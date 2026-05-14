@@ -1,0 +1,17 @@
+<Controllers>
+    <Controller name="Joystick" default="true" analogToDigital="left">
+        <Mapping name="One" input="ButtonA" />
+        <Mapping name="Two" input="ButtonB" />
+        <Mapping name="Joystick-Any" input="ButtonDpad" />
+        <Mapping name="Joystick-Up" input="ButtonDpadUp" />
+        <Mapping name="Joystick-Down" input="ButtonDpadDown" />
+        <Mapping name="Joystick-Left" input="ButtonDpadLeft" />
+        <Mapping name="Joystick-Right" input="ButtonDpadRight" />
+        <!-- Console inputs -->
+        <Mapping name="Console-Reset" input="ButtonY" />
+        <Mapping name="Console-Select" input="ButtonBack" />
+        <Mapping name="Console-Start" input="ButtonStart" />
+        <Mapping name="Left-Difficulty" input="ButtonLeftShoulder" />
+        <Mapping name="Right-Difficulty" input="ButtonRightShoulder" />
+    </Controller>
+</Controllers>

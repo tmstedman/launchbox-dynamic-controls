@@ -1,0 +1,12 @@
+<InputLabels>
+    <A>Low Punch</A>
+    <X>High Punch</X>
+    <C>Low Kick</C>
+    <Z>High Kick</Z>
+    <B>Block</B>
+    <Y>Block</Y>
+    <Dpad-Up>Jump</Dpad-Up>
+    <Dpad-Down>Crouch</Dpad-Down>
+    <Dpad-Left>Back</Dpad-Left>
+    <Dpad-Right>Forward</Dpad-Right>
+</InputLabels>

@@ -1,0 +1,4 @@
+<GameMapping analogToDigital="left">
+    <Mapping name="BUTTON1" input="ButtonX" />
+    <Mapping name="BUTTON2" input="ButtonA" />
+</GameMapping>

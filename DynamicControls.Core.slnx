@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/Core/DynamicControls.Core.csproj" />
+  <Project Path="tests/Core.TestHelpers/DynamicControls.Core.TestHelpers.csproj" />
+  <Project Path="tests/Core.Tests/DynamicControls.Core.Tests.csproj" />
+  <Project Path="tests/Core.IntegrationTests/DynamicControls.Core.IntegrationTests.csproj" />
+</Solution>

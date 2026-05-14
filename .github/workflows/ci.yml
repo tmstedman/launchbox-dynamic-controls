@@ -1,0 +1,235 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, preview]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:   # manual "Run workflow" — builds the plugin artifact for any branch
+
+# Needed so the coverage step can post/update a comment on pull requests.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  core-tests:
+    name: Core tests (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # net6.0 targeting pack comes from the 6.0 SDK; the 8.0 SDK supplies the C# 12
+      # compiler that Directory.Build.props requests via LangVersion=12.0.
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      # coverlet.collector (referenced by both test projects) writes a Cobertura file per
+      # run. Unit and integration coverage go to separate directories so they can be reported
+      # independently rather than merged into one number.
+      - name: Verify assets/User contains only README.txt files
+        shell: pwsh
+        run: |
+          $badFiles = Get-ChildItem -Recurse -File "assets/User" | Where-Object { $_.Name -ne "README.txt" }
+          if ($badFiles) { $badFiles | ForEach-Object { Write-Error "Non-README file in assets/User/: $_" }; exit 1 }
+
+      - name: Core.Tests
+        run: dotnet test tests/Core.Tests/DynamicControls.Core.Tests.csproj
+             --collect:"XPlat Code Coverage" --results-directory ./coverage/unit
+
+      - name: Core.IntegrationTests
+        run: dotnet test tests/Core.IntegrationTests/DynamicControls.Core.IntegrationTests.csproj
+             --collect:"XPlat Code Coverage" --results-directory ./coverage/integration
+
+      # Build one report per suite (HTML for the artifact, GitHub markdown for the summary),
+      # then concatenate the two markdown summaries under labelled headings into combined.md,
+      # which feeds both the run summary and the PR comment. Runs even on red builds.
+      - name: Generate coverage reports
+        id: cov
+        if: ${{ !cancelled() }}
+        run: |
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          export PATH="$PATH:$HOME/.dotnet/tools"
+          reportgenerator \
+            -reports:'coverage/unit/**/coverage.cobertura.xml' \
+            -targetdir:coveragereport/unit \
+            -title:'Unit tests (Core.Tests)' \
+            -reporttypes:'Html;MarkdownSummaryGithub;JsonSummary'
+          reportgenerator \
+            -reports:'coverage/integration/**/coverage.cobertura.xml' \
+            -targetdir:coveragereport/integration \
+            -title:'Integration tests (Core.IntegrationTests)' \
+            -reporttypes:'Html;MarkdownSummaryGithub;JsonSummary'
+          {
+            echo "## Unit test coverage (Core.Tests)"
+            cat coveragereport/unit/SummaryGithub.md
+            echo ""
+            echo "## Integration test coverage (Core.IntegrationTests)"
+            cat coveragereport/integration/SummaryGithub.md
+          } > coveragereport/combined.md
+          # Expose line-coverage percentages for the badge steps below.
+          echo "unit=$(jq -r '.summary.linecoverage' coveragereport/unit/Summary.json)" >> "$GITHUB_OUTPUT"
+          echo "integration=$(jq -r '.summary.linecoverage' coveragereport/integration/Summary.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Write coverage to job summary
+        if: ${{ !cancelled() }}
+        run: cat coveragereport/combined.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload HTML coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coveragereport
+          retention-days: 7
+
+      - name: Comment coverage on PR
+        if: ${{ github.event_name == 'pull_request' && !cancelled() }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          path: coveragereport/combined.md
+
+      # Publish the two percentages to a Gist (only for master, so the README badges track the
+      # mainline). The shields.io badges in README.md read these JSON files. Requires repo
+      # secret GIST_TOKEN (a PAT with 'gist' scope) and repo variable COVERAGE_GIST_ID.
+      - name: Publish unit coverage badge
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && !cancelled() }}
+        continue-on-error: true
+        uses: schneegans/dynamic-badges-action@v1.8.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ vars.COVERAGE_GIST_ID }}
+          filename: unit-coverage.json
+          label: unit coverage
+          message: ${{ steps.cov.outputs.unit }}%
+          valColorRange: ${{ steps.cov.outputs.unit }}
+          minColorRange: 50
+          maxColorRange: 90
+
+      - name: Publish integration coverage badge
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && !cancelled() }}
+        continue-on-error: true
+        uses: schneegans/dynamic-badges-action@v1.8.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: ${{ vars.COVERAGE_GIST_ID }}
+          filename: integration-coverage.json
+          label: integration coverage
+          message: ${{ steps.cov.outputs.integration }}%
+          valColorRange: ${{ steps.cov.outputs.integration }}
+          minColorRange: 50
+          maxColorRange: 90
+
+  launchbox-tests:
+    name: LaunchBox tests (Windows)
+    runs-on: windows-latest
+    # contents: write lets the tag build attach the plugin zip to a GitHub Release.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            6.0.x
+            8.0.x
+
+      - name: LaunchBox.Tests
+        run: dotnet test tests/LaunchBox.Tests/DynamicControls.LaunchBox.Tests.csproj
+
+      # Package the installable plugin on master pushes and on version tags. publish/*.dll is the
+      # full dependency closure (our two DLLs + the System.IO.Abstractions family) minus the
+      # LaunchBox SDK, which is Private=false because the host provides it. All of these DLLs must
+      # be copied into the Plugins folder — LaunchBox does not supply System.IO.Abstractions.
+      # success() (not !cancelled()) so a failing test suite never produces a build or release.
+      - name: Publish plugin
+        if: ${{ success() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref_type == 'tag'))) }}
+        run: dotnet publish src/LaunchBox/DynamicControls.LaunchBox.csproj -c Release -o publish
+
+      # --- master: ephemeral build artifact (7-day retention) named by short SHA ---
+      - name: Compute short SHA
+        id: meta
+        if: ${{ success() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')) }}
+        shell: bash
+        run: echo "sha=${GITHUB_SHA:0:10}" >> "$GITHUB_OUTPUT"
+
+      # The artifact name (no .zip — GitHub appends that on download) becomes the download filename:
+      # launchbox-dynamic-controls-<first-10-of-sha>.zip
+      - name: Upload plugin artifact
+        if: ${{ success() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/master')) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: launchbox-dynamic-controls-${{ steps.meta.outputs.sha }}
+          path: publish/*.dll
+          retention-days: 7
+
+      # --- version tag: permanent GitHub Release with four zips attached ---
+      # The three component zips nest their payload under a top-level folder (ZipFile with
+      # includeBaseDirectory=$true — Compress-Archive flattens it) so each extracts straight into the
+      # right LaunchBox folder:
+      #   plugin zip     → DynamicControls.LaunchBox\ → extract into LaunchBox\Plugins\
+      #   assets zip     → Dynamic Controls\          → extract into LaunchBox\Data\
+      #   pausetheme zip → Dynamic Controls\          → extract into LaunchBox\PauseThemes\
+      # The ALL zip mirrors the LaunchBox tree (Plugins/Data/PauseThemes at its root, no base
+      # dir) so it extracts into the LaunchBox root in one step.
+      - name: Package release zips
+        if: ${{ success() && github.ref_type == 'tag' }}
+        shell: pwsh
+        run: |
+          # Plugin DLLs
+          New-Item -ItemType Directory -Force -Path DynamicControls.LaunchBox | Out-Null
+          Copy-Item publish/*.dll DynamicControls.LaunchBox/
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            "$pwd/DynamicControls.LaunchBox",
+            "$pwd/launchbox-dynamic-controls-plugin-${{ github.ref_name }}.zip",
+            [System.IO.Compression.CompressionLevel]::Optimal,
+            $true)
+
+          # Data folder lives in the repo as assets/, but ships as "Dynamic Controls" (the folder
+          # name LaunchBox expects under Data\). Stage it under that name and ship debug off.
+          New-Item -ItemType Directory -Force -Path "staging/Dynamic Controls" | Out-Null
+          Copy-Item -Recurse -Force "assets/*" "staging/Dynamic Controls/"
+          $cfg = "staging/Dynamic Controls/Defaults/GlobalConfig.xml"
+          (Get-Content $cfg -Raw) -replace '<Debug>true</Debug>', '<Debug>false</Debug>' | Set-Content $cfg
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            "$pwd/staging/Dynamic Controls",
+            "$pwd/launchbox-dynamic-controls-assets-${{ github.ref_name }}.zip",
+            [System.IO.Compression.CompressionLevel]::Optimal,
+            $true)
+
+          # Pause theme — ships as a "Dynamic Controls\" folder for LaunchBox\PauseThemes\.
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            "$pwd/pause-themes/Dynamic Controls",
+            "$pwd/launchbox-dynamic-controls-pausetheme-${{ github.ref_name }}.zip",
+            [System.IO.Compression.CompressionLevel]::Optimal,
+            $true)
+
+          # ALL-in-one: mirror the LaunchBox folder tree (Plugins/Data/PauseThemes) so the user
+          # extracts it straight into the LaunchBox root. Zipped WITHOUT a base directory so those
+          # folders sit at the zip root and merge into the install.
+          New-Item -ItemType Directory -Force -Path bundle/Plugins, "bundle/Data", bundle/PauseThemes | Out-Null
+          Copy-Item -Recurse -Force DynamicControls.LaunchBox bundle/Plugins/
+          Copy-Item -Recurse -Force "staging/Dynamic Controls" "bundle/Data/"
+          Copy-Item -Recurse -Force "pause-themes/Dynamic Controls" bundle/PauseThemes/
+          [System.IO.Compression.ZipFile]::CreateFromDirectory(
+            "$pwd/bundle",
+            "$pwd/launchbox-dynamic-controls-ALL-${{ github.ref_name }}.zip",
+            [System.IO.Compression.CompressionLevel]::Optimal,
+            $false)
+
+      - name: Release on tag
+        if: ${{ success() && github.ref_type == 'tag' }}
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            launchbox-dynamic-controls-ALL-${{ github.ref_name }}.zip
+            launchbox-dynamic-controls-plugin-${{ github.ref_name }}.zip
+            launchbox-dynamic-controls-assets-${{ github.ref_name }}.zip
+            launchbox-dynamic-controls-pausetheme-${{ github.ref_name }}.zip
+          fail_on_unmatched_files: true
+          generate_release_notes: true

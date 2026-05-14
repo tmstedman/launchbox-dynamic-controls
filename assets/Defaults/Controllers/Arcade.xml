@@ -1,0 +1,74 @@
+<Controllers>
+    <Controller name="Cabinet" default="true">
+        <!-- Standard buttons -->
+        <Mapping name="BUTTON1" input="ButtonA" />
+        <Mapping name="BUTTON2" input="ButtonB" />
+        <Mapping name="BUTTON3" input="ButtonX" />
+        <Mapping name="BUTTON4" input="ButtonY" />
+        <Mapping name="BUTTON5" input="ButtonLeftShoulder" />
+        <Mapping name="BUTTON6" input="ButtonRightShoulder" />
+        <Mapping name="BUTTON7" input="AxisTriggerLeft" />
+        <Mapping name="BUTTON8" input="AxisTriggerRight" />
+        <Mapping name="BUTTON9" input="ButtonLeftStick" />
+        <Mapping name="BUTTON10" input="ButtonRightStick" />
+
+        <!-- Standard joystick -->
+        <Mapping name="JOYSTICK" input="ButtonDpad" />
+        <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+        <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+        <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+        <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+
+        <!-- Dual joystick (left) -->
+        <Mapping name="JOYSTICKLEFT_UP" input="AxisLeftStickUp" />
+        <Mapping name="JOYSTICKLEFT_DOWN" input="AxisLeftStickDown" />
+        <Mapping name="JOYSTICKLEFT_LEFT" input="AxisLeftStickLeft" />
+        <Mapping name="JOYSTICKLEFT_RIGHT" input="AxisLeftStickRight" />
+
+        <!-- Dual joystick (right) -->
+        <Mapping name="JOYSTICKRIGHT_UP" input="AxisRightStickUp" />
+        <Mapping name="JOYSTICKRIGHT_DOWN" input="AxisRightStickDown" />
+        <Mapping name="JOYSTICKRIGHT_LEFT" input="AxisRightStickLeft" />
+        <Mapping name="JOYSTICKRIGHT_RIGHT" input="AxisRightStickRight" />
+
+        <!-- Analog stick -->
+        <Mapping name="AD_STICK_X" input="AxisLeftStickLeft" />
+        <Mapping name="AD_STICK_X_EXT" input="AxisLeftStickRight" />
+        <Mapping name="AD_STICK_Y" input="AxisLeftStickUp" />
+        <Mapping name="AD_STICK_Y_EXT" input="AxisLeftStickDown" />
+        <Mapping name="AD_STICK_Z" input="AxisRightStickUp" />
+        <Mapping name="AD_STICK_Z_EXT" input="AxisRightStickDown" />
+
+        <!-- Pedals -->
+        <Mapping name="PEDAL" input="AxisTriggerRight" />
+        <Mapping name="PEDAL2" input="AxisTriggerLeft" />
+
+        <!-- Paddle -->
+        <Mapping name="PADDLE" input="AxisLeftStickLeft" />
+        <Mapping name="PADDLE_EXT" input="AxisLeftStickRight" />
+        <Mapping name="PADDLE_V" input="AxisLeftStickUp" />
+        <Mapping name="PADDLE_V_EXT" input="AxisLeftStickDown" />
+
+        <!-- Dial -->
+        <Mapping name="DIAL" input="AxisLeftStickLeft" />
+        <Mapping name="DIAL_EXT" input="AxisLeftStickRight" />
+        <Mapping name="DIAL_V" input="AxisLeftStickUp" />
+        <Mapping name="DIAL_V_EXT" input="AxisLeftStickDown" />
+
+        <!-- Trackball -->
+        <Mapping name="TRACKBALL_X" input="AxisLeftStickLeft" />
+        <Mapping name="TRACKBALL_X_EXT" input="AxisLeftStickRight" />
+        <Mapping name="TRACKBALL_Y" input="AxisLeftStickUp" />
+        <Mapping name="TRACKBALL_Y_EXT" input="AxisLeftStickDown" />
+
+        <!-- Lightgun -->
+        <Mapping name="LIGHTGUN_X" input="AxisRightStickLeft" />
+        <Mapping name="LIGHTGUN_X_EXT" input="AxisRightStickRight" />
+        <Mapping name="LIGHTGUN_Y" input="AxisRightStickUp" />
+        <Mapping name="LIGHTGUN_Y_EXT" input="AxisRightStickDown" />
+
+        <!-- System buttons -->
+        <Mapping name="START" input="ButtonStart" />
+        <Mapping name="COIN" input="ButtonBack" />
+    </Controller>
+</Controllers>

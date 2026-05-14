@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>DynamicControls.LaunchBox</RootNamespace>
+    <AssemblyName>DynamicControls.LaunchBox</AssemblyName>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable;CS8509</WarningsAsErrors>
+    <NoWarn>CS8524</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- LaunchBox SDK isn't on NuGet; the assembly is vendored under libs/ so the build is
+         self-contained on dev machines and CI alike. Path is relative to this project file.
+         Private=false keeps it out of the build output — LaunchBox provides it at runtime, so the
+         shipped package is just our own DLLs plus their real dependencies. -->
+    <Reference Include="Unbroken.LaunchBox.Plugins">
+      <HintPath>$(MSBuildThisFileDirectory)..\..\libs\Unbroken.LaunchBox.Plugins.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\DynamicControls.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Remove="**\*.xaml" />
+    <None Include="**\*.xaml" Exclude="bin\**;obj\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
