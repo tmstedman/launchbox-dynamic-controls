@@ -1,0 +1,14 @@
+{
+    "coverage-gutters.coverageFileNames": [
+        "lcov.info"
+    ],
+    "coverage-gutters.coverageBaseDir": "TestResults/Report/Unit/",
+    "coverage-gutters.manualCoverageFilePaths": [
+        "${workspaceFolder}/TestResults/Report/Unit/lcov.info"
+    ],
+    "dotnet.enableRoslynAnalyzers": true,
+    "dotnet.enableEditorConfigSupport": true,
+    "dotnet.showAllDiagnostics": true,
+    "dotnet.defaultSolution": "DynamicControls.Core.slnx",
+    "editor.detectIndentation": false
+}

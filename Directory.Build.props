@@ -1,0 +1,26 @@
+<Project>
+
+  <PropertyGroup>
+    <!--
+      Roll forward to whichever .NET runtime major version is installed when the project's
+      declared TargetFramework isn't available. Bakes the equivalent of DOTNET_ROLL_FORWARD=LatestMajor
+      into each project's runtimeconfig.json so CLI, VS Code test explorer, debugger, and tasks
+      all use the right runtime without anyone needing to set an environment variable.
+    -->
+    <RollForward>LatestMajor</RollForward>
+
+    <!--
+      Run the Style analyzers (IDE0xxx) during dotnet build so .editorconfig-driven hints
+      surface in the build output and CI, not just the IDE Problems panel.
+    -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!--
+      Opt into C# 12 syntax (collection expressions, raw strings, primary constructors, list
+      patterns, etc.) while leaving TargetFramework alone. The compiler refuses any feature that
+      needs a newer BCL — distributed net6.0 DLLs stay loadable on .NET 6.
+    -->
+    <LangVersion>12.0</LangVersion>
+  </PropertyGroup>
+
+</Project>

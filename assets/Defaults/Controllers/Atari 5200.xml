@@ -1,0 +1,10 @@
+<Controllers>
+    <Controller name="Joystick" default="true" analogToDigital="left">
+        <Mapping name="A" input="ButtonA" />
+        <Mapping name="Joystick-Any" input="ButtonDpad" />
+        <Mapping name="Joystick-Up" input="ButtonDpadUp" />
+        <Mapping name="Joystick-Down" input="ButtonDpadDown" />
+        <Mapping name="Joystick-Left" input="ButtonDpadLeft" />
+        <Mapping name="Joystick-Right" input="ButtonDpadRight" />
+    </Controller>
+</Controllers>

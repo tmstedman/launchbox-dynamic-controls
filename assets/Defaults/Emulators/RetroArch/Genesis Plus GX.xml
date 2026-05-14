@@ -1,0 +1,10 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="6-Button">
+            <Retropad id="513" />
+        </Controller>
+        <Controller name="3-Button">
+            <Retropad id="257" />
+        </Controller>
+    </Controllers>
+</RetroArchCore>

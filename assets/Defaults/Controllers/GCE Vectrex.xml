@@ -1,0 +1,13 @@
+<Controllers>
+    <Controller name="Pad" default="true">
+        <Mapping name="One" input="ButtonX" />
+        <Mapping name="Two" input="ButtonY" />
+        <Mapping name="Three" input="ButtonA" />
+        <Mapping name="Four" input="ButtonB" />
+        <Mapping name="Joystick-Any" input="AxisLeftStick" />
+        <Mapping name="Joystick-Up" input="AxisLeftStickUp" />
+        <Mapping name="Joystick-Down" input="AxisLeftStickDown" />
+        <Mapping name="Joystick-Left" input="AxisLeftStickLeft" />
+        <Mapping name="Joystick-Right" input="AxisLeftStickRight" />
+    </Controller>
+</Controllers>

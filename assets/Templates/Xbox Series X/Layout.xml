@@ -1,0 +1,196 @@
+<ControllerTemplate>
+    <Head>
+        <Style fontSize="24" inactiveBlurRadius="8" />
+        <Style name="auto-blur" showIf="auto" minOpacity="0.3" />
+        <Style name="mapped-input-blur" showIf="mapping" minOpacity="0.3" inactiveBlurRadius="6" />
+        <Style name="small-label-blur" showIf="label" minOpacity="0.3" inactiveBlurRadius="6" fontSize="22" />
+        <Style name="input-label" showIf="label" minOpacity="0.3" inactiveBlurRadius="8" />
+        <Style name="show-if-label" showIf="label" />
+    </Head>
+    <Body>
+        <Input name="ButtonGuide" style="auto-blur" x="771" y="262">
+            <Render height="68" width="68" />
+        </Input>
+        <Input name="AxisTriggerLeft" style="auto-blur" x="307" y="116">
+            <Overlay src="LineLT.png" x="+81" y="+30" />
+            <Render height="65" width="65" />
+            <Label x="-19" y="+32" align="right" />
+        </Input>
+        <Input name="ButtonLeftShoulder" style="auto-blur" x="307" y="203">
+            <Overlay src="LineLB.png" x="+85" y="+24" />
+            <Render height="42" width="64" />
+            <Label x="-19" y="+21" align="right" />
+        </Input>
+        <Input name="AxisTriggerRight" style="auto-blur" x="1228" y="116">
+            <Overlay src="LineRT.png" x="-207" y="+30" />
+            <Render height="65" width="65" />
+            <Label x="+81" y="+32" />
+        </Input>
+        <Input name="ButtonRightShoulder" style="auto-blur" x="1229" y="203">
+            <Overlay src="LineRB.png" x="-144" y="+24" />
+            <Render height="42" width="64" />
+            <Label x="+80" y="+21" />
+        </Input>
+        <Input name="ButtonY" style="auto-blur" x="970" y="292">
+            <Render height="64" width="64" />
+        </Input>
+        <Input name="ButtonX" style="auto-blur" x="912" y="345">
+            <Render height="64" width="64" />
+        </Input>
+        <Input name="ButtonA" style="auto-blur" x="970" y="401">
+            <Render height="64" width="64" />
+        </Input>
+        <Input name="ButtonB" style="auto-blur" x="1026" y="350">
+            <Render height="64" width="64" />
+        </Input>
+        <Input name="ButtonStart" style="mapped-input-blur" x="832" y="356">
+            <Render height="44" width="44" />
+        </Input>
+        <Input name="ButtonBack" style="mapped-input-blur" x="714" y="356">
+            <Render height="44" width="44" />
+        </Input>
+        <Group>
+            <Overlay src="LineStart.png" x="703" y="406" />
+            <Stack x="666" y="661" gap="45">
+                <Input name="ButtonStart" style="small-label-blur">
+                    <Render height="34" width="34" />
+                    <Label x="+51" y="+17" />
+                </Input>
+                <Input name="ButtonBack" style="small-label-blur">
+                    <Render height="34" width="34" />
+                    <Label x="+51" y="+17" />
+                </Input>
+            </Stack>
+        </Group>
+        <Group>
+            <Stack x="1249" y="318" gap="80">
+                <Input name="ButtonY" style="input-label">
+                    <Overlay src="LineY.png" x="-209" y="+5" />
+                    <Render height="44" width="44" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonB" style="input-label">
+                    <Overlay src="LineB.png" x="-166" y="+13" />
+                    <Render height="44" width="44" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonA" style="input-label">
+                    <Overlay src="LineA.png" x="-218" y="-18" />
+                    <Render height="44" width="44" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonX" style="input-label">
+                    <Overlay src="LineX.png" x="-304" y="-142" />
+                    <Render height="44" width="44" />
+                    <Label x="+60" y="+22" />
+                </Input>
+            </Stack>
+        </Group>
+        <Input name="ButtonLeftStick" style="show-if-label" x="307" y="477">
+            <Overlay src="LineLS.png" x="+80" y="-56" />
+            <Render height="44" width="44" />
+            <Label x="-19" y="+22" align="right" />
+        </Input>
+        <Input name="ButtonRightStick" style="show-if-label" x="1249" y="658">
+            <Overlay src="LineRS.png" x="-298" y="-108" />
+            <Render height="44" width="44" />
+            <Label x="+60" y="+22" />
+        </Input>
+        <Input name="AxisLeftStick" style="auto-blur" x="539" y="309">
+            <Render height="124" width="124" />
+            <OneOf>
+                <Group>
+                    <Overlay src="LineL_Multi.png" x="386" y="370" />
+                    <Stack x="312" y="291" gap="45" collapse="true">
+                        <Input name="AxisLeftStickUp" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="AxisLeftStickLeft" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="AxisLeftStickRight" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="AxisLeftStickDown" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                    </Stack>
+                </Group>
+                <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
+                    <Overlay src="LineL.png" x="+79" y="+31" />
+                    <Render height="64" width="64" />
+                    <Label x="-19" y="+32" align="right" />
+                </Input>
+            </OneOf>
+        </Input>
+        <Input name="AxisRightStick" style="auto-blur" x="839" y="438">
+            <Render height="124" width="124" />
+            <OneOf>
+                <Group>
+                    <Overlay src="LineR_Multi.png" x="898" y="575" />
+                    <Stack x="882" y="772" gap="45" collapse="true">
+                        <Input name="AxisRightStickUp" style="small-label-blur">
+                            <Render useImage="AxisLeftStickUp" height="34" width="34" />
+                            <Label x="+52" y="+15" />
+                        </Input>
+                        <Input name="AxisRightStickLeft" style="small-label-blur">
+                            <Render useImage="AxisLeftStickLeft" height="34" width="34" />
+                            <Label x="+52" y="+15" />
+                        </Input>
+                        <Input name="AxisRightStickRight" style="small-label-blur">
+                            <Render useImage="AxisLeftStickRight" height="34" width="34" />
+                            <Label x="+52" y="+15" />
+                        </Input>
+                        <Input name="AxisRightStickDown" style="small-label-blur">
+                            <Render useImage="AxisLeftStickDown" height="34" width="34" />
+                            <Label x="+52" y="+15" />
+                        </Input>
+                    </Stack>
+                </Group>
+                <Input name="AxisRightStick" style="show-if-label" x="867" y="740">
+                    <Overlay src="LineR.png" x="+31" y="-170" />
+                    <Render height="64" width="64" />
+                    <Label x="+32" y="+88" align="center" />
+                </Input>
+            </OneOf>
+        </Input>
+        <Input name="ButtonDpad" style="auto-blur" x="623" y="440">
+            <Render height="135" width="135" />
+            <OneOf>
+                <Group>
+                    <Stack x="312" y="552" gap="45" collapse="true">
+                        <Overlay src="LineDpad_Multi.png" x="+72" y="-45" />
+                        <Input name="ButtonDpadUp" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="ButtonDpadLeft" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="ButtonDpadRight" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                        <Input name="ButtonDpadDown" style="small-label-blur">
+                            <Render height="34" width="34" />
+                            <Label x="-24" y="+17" align="right" />
+                        </Input>
+                    </Stack>
+                </Group>
+                <Input name="ButtonDpad" style="show-if-label" x="312" y="552">
+                    <Overlay src="LineDpad_Multi.png" x="+72" y="-45" />
+                    <Render useImage="ButtonDpadUp" height="34" width="34" />
+                    <Render useImage="ButtonDpadLeft" y="+45" height="34" width="34" />
+                    <Render useImage="ButtonDpadRight" y="+90" height="34" width="34" />
+                    <Render useImage="ButtonDpadDown" y="+135" height="34" width="34" />
+                    <Label x="-24" y="+84" align="right" />
+                </Input>
+            </OneOf>
+        </Input>
+    </Body>
+</ControllerTemplate>
