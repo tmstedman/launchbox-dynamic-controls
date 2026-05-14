@@ -1,0 +1,5 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="DualShock" />
+    </Controllers>
+</RetroArchCore>

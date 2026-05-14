@@ -1,0 +1,21 @@
+<Controllers>
+    <Controller name="Pad" default="true">
+        <Mapping name="A" input="ButtonA" />
+        <Mapping name="B" input="ButtonB" />
+        <Mapping name="X" input="ButtonX" />
+        <Mapping name="Y" input="ButtonY" />
+        <Mapping name="L" input="AxisTriggerLeft" />
+        <Mapping name="R" input="AxisTriggerRight" />
+        <Mapping name="L-Any" input="AxisLeftStick" />
+        <Mapping name="L-Up" input="AxisLeftStickUp" />
+        <Mapping name="L-Down" input="AxisLeftStickDown" />
+        <Mapping name="L-Left" input="AxisLeftStickLeft" />
+        <Mapping name="L-Right" input="AxisLeftStickRight" />
+        <Mapping name="Start" input="ButtonStart" />
+        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+        <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+        <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+        <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+    </Controller>
+</Controllers>

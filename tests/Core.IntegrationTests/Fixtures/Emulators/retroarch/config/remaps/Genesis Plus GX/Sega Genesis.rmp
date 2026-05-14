@@ -1,0 +1,5 @@
+# Content-directory remap (priority 2, named after the ROM folder). RetroArchRemapLoader.Load()
+# reads only the game-specific file (priority 1), so this is ignored. If loaded, the X↔Z
+# shoulder swap here would break the test SegaGenesis_MortalKombatII_RetroArchRmpButtonSwap.
+input_player1_btn_l = "11"
+input_player1_btn_r = "10"
