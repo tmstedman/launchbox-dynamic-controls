@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "dotnet.defaultSolution": "DynamicControls.slnx"
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+          "build",
+          "${workspaceFolder}/DynamicControls.slnx"
+        ],
+        "problemMatcher": "$msCompile",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "test",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+          "test",
+          "${workspaceFolder}/DynamicControls.slnx",
+          "--nologo"
+        ],
+        "options": {
+          "env": {
+            "DOTNET_ROLL_FORWARD": "LatestMajor"
+          }
+        },
+        "problemMatcher": "$msCompile",
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        }
+      }
+    ]
+  }
+}

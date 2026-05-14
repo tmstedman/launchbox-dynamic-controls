@@ -1,0 +1,30 @@
+# Build outputs
+bin/
+obj/
+
+# NuGet
+*.nupkg
+*.snupkg
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS directories
+.vs/
+
+# JetBrains Rider / IntelliJ
+.idea/
+*.iml
+
+# Test results
+TestResults/
+
+# Scratch / working notes
+.work/
+
+# OS files
+.DS_Store
+Thumbs.db

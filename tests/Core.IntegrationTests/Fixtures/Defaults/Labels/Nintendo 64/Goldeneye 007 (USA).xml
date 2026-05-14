@@ -1,0 +1,10 @@
+<InputLabels>
+    <B>Weapon</B>
+    <A>Action</A>
+    <L>Aim</L>
+    <R>Aim</R>
+    <Z>Fire</Z>
+    <Stick-Any>Look</Stick-Any>
+    <Dpad-Any>Move</Dpad-Any>
+    <C-Any>Move</C-Any>
+</InputLabels>
