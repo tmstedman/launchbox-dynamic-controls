@@ -1,0 +1,15 @@
+<Controllers>
+    <Controller name="3-Button" analogToDigital="left">
+        <Mapping name="C" input="ButtonX" />
+        <Mapping name="B" input="ButtonA" />
+        <Mapping name="A" input="ButtonB" />
+        <Mapping name="Pause" input="ButtonBack" />
+        <Mapping name="Options" input="ButtonStart" />
+        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+        <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+        <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+        <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+        <!-- TODO numeric keypad -->
+    </Controller>
+</Controllers>

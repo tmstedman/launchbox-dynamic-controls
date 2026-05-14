@@ -1,0 +1,19 @@
+<Controllers>
+    <Controller name="Cabinet" default="true">
+        <Mapping name="BUTTON1" input="ButtonA" />
+        <Mapping name="BUTTON2" input="ButtonB" />
+        <Mapping name="BUTTON3" input="ButtonX" />
+        <Mapping name="BUTTON4" input="ButtonY" />
+        <Mapping name="BUTTON5" input="ButtonLeftShoulder" />
+        <Mapping name="BUTTON6" input="ButtonRightShoulder" />
+        <Mapping name="BUTTON7" input="AxisTriggerLeft" />
+        <Mapping name="BUTTON8" input="AxisTriggerRight" />
+        <Mapping name="JOYSTICK" input="AxisLeftStick" />
+        <Mapping name="START" input="ButtonStart" />
+        <Mapping name="COIN" input="ButtonBack" />
+        <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+        <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+        <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+        <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+    </Controller>
+</Controllers>
