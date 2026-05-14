@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>DynamicControls</RootNamespace>
+    <AssemblyName>DynamicControls.Core</AssemblyName>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable;CS8509</WarningsAsErrors>
+    <NoWarn>CS8524</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Page Remove="**\*.xaml" />
+    <None Include="**\*.xaml" Exclude="bin\**;obj\**" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

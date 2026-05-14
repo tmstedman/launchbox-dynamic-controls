@@ -1,0 +1,159 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "coverage",
+            "detail": "Combined: clear TestResults, run all tests with coverage, generate one report covering everything.",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "coverage: clean all",
+                "coverage: test all",
+                "coverage: report all"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: unit",
+            "detail": "Unit-test coverage only (excludes the Integration project). Report goes to TestResults/Report/Unit.",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "coverage: clean unit",
+                "coverage: test unit",
+                "coverage: report unit"
+            ],
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: integration",
+            "detail": "Integration-tier coverage only (subsystem + end-to-end tests). Report goes to TestResults/Report/Integration.",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "coverage: clean integration",
+                "coverage: test integration",
+                "coverage: report integration"
+            ],
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: clean all",
+            "detail": "Remove the entire TestResults folder so a combined run starts fresh.",
+            "type": "shell",
+            "command": "rm -rf TestResults",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: clean unit",
+            "detail": "Wipe only the unit-suite results and report — leaves the combined and integration outputs alone.",
+            "type": "shell",
+            "command": "rm -rf TestResults/Unit TestResults/Report/Unit",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: clean integration",
+            "detail": "Wipe only the integration-suite results and report.",
+            "type": "shell",
+            "command": "rm -rf TestResults/Integration TestResults/Report/Integration",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: test all",
+            "detail": "Run both test projects with the XPlat Code Coverage collector.",
+            "type": "shell",
+            "command": "dotnet test DynamicControls.Core.slnx --nologo --collect:\"XPlat Code Coverage\" --results-directory ./TestResults",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "shared" },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "coverage: test unit",
+            "detail": "Run the Core.Tests (unit) project only; output goes to TestResults/Unit.",
+            "type": "shell",
+            "command": "dotnet test tests/Core.Tests/DynamicControls.Core.Tests.csproj --nologo --collect:\"XPlat Code Coverage\" --results-directory ./TestResults/Unit",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "shared" },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "coverage: test integration",
+            "detail": "Run the Core.IntegrationTests project only; output goes to TestResults/Integration.",
+            "type": "shell",
+            "command": "dotnet test tests/Core.IntegrationTests/DynamicControls.Core.IntegrationTests.csproj --nologo --collect:\"XPlat Code Coverage\" --results-directory ./TestResults/Integration",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "always", "panel": "shared" },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "coverage: report all",
+            "detail": "Generate a combined report from every cobertura output found under TestResults. ~/.dotnet/tools is prepended to PATH so the tool resolves without per-shell setup.",
+            "type": "shell",
+            "command": "${userHome}/.dotnet/tools/reportgenerator -reports:\"TestResults/**/coverage.cobertura.xml\" -targetdir:\"TestResults/Report\" -reporttypes:\"Html;lcov;TextSummary\"",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": { "PATH": "${env:HOME}/.dotnet/tools:${env:PATH}" }
+            },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: report unit",
+            "detail": "Generate the unit-only report into TestResults/Report/Unit.",
+            "type": "shell",
+            "command": "${userHome}/.dotnet/tools/reportgenerator -reports:\"TestResults/Unit/**/coverage.cobertura.xml\" -targetdir:\"TestResults/Report/Unit\" -reporttypes:\"Html;lcov;TextSummary\"",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": { "PATH": "${env:HOME}/.dotnet/tools:${env:PATH}" }
+            },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: report integration",
+            "detail": "Generate the integration-only report into TestResults/Report/Integration.",
+            "type": "shell",
+            "command": "${userHome}/.dotnet/tools/reportgenerator -reports:\"TestResults/Integration/**/coverage.cobertura.xml\" -targetdir:\"TestResults/Report/Integration\" -reporttypes:\"Html;lcov;TextSummary\"",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": { "PATH": "${env:HOME}/.dotnet/tools:${env:PATH}" }
+            },
+            "presentation": { "reveal": "silent", "panel": "shared" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: open report",
+            "detail": "Open the combined HTML report in the default browser.",
+            "type": "shell",
+            "command": "open TestResults/Report/index.html",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: open unit report",
+            "type": "shell",
+            "command": "open TestResults/Report/Unit/index.html",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent" },
+            "problemMatcher": []
+        },
+        {
+            "label": "coverage: open integration report",
+            "type": "shell",
+            "command": "open TestResults/Report/Integration/index.html",
+            "options": { "cwd": "${workspaceFolder}" },
+            "presentation": { "reveal": "silent" },
+            "problemMatcher": []
+        }
+    ]
+}

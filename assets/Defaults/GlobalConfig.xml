@@ -1,0 +1,6 @@
+<Config>
+    <DefaultTemplate>Xbox Series X</DefaultTemplate>
+    <Debug>true</Debug>
+    <EnableRetroArch>true</EnableRetroArch>
+    <EnableMame>true</EnableMame>
+</Config>

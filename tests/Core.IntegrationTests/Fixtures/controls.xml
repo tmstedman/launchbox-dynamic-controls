@@ -1,0 +1,97 @@
+<dat>
+	<game romname="1942" gamename="1942 (Revision B)">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="Fire"/>
+				<label name="P1_BUTTON2" value="Loop"/>
+				<label name="P1_JOYSTICK_UP" value="Up"/>
+				<label name="P1_JOYSTICK_DOWN" value="Down"/>
+				<label name="P1_JOYSTICK_LEFT" value="Left"/>
+				<label name="P1_JOYSTICK_RIGHT" value="Right"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="dkong" gamename="Donkey Kong (US set 1)">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="Jump"/>
+				<label name="P1_JOYSTICK_LEFT" value="Run Left"/>
+				<label name="P1_JOYSTICK_DOWN" value="Climb Down Ladder"/>
+				<label name="P1_JOYSTICK_UP" value="Climb Up Ladder"/>
+				<label name="P1_JOYSTICK_RIGHT" value="Run Right"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="mk3" gamename="Mortal Kombat 3 (rev 2.1)">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="High Punch"/>
+				<label name="P1_BUTTON2" value="Block"/>
+				<label name="P1_BUTTON3" value="High Kick"/>
+				<label name="P1_BUTTON4" value="Low Punch"/>
+				<label name="P1_BUTTON5" value="Low Kick"/>
+				<label name="P1_BUTTON6" value="Run"/>
+				<label name="P1_JOYSTICK_UP" value="Jump"/>
+				<label name="P1_JOYSTICK_DOWN" value="Duck"/>
+				<label name="P1_JOYSTICK_LEFT" value="Move Left"/>
+				<label name="P1_JOYSTICK_RIGHT" value="Move Right"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="mole" gamename="Mole Attack">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="Attack 1"/>
+				<label name="P1_BUTTON2" value="Attack 2"/>
+				<label name="P1_BUTTON3" value="Attack 3"/>
+				<label name="P1_BUTTON4" value="Attack 4"/>
+				<label name="P1_BUTTON5" value="Attack 5"/>
+				<label name="P1_BUTTON6" value="Attack 6"/>
+				<label name="P1_BUTTON7" value="Attack 7"/>
+				<label name="P1_BUTTON8" value="Attack 8"/>
+				<label name="P1_BUTTON9" value="Attack 9"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="outrun" gamename="Out Run (sitdown/upright, Rev B)">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="High / Low"/>
+				<label name="P1_PADDLE" value="Left"/>
+				<label name="P1_PADDLE_EXT" value="Right"/>
+				<label name="P1_PEDAL" value="Accelerate"/>
+				<label name="P1_PEDAL2" value="Brake"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="robotron" gamename="Robotron (Solid Blue label)">
+		<player number="1">
+			<labels>
+				<label name="P1_JOYSTICKLEFT_UP" value="Move Up"/>
+				<label name="P1_JOYSTICKLEFT_DOWN" value="Move Down"/>
+				<label name="P1_JOYSTICKLEFT_LEFT" value="Move Left"/>
+				<label name="P1_JOYSTICKLEFT_RIGHT" value="Move Right"/>
+				<label name="P1_JOYSTICKRIGHT_UP" value="Fire Up"/>
+				<label name="P1_JOYSTICKRIGHT_DOWN" value="Fire Down"/>
+				<label name="P1_JOYSTICKRIGHT_LEFT" value="Fire Left"/>
+				<label name="P1_JOYSTICKRIGHT_RIGHT" value="Fire Right"/>
+			</labels>
+		</player>
+	</game>
+	<game romname="sf2ce" gamename="Street Fighter II': Champion Edition (World 920513)">
+		<player number="1">
+			<labels>
+				<label name="P1_BUTTON1" value="Light Punch"/>
+				<label name="P1_BUTTON2" value="Middle Punch"/>
+				<label name="P1_BUTTON3" value="Heavy Punch"/>
+				<label name="P1_BUTTON4" value="Light Kick"/>
+				<label name="P1_BUTTON5" value="Middle Kick"/>
+				<label name="P1_BUTTON6" value="Heavy Kick"/>
+				<label name="P1_JOYSTICK_UP" value="Jump"/>
+				<label name="P1_JOYSTICK_DOWN" value="Crouch"/>
+				<label name="P1_JOYSTICK_LEFT" value="Left"/>
+				<label name="P1_JOYSTICK_RIGHT" value="Right"/>
+			</labels>
+		</player>
+	</game>
+</dat>

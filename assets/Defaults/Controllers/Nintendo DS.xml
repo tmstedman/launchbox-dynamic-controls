@@ -1,0 +1,23 @@
+<Controllers>
+    <Controller name="Pad" default="true" analogToDigital="left">
+        <Mapping name="B" input="ButtonA" />
+        <Mapping name="A" input="ButtonB" />
+        <Mapping name="Y" input="ButtonX" />
+        <Mapping name="X" input="ButtonY" />
+        <Mapping name="L" input="ButtonLeftShoulder" />
+        <Mapping name="R" input="ButtonRightShoulder" />
+        <Mapping name="Start" input="ButtonStart" />
+        <Mapping name="Select" input="ButtonBack" />
+        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+        <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+        <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+        <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+        <!-- Emulator specific controls -->
+        <Mapping name="MicNoise" input="AxisTriggerLeft" />
+        <Mapping name="SwapScreens" input="AxisTriggerRight" />
+        <Mapping name="CloseLid" input="ButtonLeftStick" />
+        <Mapping name="ToggleTouchStick" input="ButtonRightStick" />
+        <Mapping name="MoveTouchStick" input="AxisRightStick" />
+    </Controller>
+</Controllers>
