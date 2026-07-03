@@ -27,7 +27,11 @@
 
   <ItemGroup>
     <Page Remove="**\*.xaml" />
-    <None Include="**\*.xaml" Exclude="bin\**;obj\**" CopyToOutputDirectory="PreserveNewest" />
+    <Page Include="ControllerOverlayControl.xaml" />
+    <Compile Include="ControllerOverlayControl.xaml.cs">
+      <DependentUpon>ControllerOverlayControl.xaml</DependentUpon>
+    </Compile>
+    <None Include="**\*.xaml" Exclude="bin\**;obj\**;ControllerOverlayControl.xaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

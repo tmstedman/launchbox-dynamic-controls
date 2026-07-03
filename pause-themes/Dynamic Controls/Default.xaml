@@ -160,59 +160,7 @@ Adapted from the "PauseShift" pause theme (v1.0) by Faeran, with thanks.
             <Grid Grid.Row="1" Grid.Column="2">
 
                 <!-- CONTROLLER IMAGE WITH DYNAMIC BUTTON LABELS (overlay mode) -->
-                <Viewbox Stretch="Uniform" VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <Canvas Width="{Binding CanvasWidth, Source={x:Static dc:DynamicControlsViewModel.Instance}}"
-                            Height="{Binding CanvasHeight, Source={x:Static dc:DynamicControlsViewModel.Instance}}">
-                    <ItemsControl ItemsSource="{Binding InputLabels, Source={x:Static dc:DynamicControlsViewModel.Instance}}"
-                                  Width="{Binding CanvasWidth, Source={x:Static dc:DynamicControlsViewModel.Instance}}"
-                                  Height="{Binding CanvasHeight, Source={x:Static dc:DynamicControlsViewModel.Instance}}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                                <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Text}" Foreground="White" FontFamily="Segoe UI" FontSize="{Binding FontSize}" FontWeight="SemiBold"
-                                           Width="300" TextAlignment="{Binding Alignment}" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                        <ItemsControl.Background>
-                            <ImageBrush ImageSource="{Binding ControlsImagePath, Source={x:Static dc:DynamicControlsViewModel.Instance}}" Stretch="Uniform"
-                                        RenderOptions.BitmapScalingMode="HighQuality" />
-                        </ItemsControl.Background>
-                    </ItemsControl>
-                    <ItemsControl ItemsSource="{Binding RenderedImages, Source={x:Static dc:DynamicControlsViewModel.Instance}}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style TargetType="ContentPresenter">
-                                <Setter Property="Canvas.Left" Value="{Binding Left}" />
-                                <Setter Property="Canvas.Top" Value="{Binding Top}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Image Source="{Binding Source}" Width="{Binding Width}" Height="{Binding Height}" Opacity="{Binding Opacity}"
-                                       RenderOptions.BitmapScalingMode="HighQuality">
-                                    <Image.Effect>
-                                        <BlurEffect Radius="{Binding BlurRadius}" />
-                                    </Image.Effect>
-                                </Image>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </Canvas>
-                </Viewbox>
+                <dc:ControllerOverlayControl VerticalAlignment="Center" HorizontalAlignment="Center" />
 
                 <!-- PLATFORM LOGO OVERLAY: bottom-right corner -->
                 <Grid>
