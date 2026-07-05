@@ -1,0 +1,10 @@
+<Labels>
+    <Game romName="Super Mario 64 (USA)">
+        <B>Punch</B>
+        <A>Jump</A>
+        <Z>Crouch</Z>
+        <Stick-Any>Move</Stick-Any>
+        <C-Any>Camera</C-Any>
+        <Start>Start</Start>
+    </Game>
+</Labels>

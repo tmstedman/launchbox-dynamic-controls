@@ -30,6 +30,7 @@ public class MameControlsXmlSourceTests
         Platform: "Arcade",
         RomName: romName,
         CloneOf: null,
+        LaunchBoxId: null,
         EmulatorPath: emulator ?? MameExe,
         RomDirectory: null,
         RetroArchCore: null);

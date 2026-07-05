@@ -27,6 +27,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "dkong",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -104,6 +105,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "robotron",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -181,6 +183,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "1942",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -263,6 +266,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "sf2ce",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -355,6 +359,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "outrun",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -432,6 +437,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "mk3r10",            // no controls.xml entry
             CloneOf: "mk3",                // controls.xml has the parent entry
+            LaunchBoxId: null,
             EmulatorPath: MameEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);
@@ -465,6 +471,7 @@ public class ArcadeEndToEndTests
             Platform: "Arcade",
             RomName: "mole",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: MameDefaultEmulatorPath,
             RomDirectory: null,
             RetroArchCore: null);

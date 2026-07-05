@@ -18,15 +18,18 @@ public interface IInputLabelsLoader
     bool IsEnabled(GlobalConfig config);
 
     /// <summary>
-    /// Loads game labels for the given <paramref name="game"/>. Returns null when this loader
-    /// has no data for the ROM.
+    /// Loads game labels for the given <paramref name="game"/>. Lookup order: database ID
+    /// (<see cref="GameInfo.LaunchBoxId"/>), then ROM name (<see cref="GameInfo.RomName"/>).
+    /// Returns null when this loader has no entry for the game.
     /// </summary>
     InputLabelsConfig? Load(GameInfo game);
 
     /// <summary>
-    /// Loads the platform-default labels file. Returns null when no defaults exist for
-    /// <paramref name="platform"/>. All entries are merged into game-specific labels by the service,
-    /// with game-specific labels taking precedence for any button defined in both.
+    /// Loads the platform-default labels. For the file-based loader this comes from the
+    /// <c>&lt;Defaults&gt;</c> block of <c>Labels/{platform}.xml</c>; plugin loaders (e.g. MAME
+    /// controls.xml) return null as they have no concept of platform defaults. All entries are
+    /// merged into game-specific labels by the service, with game-specific labels taking
+    /// precedence for any button defined in both.
     /// </summary>
     InputLabelsConfig? LoadDefaultLabels(string platform);
 }

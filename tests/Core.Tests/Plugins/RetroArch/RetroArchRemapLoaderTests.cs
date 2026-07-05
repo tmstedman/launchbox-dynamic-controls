@@ -67,7 +67,7 @@ public class RetroArchRemapLoaderTests
     }
 
     private GameInfo MakeGame(string romName = Rom) =>
-        new("Platform", romName, null, null, ContentDir, null);
+        new("Platform", romName, null, null, null, ContentDir, null);
 
     // ---- gating ----
 
@@ -177,7 +177,7 @@ public class RetroArchRemapLoaderTests
         StubDirExists(CoreDir);
         _configReader.LoadConfigFile(GameRmpPath).Returns(DictOf("game_key", "G"));
 
-        var result = _underTest.Load(RetroArchDir, Core, new("Platform", Rom, null, null, null, null)).ShouldNotBeNull();
+        var result = _underTest.Load(RetroArchDir, Core, new("Platform", Rom, null, null, null, null, null)).ShouldNotBeNull();
 
         result.ContentDir.ShouldBeNull();
         _configReader.DidNotReceive().LoadConfigFile(ContentRmpPath);
@@ -226,7 +226,7 @@ public class RetroArchRemapLoaderTests
         StubDirExists(coreDir);
         _configReader.LoadConfigFile(gameRmp).Returns(DictOf("game_key", "G"));
 
-        var result = _underTest.Load(RetroArchDir, core, new("Platform", rom, null, null, romDir, null)).ShouldNotBeNull();
+        var result = _underTest.Load(RetroArchDir, core, new("Platform", rom, null, null, null, romDir, null)).ShouldNotBeNull();
 
         result.Game.ShouldBeDictionaryOf(("game_key", "G"));
     }

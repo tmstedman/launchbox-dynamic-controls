@@ -22,6 +22,7 @@ public class Nintendo64EndToEndTests
             Platform: "Nintendo 64",
             RomName: "Goldeneye 007 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -110,6 +111,7 @@ public class Nintendo64EndToEndTests
             Platform: "Nintendo 64",
             RomName: "Super Mario 64 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);

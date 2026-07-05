@@ -15,10 +15,11 @@ public static class InputMappingFixtures
         string platform = Platform,
         string romName = "OutRun",
         string? cloneOf = null,
+        string? launchBoxId = null,
         string? emulatorPath = null,
         string? romDirectory = null,
         string? retroArchCore = null) =>
-        new(Platform: platform, RomName: romName, CloneOf: cloneOf,
+        new(Platform: platform, RomName: romName, CloneOf: cloneOf, LaunchBoxId: launchBoxId,
             EmulatorPath: emulatorPath, RomDirectory: romDirectory, RetroArchCore: retroArchCore);
 
     public static InputMappingConfig MappingConfig(
