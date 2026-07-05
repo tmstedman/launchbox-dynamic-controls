@@ -1,7 +1,0 @@
-<InputLabels>
-    <Option1>Option 1</Option1>
-    <Option2>Option 2</Option2>
-    <Start>Start</Start>
-    <!-- Emulator specific functionality -->
-    <RotateScreen>Rotate Screen</RotateScreen>
-</InputLabels>

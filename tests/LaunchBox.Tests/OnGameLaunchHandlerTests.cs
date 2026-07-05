@@ -131,6 +131,7 @@ public class OnGameLaunchHandlerTests
         game.ApplicationPath.Returns(applicationPath);
         game.Platform.Returns(platform);
         game.CloneOf.Returns(cloneOf);
+        game.LaunchBoxDbId.Returns((int?)null);
         return game;
     }
 }
