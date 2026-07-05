@@ -1,4 +1,3 @@
-using DynamicControls;
 using DynamicControls.Config;
 using DynamicControls.Labels;
 using NSubstitute;
@@ -27,7 +26,7 @@ public class InputLabelsLoaderTests
         _underTest = new InputLabelsLoader(_logger, new LayeredFileSystem(RootDir, _fs));
     }
 
-    private static GameInfo Game(string platform, string romName, string? launchBoxId = null) => new(
+    private static GameInfo Game(string platform, string romName, int? launchBoxId = null) => new(
         Platform: platform,
         RomName: romName,
         CloneOf: null,
@@ -137,6 +136,53 @@ public class InputLabelsLoaderTests
         result.ShouldBeNull();
     }
 
+    // --- Fuzzy name lookup ---
+
+    [Fact]
+    public void Load_GameEntryMatchedByFuzzyName_WhenExactNameDoesNotMatch()
+    {
+        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="OutRun (USA, Europe)">
+                <A>Brake</A>
+              </Game>
+            </Labels>
+            """);
+
+        // ROM name lacks the region tag that the entry has — fuzzy match strips both
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun"));
+
+        result.ShouldNotBeNull();
+        result.Labels.Select(e => e.Name).ShouldBe(["A"]);
+    }
+
+    [Fact]
+    public void Load_ExactNameMatchTakesPriorityOverFuzzyMatch()
+    {
+        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="OutRun">
+                <A>A1</A>
+              </Game>
+              <Game romName="OutRun (USA, Europe)">
+                <A>A2</A>
+              </Game>
+            </Labels>
+            """);
+
+        // "OutRun" matches exactly, so the fuzzy-only entry should not win
+        InputLabelsConfig? result1 = _underTest.Load(Game("Sega Genesis", "OutRun"));
+        result1.ShouldNotBeNull();
+        result1.Labels[0].Label.ShouldBe("A1");
+
+        // "OutRun" matches exactly, so the fuzzy-only entry should not win
+        InputLabelsConfig? result2 = _underTest.Load(Game("Sega Genesis", "OutRun (USA, Europe)"));
+        result2.ShouldNotBeNull();
+        result2.Labels[0].Label.ShouldBe("A2");
+    }
+
     // --- ID-based lookup ---
 
     [Fact]
@@ -152,7 +198,7 @@ public class InputLabelsLoaderTests
             """);
 
         // matches by id even though RomName differs from the entry's name attribute
-        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun (EUR)", launchBoxId: "42"));
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun (EUR)", launchBoxId: 42));
 
         result.ShouldNotBeNull();
         result.Labels.Select(e => e.Name).ShouldBe(["A"]);
@@ -173,7 +219,7 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun", launchBoxId: "42"));
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun", launchBoxId: 42));
 
         result!.Labels[0].Label.ShouldBe("By-Id");
     }
@@ -252,7 +298,7 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun (USA, Europe)", launchBoxId: "42"));
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun (USA, Europe)", launchBoxId: 42));
 
         result!.Labels[0].Label.ShouldBe("User");
     }
@@ -317,7 +363,7 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? byId = _underTest.Load(Game("Sega Genesis", "OutRun", launchBoxId: "42"));
+        InputLabelsConfig? byId = _underTest.Load(Game("Sega Genesis", "OutRun", launchBoxId: 42));
         InputLabelsConfig? byName = _underTest.Load(Game("Sega Genesis", "OutRun"));
 
         byId.ShouldNotBeNull();

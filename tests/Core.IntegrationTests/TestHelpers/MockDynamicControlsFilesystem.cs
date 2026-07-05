@@ -48,7 +48,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     /// <summary>Adds a game entry to the platform labels file. <paramref name="xml"/> is the
     /// inner XML of a root element; the root wrapper is stripped. Pass <paramref name="launchBoxId"/>
     /// to also emit an <c>id="..."</c> attribute so the entry can be found by database ID.</summary>
-    public void WriteGameLabels(string platform, string romName, string xml, string? launchBoxId = null) =>
+    public void WriteGameLabels(string platform, string romName, string xml, int? launchBoxId = null) =>
         AddLabels("Defaults", platform, gameName: romName, gameId: launchBoxId, gameInnerXml: InnerXml(xml));
 
     public void WriteControlsXml(string xml) =>
@@ -103,7 +103,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     private void AddLabels(string layer, string platform,
         string? defaultsInnerXml = null,
         string? gameName = null,
-        string? gameId = null,
+        int? gameId = null,
         string? gameInnerXml = null)
     {
         var key = (layer, platform);
@@ -129,7 +129,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     private sealed class PlatformLabelAccumulator
     {
         public string? DefaultsInnerXml { get; set; }
-        public Dictionary<string, (string? Id, string InnerXml)> Games { get; } = new(StringComparer.OrdinalIgnoreCase);
+        public Dictionary<string, (int? Id, string InnerXml)> Games { get; } = new(StringComparer.OrdinalIgnoreCase);
 
         public string ToXml()
         {
@@ -141,7 +141,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
                 sb.AppendLine($"    {DefaultsInnerXml}");
                 sb.AppendLine("  </Defaults>");
             }
-            foreach (KeyValuePair<string, (string? Id, string InnerXml)> game in Games)
+            foreach (KeyValuePair<string, (int? Id, string InnerXml)> game in Games)
             {
                 string safeName = game.Key.Replace("\"", "&quot;");
                 string idAttr = game.Value.Id != null ? $" launchBoxId=\"{game.Value.Id}\"" : "";

@@ -345,14 +345,92 @@ public class InputLabelsSubsystemTests
             <InputLabels>
               <A>Brake</A>
             </InputLabels>
-            """, launchBoxId: "42");
+            """, launchBoxId: 42);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
-        GameInfo game = Game(platform: Platform, romName: "OutRun", launchBoxId: "42");
+        GameInfo game = Game(platform: Platform, romName: "OutRun", launchBoxId: 42);
 
         ResolvedLabels labels = Build().Load(game, mapping);
 
         labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Brake"));
         labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    // ---- Fuzzy romName matching ----
+
+    [Fact]
+    public void Load_FuzzyMatch_BareEntryFoundByBracketedRomName()
+    {
+        // Entry uses the bare title; ROM on disk has a region tag. Fuzzy match strips the
+        // ROM's brackets so "OutRun (USA, Europe)" finds the "OutRun" entry.
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <A>Brake</A>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
+        GameInfo game = Game(platform: Platform, romName: "OutRun (USA, Europe)");
+
+        ResolvedLabels labels = Build().Load(game, mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Brake"));
+        labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Load_FuzzyMatch_BracketedEntryFoundByBareRomName()
+    {
+        // Entry was written with a region tag; ROM on disk is bare. Fuzzy match strips the
+        // entry's brackets so "OutRun" finds the "OutRun (USA, Europe)" entry.
+        _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
+            <InputLabels>
+              <A>Brake</A>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
+        GameInfo game = Game(platform: Platform, romName: "OutRun");
+
+        ResolvedLabels labels = Build().Load(game, mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Brake"));
+        labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Load_FuzzyMatch_BothBracketedDifferently_StillMatch()
+    {
+        // Entry and ROM both have region tags but different ones. Both normalize to the same
+        // bare title, so the match succeeds.
+        _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
+            <InputLabels>
+              <A>Brake</A>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
+        GameInfo game = Game(platform: Platform, romName: "OutRun (USA)");
+
+        ResolvedLabels labels = Build().Load(game, mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Brake"));
+        labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Load_FuzzyMatch_NormalizationDoesNotOverMatch_UnrelatedTitles()
+    {
+        // Fuzzy match only strips brackets — it does not do substring or similarity matching.
+        // "Sonic" should not match an "OutRun" entry.
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <A>Brake</A>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
+        GameInfo game = Game(platform: Platform, romName: "Sonic (USA)");
+
+        ResolvedLabels labels = Build().Load(game, mapping);
+
+        labels.LabelText.ShouldBeEmpty();
+        labels.IsGameSpecific.ShouldBeFalse();
     }
 
     // ---- User <Defaults> block merging ----

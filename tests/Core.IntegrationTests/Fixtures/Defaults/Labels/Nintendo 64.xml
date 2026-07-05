@@ -2,7 +2,7 @@
   <Defaults>
     <Start>Pause</Start>
   </Defaults>
-  <Game romName="Goldeneye 007 (USA)">
+  <Game romName="Goldeneye 007">
     <B>Weapon</B>
     <A>Action</A>
     <L>Aim</L>

@@ -28,7 +28,7 @@ public record GameInfo(
     string Platform,
     string RomName,
     string? CloneOf,
-    string? LaunchBoxId,
+    int? LaunchBoxId,
     string? EmulatorPath,
     string? RomDirectory,
     string? RetroArchCore);
