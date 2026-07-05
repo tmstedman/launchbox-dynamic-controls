@@ -39,7 +39,7 @@ public class OnGameLaunchHandler(
             Platform: platform,
             RomName: romName,
             CloneOf: game.CloneOf,
-            LaunchBoxId: game.LaunchBoxDbId?.ToString(),
+            LaunchBoxId: game.LaunchBoxDbId,
             EmulatorPath: emulator?.ApplicationPath,
             RomDirectory: Path.GetDirectoryName(game.ApplicationPath),
             RetroArchCore: _retroArchCoreResolver.Resolve(emulator, platform));

@@ -39,9 +39,17 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         InputLabelsConfig? result = null;
 
         if (game.LaunchBoxId != null)
-            platform.ById.TryGetValue(game.LaunchBoxId, out result);
+            platform.ById.TryGetValue(game.LaunchBoxId.Value, out result);
 
         result ??= platform.ByName.GetValueOrDefault(game.RomName);
+
+        if (result == null)
+        {
+            string normalized = game.RomName.NormalizeRomName();
+            platform.ByNormalizedName.TryGetValue(normalized, out result);
+            if (result != null)
+                _logger.Debug($"Label entry found by fuzzy romName match: '{game.RomName}' -> '{normalized}'");
+        }
 
         if (result == null)
             _logger.Debug($"No label entry found for launchBoxId='{game.LaunchBoxId}' romName='{game.RomName}'");
@@ -98,7 +106,8 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
             }
             else if (node.Name == "Game")
             {
-                string? id = node.Attributes["launchBoxId"]?.Value;
+                string? idStr = node.Attributes["launchBoxId"]?.Value;
+                int? id = idStr != null && int.TryParse(idStr, out int parsed) ? parsed : null;
                 string? name = node.Attributes["romName"]?.Value;
                 InputLabelsConfig labels = ParseLabels(node, path);
                 file.Games.Add(new GameEntry(id, name, labels));
@@ -126,22 +135,23 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
 
     private static PlatformLabels Merge(PlatformFile? defaults, PlatformFile? user)
     {
-        var byId = new Dictionary<string, InputLabelsConfig>(StringComparer.OrdinalIgnoreCase);
+        var byId = new Dictionary<int, InputLabelsConfig>();
         var byName = new Dictionary<string, InputLabelsConfig>(StringComparer.OrdinalIgnoreCase);
+        var byNormalizedName = new Dictionary<string, InputLabelsConfig>(StringComparer.OrdinalIgnoreCase);
 
         foreach (GameEntry e in defaults?.Games ?? [])
         {
-            if (e.Id != null) byId[e.Id] = e.Labels;
-            if (e.Name != null) byName[e.Name] = e.Labels;
+            if (e.Id != null) byId[e.Id.Value] = e.Labels;
+            if (e.Name != null) { byName[e.Name] = e.Labels; byNormalizedName[e.Name.NormalizeRomName()] = e.Labels; }
         }
         foreach (GameEntry e in user?.Games ?? [])
         {
-            if (e.Id != null) byId[e.Id] = e.Labels;
-            if (e.Name != null) byName[e.Name] = e.Labels;
+            if (e.Id != null) byId[e.Id.Value] = e.Labels;
+            if (e.Name != null) { byName[e.Name] = e.Labels; byNormalizedName[e.Name.NormalizeRomName()] = e.Labels; }
         }
 
         InputLabelsConfig mergedDefaults = MergeDefaults(defaults?.Defaults, user?.Defaults);
-        return new PlatformLabels(mergedDefaults, byId, byName);
+        return new PlatformLabels(mergedDefaults, byId, byName, byNormalizedName);
     }
 
     private static InputLabelsConfig MergeDefaults(InputLabelsConfig? defaults, InputLabelsConfig? user)
@@ -168,10 +178,11 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         public List<GameEntry> Games { get; } = [];
     }
 
-    private sealed record GameEntry(string? Id, string? Name, InputLabelsConfig Labels);
+    private sealed record GameEntry(int? Id, string? Name, InputLabelsConfig Labels);
 
     private sealed record PlatformLabels(
         InputLabelsConfig Defaults,
-        IReadOnlyDictionary<string, InputLabelsConfig> ById,
-        IReadOnlyDictionary<string, InputLabelsConfig> ByName);
+        IReadOnlyDictionary<int, InputLabelsConfig> ById,
+        IReadOnlyDictionary<string, InputLabelsConfig> ByName,
+        IReadOnlyDictionary<string, InputLabelsConfig> ByNormalizedName);
 }
