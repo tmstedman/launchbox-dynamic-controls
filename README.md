@@ -138,7 +138,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 
 The data files that ship with the plugin - button mappings, labels, templates, and emulator definitions - are the most impactful area for contributions. No C# knowledge required for any of these.
 
-- **Game labels** (`Defaults\Labels\{Platform}.xml`) - what each button does in specific games, keyed by platform button name. Add a `<Game>` entry for any game that doesn't have one. Include the LaunchBox Games Database ID as the `id` attribute so the entry is found regardless of ROM filename.
+- **Game labels** (`Defaults\Labels\{Platform}.xml`) - what each button does in specific games, keyed by platform button name. Add a `<Game>` entry for any game that doesn't have one. Include the LaunchBox Games Database ID as the `launchBoxId` attribute so the entry is found regardless of ROM filename.
 - **Default input mappings** (`Defaults\Controllers\{Platform}.xml`) - how platform buttons map to generic controller slots. Covers ~50 platforms; corrections and new platforms welcome. When adding a new platform, follow the conventions used in the existing files.
 - **Platform button images** - PNGs under `Templates\Xbox Series X\{Platform}\`. Styled images for any platform not yet covered in the template, or additional controller variants for existing ones. Images must be styled consistently with the existing platform images.
 - **RetroArch device-type IDs** (`Defaults\Emulators\RetroArch\{CoreDisplayName}.xml`) - maps RetroArch's `input_libretro_device` IDs to controller variant names, so the plugin can detect which variant is active. Only one core ships today; every additional core helps.
