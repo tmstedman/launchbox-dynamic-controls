@@ -53,6 +53,7 @@ public class RetroArchMappingSourceTests
         Platform: "Sega Genesis",
         RomName: "OutRun",
         CloneOf: null,
+        LaunchBoxId: null,
         EmulatorPath: RetroArchExe,
         RomDirectory: @"C:\Games\Sega Genesis",
         RetroArchCore: CoreDll);

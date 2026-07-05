@@ -37,6 +37,7 @@ public class RetroArchOverridesResolverTests
         Platform: "Sega Genesis",
         RomName: Rom,
         CloneOf: null,
+        LaunchBoxId: null,
         EmulatorPath: null,
         RomDirectory: RomDirectory,
         RetroArchCore: null);

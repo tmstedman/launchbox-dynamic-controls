@@ -25,6 +25,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "OutRun (USA, Europe)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -121,6 +122,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Street Fighter II' - Special Champion Edition (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -175,6 +177,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Mortal Kombat II (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -267,6 +270,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Aladdin (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -337,6 +341,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "OutRun (Beta)",                  // no InputMappings or Labels file
             CloneOf: "OutRun (USA, Europe)",           // parent has both
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);

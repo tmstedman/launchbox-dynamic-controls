@@ -1,9 +1,0 @@
-<InputLabels>
-    <Dpad-Left>Steer</Dpad-Left>
-    <Dpad-Right>Steer</Dpad-Right>
-    <Dpad-Up>Low gear</Dpad-Up>
-    <Dpad-Down>High gear</Dpad-Down>
-    <A>Brake</A>
-    <B>Accelerate</B>
-    <Start>Pause</Start>
-</InputLabels>

@@ -9,8 +9,9 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the input-labels subsystem with its real internal wiring intact:
-/// <see cref="InputLabelsLoader"/> (XML file parsing for both game and <c>_DefaultLabels</c>
-/// files) and <see cref="Plugins.ControlsXml.MameControlsXmlSource"/> +
+/// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <c>&lt;Defaults&gt;</c>
+/// blocks from the per-platform <c>Labels/{platform}.xml</c> file) and
+/// <see cref="Plugins.ControlsXml.MameControlsXmlSource"/> +
 /// <see cref="Plugins.ControlsXml.ControlsXmlLoader"/> (BYOAC controls.xml parsing, MAME-gated)
 /// composing through <see cref="InputLabelsPlugins"/> (enable-filtering + chain order) into
 /// <see cref="InputLabelsService"/> (game-loader chain, inheritable-default merge,
@@ -331,5 +332,54 @@ public class InputLabelsSubsystemTests
 
         // The User file wins — Boost, not the Defaults Accelerate
         labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Boost"));
+    }
+
+    // ---- LaunchBoxId-based lookup ----
+
+    [Fact]
+    public void Load_GameMatchedByLaunchBoxId_WhenRomNameDoesNotMatchEntryName()
+    {
+        // The entry's name attribute is the canonical No-Intro name; the ROM on disk may differ.
+        // Matching by id lets the entry be found regardless of the ROM filename.
+        _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
+            <InputLabels>
+              <A>Brake</A>
+            </InputLabels>
+            """, launchBoxId: "42");
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
+        GameInfo game = Game(platform: Platform, romName: "OutRun", launchBoxId: "42");
+
+        ResolvedLabels labels = Build().Load(game, mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Brake"));
+        labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    // ---- User <Defaults> block merging ----
+
+    [Fact]
+    public void Load_UserDefaultsBlockOverridesDefaultsBlock_PerButton()
+    {
+        // User <Defaults> wins per-button: Start is overridden; B is not present in User so
+        // the Defaults entry is kept.
+        _dc.WriteDefaultLabels(Platform, """
+            <InputLabels>
+              <Start>Pause</Start>
+              <B>Cancel</B>
+            </InputLabels>
+            """);
+        _dc.WriteUserDefaultLabels(Platform, """
+            <InputLabels>
+              <Start>Resume</Start>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("Start", ["ButtonStart"]), ("B", ["ButtonB"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "Unknown"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonStart", "Resume"),
+            ("ButtonB", "Cancel"));
+        labels.IsGameSpecific.ShouldBeFalse();
     }
 }

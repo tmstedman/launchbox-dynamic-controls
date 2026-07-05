@@ -38,7 +38,7 @@ public class RetroArchCfgLoaderTests
     private static Dictionary<string, string> DictOf(string key, string value) => new() { [key] = value };
 
     private static GameInfo MakeGame(string? romDirectory = null, string romName = Rom) =>
-        new("Sega Genesis", romName, null, null, romDirectory, null);
+        new("Sega Genesis", romName, null, null, null, romDirectory, null);
 
     // ---- config root: portable vs non-portable ----
 
@@ -177,7 +177,7 @@ public class RetroArchCfgLoaderTests
         string gameCfg = Path.Combine(coreDir, $"{rom}.cfg");
         _configReader.LoadConfigFile(gameCfg).Returns(DictOf("input_player1_a_btn", "5"));
 
-        var result = _underTest.Load(RetroArchDir, core, new("Platform", rom, null, null, content, null)).ShouldNotBeNull();
+        var result = _underTest.Load(RetroArchDir, core, new("Platform", rom, null, null, null, content, null)).ShouldNotBeNull();
 
         result.Game.ShouldBeDictionaryOf(("input_player1_a_btn", "5"));
     }

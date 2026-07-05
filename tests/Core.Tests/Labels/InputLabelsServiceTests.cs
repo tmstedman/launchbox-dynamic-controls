@@ -39,6 +39,7 @@ public class InputLabelsServiceTests
         Platform: "Sega Genesis",
         RomName: romName,
         CloneOf: null,
+        LaunchBoxId: null,
         EmulatorPath: null,
         RomDirectory: null,
         RetroArchCore: null);

@@ -27,6 +27,7 @@ public class RetroArchEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Mortal Kombat II (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "genesis_plus_gx_libretro");
@@ -120,6 +121,7 @@ public class RetroArchEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Sonic the Hedgehog (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "genesis_plus_gx_libretro");
@@ -199,6 +201,7 @@ public class RetroArchEndToEndTests
             Platform: "Sony Playstation 2",
             RomName: "Tekken 5 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "pcsx2_libretro");
@@ -273,6 +276,7 @@ public class RetroArchEndToEndTests
             Platform: "Sony Playstation 2",
             RomName: "Need for Speed Underground 2 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "pcsx2_libretro");
@@ -334,6 +338,7 @@ public class RetroArchEndToEndTests
             Platform: "Sony Playstation 2",
             RomName: "Crash Bandicoot (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "pcsx2_libretro");
@@ -399,6 +404,7 @@ public class RetroArchEndToEndTests
             Platform: "Sony Playstation 2",
             RomName: "Burnout 3 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "pcsx2_libretro");
@@ -467,6 +473,7 @@ public class RetroArchEndToEndTests
             Platform: "Sony Playstation 2",
             RomName: "Resident Evil 4 (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: RetroArchEmulatorPath,
             RomDirectory: null,
             RetroArchCore: "pcsx2_libretro");
