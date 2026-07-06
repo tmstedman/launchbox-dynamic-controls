@@ -26,6 +26,7 @@ public class NintendoDsEndToEndTests
             Platform: "Nintendo DS",
             RomName: "Mario Kart DS (USA)",   // no labels file exists for this ROM (or the platform)
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
