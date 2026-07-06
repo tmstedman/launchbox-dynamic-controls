@@ -25,6 +25,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "OutRun (USA, Europe)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -110,6 +111,40 @@ public class SegaGenesisEndToEndTests
             #pragma warning restore format
     }
 
+    [Fact]
+    public void SegaGenesis_OutRun_MatchedByLaunchBoxId()
+    {
+        // ROM name "or2" has no label entry and doesn't fuzzy-match "OutRun".
+        // launchBoxId="1" identifies this as the OutRun game so its labels are loaded.
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "or2",
+            CloneOf: null,
+            LaunchBoxId: 1,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        // OutRun's labels land on their slots via the default 6-Button mapping
+        // (A->ButtonX, B->ButtonA); analogToDigital="left" mirrors Dpad labels onto AxisLeftStick
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonX",            Text: "Brake"),
+            new(Input: "ButtonA",            Text: "Accelerate"),
+            new(Input: "ButtonDpadLeft",     Text: "Steer"),
+            new(Input: "ButtonDpadRight",    Text: "Steer"),
+            new(Input: "ButtonDpadUp",       Text: "Low gear"),
+            new(Input: "ButtonDpadDown",     Text: "High gear"),
+            new(Input: "ButtonStart",        Text: "Pause"),
+            new(Input: "AxisLeftStickUp",    Text: "Low gear"),
+            new(Input: "AxisLeftStickDown",  Text: "High gear"),
+            new(Input: "AxisLeftStickLeft",  Text: "Steer"),
+            new(Input: "AxisLeftStickRight", Text: "Steer"));
+            #pragma warning restore format
+    }
+
     /// <summary>
     /// 6-Button default, no game-specific labels — the default rendering mode where showIf="auto"
     /// resolves to IsMapped, so all mapped inputs are active and the label-only Stack/OneOf groups drop.
@@ -121,6 +156,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Street Fighter II' - Special Champion Edition (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -175,6 +211,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Mortal Kombat II (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -267,6 +304,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "Aladdin (USA)",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -337,6 +375,7 @@ public class SegaGenesisEndToEndTests
             Platform: "Sega Genesis",
             RomName: "OutRun (Beta)",                  // no InputMappings or Labels file
             CloneOf: "OutRun (USA, Europe)",           // parent has both
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);

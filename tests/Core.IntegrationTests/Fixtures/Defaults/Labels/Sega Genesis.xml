@@ -1,0 +1,42 @@
+<Labels>
+  <Defaults>
+    <Start>Pause</Start>
+  </Defaults>
+  <Game romName="Aladdin">
+    <A>Sword</A>
+    <B>Jump</B>
+    <C>Throw</C>
+  </Game>
+  <Game romName="Mortal Kombat II">
+    <A>Low Punch</A>
+    <X>High Punch</X>
+    <C>Low Kick</C>
+    <Z>High Kick</Z>
+    <B>Block</B>
+    <Y>Block</Y>
+    <Dpad-Up>Jump</Dpad-Up>
+    <Dpad-Down>Crouch</Dpad-Down>
+    <Dpad-Left>Back</Dpad-Left>
+    <Dpad-Right>Forward</Dpad-Right>
+  </Game>
+  <Game launchBoxId="1" romName="OutRun">
+    <Dpad-Left>Steer</Dpad-Left>
+    <Dpad-Right>Steer</Dpad-Right>
+    <Dpad-Up>Low gear</Dpad-Up>
+    <Dpad-Down>High gear</Dpad-Down>
+    <A>Brake</A>
+    <B>Accelerate</B>
+  </Game>
+  <Game romName="Sonic the Hedgehog">
+    <A>Jump</A>
+    <B>Jump</B>
+    <C>Jump</C>
+    <Dpad-Any>Move</Dpad-Any>
+  </Game>
+  <Game romName="UserLabelsTest">
+    <A>Defaults Brake</A>
+  </Game>
+  <Game romName="UserMappingTest">
+    <Y>Special Attack</Y>
+  </Game>
+</Labels>

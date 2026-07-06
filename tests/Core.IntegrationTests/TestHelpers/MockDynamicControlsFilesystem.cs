@@ -1,4 +1,6 @@
 using System.IO.Abstractions.TestingHelpers;
+using System.Text;
+using System.Xml;
 
 namespace DynamicControls.Core.IntegrationTests.TestHelpers;
 
@@ -7,10 +9,17 @@ namespace DynamicControls.Core.IntegrationTests.TestHelpers;
 /// eliminating path-construction boilerplate and <see cref="MockFileData"/> noise from subsystem
 /// test classes. <see cref="Fs"/> exposes the in-memory filesystem as the production
 /// <see cref="IFileSystem"/> (via <see cref="MockFsAdapter"/>) for passing to factory methods.
+///
+/// Label helpers accumulate entries in memory and re-write the combined per-platform
+/// <c>Labels/{platform}.xml</c> file each time an entry is added, so tests can call
+/// <see cref="WriteGameLabels"/> and <see cref="WriteDefaultLabels"/> independently in any order.
 /// </summary>
 internal sealed class MockDynamicControlsFilesystem(string root)
 {
     private readonly MockFileSystem _mock = new();
+
+    // Accumulated label state keyed by (layer, platform).
+    private readonly Dictionary<(string Layer, string Platform), PlatformLabelAccumulator> _labels = [];
 
     /// <summary>The in-memory filesystem as the production <see cref="IFileSystem"/>.</summary>
     public IFileSystem Fs => new MockFsAdapter(_mock);
@@ -30,11 +39,17 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     public void WriteGameMapping(string platform, string romName, string xml) =>
         WriteFile(Path.Combine("Defaults", "InputMappings", platform, romName + ".xml"), xml);
 
+    /// <summary>Sets the <c>&lt;Defaults&gt;</c> block for the platform. <paramref name="xml"/>
+    /// is the inner XML of a root element (e.g. <c>&lt;InputLabels&gt;...&lt;/InputLabels&gt;</c>);
+    /// the root wrapper is stripped and only child elements are kept.</summary>
     public void WriteDefaultLabels(string platform, string xml) =>
-        WriteFile(Path.Combine("Defaults", "Labels", platform, "_DefaultLabels.xml"), xml);
+        AddLabels("Defaults", platform, defaultsInnerXml: InnerXml(xml));
 
-    public void WriteGameLabels(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("Defaults", "Labels", platform, romName + ".xml"), xml);
+    /// <summary>Adds a game entry to the platform labels file. <paramref name="xml"/> is the
+    /// inner XML of a root element; the root wrapper is stripped. Pass <paramref name="launchBoxId"/>
+    /// to also emit an <c>id="..."</c> attribute so the entry can be found by database ID.</summary>
+    public void WriteGameLabels(string platform, string romName, string xml, int? launchBoxId = null) =>
+        AddLabels("Defaults", platform, gameName: romName, gameId: launchBoxId, gameInnerXml: InnerXml(xml));
 
     public void WriteControlsXml(string xml) =>
         WriteFile("controls.xml", xml);
@@ -56,8 +71,13 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     public void WriteUserGameMapping(string platform, string romName, string xml) =>
         WriteFile(Path.Combine("User", "InputMappings", platform, romName + ".xml"), xml);
 
+    /// <summary>Sets the <c>&lt;Defaults&gt;</c> block in the User-layer platform labels file.</summary>
+    public void WriteUserDefaultLabels(string platform, string xml) =>
+        AddLabels("User", platform, defaultsInnerXml: InnerXml(xml));
+
+    /// <summary>Adds a game entry to the User-layer platform labels file.</summary>
     public void WriteUserGameLabels(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("User", "Labels", platform, romName + ".xml"), xml);
+        AddLabels("User", platform, gameName: romName, gameInnerXml: InnerXml(xml));
 
     public void WriteUserRetroArchCore(string coreDisplayName, string xml) =>
         WriteFile(Path.Combine("User", "Emulators", "RetroArch", coreDisplayName + ".xml"), xml);
@@ -77,4 +97,60 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     /// <c>"{rom}.cfg"</c> or <c>"default.cfg"</c>.</summary>
     public void WriteMameCfg(string fileName, string xml) =>
         WriteFile(Path.Combine("Emulators", "mame", "cfg", fileName), xml);
+
+    // ---- Label accumulation ----
+
+    private void AddLabels(string layer, string platform,
+        string? defaultsInnerXml = null,
+        string? gameName = null,
+        int? gameId = null,
+        string? gameInnerXml = null)
+    {
+        var key = (layer, platform);
+        if (!_labels.TryGetValue(key, out PlatformLabelAccumulator? acc))
+            _labels[key] = acc = new PlatformLabelAccumulator();
+
+        if (defaultsInnerXml != null)
+            acc.DefaultsInnerXml = defaultsInnerXml;
+        if (gameName != null && gameInnerXml != null)
+            acc.Games[gameName] = (gameId, gameInnerXml);
+
+        string path = Path.Combine(layer, "Labels", platform + ".xml");
+        WriteFile(path, acc.ToXml());
+    }
+
+    private static string InnerXml(string xml)
+    {
+        var doc = new XmlDocument();
+        doc.LoadXml(xml);
+        return doc.DocumentElement!.InnerXml;
+    }
+
+    private sealed class PlatformLabelAccumulator
+    {
+        public string? DefaultsInnerXml { get; set; }
+        public Dictionary<string, (int? Id, string InnerXml)> Games { get; } = new(StringComparer.OrdinalIgnoreCase);
+
+        public string ToXml()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<Labels>");
+            if (DefaultsInnerXml != null)
+            {
+                sb.AppendLine("  <Defaults>");
+                sb.AppendLine($"    {DefaultsInnerXml}");
+                sb.AppendLine("  </Defaults>");
+            }
+            foreach (KeyValuePair<string, (int? Id, string InnerXml)> game in Games)
+            {
+                string safeName = game.Key.Replace("\"", "&quot;");
+                string idAttr = game.Value.Id != null ? $" launchBoxId=\"{game.Value.Id}\"" : "";
+                sb.AppendLine($"  <Game{idAttr} romName=\"{safeName}\">");
+                sb.AppendLine($"    {game.Value.InnerXml}");
+                sb.AppendLine("  </Game>");
+            }
+            sb.AppendLine("</Labels>");
+            return sb.ToString();
+        }
+    }
 }

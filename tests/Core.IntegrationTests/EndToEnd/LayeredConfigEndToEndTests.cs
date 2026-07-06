@@ -27,6 +27,7 @@ public class LayeredConfigEndToEndTests
             Platform: "Sega Genesis",
             RomName: "UserMappingTest",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -39,7 +40,7 @@ public class LayeredConfigEndToEndTests
         overlay.ShouldHaveLabels(
             #pragma warning disable format
             new(Input: "ButtonY",     Text: "Special Attack"),
-            new(Input: "ButtonStart", Text: "Pause"));      // inherited from _DefaultLabels.xml
+            new(Input: "ButtonStart", Text: "Pause"));      // inherited from <Defaults> block
             #pragma warning restore format
     }
 
@@ -57,6 +58,7 @@ public class LayeredConfigEndToEndTests
             Platform: "Sega Genesis",
             RomName: "UserLabelsTest",
             CloneOf: null,
+            LaunchBoxId: null,
             EmulatorPath: null,
             RomDirectory: null,
             RetroArchCore: null);
@@ -70,7 +72,7 @@ public class LayeredConfigEndToEndTests
         overlay.ShouldHaveLabels(
             #pragma warning disable format
             new(Input: "ButtonX",     Text: "User Brake"),
-            new(Input: "ButtonStart", Text: "Pause"));      // inherited from _DefaultLabels.xml
+            new(Input: "ButtonStart", Text: "Pause"));      // inherited from <Defaults> block
             #pragma warning restore format
     }
 }

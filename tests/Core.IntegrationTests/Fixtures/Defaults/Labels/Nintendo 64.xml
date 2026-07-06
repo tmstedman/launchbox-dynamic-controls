@@ -1,4 +1,8 @@
-<InputLabels>
+<Labels>
+  <Defaults>
+    <Start>Pause</Start>
+  </Defaults>
+  <Game romName="Goldeneye 007">
     <B>Weapon</B>
     <A>Action</A>
     <L>Aim</L>
@@ -7,4 +11,5 @@
     <Stick-Any>Look</Stick-Any>
     <Dpad-Any>Move</Dpad-Any>
     <C-Any>Move</C-Any>
-</InputLabels>
+  </Game>
+</Labels>

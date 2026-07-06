@@ -1,0 +1,31 @@
+<Labels>
+  <Defaults>
+    <Start>Pause</Start>
+  </Defaults>
+  <Game romName="Burnout 3">
+    <Cross>Boost</Cross>
+    <Circle>Brake</Circle>
+    <Square>Handbrake</Square>
+    <Triangle>Camera</Triangle>
+  </Game>
+  <Game romName="Crash Bandicoot">
+    <Dpad-Up>Jump</Dpad-Up>
+    <Dpad-Down>Crouch</Dpad-Down>
+  </Game>
+  <Game romName="Need for Speed Underground 2">
+    <L2>Brake</L2>
+    <R2>Accelerate</R2>
+  </Game>
+  <Game romName="Resident Evil 4">
+    <Cross>Attack</Cross>
+    <Circle>Cancel</Circle>
+    <Square>Reload</Square>
+    <Triangle>Inventory</Triangle>
+  </Game>
+  <Game romName="Tekken 5">
+    <Cross>Left Kick</Cross>
+    <Circle>Right Kick</Circle>
+    <Square>Left Punch</Square>
+    <Triangle>Right Punch</Triangle>
+  </Game>
+</Labels>

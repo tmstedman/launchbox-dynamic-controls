@@ -16,8 +16,7 @@ Defaults/  (shipped, overwritten on update — do not edit)
 ----------------------------------------------------------
   GlobalConfig.xml                          Global plugin settings.
   Controllers/{Platform}.xml                Controller variants per platform.
-  Labels/{Platform}/_DefaultLabels.xml      Platform-default labels.
-  Labels/{Platform}/{RomName}.xml           Per-game labels.
+  Labels/{Platform}.xml                     Per-platform labels (game entries + defaults block).
   controls.xml                              BYOAC MAME controls database.
   Emulators/MAME/JoycodeMapping.xml            JOYCODE -> generic-input lookup for MAME cfg translation.
   Emulators/RetroArch/{CoreDisplayName}.xml Per-core controller variant declarations.
@@ -30,7 +29,7 @@ shadow them. For example:
   GlobalConfig.xml                          Override global settings.
   Controllers/{Platform}.xml                Override a platform's controller definitions.
   InputMappings/{Platform}/{Game}.xml       Override a game's input mapping.
-  Labels/{Platform}/{RomName}.xml           Override per-game labels.
+  Labels/{Platform}.xml                     Override or add game labels for a platform.
   controls.xml                              Override the MAME controls database.
   Emulators/MAME/JoycodeMapping.xml            Override the JOYCODE mapping.
   Emulators/RetroArch/{CoreDisplayName}.xml Override a core's variant declarations.
