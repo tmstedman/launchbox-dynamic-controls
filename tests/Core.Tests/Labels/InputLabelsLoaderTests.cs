@@ -136,6 +136,24 @@ public class InputLabelsLoaderTests
         result.ShouldBeNull();
     }
 
+    [Fact]
+    public void Load_GameEntryMatchedByName_CaseInsensitive()
+    {
+        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="OutRun">
+                <A>Brake</A>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "outrun"));
+
+        result.ShouldNotBeNull();
+        result.Labels.Select(e => e.Name).ShouldBe(["A"]);
+    }
+
     // --- Fuzzy name lookup ---
 
     [Fact]
@@ -144,14 +162,14 @@ public class InputLabelsLoaderTests
         string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
         StubXml(path, """
             <Labels>
-              <Game romName="OutRun (USA, Europe)">
+              <Game romName="OutRun">
                 <A>Brake</A>
               </Game>
             </Labels>
             """);
 
         // ROM name lacks the region tag that the entry has — fuzzy match strips both
-        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun"));
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OutRun (USA, Europe)"));
 
         result.ShouldNotBeNull();
         result.Labels.Select(e => e.Name).ShouldBe(["A"]);
@@ -181,6 +199,25 @@ public class InputLabelsLoaderTests
         InputLabelsConfig? result2 = _underTest.Load(Game("Sega Genesis", "OutRun (USA, Europe)"));
         result2.ShouldNotBeNull();
         result2.Labels[0].Label.ShouldBe("A2");
+    }
+
+    [Fact]
+    public void Load_GameEntryMatchedByFuzzyName_CaseInsensitive()
+    {
+        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="OutRun">
+                <A>Brake</A>
+              </Game>
+            </Labels>
+            """);
+
+        // ROM name has different casing and lacks the region tag — fuzzy match handles both
+        InputLabelsConfig? result = _underTest.Load(Game("Sega Genesis", "OUTRUN (USA, Europe)"));
+
+        result.ShouldNotBeNull();
+        result.Labels.Select(e => e.Name).ShouldBe(["A"]);
     }
 
     // --- ID-based lookup ---
