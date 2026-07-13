@@ -26,7 +26,7 @@ XML structure
            analogToDigital="left" mirrors Dpad platform buttons onto the left
            stick generic inputs so both work for directional labels. -->
 
-      <Controller name="6-Button" default="true" analogToDigital="left">
+      <Controller name="6-Button" analogToDigital="left" default="true">
           <!-- Mappings here extend or override the root-level baseline. -->
           <Mapping name="X" input="ButtonLeftShoulder" />
       </Controller>

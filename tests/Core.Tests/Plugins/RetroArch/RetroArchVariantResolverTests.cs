@@ -6,9 +6,10 @@ namespace DynamicControls.Core.Tests.Plugins.RetroArch;
 /// <summary>
 /// Unit tests for <see cref="RetroArchVariantResolver"/>. The resolver is pure logic over a
 /// <see cref="RetroArchGameData"/> and a <see cref="RetroArchCoreConfig"/> — no filesystem
-/// dependencies. Focus: the three null-return conditions (key absent, device type 1, non-integer
-/// value), the error path when the type is not declared in the core config, and correct selection
-/// when the type matches — including selection by a non-first id.
+/// dependencies. Focus: the null-return conditions (key absent, non-integer value, device type 1
+/// absent from core config), the error path when a non-1 type is not declared in the core config,
+/// correct selection when the type matches — including device type 1 when declared and selection
+/// by a non-first id.
 /// </summary>
 public class RetroArchVariantResolverTests
 {
@@ -37,11 +38,10 @@ public class RetroArchVariantResolverTests
 
     [Theory]
     [InlineData(null)]    // key absent
-    [InlineData("1")]     // RETRO_DEVICE_JOYPAD — default pad, not a variant selection
+    [InlineData("1")]     // device type 1 not declared in core config — treated as no override
     [InlineData("auto")]  // non-integer value
-    public void Resolve_NullOrDefaultOrNonIntegerDeviceType_ReturnsNull(string? deviceTypeValue)
+    public void Resolve_KeyAbsentOrNonIntegerOrType1NotDeclared_ReturnsNull(string? deviceTypeValue)
     {
-        // given a dictionary with the device type in each problematic form
         var entries = deviceTypeValue == null
             ? []
             : new Dictionary<string, string> { ["input_libretro_device_p1"] = deviceTypeValue };
@@ -50,6 +50,7 @@ public class RetroArchVariantResolverTests
 
         result.ShouldBeNull();
         _logger.Received().Debug(Arg.Is<string>(s => s.Contains("no device type override")));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
     // ---- error path ----
@@ -68,6 +69,19 @@ public class RetroArchVariantResolverTests
     }
 
     // ---- match ----
+
+    [Fact]
+    public void Resolve_DeviceType1_DeclaredInCoreConfig_ReturnsVariant()
+    {
+        var entries = new Dictionary<string, string> { ["input_libretro_device_p1"] = "1" };
+        var coreConfig = CoreConfig(("Control Pad", [1]), ("3D Control Pad", [261]));
+
+        var result = _underTest.Resolve(Data(entries), coreConfig, Core);
+
+        result.ShouldNotBeNull();
+        result.Name.ShouldBe("Control Pad");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
 
     [Theory]
     [InlineData("513")] // first declared id for Pad-6btn

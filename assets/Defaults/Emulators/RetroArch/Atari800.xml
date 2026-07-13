@@ -1,0 +1,8 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="Joystick">
+            <Retropad id="513" />
+            <Retropad id="769" />
+        </Controller>
+    </Controllers>
+</RetroArchCore>

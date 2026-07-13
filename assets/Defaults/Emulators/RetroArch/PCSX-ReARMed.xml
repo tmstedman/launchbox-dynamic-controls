@@ -1,0 +1,25 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="Standard">
+            <Retropad id="257" />
+        </Controller>
+        <Controller name="Analog">
+            <Retropad id="261" />
+        </Controller>
+        <Controller name="DualShock">
+            <Retropad id="517" />
+        </Controller>
+        <Controller name="NeGcon">
+            <Retropad id="773" />
+        </Controller>
+        <Controller name="GunCon">
+            <Retropad id="260" />
+        </Controller>
+        <Controller name="Justifier">
+            <Retropad id="516" />
+        </Controller>
+        <Controller name="Mouse">
+            <Retropad id="258" />
+        </Controller>
+    </Controllers>
+</RetroArchCore>

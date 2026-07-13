@@ -1,5 +1,7 @@
+<!-- Standalone: the GBA has its own L/R shoulder buttons, so it is not shared with the
+     Game Boy / Game Boy Color base even though the current mapping happens to coincide. -->
 <Controllers>
-    <Controller name="Pad" default="true" analogToDigital="left">
+    <Controller name="Pad" analogToDigital="left" default="true">
         <Mapping name="B" input="ButtonA" />
         <Mapping name="A" input="ButtonB" />
         <Mapping name="Start" input="ButtonStart" />

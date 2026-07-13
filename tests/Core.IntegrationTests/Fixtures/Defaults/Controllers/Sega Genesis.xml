@@ -1,22 +1,22 @@
 <Controllers>
 
-    <Mapping name="A" input="ButtonX" />
-    <Mapping name="B" input="ButtonA" />
-    <Mapping name="C" input="ButtonB" />
-    <Mapping name="Start" input="ButtonStart" />
-    <Mapping name="Dpad-Any" input="ButtonDpad" />
-    <Mapping name="Dpad-Up" input="ButtonDpadUp" />
-    <Mapping name="Dpad-Down" input="ButtonDpadDown" />
-    <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
-    <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+    <Controller name="3-Button" analogToDigital="left">
+        <Mapping name="A" input="ButtonX" />
+        <Mapping name="B" input="ButtonA" />
+        <Mapping name="C" input="ButtonB" />
+        <Mapping name="Start" input="ButtonStart" />
+        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+        <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+        <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+        <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+    </Controller>
 
-    <Controller name="6-Button" default="true" analogToDigital="left">
+    <Controller name="6-Button" inheritFrom="3-Button" analogToDigital="left" default="true">
         <Mapping name="X" input="ButtonLeftShoulder" />
         <Mapping name="Y" input="ButtonY" />
         <Mapping name="Z" input="ButtonRightShoulder" />
         <Mapping name="Mode" input="ButtonBack" />
     </Controller>
-
-    <Controller name="3-Button" analogToDigital="left" />
 
 </Controllers>

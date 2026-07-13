@@ -72,6 +72,65 @@ Create `User\Controllers\{Platform}.xml` (or `Defaults\Controllers\{Platform}.xm
 </Controllers>
 ```
 
+When a platform has several controllers that share a common button set, a variant can declare
+`inheritFrom="OtherController"` to prepend that controller's mappings before its own instead of
+repeating them. Inheritance is transitive — the base may itself `inheritFrom` a third controller —
+so you can build up a chain (e.g. NEC PC Engine's `6-Button` inherits from `3-Button`, which
+inherits from `2-Button`). A variant's own mappings override any inherited entry with the same
+`name`. Only mappings are inherited; `analogToDigital` is read from each controller's own attribute.
+
+```xml
+<!-- User\Controllers\NEC PC Engine.xml -->
+<Controllers>
+    <Controller name="2-Button">
+        <Mapping name="I" input="ButtonB" />
+        <Mapping name="II" input="ButtonA" />
+    </Controller>
+    <Controller name="3-Button" inheritFrom="2-Button">
+        <Mapping name="III" input="ButtonX" />
+    </Controller>
+    <Controller name="6-Button" inheritFrom="3-Button">
+        <Mapping name="IV" input="ButtonY" />
+    </Controller>
+</Controllers>
+```
+
+### Sharing one definition across platforms
+
+When the platforms in one hardware *family* share a controller (e.g. the NES, its Japanese
+counterpart the Famicom, and the Famicom Disk System add-on all use the same D-pad + 2-button pad),
+put the definition in the family's root platform file and point each descendant at it with a
+root-level `inheritFrom`:
+
+```xml
+<!-- Defaults\Controllers\Nintendo Entertainment System.xml  (root platform, full definition) -->
+<Controllers>
+    <Controller name="Pad" analogToDigital="left" default="true">
+        <Mapping name="B" input="ButtonA" />
+        <Mapping name="A" input="ButtonB" />
+        <!-- … -->
+    </Controller>
+</Controllers>
+```
+
+```xml
+<!-- Defaults\Controllers\Nintendo Famicom.xml  (one-line pointer) -->
+<Controllers inheritFrom="Nintendo Entertainment System" />
+```
+
+Group by hardware family, not by whichever mappings happen to coincide today: a pointer should
+target the platform that genuinely *defines* the controller family, so a later fix propagates to the
+right platforms and no further. The Game Boy line, for instance, is a *separate* family rooted at
+`Nintendo Game Boy` — even though its pad currently matches the NES pad — so that adding, say, the
+Game Boy Advance's L/R shoulders never leaks onto the NES.
+
+A platform file can also add or override controllers on top of the root — list its own `<Controller>`
+elements alongside the root `inheritFrom`; a controller whose `name` matches a root entry replaces
+it, and a new name is appended. Root-level inheritance is transitive and controller-level
+`inheritFrom` resolves across the file boundary, so a platform can add a `6-Button` that inherits a
+`3-Button` defined in the root.
+
+
 ### 2. Add platform button images
 
 Create `Templates\{TemplateName}\{Platform}\` and add one `.png` per platform button. File names must match the `name` attributes in the Controllers file (e.g. `One.png`, `Two.png`).

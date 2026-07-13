@@ -1,5 +1,6 @@
 <Controllers>
-    <Controller name="Pad" analogToDigital="left">
+
+    <Controller name="Control Pad" analogToDigital="left" default="true">
         <Mapping name="A" input="ButtonX" />
         <Mapping name="B" input="ButtonA" />
         <Mapping name="C" input="ButtonB" />
@@ -15,4 +16,13 @@
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
+
+    <Controller name="3D Control Pad" inheritFrom="Control Pad">
+        <Mapping name="L-Any" input="AxisLeftStick" />
+        <Mapping name="L-Up" input="AxisLeftStickUp" />
+        <Mapping name="L-Down" input="AxisLeftStickDown" />
+        <Mapping name="L-Left" input="AxisLeftStickLeft" />
+        <Mapping name="L-Right" input="AxisLeftStickRight" />
+    </Controller>
+
 </Controllers>

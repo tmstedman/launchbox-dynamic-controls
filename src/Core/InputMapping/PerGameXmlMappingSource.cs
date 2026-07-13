@@ -43,23 +43,8 @@ public class PerGameXmlMappingSource(ILogger logger, IInputMappingLoader loader)
         config.Controller = baseline?.Name;
         config.AnalogToDigital ??= baseline?.AnalogToDigital;
 
-        // Layer per-game entries on top of the baseline: any baseline entry whose Name appears
-        // in the per-game XML's <Mapping> or <Unmap> elements is dropped. <Mapping> entries are
-        // then appended; <Unmap> contributes nothing back (the Name leaves the mapping entirely,
-        // matching RetroArch's -1 sentinel semantics). Baseline entries for other Names are
-        // preserved as-is.
         if (baseline != null)
-        {
-            var overriddenNames = new HashSet<string>(config.Mappings.Select(m => m.Name));
-            overriddenNames.UnionWith(config.Unmaps);
-            var merged = new List<MappingEntry>();
-            foreach (MappingEntry entry in baseline.Mappings)
-            {
-                if (!overriddenNames.Contains(entry.Name)) merged.Add(entry);
-            }
-            merged.AddRange(config.Mappings);
-            config.Mappings = merged;
-        }
+            config.Mappings = MappingOverlay.Apply(baseline.Mappings, config.Mappings, config.Unmaps);
 
         return config;
     }

@@ -1,5 +1,5 @@
 <Controllers>
-    <Controller name="Joystick" default="true" analogToDigital="left">
+    <Controller name="Joystick" analogToDigital="left" default="true">
         <Mapping name="One" input="ButtonA" />
         <Mapping name="Two" input="ButtonB" />
         <Mapping name="Joystick-Any" input="ButtonDpad" />

@@ -11,9 +11,11 @@ public interface IRetroArchVariantResolver
 /// <summary>
 /// Resolves the effective controller variant from <c>input_libretro_device_p1</c>, walking the
 /// cascade levels from most specific to least (Game → ContentDir → Core → Global) and stopping
-/// at the first level that contains the key. Device type 1 (RETRO_DEVICE_JOYPAD, the default)
-/// is treated as "no override" and returns null. The <paramref name="logSource"/> constructor
-/// parameter ("cfg" or "remap") distinguishes the two in log output.
+/// at the first level that contains the key. Device type 1 (RETRO_DEVICE_JOYPAD) is resolved
+/// like any other ID when declared in the core XML; when absent from the core XML it is treated
+/// silently as "no override" (no error) since it is RetroArch's implicit default. The
+/// <paramref name="logSource"/> constructor parameter ("cfg" or "remap") distinguishes the two
+/// in log output.
 /// </summary>
 public class RetroArchVariantResolver(ILogger logger, string logSource) : IRetroArchVariantResolver
 {
@@ -32,7 +34,7 @@ public class RetroArchVariantResolver(ILogger logger, string logSource) : IRetro
             if (entries == null || !entries.TryGetValue("input_libretro_device_p1", out string? deviceTypeStr))
                 continue;
 
-            if (!int.TryParse(deviceTypeStr, out int deviceType) || deviceType == 1)
+            if (!int.TryParse(deviceTypeStr, out int deviceType))
             {
                 _logger.Debug($"RetroArch {_logSource}: no device type override");
                 return null;
@@ -41,7 +43,10 @@ public class RetroArchVariantResolver(ILogger logger, string logSource) : IRetro
             RetroArchControllerConfig? variant = coreConfig.SelectController(deviceType);
             if (variant == null)
             {
-                _logger.Error($"RetroArch {_logSource}: device type {deviceType} not declared in core XML for '{coreDisplayName}'");
+                if (deviceType != 1)
+                    _logger.Error($"RetroArch {_logSource}: device type {deviceType} not declared in core XML for '{coreDisplayName}'");
+                else
+                    _logger.Debug($"RetroArch {_logSource}: no device type override");
                 return null;
             }
             _logger.Debug($"RetroArch {_logSource}: selected variant '{variant.Name}' for device type {deviceType}");
