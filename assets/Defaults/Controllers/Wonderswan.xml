@@ -1,5 +1,5 @@
 <Controllers>
-    <Controller name="Pad" default="true" analogToDigital="left">
+    <Controller name="Pad" analogToDigital="left" default="true">
         <Mapping name="B" input="ButtonA" />
         <Mapping name="A" input="ButtonB" />
         <Mapping name="Start" input="ButtonStart" />
@@ -12,7 +12,6 @@
         <Mapping name="Y-Down" input="ButtonRightShoulder" />
         <Mapping name="Y-Left" input="AxisTriggerLeft" />
         <Mapping name="Y-Right" input="AxisTriggerRight" />
-        <!-- Emulator controls -->
         <Mapping name="RotateScreen" input="ButtonBack" />
     </Controller>
 </Controllers>

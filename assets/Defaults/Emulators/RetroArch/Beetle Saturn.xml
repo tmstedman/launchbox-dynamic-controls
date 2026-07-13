@@ -1,0 +1,31 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="Control Pad">
+            <Retropad id="1" />
+        </Controller>
+        <Controller name="3D Control Pad">
+            <Retropad id="261" />
+        </Controller>
+        <Controller name="Mission Stick">
+            <Retropad id="773" />
+        </Controller>
+        <Controller name="Dual Mission Sticks">
+            <Retropad id="1029" />
+        </Controller>
+        <Controller name="Twin-Stick">
+            <Retropad id="1285" />
+        </Controller>
+        <Controller name="Arcade Racer">
+            <Retropad id="517" />
+        </Controller>
+        <Controller name="Mouse">
+            <Retropad id="258" />
+        </Controller>
+        <Controller name="Stunner">
+            <Retropad id="260" />
+        </Controller>
+        <Controller name="Virtua Gun">
+            <Retropad id="516" />
+        </Controller>
+    </Controllers>
+</RetroArchCore>

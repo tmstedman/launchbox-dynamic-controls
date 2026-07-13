@@ -19,10 +19,14 @@ public interface IInputMappingLoader
 
     /// <summary>
     /// Loads the platform-level controllers file (<c>Controllers.xml</c>) — one or more
-    /// <c>&lt;Controller&gt;</c> blocks, each with its own button vocabulary. Root-level
-    /// <c>&lt;Mapping&gt;</c> entries (direct children of the root, outside any
-    /// <c>&lt;Controller&gt;</c>) form a shared baseline merged into every controller. Returns
-    /// null when no controllers file exists for the given platform.
+    /// <c>&lt;Controller&gt;</c> blocks, each with its own button vocabulary. A controller may
+    /// declare <c>inheritFrom="OtherControllerName"</c> to prepend another controller's mappings
+    /// before its own; inheritance is transitive (the base may itself inheritFrom a third, and so
+    /// on) with cycles detected and broken. The root <c>&lt;Controllers&gt;</c> element may also
+    /// carry <c>inheritFrom="OtherFile"</c> to pull in a shared base file's controllers and merge
+    /// this file's own on top (override by name, append new) — letting platforms that share a
+    /// layout reduce to a one-line pointer. Returns null when no controllers file exists for the
+    /// given platform.
     /// </summary>
     PlatformControllersConfig? LoadPlatformMapping(string platform);
 }
@@ -94,34 +98,136 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     private PlatformControllersConfig ParsePlatformMapping(string path)
     {
         var result = new PlatformControllersConfig();
+
+        // Pass 1: read this file's raw <Controller> list, resolving any root-level file
+        // inheritFrom first — a `<Controllers inheritFrom="_Base">` file pulls in the base file's
+        // controllers and merges its own on top (override by name, append new names). This lets
+        // many platforms that share a controller layout reduce to a one-line pointer at a shared
+        // base file. No controller-level inheritance is resolved yet.
+        List<ParsedController> parsed = LoadControllersRaw(path, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+
+        // Pass 2: build the final ControllerConfig list. For each controller, walk its inheritFrom
+        // chain to the root and prepend every ancestor's own mappings in order (root ancestor first,
+        // this controller's own mappings last). Inheritance is transitive — a controller that
+        // inheritsFrom another which itself inheritsFrom a third accumulates all three levels.
+        var byName = parsed.ToDictionary(pc => pc.Name);
+        foreach (ParsedController pc in parsed)
+        {
+            var controller = new ControllerConfig
+            {
+                Name = pc.Name,
+                IsDefault = pc.IsDefault,
+                AnalogToDigital = pc.AnalogToDigital,
+            };
+
+            controller.Mappings.AddRange(ResolveInheritedMappings(pc, byName, path));
+            result.Controllers.Add(controller);
+
+            _logger.Debug($"Controller '{controller.Name}': {controller.Mappings.Count} mappings (inheritFrom={pc.InheritFrom ?? "none"}), default={controller.IsDefault}, analogToDigital={controller.AnalogToDigital}");
+        }
+
+        _logger.Debug($"Platform controllers: {result.Controllers.Count}");
+        return result;
+    }
+
+    /// <summary>
+    /// Reads a Controllers file into a raw <see cref="ParsedController"/> list, resolving a
+    /// root-level <c>&lt;Controllers inheritFrom="OtherFile"&gt;</c> reference by loading that file
+    /// first and merging this file's own controllers on top. Root-level inheritance is transitive
+    /// (a base may itself inheritFrom another) with cycles detected via <paramref name="visited"/>
+    /// and a missing base logged; either case falls back to this file's own controllers.
+    /// </summary>
+    private List<ParsedController> LoadControllersRaw(string path, HashSet<string> visited)
+    {
         using Stream stream = _lfs.OpenRead(path);
         var doc = new XmlDocument();
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;
 
-        // Root-level <Mapping> entries form a shared baseline inherited by every <Controller>:
-        // buttons common to all variants (e.g. A/B/C/Start/Dpad) are declared once here, and each
-        // controller adds only the buttons unique to it.
-        var shared = new List<MappingEntry>();
-        foreach (XmlElement node in root.ChildNodes.OfType<XmlElement>())
-        {
-            if (node.Name != "Mapping") continue;
-            MappingEntry? entry = ParseMappingEntry(node, path);
-            if (entry != null) shared.Add(entry);
-        }
-
+        var own = new List<ParsedController>();
         foreach (XmlElement node in root.ChildNodes.OfType<XmlElement>())
         {
             if (node.Name != "Controller") continue;
-            ControllerConfig? controller = ParseController(node, path, shared);
-            if (controller != null) result.Controllers.Add(controller);
+            ParsedController? pc = ParseControllerRaw(node, path);
+            if (pc != null) own.Add(pc);
         }
 
-        _logger.Debug($"Platform controllers: {result.Controllers.Count}, shared mappings: {shared.Count}");
-        return result;
+        string? baseName = root.Attributes["inheritFrom"]?.Value;
+        if (string.IsNullOrEmpty(baseName)) return own;
+
+        string basePath = _lfs.Resolve("Controllers", baseName.SafeFileName() + ".xml");
+        if (!_lfs.FileExists(basePath))
+        {
+            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' resolves to '{basePath}' which does not exist; using own controllers only");
+            return own;
+        }
+        if (!visited.Add(baseName))
+        {
+            _logger.Error($"Controllers file {path}: root inheritFrom chain forms a cycle at '{baseName}'; stopping resolution");
+            return own;
+        }
+
+        List<ParsedController> baseControllers = LoadControllersRaw(basePath, visited);
+        return MergeControllers(baseControllers, own);
     }
 
-    private ControllerConfig? ParseController(XmlElement node, string path, List<MappingEntry> shared)
+    /// <summary>
+    /// Overlays <paramref name="own"/> controllers onto <paramref name="baseList"/>: a controller
+    /// whose name matches a base entry replaces it in place; a new name is appended after the base
+    /// entries. Base document order is preserved for the shared controllers.
+    /// </summary>
+    private static List<ParsedController> MergeControllers(List<ParsedController> baseList, List<ParsedController> own)
+    {
+        var merged = new List<ParsedController>(baseList);
+        foreach (ParsedController pc in own)
+        {
+            int idx = merged.FindIndex(c => string.Equals(c.Name, pc.Name, StringComparison.Ordinal));
+            if (idx >= 0) merged[idx] = pc;
+            else merged.Add(pc);
+        }
+        return merged;
+    }
+
+    /// <summary>
+    /// Resolves a controller's transitive inheritFrom chain into a single mapping list. Each level
+    /// is applied as an overlay onto the accumulated result from the root down: a child entry
+    /// whose Name matches a parent entry replaces it; names not mentioned in the child are
+    /// inherited unchanged. A missing base controller or an inheritFrom cycle is logged and stops
+    /// the walk, so resolution never loops or throws.
+    /// </summary>
+    private List<MappingEntry> ResolveInheritedMappings(
+        ParsedController pc, Dictionary<string, ParsedController> byName, string path)
+    {
+        // Walk from pc up towards the root, collecting the chain leaf-first.
+        var chain = new List<ParsedController>();
+        var visited = new HashSet<string>();
+        ParsedController? current = pc;
+        while (current != null)
+        {
+            if (!visited.Add(current.Name))
+            {
+                _logger.Error($"Controller '{pc.Name}' in {path}: inheritFrom chain forms a cycle at '{current.Name}'; stopping resolution");
+                break;
+            }
+            chain.Add(current);
+
+            if (current.InheritFrom == null) break;
+            if (!byName.TryGetValue(current.InheritFrom, out ParsedController? baseController))
+            {
+                _logger.Error($"Controller '{current.Name}' in {path}: inheritFrom='{current.InheritFrom}' names a controller that does not exist; using accumulated mappings only");
+                break;
+            }
+            current = baseController;
+        }
+
+        // chain is leaf-first; fold root-first so each level's entries override the previous.
+        List<MappingEntry> mappings = chain[^1].OwnMappings;
+        for (int i = chain.Count - 2; i >= 0; i--)
+            mappings = MappingOverlay.Apply(mappings, chain[i].OwnMappings);
+        return mappings;
+    }
+
+    private ParsedController? ParseControllerRaw(XmlElement node, string path)
     {
         string? name = node.Attributes["name"]?.Value;
         if (string.IsNullOrEmpty(name))
@@ -130,27 +236,32 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             return null;
         }
 
-        var controller = new ControllerConfig { Name = name };
+        bool isDefault = false;
         string? defaultAttr = node.Attributes["default"]?.Value;
-        if (defaultAttr != null && bool.TryParse(defaultAttr, out bool isDefault))
-            controller.IsDefault = isDefault;
+        if (defaultAttr != null && bool.TryParse(defaultAttr, out bool parsed))
+            isDefault = parsed;
 
-        if (TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d))
-            controller.AnalogToDigital = a2d;
+        TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
 
-        // Shared mappings first, then controller-specific ones — so the controller's own entries
-        // sit after the baseline it inherits.
-        controller.Mappings.AddRange(shared);
+        string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
+
+        var ownMappings = new List<MappingEntry>();
         foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
         {
             if (child.Name != "Mapping") continue;
             MappingEntry? entry = ParseMappingEntry(child, path);
-            if (entry != null) controller.Mappings.Add(entry);
+            if (entry != null) ownMappings.Add(entry);
         }
 
-        _logger.Debug($"Controller '{controller.Name}': {controller.Mappings.Count} mappings ({shared.Count} shared), default={controller.IsDefault}, analogToDigital={controller.AnalogToDigital}");
-        return controller;
+        return new ParsedController(name, isDefault, a2d, inheritFrom, ownMappings);
     }
+
+    private sealed record ParsedController(
+        string Name,
+        bool IsDefault,
+        AnalogToDigitalMode? AnalogToDigital,
+        string? InheritFrom,
+        List<MappingEntry> OwnMappings);
 
     private MappingEntry? ParseMappingEntry(XmlElement node, string path)
     {

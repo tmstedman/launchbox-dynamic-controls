@@ -2,9 +2,17 @@
     <Controllers>
         <Controller name="6-Button">
             <Retropad id="513" />
+            <Retropad id="1281" />
+            <Retropad id="1793" />
         </Controller>
         <Controller name="3-Button">
             <Retropad id="257" />
+            <Retropad id="1025" />
+            <Retropad id="1537" />
+        </Controller>
+        <Controller name="2-Button">
+            <Retropad id="769" />
+            <Retropad id="2049" />
         </Controller>
     </Controllers>
 </RetroArchCore>

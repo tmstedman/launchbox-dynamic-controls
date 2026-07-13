@@ -1,0 +1,35 @@
+<RetroArchCore>
+    <Controllers>
+        <Controller name="Pad">
+            <Retropad id="1" />
+        </Controller>
+        <Controller name="Twin Stick">
+            <Retropad id="513" />
+        </Controller>
+        <Controller name="Saturn Twin-Stick">
+            <Retropad id="769" />
+        </Controller>
+        <Controller name="Arcade Stick">
+            <Retropad id="1025" />
+        </Controller>
+        <Controller name="Maracas">
+            <Retropad id="1281" />
+        </Controller>
+        <Controller name="Fishing Controller">
+            <Retropad id="1537" />
+        </Controller>
+        <Controller name="Pop'n Music">
+            <Retropad id="1793" />
+        </Controller>
+        <Controller name="Race Controller">
+            <Retropad id="2049" />
+        </Controller>
+        <Controller name="Densha de Go!">
+            <Retropad id="2305" />
+        </Controller>
+        <!-- Full Controller = Panther DC Controller (2 analog sticks + all buttons) -->
+        <Controller name="Full Controller">
+            <Retropad id="2561" />
+        </Controller>
+    </Controllers>
+</RetroArchCore>

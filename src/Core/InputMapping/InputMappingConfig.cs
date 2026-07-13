@@ -35,11 +35,13 @@ public record InputMappingConfig
 
 /// <summary>
 /// Raw DTO for a platform's Controllers.xml — one or more &lt;Controller&gt; entries,
-/// each declaring its own button vocabulary. Root-level &lt;Mapping&gt; entries (outside any
-/// &lt;Controller&gt;) are a shared baseline the loader merges into every controller's Mappings,
-/// so buttons common to all variants are declared once. Games either select one controller
-/// explicitly via `controller="..."` or fall back to whichever controller is marked default (or,
-/// if none is marked, the first one in document order).
+/// each declaring its own button vocabulary. A controller may carry an
+/// <c>inheritFrom="OtherControllerName"</c> attribute; the loader applies the inheriting
+/// controller's own entries as an overlay onto the base: entries whose Name matches a base
+/// entry replace it, new Names are appended. Inheritance is transitive — the named base may
+/// itself inheritFrom another controller — with cycles detected and broken. Games either select
+/// one controller explicitly via <c>controller="..."</c> or fall back to whichever controller
+/// is marked default (or, if none is marked, the first one in document order).
 /// </summary>
 public record PlatformControllersConfig
 {
@@ -64,6 +66,9 @@ public record PlatformControllersConfig
 /// <summary>
 /// A single controller variant within a platform — has its own name, button vocabulary, and
 /// AnalogToDigital mode. Games either select it explicitly or inherit the platform's default.
+/// When an XML <c>inheritFrom</c> attribute is present, the loader prepends the named
+/// controller's mappings (transitively, following the base's own inheritFrom) before this
+/// controller's own entries; after loading, <c>Mappings</c> already reflects the fully-merged list.
 /// </summary>
 public record ControllerConfig
 {
@@ -79,7 +84,9 @@ public record ControllerConfig
     /// <summary>Controller-level `analogToDigital` value. Null means no mirroring.</summary>
     public AnalogToDigitalMode? AnalogToDigital { get; set; }
 
-    /// <summary>Platform-button-to-generic-input mappings for this controller.</summary>
+    /// <summary>Platform-button-to-generic-input mappings for this controller, fully resolved
+    /// after inheritFrom overlay: each Name appears at most once, with the deepest descendant's
+    /// entry winning.</summary>
     public List<MappingEntry> Mappings { get; set; } = [];
 }
 

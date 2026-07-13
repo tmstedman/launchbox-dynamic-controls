@@ -206,13 +206,14 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Load_PerGameSelectsNonDefaultController_OverlaysOnThatBaseline()
     {
+        // 6-Button uses inheritFrom="Pad" so it prepends Pad's A mapping, then adds X.
+        // The per-game override replaces A; X survives from the inherited baseline.
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Pad" default="true">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
-              <Controller name="6-Button">
-                <Mapping name="A" input="ButtonA" />
+              <Controller name="6-Button" inheritFrom="Pad">
                 <Mapping name="X" input="ButtonX" />
               </Controller>
             </Controllers>
@@ -226,12 +227,82 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
 
         mapping.Controller.ShouldBe("6-Button");
-        // 6-Button baseline's A is replaced by the per-game value; X survives unchanged. The
-        // exact-dict assertion also catches any accidental cross-controller bleed (e.g. Pad
-        // baseline leaking through).
+        // 6-Button's resolved baseline (A from Pad + X own) is overlaid by the per-game mapping.
+        // The exact-dict assertion also catches any accidental cross-controller bleed.
         mapping.ButtonToInput.ShouldBeDictionaryOf(
             ("A", ["ButtonY"]),
             ("X", ["ButtonX"]));
+    }
+
+    [Fact]
+    public void Load_PerGameSelectsTransitivelyInheritingController_AccumulatesWholeChain()
+    {
+        // 6-Button inheritFrom 3-Button inheritFrom 2-Button. Selecting 6-Button must resolve the
+        // whole chain through the real loader: I/II from 2-Button (grandparent), III from 3-Button
+        // (parent), IV from 6-Button's own. This is the discriminator against one-level inheritance,
+        // where the grandparent (2-Button) entries would be missing.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="2-Button" default="true">
+                <Mapping name="I" input="ButtonB" />
+                <Mapping name="II" input="ButtonA" />
+              </Controller>
+              <Controller name="3-Button" inheritFrom="2-Button">
+                <Mapping name="III" input="ButtonX" />
+              </Controller>
+              <Controller name="6-Button" inheritFrom="3-Button">
+                <Mapping name="IV" input="ButtonY" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "Fatal Fury", """
+            <GameMapping controller="6-Button" />
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "Fatal Fury"));
+
+        mapping.Controller.ShouldBe("6-Button");
+        mapping.ButtonToInput.ShouldBeDictionaryOf(
+            ("I", ["ButtonB"]),      // grandparent (2-Button)
+            ("II", ["ButtonA"]),     // grandparent (2-Button)
+            ("III", ["ButtonX"]),    // parent (3-Button)
+            ("IV", ["ButtonY"]));    // own (6-Button)
+    }
+
+    [Fact]
+    public void Load_PlatformInheritsSharedBaseFile_ResolvesThroughRealLoader()
+    {
+        // The platform's Controllers file is a one-line pointer at a shared base file; the base
+        // holds the actual 2/3/6-Button chain. Selecting 6-Button must resolve root-level file
+        // inheritFrom AND controller-level transitive inheritFrom (which crosses the file boundary)
+        // through the real loader, accumulating every ancestor's mappings.
+        _dc.WritePlatform("_NEC Pad", """
+            <Controllers>
+              <Controller name="2-Button" default="true">
+                <Mapping name="I" input="ButtonB" />
+                <Mapping name="II" input="ButtonA" />
+              </Controller>
+              <Controller name="3-Button" inheritFrom="2-Button">
+                <Mapping name="III" input="ButtonX" />
+              </Controller>
+              <Controller name="6-Button" inheritFrom="3-Button">
+                <Mapping name="IV" input="ButtonY" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WritePlatform(Platform, """<Controllers inheritFrom="_NEC Pad" />""");
+        _dc.WriteGameMapping(Platform, "Fatal Fury", """
+            <GameMapping controller="6-Button" />
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "Fatal Fury"));
+
+        mapping.Controller.ShouldBe("6-Button");
+        mapping.ButtonToInput.ShouldBeDictionaryOf(
+            ("I", ["ButtonB"]),
+            ("II", ["ButtonA"]),
+            ("III", ["ButtonX"]),
+            ("IV", ["ButtonY"]));
     }
 
     [Fact]

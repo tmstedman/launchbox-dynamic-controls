@@ -1,16 +1,12 @@
 <Controllers>
-    <Controller name="Pad" default="true">
+
+    <Controller name="Arcade Stick">
         <Mapping name="A" input="ButtonA" />
         <Mapping name="B" input="ButtonB" />
         <Mapping name="X" input="ButtonX" />
         <Mapping name="Y" input="ButtonY" />
         <Mapping name="L" input="AxisTriggerLeft" />
         <Mapping name="R" input="AxisTriggerRight" />
-        <Mapping name="L-Any" input="AxisLeftStick" />
-        <Mapping name="L-Up" input="AxisLeftStickUp" />
-        <Mapping name="L-Down" input="AxisLeftStickDown" />
-        <Mapping name="L-Left" input="AxisLeftStickLeft" />
-        <Mapping name="L-Right" input="AxisLeftStickRight" />
         <Mapping name="Start" input="ButtonStart" />
         <Mapping name="Dpad-Any" input="ButtonDpad" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
@@ -18,4 +14,31 @@
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
+
+    <Controller name="Pad" inheritFrom="Arcade Stick" default="true">
+        <Mapping name="L-Any" input="AxisLeftStick" />
+        <Mapping name="L-Up" input="AxisLeftStickUp" />
+        <Mapping name="L-Down" input="AxisLeftStickDown" />
+        <Mapping name="L-Left" input="AxisLeftStickLeft" />
+        <Mapping name="L-Right" input="AxisLeftStickRight" />
+    </Controller>
+
+    <!-- Full Controller = Panther DC Controller (2 analog sticks + all buttons).
+         Inherits the base button set from Arcade Stick and adds C/Z/D plus both analog sticks. -->
+    <Controller name="Full Controller" inheritFrom="Arcade Stick">
+        <Mapping name="C" input="ButtonLeftShoulder" />
+        <Mapping name="Z" input="ButtonRightShoulder" />
+        <Mapping name="D" input="ButtonBack" />
+        <Mapping name="L-Any" input="AxisLeftStick" />
+        <Mapping name="L-Up" input="AxisLeftStickUp" />
+        <Mapping name="L-Down" input="AxisLeftStickDown" />
+        <Mapping name="L-Left" input="AxisLeftStickLeft" />
+        <Mapping name="L-Right" input="AxisLeftStickRight" />
+        <Mapping name="R-Any" input="AxisRightStick" />
+        <Mapping name="R-Up" input="AxisRightStickUp" />
+        <Mapping name="R-Down" input="AxisRightStickDown" />
+        <Mapping name="R-Left" input="AxisRightStickLeft" />
+        <Mapping name="R-Right" input="AxisRightStickRight" />
+    </Controller>
+
 </Controllers>

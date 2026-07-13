@@ -72,7 +72,7 @@ All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.pr
 Fixtures/
   Defaults/
     GlobalConfig.xml
-    Controllers/{Platform}.xml            — button vocabulary + analogToDigital per controller variant; root-level <Mapping> elements are a shared baseline merged into every <Controller>
+    Controllers/{Platform}.xml            — button vocabulary + analogToDigital per controller variant; a <Controller> may carry inheritFrom="OtherController" to prepend that controller's mappings before its own. Inheritance is transitive (the base may itself inheritFrom another, e.g. NEC 6-Button → 3-Button → 2-Button) with cycles detected and broken. Only mappings are inherited — analogToDigital is read from the controller's own attribute, not the chain. The root <Controllers> element may also carry inheritFrom="RootPlatform" to pull in the family root's controllers and merge this file's own on top (override by name, append new) — descendants in a hardware family reduce to a one-line pointer at the root (e.g. Nintendo Famicom.xml → inheritFrom="Nintendo Entertainment System"; Sony Playstation 2.xml → inheritFrom="Sony Playstation"). Root inheritance is transitive and cycle-safe; a missing base file is logged and the file falls back to its own controllers
     InputMappings/{Platform}/{Rom}.xml    — per-game controller selection or button remaps
     Labels/{Platform}/_DefaultLabels.xml  — inheritable defaults (inherit="true")
     Labels/{Platform}/{Rom}.xml           — game-specific labels

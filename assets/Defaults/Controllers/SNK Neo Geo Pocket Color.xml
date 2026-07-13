@@ -1,12 +1,1 @@
-<Controllers>
-    <Controller name="Pad" default="true" analogToDigital="left">
-        <Mapping name="A" input="ButtonA" />
-        <Mapping name="B" input="ButtonB" />
-        <Mapping name="Option" input="ButtonStart" />
-        <Mapping name="Dpad-Any" input="ButtonDpad" />
-        <Mapping name="Dpad-Up" input="ButtonDpadUp" />
-        <Mapping name="Dpad-Down" input="ButtonDpadDown" />
-        <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
-        <Mapping name="Dpad-Right" input="ButtonDpadRight" />
-    </Controller>
-</Controllers>
+<Controllers inheritFrom="SNK Neo Geo Pocket" />

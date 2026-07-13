@@ -1,5 +1,5 @@
 <Controllers>
-    <Controller name="3-Button" analogToDigital="left">
+    <Controller name="3-Button" analogToDigital="left" default="true">
         <Mapping name="C" input="ButtonX" />
         <Mapping name="B" input="ButtonA" />
         <Mapping name="A" input="ButtonB" />
