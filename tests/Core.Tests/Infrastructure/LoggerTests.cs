@@ -11,7 +11,7 @@ public class LoggerTests
     private static readonly DateTime FixedTime = new(2026, 6, 18, 14, 30, 45);
 
     private Logger CreateLogger(bool debugEnabled = false) =>
-        new(_fs, RootDir, () => FixedTime) { IsDebugEnabled = debugEnabled };
+        new(_fs, LogPath, () => FixedTime) { IsDebugEnabled = debugEnabled };
 
     [Theory]
     [InlineData(false)]
@@ -137,13 +137,27 @@ public class LoggerTests
     {
         // given a logger constructed without an explicit clock
         _fs.DirectoryExists(LogDir).Returns(true);
-        var underTest = new Logger(_fs, RootDir);
+        var underTest = new Logger(_fs, LogPath);
 
         // when an info message is logged
         underTest.Info("hi");
 
         // then a line is written; we don't pin the timestamp, only that the message
         // and level are preserved at the end of the formatted line
+        _fs.Received(1).AppendAllText(LogPath, Arg.Is<string>(s => s.EndsWith("[INFO] hi\r\n")));
+    }
+
+    [Fact]
+    public void ForRoot_WritesToLogsSubdirectoryOfRoot()
+    {
+        // given a logger built from the plugin root via ForRoot
+        _fs.DirectoryExists(LogDir).Returns(true);
+        var underTest = Logger.ForRoot(_fs, RootDir);
+
+        // when a message is logged
+        underTest.Info("hi");
+
+        // then it writes to {RootDir}\Logs\debug.log
         _fs.Received(1).AppendAllText(LogPath, Arg.Is<string>(s => s.EndsWith("[INFO] hi\r\n")));
     }
 }

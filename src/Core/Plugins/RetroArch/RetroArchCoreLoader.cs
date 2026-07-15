@@ -20,9 +20,9 @@ public class RetroArchCoreLoader(ILogger logger, LayeredFileSystem lfs) : IRetro
 
     public RetroArchCoreConfig? Load(string coreDisplayName)
     {
-        string path = _lfs.Resolve("Emulators", "RetroArch", coreDisplayName + ".xml");
-        _logger.Debug($"RetroArch core config path: {path}, Exists: {_lfs.FileExists(path)}");
-        if (!_lfs.FileExists(path)) return null;
+        string? path = _lfs.Resolve("Emulators", "RetroArch", coreDisplayName + ".xml");
+        _logger.Debug($"RetroArch core config path: {path}");
+        if (path == null) return null;
 
         using Stream stream = _lfs.OpenRead(path);
         var doc = new XmlDocument();

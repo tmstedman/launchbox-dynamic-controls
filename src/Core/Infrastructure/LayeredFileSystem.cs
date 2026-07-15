@@ -2,32 +2,35 @@ namespace DynamicControls.Infrastructure;
 
 /// <summary>
 /// Wraps an <see cref="IFileSystem"/> with two-tier path resolution: a <c>User\</c> layer that
-/// shadows a <c>Defaults\</c> layer under the same root. Loaders call <see cref="Resolve"/> to
-/// get the right path without knowing which layer wins; all other I/O delegates to the underlying
-/// <see cref="IFileSystem"/> unchanged.
+/// shadows a <c>Defaults\</c> layer under the same root. <see cref="Defaults"/>/<see cref="User"/>
+/// are rooted one level into each layer, for loaders that need to check/read a specific layer
+/// directly. <see cref="Resolve"/> picks the winning layer for loaders that just want "the" file
+/// without caring which layer it came from; its root-relative result is read back via the plain
+/// <see cref="FileExists"/>/<see cref="OpenRead"/> pair (rooted at the plugin root itself).
 /// </summary>
 public sealed class LayeredFileSystem(string rootDir, IFileSystem fs)
 {
-    /// <summary>The underlying <see cref="IFileSystem"/> — for components that need a plain
-    /// filesystem reference rather than layered path resolution (e.g. template loading, loggers,
-    /// RetroArch cfg reading from the emulator directory).</summary>
-    public IFileSystem Fs { get; } = fs;
+    private readonly IFileSystem _rooted = new RootedFileSystem(rootDir, fs);
 
-    public string RootDir { get; } = rootDir;
-    public string DefaultsDir { get; } = Path.Combine(rootDir, "Defaults");
-    public string UserDir { get; } = Path.Combine(rootDir, "User");
+    /// <summary>Rooted at <c>{rootDir}\Defaults</c> — paths passed here are relative to that layer.</summary>
+    public RootedFileSystem Defaults { get; } = new(Path.Combine(rootDir, "Defaults"), fs);
+
+    /// <summary>Rooted at <c>{rootDir}\User</c> — paths passed here are relative to that layer.</summary>
+    public RootedFileSystem User { get; } = new(Path.Combine(rootDir, "User"), fs);
 
     /// <summary>
-    /// Returns the <c>User\{segments}</c> path when that file exists; otherwise returns
-    /// <c>Defaults\{segments}</c>. The returned path may not exist either — callers handle that
-    /// as they do today (check <see cref="FileExists"/> before opening).
+    /// Returns the <c>User\{segments}</c> path when that file exists; otherwise the
+    /// <c>Defaults\{segments}</c> path when that exists; otherwise null. The returned path is
+    /// root-relative — pass it to <see cref="FileExists"/>/<see cref="OpenRead"/>.
     /// </summary>
-    public string Resolve(params string[] segments)
+    public string? Resolve(params string[] segments)
     {
-        string user = Path.Combine([UserDir, .. segments]);
-        return Fs.FileExists(user) ? user : Path.Combine([DefaultsDir, .. segments]);
+        string relative = Path.Combine(segments);
+        if (User.FileExists(relative)) return Path.Combine("User", relative);
+        if (Defaults.FileExists(relative)) return Path.Combine("Defaults", relative);
+        return null;
     }
 
-    public bool FileExists(string path) => Fs.FileExists(path);
-    public Stream OpenRead(string path) => Fs.OpenRead(path);
+    public bool FileExists(string path) => _rooted.FileExists(path);
+    public Stream OpenRead(string path) => _rooted.OpenRead(path);
 }

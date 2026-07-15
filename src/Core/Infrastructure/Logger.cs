@@ -10,19 +10,22 @@ public interface ILogger
 }
 
 /// <summary>
-/// Debug logger that writes to a log file in the plugin directory.
-/// Logging is controlled by the IsDebugEnabled flag.
+/// Debug logger that writes to a log file. Logging is controlled by the IsDebugEnabled flag.
 /// </summary>
-public class Logger(IFileSystem fs, string rootDir, Func<DateTime> now) : ILogger
+public class Logger(IFileSystem fs, string logPath, Func<DateTime> now) : ILogger
 {
-    private readonly string _logPath = Path.Combine(rootDir, "Logs", "debug.log");
+    private readonly string _logPath = logPath;
     private readonly IFileSystem _fs = fs;
     private readonly Func<DateTime> _now = now;
 
     public bool IsDebugEnabled { get; set; }
 
-    public Logger(IFileSystem fs, string rootDir)
-        : this(fs, rootDir, () => DateTime.Now) { }
+    public Logger(IFileSystem fs, string logPath)
+        : this(fs, logPath, () => DateTime.Now) { }
+
+    /// <summary>Builds a logger writing to the plugin's conventional <c>{rootDir}\Logs\debug.log</c>.</summary>
+    public static Logger ForRoot(IFileSystem fs, string rootDir) =>
+        new(fs, Path.Combine(rootDir, "Logs", "debug.log"));
 
     /// <summary>
     /// Writes a message to the debug log. Only writes if Debug is true.

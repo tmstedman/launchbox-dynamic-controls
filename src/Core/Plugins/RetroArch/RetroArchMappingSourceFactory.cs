@@ -7,14 +7,15 @@ internal static class RetroArchMappingSourceFactory
 {
     public static RetroArchMappingSource Create(
         LayeredFileSystem lfs,
+        IFileSystem fs,
         ILogger logger,
         IApplicationData? applicationData = null)
     {
-        var coreInfo = new RetroArchCoreInfo(lfs.Fs, logger);
+        var coreInfo = new RetroArchCoreInfo(fs, logger);
         var coreLoader = new RetroArchCoreLoader(logger, lfs);
-        var reader = new RetroArchConfigFileReader(logger, lfs.Fs);
-        var cfgLoader = new RetroArchCfgLoader(reader, lfs.Fs, applicationData ?? new SystemApplicationData());
-        var remapLoader = new RetroArchRemapLoader(reader, lfs.Fs);
+        var reader = new RetroArchConfigFileReader(logger, fs);
+        var cfgLoader = new RetroArchCfgLoader(reader, fs, applicationData ?? new SystemApplicationData());
+        var remapLoader = new RetroArchRemapLoader(reader, fs);
         var cfgVariantResolver = new RetroArchVariantResolver(logger, "cfg");
         var remapVariantResolver = new RetroArchVariantResolver(logger, "remap");
         var cfgSwapResolver = new RetroArchCfgSwapResolver(logger);

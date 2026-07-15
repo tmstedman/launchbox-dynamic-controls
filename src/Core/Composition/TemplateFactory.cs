@@ -24,7 +24,7 @@ internal static class TemplateFactory
         ITemplateImageResolver? imageResolver = null)
     {
         fs ??= new SystemFileSystem();
-        logger ??= new Logger(fs, rootDir);
+        logger ??= Logger.ForRoot(fs, rootDir);
 
         var templateLoader = new TemplateLoader(logger, fs, rootDir);
         imageResolver ??= new TemplateImageResolver(logger, fs, new ImageHeader(), rootDir);

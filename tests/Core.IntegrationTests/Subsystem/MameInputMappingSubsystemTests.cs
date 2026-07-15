@@ -41,6 +41,7 @@ public class MameInputMappingSubsystemTests
     private InputMappingService Build(bool enableMame = true) =>
         InputMappingFactory.Create(
             _dc.Lfs,
+            _dc.Fs,
             new NullLogger(),
             config: new GlobalConfig { EnableMame = enableMame },
             sources: []);

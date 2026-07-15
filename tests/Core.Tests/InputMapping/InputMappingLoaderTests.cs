@@ -649,7 +649,7 @@ public class InputMappingLoaderTests
         // then only the platform's own controllers are used and the missing base is logged
         result.Controllers.Select(c => c.Name).ShouldBe(["Pad"]);
         result.Controllers[0].Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA")]);
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("_DoesNotExist") && s.Contains("does not exist")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("_DoesNotExist") && s.Contains("found in neither")));
     }
 
     [Fact]

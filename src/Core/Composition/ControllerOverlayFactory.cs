@@ -20,7 +20,7 @@ public static class ControllerOverlayFactory
     public static ControllerOverlayService Create(string rootDir)
     {
         var fs = new SystemFileSystem();
-        var logger = new Logger(fs, rootDir);
+        var logger = Logger.ForRoot(fs, rootDir);
         var lfs = new LayeredFileSystem(rootDir, fs);
 
         GlobalConfig config = ConfigLoader.Load(lfs, logger);
@@ -30,7 +30,7 @@ public static class ControllerOverlayFactory
         logger.ClearLog();
 
         InputLabelsService inputLabelsService = InputLabelsFactory.Create(lfs, logger, config);
-        InputMappingService inputMappingService = InputMappingFactory.Create(lfs, logger, config);
+        InputMappingService inputMappingService = InputMappingFactory.Create(lfs, fs, logger, config);
         TemplateService templateService = TemplateFactory.Create(rootDir, logger, fs);
         InputRenderingService inputRenderingService = InputRenderingFactory.Create(logger);
 

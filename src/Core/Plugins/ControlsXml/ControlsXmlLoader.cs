@@ -54,17 +54,17 @@ public class ControlsXmlLoader(ILogger logger, LayeredFileSystem lfs) : IControl
         if (_loaded) return _allLabels;
         _loaded = true;
 
-        string path = Path.Combine(_lfs.RootDir, "controls.xml");
-        _logger.Debug($"controls.xml path: {path}, Exists: {_lfs.Fs.FileExists(path)}");
+        const string path = "controls.xml";
+        _logger.Debug($"controls.xml path: {path}, Exists: {_lfs.FileExists(path)}");
 
-        if (!_lfs.Fs.FileExists(path))
+        if (!_lfs.FileExists(path))
         {
             _logger.Debug("controls.xml not found, skipping");
             return null;
         }
 
         var allLabels = new Dictionary<string, InputLabelsConfig>();
-        using Stream stream = _lfs.Fs.OpenRead(path);
+        using Stream stream = _lfs.OpenRead(path);
         var doc = new XmlDocument();
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;

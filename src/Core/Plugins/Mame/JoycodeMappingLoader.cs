@@ -24,10 +24,10 @@ public class JoycodeMappingLoader(
     {
         var map = new Dictionary<string, string>();
 
-        string path = _lfs.Resolve("Emulators", "MAME", "JoycodeMapping.xml");
-        _logger.Debug($"Joycode mapping path: {path}, Exists: {_lfs.FileExists(path)}");
+        string? path = _lfs.Resolve("Emulators", "MAME", "JoycodeMapping.xml");
+        _logger.Debug($"Joycode mapping path: {path}");
 
-        if (!_lfs.FileExists(path))
+        if (path == null)
         {
             _logger.Error("JoycodeMapping.xml not found, MAME joycode translation disabled");
             return new JoycodeMapping(map);

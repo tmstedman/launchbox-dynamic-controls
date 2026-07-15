@@ -44,20 +44,20 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     public InputMappingConfig? LoadGameMapping(GameInfo game)
     {
         string safePlatform = game.Platform.SafeFileName();
-        string gamePath = _lfs.Resolve("InputMappings", safePlatform, game.RomName + ".xml");
-        _logger.Debug($"Game input mapping path: {gamePath}, Exists: {_lfs.FileExists(gamePath)}");
+        string? gamePath = _lfs.Resolve("InputMappings", safePlatform, game.RomName + ".xml");
+        _logger.Debug($"Game input mapping path: {gamePath}");
 
-        return _lfs.FileExists(gamePath) ? ParseGameMapping(gamePath) : null;
+        return gamePath != null ? ParseGameMapping(gamePath) : null;
     }
 
     /// <inheritdoc />
     public PlatformControllersConfig? LoadPlatformMapping(string platform)
     {
         string safePlatform = platform.SafeFileName();
-        string platformPath = _lfs.Resolve("Controllers", safePlatform + ".xml");
-        _logger.Debug($"Controllers path: {platformPath}, Exists: {_lfs.FileExists(platformPath)}");
+        string? platformPath = _lfs.Resolve("Controllers", safePlatform + ".xml");
+        _logger.Debug($"Controllers path: {platformPath}");
 
-        return _lfs.FileExists(platformPath) ? ParsePlatformMapping(platformPath) : null;
+        return platformPath != null ? ParsePlatformMapping(platformPath) : null;
     }
 
     private InputMappingConfig ParseGameMapping(string path)
@@ -155,10 +155,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         string? baseName = root.Attributes["inheritFrom"]?.Value;
         if (string.IsNullOrEmpty(baseName)) return own;
 
-        string basePath = _lfs.Resolve("Controllers", baseName.SafeFileName() + ".xml");
-        if (!_lfs.FileExists(basePath))
+        string safeBaseName = baseName.SafeFileName() + ".xml";
+        string? basePath = _lfs.Resolve("Controllers", safeBaseName);
+        if (basePath == null)
         {
-            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' resolves to '{basePath}' which does not exist; using own controllers only");
+            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' names '{safeBaseName}', found in neither User\\Controllers nor Defaults\\Controllers; using own controllers only");
             return own;
         }
         if (!visited.Add(baseName))

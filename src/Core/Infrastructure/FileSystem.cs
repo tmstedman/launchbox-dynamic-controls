@@ -37,3 +37,26 @@ public sealed class SystemFileSystem : IFileSystem
     public void CreateDirectory(string path) => Directory.CreateDirectory(path);
 
 }
+
+/// <summary>
+/// Decorates an <see cref="IFileSystem"/> so callers work in paths relative to
+/// <paramref name="rootDir"/> — every path is joined onto the root before reaching
+/// <paramref name="inner"/>. Lets composition wire up the plugin root once instead of threading
+/// <c>rootDir</c> through every loader that would otherwise <c>Path.Combine</c> it in manually.
+/// </summary>
+public sealed class RootedFileSystem(string rootDir, IFileSystem inner) : IFileSystem
+{
+    /// <summary>Joins <paramref name="path"/> onto the root — for callers that need to hand an
+    /// absolute path to something outside the <see cref="IFileSystem"/> seam (e.g. an image path
+    /// rendered by the UI layer).</summary>
+    public string FullPath(string path) => Path.Combine(rootDir, path);
+
+    public bool FileExists(string path) => inner.FileExists(FullPath(path));
+    public Stream OpenRead(string path) => inner.OpenRead(FullPath(path));
+    public string ReadAllText(string path) => inner.ReadAllText(FullPath(path));
+    public void AppendAllText(string path, string contents) => inner.AppendAllText(FullPath(path), contents);
+    public void DeleteFile(string path) => inner.DeleteFile(FullPath(path));
+
+    public bool DirectoryExists(string path) => inner.DirectoryExists(FullPath(path));
+    public void CreateDirectory(string path) => inner.CreateDirectory(FullPath(path));
+}

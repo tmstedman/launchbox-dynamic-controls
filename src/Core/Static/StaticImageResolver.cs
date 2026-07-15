@@ -21,8 +21,7 @@ public interface IStaticImageResolver
 public class StaticImageResolver(ILogger logger, LayeredFileSystem lfs) : IStaticImageResolver
 {
     private readonly ILogger _logger = logger;
-    private readonly LayeredFileSystem _lfs = lfs;
-    private readonly string _staticDir = Path.Combine(lfs.UserDir, "Static");
+    private readonly RootedFileSystem _userFs = lfs.User;
 
     /// <inheritdoc />
     public string? Find(GameInfo game)
@@ -31,11 +30,12 @@ public class StaticImageResolver(ILogger logger, LayeredFileSystem lfs) : IStati
 
         string[] candidates =
         [
-            Path.Combine(_staticDir, safePlatform, game.RomName + ".png"),
-            Path.Combine(_staticDir, safePlatform, game.RomName + ".jpg")
+            Path.Combine("Static", safePlatform, game.RomName + ".png"),
+            Path.Combine("Static", safePlatform, game.RomName + ".jpg")
         ];
 
-        string? found = candidates.FirstOrDefault(_lfs.FileExists);
+        string? foundRelative = candidates.FirstOrDefault(_userFs.FileExists);
+        string? found = foundRelative != null ? _userFs.FullPath(foundRelative) : null;
         if (found != null)
             _logger.Debug($"Static image found: {found}");
         else

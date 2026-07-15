@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Xml;
 using System.Xml.Serialization;
 using DynamicControls.Config;
@@ -14,14 +13,6 @@ namespace DynamicControls.Composition;
 /// </summary>
 internal static class ConfigLoader
 {
-    /// <summary>Production entry point — creates real I/O dependencies.</summary>
-    [ExcludeFromCodeCoverage]
-    public static GlobalConfig Load(LayeredFileSystem lfs)
-    {
-        var fs = new SystemFileSystem();
-        return Load(lfs, new Logger(fs, lfs.DefaultsDir));
-    }
-
     /// <summary>
     /// Reads GlobalConfig.xml from the layered paths and returns the merged configuration.
     /// Loads Defaults\GlobalConfig.xml as the base, then overlays any settings present in
@@ -34,23 +25,21 @@ internal static class ConfigLoader
         serializer.UnknownElement += (sender, e) =>
             logger.Error($"Unknown config element: {e.Element.Name}");
 
-        string defaultsPath = Path.Combine(lfs.DefaultsDir, "GlobalConfig.xml");
-        bool defaultsExists = lfs.FileExists(defaultsPath);
-        logger.Info($"Defaults config path: {defaultsPath}, Exists: {defaultsExists}");
+        bool defaultsExists = lfs.Defaults.FileExists("GlobalConfig.xml");
+        logger.Info($"Defaults config exists: {defaultsExists}");
 
         GlobalConfig baseConfig = defaultsExists
-            ? (GlobalConfig)serializer.Deserialize(lfs.OpenRead(defaultsPath))!
+            ? (GlobalConfig)serializer.Deserialize(lfs.Defaults.OpenRead("GlobalConfig.xml"))!
             : new GlobalConfig();
 
-        string userPath = Path.Combine(lfs.UserDir, "GlobalConfig.xml");
-        bool userExists = lfs.FileExists(userPath);
-        logger.Info($"User config path: {userPath}, Exists: {userExists}");
+        bool userExists = lfs.User.FileExists("GlobalConfig.xml");
+        logger.Info($"User config exists: {userExists}");
         if (!userExists) return baseConfig;
 
         // Collect which elements the user file actually contains — absent elements must not
         // override the base (XmlSerializer fills absent bools with false, not the default value).
         var userDoc = new XmlDocument();
-        using (Stream docStream = lfs.OpenRead(userPath))
+        using (Stream docStream = lfs.User.OpenRead("GlobalConfig.xml"))
             userDoc.Load(docStream);
 
         var present = userDoc.DocumentElement!.ChildNodes
@@ -59,7 +48,7 @@ internal static class ConfigLoader
             .ToHashSet();
 
         GlobalConfig userConfig;
-        using (Stream cfgStream = lfs.OpenRead(userPath))
+        using (Stream cfgStream = lfs.User.OpenRead("GlobalConfig.xml"))
             userConfig = (GlobalConfig)serializer.Deserialize(cfgStream)!;
 
         if (present.Contains(nameof(GlobalConfig.DefaultTemplate)))

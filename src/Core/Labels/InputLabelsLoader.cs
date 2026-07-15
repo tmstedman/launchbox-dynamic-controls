@@ -69,19 +69,22 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
             return cached;
 
         string safePlatform = platform.SafeFileName();
-        string defaultsPath = Path.Combine(_lfs.DefaultsDir, "Labels", safePlatform + ".xml");
-        string userPath = Path.Combine(_lfs.UserDir, "Labels", safePlatform + ".xml");
+        string relativePath = Path.Combine("Labels", safePlatform + ".xml");
 
-        bool defaultsExists = _lfs.FileExists(defaultsPath);
-        bool userExists = _lfs.FileExists(userPath);
-        _logger.Debug($"Platform labels — defaults: {defaultsPath} ({(defaultsExists ? "found" : "missing")}), user: {userPath} ({(userExists ? "found" : "missing")})");
+        bool defaultsExists = _lfs.Defaults.FileExists(relativePath);
+        bool userExists = _lfs.User.FileExists(relativePath);
+        _logger.Debug($"Platform labels '{relativePath}' — defaults: {(defaultsExists ? "found" : "missing")}, user: {(userExists ? "found" : "missing")}");
 
         PlatformLabels? result = null;
         if (defaultsExists || userExists)
         {
             var sw = System.Diagnostics.Stopwatch.StartNew();
-            PlatformFile? defaultsFile = defaultsExists ? ParseFile(defaultsPath) : null;
-            PlatformFile? userFile = userExists ? ParseFile(userPath) : null;
+            PlatformFile? defaultsFile = defaultsExists
+                ? ParseFile(_lfs.Defaults.OpenRead(relativePath), Path.Combine("Defaults", relativePath))
+                : null;
+            PlatformFile? userFile = userExists
+                ? ParseFile(_lfs.User.OpenRead(relativePath), Path.Combine("User", relativePath))
+                : null;
             result = Merge(defaultsFile, userFile);
             _logger.Debug($"Platform labels '{platform}' loaded in {sw.ElapsedMilliseconds}ms");
         }
@@ -90,10 +93,10 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         return result;
     }
 
-    private PlatformFile ParseFile(string path)
+    private PlatformFile ParseFile(Stream openedStream, string path)
     {
+        using Stream stream = openedStream;
         var file = new PlatformFile();
-        using Stream stream = _lfs.OpenRead(path);
         var doc = new XmlDocument();
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;

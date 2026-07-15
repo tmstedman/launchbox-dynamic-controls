@@ -43,7 +43,7 @@ public class RetroArchSubsystemTests
     /// non-portable cascade resolve into <see cref="MockFileSystem"/> instead of the host's
     /// actual APPDATA.</summary>
     private RetroArchMappingSource Build() =>
-        RetroArchMappingSourceFactory.Create(_dc.Lfs, _logger, _appData);
+        RetroArchMappingSourceFactory.Create(_dc.Lfs, _dc.Fs, _logger, _appData);
 
     // ---- staging helpers ----
 

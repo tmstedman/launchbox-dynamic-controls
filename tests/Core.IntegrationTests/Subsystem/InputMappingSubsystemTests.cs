@@ -37,6 +37,7 @@ public class InputMappingSubsystemTests
         IInputMappingTransform? transform = null) =>
         InputMappingFactory.Create(
             _dc.Lfs,
+            _dc.Fs,
             new NullLogger(),
             sources: source == null ? [] : [source],
             transforms: transform == null ? [] : [transform]);

@@ -26,6 +26,7 @@ internal static class InputMappingFactory
     /// </summary>
     public static InputMappingService Create(
         LayeredFileSystem lfs,
+        IFileSystem fs,
         ILogger logger,
         GlobalConfig? config = null,
         IReadOnlyList<IInputMappingSource>? sources = null,
@@ -36,7 +37,7 @@ internal static class InputMappingFactory
         var loader = new InputMappingLoader(logger, lfs);
         var resolver = new InputMappingResolver(logger);
 
-        sources ??= [RetroArchMappingSourceFactory.Create(lfs, logger)];
+        sources ??= [RetroArchMappingSourceFactory.Create(lfs, fs, logger)];
 
         IInputMappingSource[] assembledSources =
         [
@@ -48,7 +49,7 @@ internal static class InputMappingFactory
         if (transforms == null)
         {
             var joycodes = new JoycodeMappingLoader(logger, lfs);
-            var mameCfgLoader = new MameCfgLoader(logger, lfs.Fs, joycodes);
+            var mameCfgLoader = new MameCfgLoader(logger, fs, joycodes);
             transforms = [new MameInputMappingSource(logger, mameCfgLoader)];
         }
 
