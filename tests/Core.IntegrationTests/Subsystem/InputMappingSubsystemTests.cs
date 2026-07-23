@@ -307,6 +307,35 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
+    public void Load_PlatformAddsNewDefaultControllerOverBaseFile_OverridesInheritedDefault()
+    {
+        // The platform's own Controllers file inherits a shared base whose "Pad" is the default,
+        // but also declares its own new controller also marked default (e.g. a CD add-on platform
+        // introducing a controller the base platform never had). No per-game mapping selects a
+        // controller explicitly, so PlatformDefaultMappingSource falls back to whichever controller
+        // resolves as the platform default — this must be the platform file's own, not the base's.
+        _dc.WritePlatform("_SharedBase", """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Mapping name="A" input="ButtonA" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WritePlatform(Platform, """
+            <Controllers inheritFrom="_SharedBase">
+              <Controller name="CD-Pad" default="true">
+                <Mapping name="A" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game());
+
+        mapping.Controller.ShouldBe("CD-Pad");
+        mapping.ButtonToInput.ShouldBeDictionaryOf(("A", ["ButtonB"]));
+    }
+
+    [Fact]
     public void Load_PerGameSelectsUnknownController_FallsBackToPlatformDefault()
     {
         _dc.WritePlatform(Platform, """

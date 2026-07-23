@@ -152,6 +152,10 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             if (pc != null) own.Add(pc);
         }
 
+        var ownDefaults = own.Where(c => c.IsDefault).Select(c => c.Name).ToList();
+        if (ownDefaults.Count > 1)
+            _logger.Error($"Controllers file {path}: multiple controllers marked default ({string.Join(", ", ownDefaults)}); one will be picked arbitrarily by document order");
+
         string? baseName = root.Attributes["inheritFrom"]?.Value;
         if (string.IsNullOrEmpty(baseName)) return own;
 
@@ -169,17 +173,33 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         }
 
         List<ParsedController> baseControllers = LoadControllersRaw(basePath, visited);
-        return MergeControllers(baseControllers, own);
+        return MergeControllers(baseControllers, own, path);
     }
 
     /// <summary>
     /// Overlays <paramref name="own"/> controllers onto <paramref name="baseList"/>: a controller
     /// whose name matches a base entry replaces it in place; a new name is appended after the base
-    /// entries. Base document order is preserved for the shared controllers.
+    /// entries. Base document order is preserved for the shared controllers. If <paramref name="own"/>
+    /// declares its own default, it overrides the base's default (even for an appended, newly-named
+    /// controller) — otherwise <see cref="PlatformControllersConfig.Resolve"/> would always pick the
+    /// base's default first, since appended entries land after it regardless of intent.
     /// </summary>
-    private static List<ParsedController> MergeControllers(List<ParsedController> baseList, List<ParsedController> own)
+    private List<ParsedController> MergeControllers(List<ParsedController> baseList, List<ParsedController> own, string path)
     {
         var merged = new List<ParsedController>(baseList);
+
+        if (own.Any(c => c.IsDefault))
+        {
+            var demoted = merged.Where(c => c.IsDefault).Select(c => c.Name).ToList();
+            if (demoted.Count > 0)
+            {
+                string newDefault = own.First(c => c.IsDefault).Name;
+                _logger.Debug($"Controllers file {path}: '{newDefault}' overrides '{string.Join(", ", demoted)}' as the platform default");
+            }
+            for (int i = 0; i < merged.Count; i++)
+                if (merged[i].IsDefault) merged[i] = merged[i] with { IsDefault = false };
+        }
+
         foreach (ParsedController pc in own)
         {
             int idx = merged.FindIndex(c => string.Equals(c.Name, pc.Name, StringComparison.Ordinal));

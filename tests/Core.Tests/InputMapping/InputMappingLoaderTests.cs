@@ -574,6 +574,122 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_RootInheritFrom_NewControllerMarkedDefault_OverridesBaseDefault()
+    {
+        // given a base with a default "Pad", and a platform that adds a new, unrelated controller
+        // also marked default (e.g. a CD add-on introducing a controller the base platform lacks)
+        string platformPath = Path.Combine(DefaultsDir, "Controllers", "NEC PC Engine-CD.xml");
+        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        StubXml(basePath, """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(platformPath, """
+            <Controllers inheritFrom="_SharedBase">
+              <Controller name='CD-Pad' default='true'>
+                <Mapping name='A' input='ButtonB' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("NEC PC Engine-CD")!;
+
+        // then the new controller's default wins — Pad's is cleared, not left as a second default
+        result.Controllers.Select(c => (c.Name, c.IsDefault)).ShouldBe(
+        [
+            ("Pad", false),
+            ("CD-Pad", true),
+        ]);
+        result.Resolve(null)!.Name.ShouldBe("CD-Pad");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_RootInheritFrom_NewControllerMarkedDefault_LogsOverride()
+    {
+        // given the same override scenario as above
+        string platformPath = Path.Combine(DefaultsDir, "Controllers", "NEC PC Engine-CD.xml");
+        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        StubXml(basePath, """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(platformPath, """
+            <Controllers inheritFrom="_SharedBase">
+              <Controller name='CD-Pad' default='true'>
+                <Mapping name='A' input='ButtonB' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        _underTest.LoadPlatformMapping("NEC PC Engine-CD");
+
+        // then the override is visible in the debug log
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("CD-Pad") && s.Contains("overrides") && s.Contains("Pad")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_MultipleControllersMarkedDefaultInSameFile_LogsError()
+    {
+        // given a single file (no inheritance) with two controllers both marked default
+        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        StubXml(path, """
+            <Controllers>
+              <Controller name='3-Button' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+              <Controller name='6-Button' default='true'>
+                <Mapping name='A' input='ButtonB' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the mistake is logged, and resolution still falls back deterministically to the
+        // first-in-document-order default rather than throwing or picking randomly
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("3-Button") && s.Contains("6-Button") && s.Contains("multiple controllers marked default")));
+        result.Resolve(null)!.Name.ShouldBe("3-Button");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_RootInheritFrom_OwnHasNoDefault_BaseDefaultIsUnaffected()
+    {
+        // given a base with a default "Pad", and a platform that adds a new controller with no
+        // default attribute at all
+        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        StubXml(basePath, """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(platformPath, """
+            <Controllers inheritFrom="_SharedBase">
+              <Controller name='Special'>
+                <Mapping name='S' input='ButtonS' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the base's default is untouched — the fix only intervenes when own declares a default
+        result.Resolve(null)!.Name.ShouldBe("Pad");
+    }
+
+    [Fact]
     public void LoadPlatformMapping_RootInheritFrom_ControllerLevelInheritanceCrossesFileBoundary()
     {
         // given a base that defines 3-Button and a platform that adds 6-Button inheritFrom="3-Button".
