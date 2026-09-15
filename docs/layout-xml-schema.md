@@ -2,7 +2,7 @@
 
 Reference for the `Layout.xml` file that drives each controller template. Every template lives under `Templates/{templateName}/` and contains:
 
-- A `BaseImage.png` (or `.jpg`) — the chassis artwork
+- A `BaseImage.png` — the chassis artwork (PNG only; a `.jpg` is not probed)
 - One `Layout.xml` (this document's schema) — slot definitions
 - Per-input images (`ButtonA.png`, `LineL.png`, etc.)
 
@@ -63,18 +63,28 @@ Explicit attributes always win. Use named styles to share visual treatment acros
 
 ### Image resolution
 
-When the renderer needs the actual file for a `<Render>` or `<Overlay>`, it walks a four-tier path chain (highest priority first):
+When the renderer needs the actual file for a `<Render>` or `<Overlay>`, it resolves the filename to a **pair** of candidates rather than to a single winner:
 
 ```
-Templates/{template}/{platform}/{controller}/{file}    ← controller-specific
-Templates/{template}/{platform}/{file}                 ← platform-specific
-Templates/{template}/{file}                            ← template-local
-Templates/{file}                                       ← shared root
+styled:   Templates/{template}/{platform}/{controller}/{file}   ← controller-specific
+          Templates/{template}/{platform}/{file}                ← platform-specific
+          (or none, if neither exists)
+
+generic:  Templates/{template}/{file}                           ← template-local
+          Templates/{file}                                      ← shared root
 ```
 
 The file name comes from `<Render useImage>` if specified, else the Input's `name` (with `.png` appended). For `<Overlay>`, it's always the `src` attribute verbatim.
 
-This lets templates supply platform-aware artwork (e.g. PlayStation symbols for `Sega Genesis` controllers driving a PlayStation chassis) without forking the template.
+Which of the two is drawn depends on the input's mapping state, so styled art doesn't appear on buttons the current controller doesn't have:
+
+| Input state | Image drawn |
+|---|---|
+| A platform button drives it, as that button's natural target | `{platformButton}.png` from the styled tiers, else the generic |
+| A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic |
+| No platform button drives it | The generic — **unless** the render sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
+
+This lets templates supply platform-aware artwork (e.g. Genesis `A`/`B`/`C` art on an Xbox chassis) without forking the template, and without a platform's art leaking onto buttons that platform doesn't have.
 
 ## Element reference
 

@@ -26,6 +26,7 @@ When rendering a button the plugin picks the most-specific image that exists on 
 1. `{Platform}/{ControllerVariant}/{PlatformButton}.png` — controller variant art (only when a controller variant is active)
 2. `{Platform}/{PlatformButton}.png` — platform art
 3. `{TemplateName}/{GenericInput}.png` — generic template fallback
+4. `Templates/{GenericInput}.png` — shared fallback, one level above the template folder; lets several templates share a common image set
 
 **Example:** Rendering the Sega Genesis B button, which the Controllers file maps to the `ButtonA` generic slot:
 
@@ -33,7 +34,9 @@ When rendering a button the plugin picks the most-specific image that exists on 
 - Without a controller variant (or if the controller variant folder has no file): `Sega Genesis/B.png`
 - If neither exists: `ButtonA.png`
 
-Image files must be `.png`. All paths above are relative to the template folder.
+One exception to "most-specific wins": when the current platform has *no* button mapped to that generic input, the generic image is used even if platform art exists — showing a Genesis `C` button on a controller slot the game can't reach would mislead. A `<Render useImage="…">` is exempt, because it is explicitly borrowing another input's artwork.
+
+Image files must be `.png`. Paths 1–3 are relative to the template folder; path 4 is relative to `Templates\`.
 
 ## Generic input names
 

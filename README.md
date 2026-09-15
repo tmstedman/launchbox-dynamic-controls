@@ -16,7 +16,7 @@ A controller button overlay plugin for LaunchBox and Big Box. Instead of a stati
 
 ## Requirements
 
-- **LaunchBox / Big Box 13.3 or newer** on **Windows**, with the pause-screen feature enabled.
+- **LaunchBox / Big Box 13.3 or newer** on **Windows**, with the pause-screen feature enabled. 13.3 is the release where LaunchBox moved to .NET 6, which the plugin targets - it cannot load on anything older.
 
 ## Installation
 
@@ -25,7 +25,7 @@ A controller button overlay plugin for LaunchBox and Big Box. Instead of a stati
 3. In LaunchBox / Big Box's **pause-screen settings**, set the pause theme to **Dynamic Controls**.
 4. Restart LaunchBox / Big Box.
 
-> **Updating?** Re-extract over your existing install. Your customizations live under `Data\Dynamic Controls\User\`, which no release zip ever touches - only the shipped `Defaults\` and `Templates\` folders are overwritten.
+> **Updating?** Re-extract over your existing install. Your customizations live under `Data\Dynamic Controls\User\`, and no release zip contains a single file you authored - only the shipped `Defaults\` and `Templates\` folders are overwritten. (The zips do refresh the `README.txt` guides inside the `User\` subfolders, so don't keep notes of your own in those files.)
 
 Individual component zips (plugin, assets, pause theme) are also on the Releases page if you need to update one piece at a time.
 
@@ -33,10 +33,15 @@ Individual component zips (plugin, assets, pause theme) are also on the Releases
 
 All data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two layers:
 
-- **`Defaults\`** - shipped files, overwritten on every update. Don't edit these.
+- **`Defaults\`** - shipped files, replaced wholesale on every update.
 - **`User\`** - your files, never touched by updates.
 
-To override any shipped file, place a copy at the same relative path under `User\` - it takes precedence automatically. The one exception is `GlobalConfig.xml`: rather than copying the whole file, you only need to include the settings you want to change, and the rest keep their defaults.
+**Editing `Defaults\` is encouraged, with one proviso: contribute the change back.** If a button is mapped to the wrong slot, a platform is missing, or a game has no labels, fix it in `Defaults\` - the file you test is then byte-identical to the file you submit. Then [open a pull request](#contributing) with it. Once merged it ships in the next release, so the update that would have overwritten your edit now *delivers* it - to you and to everyone else - and you stop having to maintain it. An edit that only ever lives on your machine is one you lose on the next update. (If you do test from `User\`, delete that copy once your fix ships - otherwise it keeps shadowing the shipped file and later corrections never reach you.)
+
+**Keep changes that are specific to your own setup in `User\`** - your emulator's button assignments, a personal label preference, a per-game remap nobody else wants. Place a copy of the shipped file at the same relative path under `User\` and it takes precedence automatically, permanently. Neither layer is quicker to work in - the only question is whether the change would help anyone but you. Two files are merged rather than replaced, because each one holds many independent settings:
+
+- **`GlobalConfig.xml`** - rather than copying the whole file, include only the settings you want to change; the rest keep their defaults.
+- **`Labels\{Platform}.xml`** - your entries are merged over the shipped ones game by game, so labelling one game doesn't cost you the shipped labels for every other game on that platform.
 
 ### `GlobalConfig.xml`
 
@@ -85,8 +90,11 @@ Some games remap buttons or use a different controller variant. The plugin resol
 <!-- User\InputMappings\Sega Genesis\Aladdin (USA).xml -->
 <GameMapping controller="3-Button">
     <Mapping name="A" input="ButtonRightShoulder" />
+    <Unmap name="C" />
 </GameMapping>
 ```
+
+`<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button.
 
 2. **RetroArch** (`EnableRetroArch=true`) - reads your RetroArch `.cfg` and remap files automatically to detect the active controller type and any per-game button swaps.
 3. **MAME** (`EnableMame=true`) - reads your MAME `.cfg` files to pick up per-game JOYCODE button assignments.
@@ -109,7 +117,7 @@ Labels tell the plugin what each button does in a specific game. All labels for 
 </Labels>
 ```
 
-The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID. Button names are the names printed on the original hardware (the same names used in Controllers and InputMappings).
+The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. Button names are the names printed on the original hardware (the same names used in Controllers and InputMappings).
 
 ### MAME controls.xml support
 
@@ -132,7 +140,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 - **DirectInput users in RetroArch do not get button swap detection.** XInput controllers get full game-level swap detection; DirectInput controllers get controller variant and remap file support but no swap detection through cfg files.
 - **DirectInput users in MAME do get button swap detection.** However, it is not reliable since DirectInput devices do not adhere to a standard layout.
 - **RetroArch button swap detection covers game-level remaps only.** Swaps configured in global, core, or core-remap files are not applied — only game-level remap files are checked. If you configure button swaps at those levels the overlay may not reflect them.
-- **RetroArch controller variant detection requires a core definition file.** The plugin can only detect the active controller variant for RetroArch cores that have a shipped `Emulators/RetroArch/{CoreDisplayName}.xml`. Currently only Genesis Plus GX ships, so controller variant detection is a no-op for all other cores unless you add one.
+- **RetroArch controller variant detection requires a core definition file.** The plugin can only detect the active controller variant for RetroArch cores that have a shipped `Emulators/RetroArch/{CoreDisplayName}.xml`. Six ship today - Genesis Plus GX, Beetle PSX, Beetle Saturn, Flycast, PCSX-ReARMed and Atari800 - so controller variant detection is a no-op for any other core unless you add one.
 
 ## Contributing
 
@@ -141,7 +149,7 @@ The data files that ship with the plugin - button mappings, labels, templates, a
 - **Game labels** (`Defaults\Labels\{Platform}.xml`) - what each button does in specific games, keyed by platform button name. Add a `<Game>` entry for any game that doesn't have one. Include the LaunchBox Games Database ID as the `launchBoxId` attribute so the entry is found regardless of ROM filename.
 - **Default input mappings** (`Defaults\Controllers\{Platform}.xml`) - how platform buttons map to generic controller slots. Covers ~50 platforms; corrections and new platforms welcome. When adding a new platform, follow the conventions used in the existing files.
 - **Platform button images** - PNGs under `Templates\Xbox Series X\{Platform}\`. Styled images for any platform not yet covered in the template, or additional controller variants for existing ones. Images must be styled consistently with the existing platform images.
-- **RetroArch device-type IDs** (`Defaults\Emulators\RetroArch\{CoreDisplayName}.xml`) - maps RetroArch's `input_libretro_device` IDs to controller variant names, so the plugin can detect which variant is active. Only one core ships today; every additional core helps.
+- **RetroArch device-type IDs** (`Defaults\Emulators\RetroArch\{CoreDisplayName}.xml`) - maps RetroArch's `input_libretro_device` IDs to controller variant names, so the plugin can detect which variant is active. Six cores ship today; every additional core helps.
 
 Open a pull request or issue at [github.com/tmstedman/launchbox-dynamic-controls](https://github.com/tmstedman/launchbox-dynamic-controls).
 

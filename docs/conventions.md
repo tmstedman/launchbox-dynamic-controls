@@ -12,11 +12,11 @@ Types that exist as XML deserialisation targets. They mirror the on-disk schema 
 
 - Mutable: `public T Property { get; set; }`
 - Collection fields use mutable `List<T>` / `Dictionary<K, V>` with default empty initialisers
-- Naming suffix: `Config` or `Node` (e.g. `TemplateLayoutConfig`, `InputNode`, `LabelEntry`)
+- Naming suffix: `Config` or `Node` (e.g. `LayoutConfig`, `InputNode`, `LabelEntry`)
 - One-call-site loaders own them — they're populated and never mutated again
 - Default values use field initialisers (e.g. `= new()`) because deserialisers need a target to populate
 
-Examples: `TemplateLayoutConfig`, `InputLabelsConfig`, `InputMappingConfig`, every `*Node` type in `Templates/TemplateLayoutConfig.cs`.
+Examples: `LayoutConfig`, `InputLabelsConfig`, `InputMappingConfig`, every `*Node` type in `Templates/LayoutConfig.cs`.
 
 These look "dated" by modern .NET standards. That's intentional — the deserialiser needs setters and no-arg constructors. Don't fight this layer.
 
@@ -31,7 +31,7 @@ The in-memory model the rest of the codebase reads from. Always built once, by a
 - Use `with` expressions to derive modified copies, never property setters
 - Derived/index fields (lookups computed from other fields) live as separate dictionary fields on the same record, populated by the builder — don't expose them as methods on the record itself
 
-Examples: `Template`, `ResolvedLayout`, `ResolvedLabels`, the `LayoutElement` hierarchy (`InputDefinition`, `InputGroup`, `OneOf`).
+Examples: `Template`, `ResolvedLayout`, `ResolvedLabels`, the `ILayoutElement` hierarchy (`InputDefinition`, `InputGroup`, `OneOf`).
 
 ```csharp
 // Good: positional record, read-only collections
@@ -59,7 +59,7 @@ The functions that turn raw configs into resolved domain types.
 - Compute derived indexes during the build, not on-demand after
 - Inject collaborator builders via DI rather than calling static helpers — keeps tests targetable
 
-Example: `TemplateConfigurer.Configure` builds a `List<LayoutElement>` locally, computes the descendants index via an injected `IInputDescendantsBuilder`, and returns one `ResolvedLayout` with everything settled.
+Example: `LayoutResolver.Resolve` builds a `List<ILayoutElement>` locally, computes the descendants index via an injected `IInputDescendantsBuilder`, and returns one `ResolvedLayout` with everything settled.
 
 > **Rule**: builders work locally with mutable collections, hand back one immutable result. No "rebuild" / "sync" pattern.
 

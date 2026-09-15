@@ -19,6 +19,12 @@
       Opt into C# 12 syntax (collection expressions, raw strings, primary constructors, list
       patterns, etc.) while leaving TargetFramework alone. The compiler refuses any feature that
       needs a newer BCL — distributed net6.0 DLLs stay loadable on .NET 6.
+
+      Leaving TargetFramework alone is the point. LaunchBox moved to .NET 6 in 13.3, so net6.0 is
+      the compatibility floor for the oldest LaunchBox this plugin supports; raising it raises that
+      minimum and silently breaks installs on older releases. Treat a bump as a user-facing
+      decision that also changes the stated requirement in README.md — not a build detail. Note
+      TargetFramework is set per-project in each csproj, so nothing here would catch it.
     -->
     <LangVersion>12.0</LangVersion>
   </PropertyGroup>

@@ -27,7 +27,8 @@ src/
     Templates/                   # the visible controller image + layout
     Rendering/                   # the final pass - calculates positions + image paths + opacity, per-input/label
     Plugins/
-      Mame/                      # MAME-specific data sources
+      ControlsXml/               # BYOAC controls.xml label source (gated on the launched emulator)
+      Mame/                      # MAME-specific data sources (cfg JOYCODE remaps)
       RetroArch/                 # RetroArch-specific data sources
     Static/                      # per-game static image override under User/Static/ (the cheapest path)
     Infrastructure/              # shared infrastructure utilities e.g. IFileSystem, ILogger, etc.
@@ -79,8 +80,10 @@ Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` (a `*Resolver`
 The resolution chain (highest priority wins):
 
 1. **Per-game XML** mappings under `InputMappings/{platform}/`
-2. **Emulator-specific** — MAME `controls.xml`, RetroArch core config + per-content overrides
+2. **Emulator-specific** — RetroArch core config + per-content overrides
 3. **Platform default** — the controller selected from `Controllers/{platform}.xml`
+
+On top of whichever source wins, an ordered list of `IInputMappingTransform`s runs. MAME is the only one today: it overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
 
 (All paths resolve through the `Defaults/`+`User/` layering — see [Config layering](#config-layering).)
 
@@ -96,11 +99,12 @@ Namespace: `src/Core/InputMapping/`. Entry point: `InputMappingService`. Emulato
 
 Each `IInputLabelsLoader` is tried in order. The first one with non-empty data for this ROM wins:
 
-1. **Per-game label XML** under `Labels/{platform}/{rom}.xml`
+1. **Per-game entry** in `Labels/{platform}.xml` — one file per platform holding a `<Game>` element per title. Looked up by `launchBoxId`, then by case-insensitive `romName`, then by a normalised `romName` — `RomNameUtils.NormalizeRomName` strips `(...)` and `[...]` groups from both sides, so region and revision tags don't cost a match
 2. **MAME controls.xml** (only if the emulator is MAME) — has labels for thousands of arcade games
-3. **Platform default** under `Labels/{platform}/_DefaultLabels.xml` — pause/start labels common to the platform
 
-Entries marked `inherit="true"` in the defaults file get merged into per-game labels (so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels). Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
+If no loader has game labels, the `<Defaults>` block of `Labels/{platform}.xml` is used on its own — the pause/start labels common to the platform.
+
+Every entry in that `<Defaults>` block is inheritable. When a game *does* have its own labels, defaults are merged in for any platform button the game didn't name, so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels. Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
 
 The `IsGameSpecific` flag tells the renderer "the game contributed at least one of its own label entries." This flips the meaning of `showIf="auto"` on a template — see below.
 
@@ -116,7 +120,7 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, collapsing-Stack metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
 
-3. **`TemplateImageResolver`** finds the base image (`BaseImage.png`) and provides the per-input image-path resolution chain (`Templates/{template}/{platform}/{controller}/{file}` → `Templates/{template}/{platform}/{file}` → `Templates/{template}/{file}` → `Templates/{file}`).
+3. **`TemplateImageResolver`** finds the base image (`BaseImage.png`) and resolves each image filename to a *pair* of candidates: a **styled** path (`Templates/{template}/{platform}/{controller}/{file}`, else `Templates/{template}/{platform}/{file}`, else none) and a **generic** path (`Templates/{template}/{file}`, else the shared `Templates/{file}`). It doesn't pick between them — that is a render-time decision taken from the input's mapping state, see [Rendering](#5-rendering).
 
 The result, a `Template`, holds the resolved layout, the image source, and the base image dimensions. Cached because templates rarely change and re-parsing them on every game launch would be wasteful.
 
@@ -137,9 +141,15 @@ The internal flow is two passes:
 
 `showIf` modes: `label` (show when this input has a label), `mapping` (show when a platform button drives it), `auto` (label-mode if the game contributed its own labels, else mapping-mode), or omitted (always).
 
-Then the filter computes per-input Y-offset adjustments for collapsing Stacks: members whose images are all zero-opacity vacate their slot, shifting subsequent members up by the stack's gap. The collapse-info dictionary (built by the configurer) keys this lookup by reference identity, deduplicating per-stack.
+Then the filter computes per-input Y-offset adjustments for collapsing Stacks: members whose images are all zero-opacity vacate their slot, shifting subsequent members up by the stack's gap. The collapse-info dictionary (built by `CollapseGroupBuilder`) keys this lookup by reference identity, deduplicating per-stack.
 
 **Image and label rendering** (`InputImageRenderer`, `InputLabelRenderer`) then walks the filtered layout per input, resolves image paths through the mapping-aware `InputImageResolver`, and emits the final `RenderedImage` / `RenderedLabel` records carrying positions, sources, opacity, and the input name. The `InputName` metadata lets end-to-end tests assert that the right label landed on the right input slot.
+
+`InputImageResolver` is where the styled/generic pair from step 4 gets decided, by classifying the input against the mapping:
+
+- **Unmapped** — no platform button drives this input. An identity render falls back to the generic image (platform-styled art for a button the controller doesn't have would mislead); a `useImage` render still honours the styled variant, because it's borrowing another input's asset rather than claiming one of its own.
+- **MappedDefault** — a platform button drives the input and it's that button's natural target. The platform button's own file wins (`B.png` before `ButtonA.png`), falling back to the generic.
+- **Remapped** — a platform button drives the input, but that button naturally targets something else. The image follows the *physical* button, so the player sees what they're actually pressing.
 
 Namespace: `src/Core/Rendering/`. Entry point: `InputRenderingService`. The render pass only ever sees resolved types — it doesn't know about platforms or emulators (see [Renderer doesn't know about platforms or emulators](#renderer-doesnt-know-about-platforms-or-emulators)).
 
@@ -153,12 +163,17 @@ Namespace: `src/Core/Rendering/`. Entry point: `InputRenderingService`. The rend
 
 - `IInputLabelsLoader` — given `GameInfo`, returns labels for the ROM or null if it doesn't recognise it
 - `IInputMappingSource` — given `GameInfo`, returns a partial mapping or null
+- `IInputMappingTransform` — given the mapping a source already produced, returns an amended copy; this is how MAME's JOYCODE overrides apply without displacing the platform mapping underneath them
 
-The owning service tries contributors in priority order until one returns data. Adding a new emulator is a folder under `Plugins/`, an implementation of the relevant interface, and a registration line in the corresponding factory — no service code changes.
+The owning service tries contributors in priority order until one returns data. Every contributor also answers `IsEnabled(GlobalConfig)`, so a user can switch a whole emulator integration off (`EnableMame`, `EnableRetroArch`) without the service knowing what a config flag is. Adding a new emulator is a folder under `Plugins/`, an implementation of the relevant interface, and a registration line in the corresponding factory — no service code changes.
+
+### `Plugins/ControlsXml/`
+
+Reads the BYOAC `controls.xml` database to supply labels for thousands of arcade ROMs. It sits in its own folder rather than under `Mame/` because the database is emulator-agnostic data; the source gates *itself* on the launched emulator being MAME, and is not tied to the `EnableMame` flag.
 
 ### `Plugins/Mame/`
 
-Reads MAME's `controls.xml` to supply labels for thousands of arcade ROMs, and the per-game MAME `cfg/` files to detect remaps. Only active when the configured emulator is MAME.
+Reads the per-game MAME `cfg/` files to detect JOYCODE remaps, contributed as an `IInputMappingTransform`. Only active when the configured emulator is MAME and `EnableMame` is set.
 
 ### `Plugins/RetroArch/`
 
@@ -180,7 +195,7 @@ Plugin-wide configuration (`GlobalConfig`) deserialised from `GlobalConfig.xml` 
 
 ### `Infrastructure/`
 
-Cross-cutting utilities: `IFileSystem` (testable filesystem abstraction), `LayeredFileSystem` (the `Defaults/`+`User/` two-tier path resolver that wraps `IFileSystem` — see [Config layering](#config-layering)), `IApplicationData` (abstracts `%APPDATA%` lookup), `ILogger`, `ImageHeader` (PNG/JPEG header parser for image dimension reads without WPF), `FileUtils`. Implementations are injected via the `Composition/` factories.
+Cross-cutting utilities: `IFileSystem` (testable filesystem abstraction), `LayeredFileSystem` (the `Defaults/`+`User/` two-tier path resolver that wraps `IFileSystem` — see [Config layering](#config-layering)), `IApplicationData` (abstracts `%APPDATA%` lookup), `ILogger`, `ImageHeader` (PNG/JPEG header parser for image dimension reads without WPF), `FileUtils`, `RomNameUtils` (ROM-name normalisation, used for the fuzzy label lookup). Implementations are injected via the `Composition/` factories.
 
 ## Key design decisions
 
@@ -222,7 +237,7 @@ Roughly: subsystem tests are where you cover lots of scenarios, E2E tests are wh
 
 ### Renderer doesn't know about platforms or emulators
 
-The render pass takes `Template`, `ResolvedMapping` and `ResolvedLabels`. It doesn't know whether labels came from MAME, RetroArch, or a static XML; it doesn't know which controller is plugged in. All platform/emulator-specific knowledge has been baked into the resolved types by step 5. This keeps the renderer testable in isolation (see `Core.Tests/Templates/`) and lets contributors add new platforms without touching rendering code.
+The render pass takes `Template`, `ResolvedMapping` and `ResolvedLabels`. It doesn't know whether labels came from MAME, RetroArch, or a static XML; it doesn't know which controller is plugged in. All platform/emulator-specific knowledge has been baked into the resolved types by step 3. This keeps the renderer testable in isolation (see `Core.Tests/Templates/`) and lets contributors add new platforms without touching rendering code.
 
 ### Config layering
 
@@ -230,7 +245,13 @@ Plugin data is split into two trees under the root: `Defaults/` (shipped with th
 
 `Templates/`, `Logs/`, and the RetroArch emulator config tree live at the root and bypass layering — templates ship fixed, logs are output, and RetroArch's own configs are read from the emulator install, not the plugin data folder.
 
-`GlobalConfig.xml` is the **one exception** to wholesale shadowing. `ConfigLoader` deserialises `Defaults/GlobalConfig.xml` as a base, then overwrites only the fields whose elements are actually *present* in `User/GlobalConfig.xml` (detected with an `XmlDocument` pass over the child element names). Without this, a user file that sets a single field would let every omitted bool deserialise to `false` and silently clobber a shipped `true` default. The full rationale lives in [config-layering.md](config-layering.md).
+Two files are **exceptions** to wholesale shadowing, both because the shadowing granularity would be wrong for them.
+
+`GlobalConfig.xml` is merged per *field*. `ConfigLoader` deserialises `Defaults/GlobalConfig.xml` as a base, then overwrites only the fields whose elements are actually *present* in `User/GlobalConfig.xml` (detected with an `XmlDocument` pass over the child element names). Without this, a user file that sets a single field would let every omitted bool deserialise to `false` and silently clobber a shipped `true` default.
+
+`Labels/{platform}.xml` is merged per *entry*. `InputLabelsLoader` reads the `Defaults/` and `User/` copies separately and overlays the user's `<Game>` entries onto the shipped ones (matched by `launchBoxId`, then `romName`), and the user's `<Defaults>` buttons onto the shipped ones by name. Because one file now holds every game on a platform, wholesale shadowing would mean labelling one game costs you the labels for all the others.
+
+The full rationale for both lives in [config-layering.md](config-layering.md).
 
 ## Extension points
 
@@ -242,7 +263,7 @@ Add a folder under `src/Core/Plugins/{Emulator}/`. Implement `IInputLabelsLoader
 
 ### Add a new platform
 
-Place a `Defaults/Controllers/{platform}.xml` with the controllers that exist for that platform. The first controller is the default; users can override per-game via `InputMappings/{platform}/{rom}.xml`. Label files (game-specific and platform-default) live under `Labels/{platform}/`. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
+Place a `Defaults/Controllers/{platform}.xml` with the controllers that exist for that platform. The one marked `default="true"` is used when nothing selects a variant (falling back to the first in document order if none is marked); users can override per-game via `InputMappings/{platform}/{rom}.xml`. Game labels and the platform's inheritable defaults share one file, `Labels/{platform}.xml`. A variant that extends another can `inheritFrom` it rather than restating its mappings — see [templates.md](templates.md) for the full inheritance rules. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
 
 ### Add a new template
 

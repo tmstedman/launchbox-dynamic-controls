@@ -18,7 +18,7 @@ tests/LaunchBox.Tests/     LaunchBox-layer unit tests
 ## Conventions
 
 **Three-layer type model** — data moves through three distinct shapes:
-1. `*Config` / `*Node` records — XML deserialisation targets; scalar properties use `init`, collection fields use mutable `List<T>` (parsers call `.Add()` after construction); never escape the loader
+1. `*Config` / `*Node` records — XML deserialisation targets; **all** properties are mutable `{ get; set; }` (the deserialiser needs setters — there is no `init` in this layer), collection fields are `List<T>` with `= []` initialisers (parsers call `.Add()` after construction); never escape the loader
 2. Immutable positional records (`ResolvedLayout`, `ResolvedMapping`, `InputDefinition`, …) — built once, `IReadOnlyList`/`IReadOnlyDictionary` collections, `with` for derivation
 3. Derived index fields (e.g. `InputDescendants`, `CollapseInfo`) computed during the build and stored on the resolved record — not recomputed on demand
 
@@ -33,13 +33,16 @@ tests/LaunchBox.Tests/     LaunchBox-layer unit tests
 
 All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.props`).
 
+`net6.0` is a compatibility floor, not an arbitrary default. LaunchBox moved to .NET 6 in 13.3, so raising `TargetFramework` raises the minimum LaunchBox version the plugin can load on, silently breaking installs on older releases — it is a user-facing decision, not a build detail, and the README's stated requirement has to move with it. `LangVersion=12.0` exists precisely so new C# syntax is available without touching the target. `TargetFramework` is declared per-project in all six csproj files, so there is no central chokepoint where a bump would be caught.
+
 ## Infrastructure conventions
 
-- `IFileSystem` — from `System.IO.Abstractions`; injected everywhere; never use `File.*`/`Directory.*` directly in `Core`
+- `IFileSystem` — an **in-house** 7-method interface in `Infrastructure/FileSystem.cs` (`FileExists`, `OpenRead`, `ReadAllText`, `AppendAllText`, `DeleteFile`, `DirectoryExists`, `CreateDirectory`), *not* `System.IO.Abstractions` (replaced in 48a4121). Injected everywhere; never use `File.*`/`Directory.*` directly in `Core`. `src/` has no NuGet dependencies at all, which is why the shipped plugin is exactly two DLLs; `TestableIO.System.IO.Abstractions.TestingHelpers` survives only as a test-only package in `Core.IntegrationTests`
 - `IApplicationData` — abstracts `Environment.GetFolderPath(ApplicationData)`; implemented by `SystemApplicationData` (excluded from coverage)
 - `ILogger` — debug-only file logger; silenced in tests via `NullLogger` (in `Core.IntegrationTests/Subsystem/SubsystemFakes.cs`)
-- `LayeredFileSystem` — wraps `IFileSystem` with two-tier path resolution (a real class, not an interface — the `IFileSystem` it wraps is the test seam). `Resolve(params segments)` returns `User\{segments}` if that file exists, else `Defaults\{segments}`; loaders call it without knowing which layer wins. `FileExists`/`OpenRead` delegate straight through; `Fs` exposes the underlying `IFileSystem` for components that take plain paths (logger, templates, RetroArch cfg reading from the emulator dir). `Templates/`, `Logs/`, and the RetroArch emulator tree live at root and bypass layering.
-  - Every loader resolves files this way, so a `User\` file *wholesale shadows* its `Defaults\` counterpart — **except `GlobalConfig.xml`**. `ConfigLoader` merges that one field-by-field: it deserialises `Defaults\GlobalConfig.xml` as the base, then overwrites only the fields whose elements are *present* in `User\GlobalConfig.xml` (detected via an `XmlDocument` pass over the child element names). This stops a user file that sets one field from silently forcing every omitted bool back to `false`.
+- `LayeredFileSystem` — wraps `IFileSystem` with two-tier path resolution (a real class, not an interface — the `IFileSystem` it wraps is the test seam). `Resolve(params segments)` returns `User\{segments}` if that file exists, else `Defaults\{segments}`, else null; loaders call it without knowing which layer wins, then read the result back through `FileExists`/`OpenRead` (rooted at the plugin root). `Defaults` / `User` expose each tier as a `RootedFileSystem` for the loaders that must check a specific layer (`InputLabelsLoader` merges both; `StaticImageResolver` reads `User` only). Components that take plain paths (logger, templates, RetroArch cfg from the emulator dir) get the raw `IFileSystem` injected instead. `Templates/`, `Logs/`, and the RetroArch emulator tree live at root and bypass layering.
+  - Every loader resolves files this way, so a `User\` file *wholesale shadows* its `Defaults\` counterpart — **except `GlobalConfig.xml` and `Labels\{Platform}.xml`**, which are merged. `ConfigLoader` merges the config field-by-field: it deserialises `Defaults\GlobalConfig.xml` as the base, then overwrites only the fields whose elements are *present* in `User\GlobalConfig.xml` (detected via an `XmlDocument` pass over the child element names). This stops a user file that sets one field from silently forcing every omitted bool back to `false`.
+  - `InputLabelsLoader` merges the labels file *entry-by-entry*: it reads the `Defaults\` and `User\` copies separately (via `lfs.Defaults` / `lfs.User`, not `Resolve`) and lays the user's `<Game>` entries over the shipped ones (matched by `launchBoxId`, then `romName`), and the user's `<Defaults>` buttons over the shipped ones by name. One file now holds every game on a platform, so shadowing would make labelling one game drop the rest.
 - `[ExcludeFromCodeCoverage]` — applied to infrastructure shims, factory classes, and pure DTOs
 
 ## Test patterns
@@ -53,8 +56,10 @@ All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.pr
   - `LayoutElements.Input(...)` / `Group(...)` / `Stack(...)` / `OneOf(...)` — `ILayoutElement` builders
   - `RenderingFixtures.Ctx(...)` / `Descendants(...)` — `VisibilityContext` + descendants index
   - `TestLayout` — fluent `LayoutConfig` builder (raw XML-shaped DTOs, for `LayoutResolver` tests)
-- `ShouldBeDictionaryOf(...)` — custom Shouldly assertion for exact dict contents (in `Core.TestHelpers/Shouldly/`)
-- Global usings include `NSubstitute`, `Shouldly`, `DynamicControls.Infrastructure`, `DynamicControls.Core.Tests.Infrastructure`
+  - `InputMappingFixtures.Game(...)` / `MappingConfig(...)` / `PlatformConfig(...)` / `ControllerDef(...)` — builders for `GameInfo` and the raw Controllers/InputMappings DTOs; use these rather than hand-constructing `InputMappingConfig` / `PlatformControllersConfig` / `ControllerConfig` inline
+  - `LayoutNavigation` — extensions on `ResolvedLayout` *and* on element sequences, so lookups chain (`result.FirstInput().Children.FirstInputGroup()`): `FirstInput()` / `FirstInputGroup()` / `FirstOneOf()`, plus `Flatten()` for a depth-first walk that reaches inputs nested inside transparent Groups
+- `ShouldBeDictionaryOf(...)` — custom Shouldly assertion for exact dict contents; `ShouldContainEntry(name, input)` / `ShouldNotContainEntry(...)` match a whole `MappingEntry` by value. Both live in `Core.TestHelpers/Shouldly/` and are declared *in the `Shouldly` namespace* so they autocomplete alongside the built-ins
+- Global usings (`tests/Core.Tests/GlobalUsings.cs`) cover `Xunit`, `Shouldly`, `DynamicControls.Infrastructure`, `DynamicControls.Core.Tests.Infrastructure` and the common `System.*` namespaces — **not** `NSubstitute`, which every test file that needs it imports explicitly
 
 **Subsystem tests (`Core.IntegrationTests/Subsystem`)**
 - Real service wiring via factory; fake at one seam (e.g. `FakeTemplateImageSource`)
@@ -74,13 +79,16 @@ Fixtures/
     GlobalConfig.xml
     Controllers/{Platform}.xml            — button vocabulary + analogToDigital per controller variant; a <Controller> may carry inheritFrom="OtherController" to prepend that controller's mappings before its own. Inheritance is transitive (the base may itself inheritFrom another, e.g. NEC 6-Button → 3-Button → 2-Button) with cycles detected and broken. Only mappings are inherited — analogToDigital is read from the controller's own attribute, not the chain. The root <Controllers> element may also carry inheritFrom="RootPlatform" to pull in the family root's controllers and merge this file's own on top (override by name, append new) — descendants in a hardware family reduce to a one-line pointer at the root (e.g. Nintendo Famicom.xml → inheritFrom="Nintendo Entertainment System"; Sony Playstation 2.xml → inheritFrom="Sony Playstation"). Root inheritance is transitive and cycle-safe; a missing base file is logged and the file falls back to its own controllers
     InputMappings/{Platform}/{Rom}.xml    — per-game controller selection or button remaps
-    Labels/{Platform}/_DefaultLabels.xml  — inheritable defaults (inherit="true")
-    Labels/{Platform}/{Rom}.xml           — game-specific labels
+    Labels/{Platform}.xml                 — one file per platform: a <Defaults> block (all
+                                            entries inheritable) plus a <Game launchBoxId= romName=>
+                                            element per title. Merged across Defaults\ and User\ at
+                                            the entry level, not shadowed wholesale
     Emulators/RetroArch/{CoreDisplayName}.xml — maps RetroArch device-type IDs to controller variants
     Emulators/MAME/JoycodeMapping.xml        — JOYCODE → generic-input lookup
-    controls.xml                          — BYOAC MAME controls database
   User/
-    (mirrors Defaults/ structure; files here shadow the Defaults counterpart)
+    (mirrors Defaults/ structure; files here shadow the Defaults counterpart —
+     except Labels/{Platform}.xml, which is merged entry-by-entry)
+  controls.xml                            — BYOAC MAME controls database (plugin root, unlayered)
   Emulators/
     mame/mame.exe + cfg/{rom}.cfg
     retroarch/retroarch.exe + retroarch.cfg (presence signals portable mode)
@@ -104,6 +112,8 @@ InputRenderingService.Render(...)  → RenderResult (flat lists of RenderedImage
 ## Input mapping
 
 **Source priority** (first non-null wins): `PerGameXmlMappingSource` → `RetroArchMappingSource` → `PlatformDefaultMappingSource`. Transforms (`MameInputMappingSource`) are applied on top of whichever source wins. When a transform applies, `InputMappingService` re-splices the `Natural*` maps from the pre-transform baseline so remap detection still works correctly.
+
+**Per-game overlay** (`PerGameXmlMappingSource`, via `MappingOverlay.Apply`): a `<GameMapping>` file overlays the selected controller's baseline. `<Mapping name="A" input="..."/>` replaces whatever that platform button had; `<Unmap name="C"/>` drops a baseline button with nothing in its place — for buttons a game isn't meant to use, in parity with RetroArch's `-1` sentinel. Baseline entries whose `name` appears in either list are dropped, then every overlay entry is appended — so repeating `<Mapping name="A">` with different `input` values drives several template slots from one platform button. The same `MappingOverlay.Apply` backs controller-level `inheritFrom` resolution.
 
 `ResolvedMapping` carries two parallel views:
 - `ButtonToInput` / `InputToButton` — the *current* mapping (after per-game remaps/transforms)
@@ -138,10 +148,10 @@ Variant selection: rmp wins over cfg; neither → platform Controllers.xml defau
 
 ## Labels pipeline
 
-1. `InputLabelsLoader` — `Labels/{platform}/{rom}.xml` (file-based, tried first)
-2. `MameControlsXmlSource` — `controls.xml` (only when `EmulatorPath` is MAME)
-3. If no game labels found → `_DefaultLabels.xml`
-4. Entries marked `inherit="true"` in `_DefaultLabels.xml` are merged into game-specific labels (e.g. Start=Pause applies even when the game only defines button labels)
+1. `InputLabelsLoader` — the `<Game>` entry in `Labels/{platform}.xml` (tried first). Lookup order: `launchBoxId` → case-insensitive `romName` → `RomNameUtils.NormalizeRomName` on both sides (strips `(...)`/`[...]` groups)
+2. `MameControlsXmlSource` — `controls.xml` (only when `EmulatorPath` is MAME; gated on the emulator, *not* on `EnableMame`)
+3. If no game labels found → the `<Defaults>` block of `Labels/{platform}.xml` on its own
+4. Every `<Defaults>` entry is inheritable — merged into game-specific labels for any platform button the game didn't name (e.g. Start=Pause applies even when the game only defines button labels). There is no `inherit` attribute
 5. Clone-of ROMs inherit their parent's labels
 
 ## Layout rendering notes

@@ -142,10 +142,10 @@ jobs:
       - name: LaunchBox.Tests
         run: dotnet test tests/LaunchBox.Tests/DynamicControls.LaunchBox.Tests.csproj
 
-      # Package the installable plugin on master pushes and on version tags. publish/*.dll is the
-      # full dependency closure (our two DLLs + the System.IO.Abstractions family) minus the
-      # LaunchBox SDK, which is Private=false because the host provides it. All of these DLLs must
-      # be copied into the Plugins folder — LaunchBox does not supply System.IO.Abstractions.
+      # Package the installable plugin on master pushes and on version tags. src/ has no NuGet
+      # dependencies, so publish/*.dll is just our own two DLLs — DynamicControls.Core and
+      # DynamicControls.LaunchBox. The LaunchBox SDK is absent because it is Private=false: the
+      # host supplies it. Both DLLs must be copied into the Plugins folder.
       # success() (not !cancelled()) so a failing test suite never produces a build or release.
       - name: Publish plugin
         if: ${{ success() && (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref_type == 'tag'))) }}
