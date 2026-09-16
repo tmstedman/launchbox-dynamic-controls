@@ -29,6 +29,17 @@ tests/LaunchBox.Tests/     LaunchBox-layer unit tests
 - Real internal wiring, I/O faked, data inline → `Core.IntegrationTests/Subsystem`
 - Full pipeline against `Fixtures/` on disk → `Core.IntegrationTests/EndToEnd`
 
+## Changing documentation
+
+One concept is usually described in several places at once (README for users, `docs/` for
+contributors, here for agents, `assets/**/README.txt` for people browsing the installed data folder,
+`.github/workflows/ci.yml` and `Directory.Build.props` for the build). Every documentation bug found so far came from
+updating one of them and missing the rest.
+
+Before finishing any change that alters behaviour users or contributors can see, work the
+**"If you change… / Check these"** table in [`docs/conventions.md`](docs/conventions.md#keeping-documentation-in-step).
+It is deliberately not duplicated here — a copy would be the sixth place to drift.
+
 ## Language
 
 All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.props`).

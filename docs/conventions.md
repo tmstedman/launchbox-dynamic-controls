@@ -124,8 +124,47 @@ The exception is raw config DTOs (layer 1 above) where `string Name { get; set; 
 
 Don't change a production type's API just to make it easier to test. If a test wants to verify internal state, add the test helper externally (extension methods on the resolved type, or test-only `InternalsVisibleTo` for the test project). Production types stay focused on what callers need.
 
+## Keeping documentation in step
+
+Most of this project's documentation drift has had one cause: a change landed in the code and in
+*one* doc, and the other places describing the same thing were never swept. Every instance found so
+far was this — the labels consolidation updated the README but not `docs/architecture.md` or
+`docs/config-layering.md`; replacing `System.IO.Abstractions` updated the README but not `CLAUDE.md` or
+the CI comments; the `<Unmap>` element was described only in the shipped `assets/` guide.
+
+The cause is fan-out, not carelessness. A single concept is pitched at up to five audiences — users
+(`README.md`), contributors (`docs/`), agents (`CLAUDE.md`), people browsing the installed data
+folder (`assets/**/README.txt`), and whoever next edits the build (`.github/workflows/ci.yml`, `Directory.Build.props`)
+— and nobody holds that map in their head while making a change. So here it is.
+
+**Find the row for what you changed and check every file in it.** Not every file will need an edit;
+the point is to have looked.
+
+| If you change… | Check these |
+|---|---|
+| The `Labels/{Platform}.xml` format — `<Game>`, `<Defaults>`, lookup keys | `README.md` (Labels) · `docs/architecture.md` §3 · `docs/config-layering.md` · `CLAUDE.md` (Fixture structure + Labels pipeline) · `assets/User/Labels/README.txt` · `assets/README.txt` |
+| `Controllers/{Platform}.xml` — variants, `inheritFrom`, `analogToDigital`, `default` | `README.md` (Input mappings) · `docs/templates.md` · `docs/architecture.md` (Add a new platform) · `CLAUDE.md` · `assets/User/Controllers/README.txt` · `assets/README.txt` |
+| Per-game `InputMappings/` — `<GameMapping>`, `<Mapping>`, `<Unmap>` | `README.md` (Game-specific overrides) · `docs/architecture.md` §2 · `CLAUDE.md` (Input mapping) · `assets/User/InputMappings/README.txt` · `assets/README.txt` |
+| `Layout.xml` — any element, attribute or `showIf` mode | `docs/layout-xml-schema.md` **(canonical)** · `docs/templates.md` · `docs/architecture.md` §4–5 · `CLAUDE.md` (Layout rendering notes) |
+| How template images are resolved, or platform/variant artwork | `docs/templates.md` **(canonical)** · `docs/layout-xml-schema.md` (Image resolution) · `docs/architecture.md` §4–5 · `CLAUDE.md` · `README.md` (Platform button images) |
+| `GlobalConfig.xml` settings | `README.md` (settings table) · `docs/config-layering.md` · `docs/architecture.md` · `CLAUDE.md` · `assets/User/README.txt` |
+| The `Defaults\`/`User\` layering rules or a file's merge strategy | `docs/config-layering.md` **(canonical)** · `README.md` (Configuration) · `docs/architecture.md` (Config layering) · `CLAUDE.md` (Infrastructure conventions) · `assets/README.txt` · `assets/User/README.txt` |
+| MAME or RetroArch integration | `README.md` (overrides + Known limitations) · `docs/architecture.md` (Plugin architecture) · `CLAUDE.md` · `assets/User/Emulators/**/README.txt` |
+| `TargetFramework`, or the minimum supported LaunchBox version | `README.md` (Requirements + Development) · `CLAUDE.md` (Language) · `Directory.Build.props` (the `LangVersion` comment) |
+| What the release zips contain | `README.md` (Installation + Updating) · `docs/config-layering.md` (Packaging impact) · `.github/workflows/ci.yml` (packaging comments) |
+
+Two habits keep the map short:
+
+- **Prefer a pointer to a restatement.** Where a row names a canonical doc, the others should link to
+  it rather than duplicate its rules. A duplicated rule is a rule that will disagree with itself.
+- **Adding a new user-facing XML element or attribute means documenting it.** The README is where
+  users discover a feature exists; nothing else reaches them. `<Unmap>` shipped working and
+  undiscoverable for months because it was only ever written up in the installed data folder.
+
 ## Pull requests
 
 (To be expanded when the repository goes public.)
 
 For now: small, focused changes; tests pass locally before submitting; one logical change per PR.
+Run the table above before opening the PR — reviewers can spot wrong code, but nobody reviews the
+doc you didn't think to open.
