@@ -44,7 +44,9 @@ It is deliberately not duplicated here — a copy would be the sixth place to dr
 
 **Subject**: imperative, specific, no scope prefix — `Fix root-level Controllers.xml inheritance silently losing a new default`, not `DOCS: fix inheritance`. Under ~72 characters.
 
-**Body**: two short paragraphs, 100–150 words. What was wrong, then what it is now, plus a sentence of why if that isn't obvious from the change. The docs specify current behaviour and carry no history (see [Changing documentation](#changing-documentation)), so the body records *why this change happened* — which is a sentence, not an essay. Rejected alternatives, hypotheses that failed and the route to the answer do not belong here.
+**Body**: bullets when the commit does several things, one change per line, verb first — `Replace`, `Add`, `Extract`, `Fix`. Compress the *why* into a trailing clause on its own bullet ("so descendants reduce to one-line pointers", "instead of being silently skipped"), never a separate paragraph. Fold tests and docs into a final bullet. Prose only when the commit does one thing whose mechanism needs explaining, and then two paragraphs at most.
+
+Either way ~120 words. The docs carry no history (see [Changing documentation](#changing-documentation)), so the body records why this change happened — a clause, not an essay. Rejected alternatives, failed hypotheses and the route to the answer stay out.
 
 **Scope**: one logical change per commit. A body running well past 150 words means either the commit is doing several things, or the message is narrating rather than recording — check which before adding more words.
 
