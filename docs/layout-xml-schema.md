@@ -4,7 +4,7 @@ Reference for the `Layout.xml` file that drives each controller template. Every 
 
 - A `BaseImage.png` — the chassis artwork (PNG only; a `.jpg` is not probed)
 - One `Layout.xml` (this document's schema) — slot definitions
-- Per-input images (`ButtonA.png`, `LineL.png`, etc.)
+- Per-input images (`ButtonA.png`, `Line_AxisLeftStick.png`, etc.)
 
 The parser is forgiving: unknown attributes are silently ignored; invalid numeric values are logged and replaced with defaults. The intent is that templates degrade gracefully when authors mistype something. All errors and warnings are written to `Logs\debug.log` — enable `<Debug>true</Debug>` in `GlobalConfig.xml` to see them.
 
@@ -189,10 +189,10 @@ A render with an unparseable `x` or `y` value logs an error and keeps the defaul
 
 ### `<Overlay>` — additional image
 
-An arbitrary image rendered at a position, with no implicit relationship to the input's `name`. Used for connector lines (`LineL.png`, `LineDpad.png`), background frames, decorative artwork.
+An arbitrary image rendered at a position, with no implicit relationship to the input's `name`. Used for connector lines (`Line_AxisLeftStick.png`, `Line_ButtonDpad_Multi.png`), background frames, decorative artwork.
 
 ```xml
-<Overlay src="LineL.png" x="+79" y="+31" />
+<Overlay src="Line_AxisLeftStick.png" x="+79" y="+31" />
 ```
 
 | Attribute | Type | Required | Notes |
@@ -234,7 +234,7 @@ A wrapper around a cluster of related inputs. Two purposes:
 
 ```xml
 <Group>
-    <Overlay src="LineDpad.png" x="+72" y="-45" />
+    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
     <Input name="ButtonDpadUp">...</Input>
     <Input name="ButtonDpadDown">...</Input>
 </Group>
@@ -354,5 +354,9 @@ These aren't enforced by the parser, but following them keeps templates legible:
 - Group related inputs (face buttons, shoulder buttons) with a comment if you're not using `<Group>` itself
 - Define named styles in `<Head>` for any combination of `showIf` + `minOpacity` you use more than twice
 - Prefer relative coordinates inside `<Stack>` and `<Group>` so the cluster moves as a unit when you tweak its origin
-- Keep `<Overlay>` lines (`LineX.png` etc.) at the group level, not duplicated on every Input
-- Name files consistently: `Button*.png` for button icons, `Axis*.png` for stick directions, `Line*.png` for connector lines
+- Keep `<Overlay>` lines (`Line_ButtonX.png` etc.) at the group level, not duplicated on every Input
+- Name every image after the **generic input** it belongs to, never after the markings on the chassis you are drawing. `Line_AxisTriggerLeft.png`, not `LineLT.png` — "LT" is an Xbox label, and a PlayStation template would then need its own `LineL2.png` for the same slot. One vocabulary keeps a template portable and lets images be shared from `Templates/` one level up.
+  - Input images take the input name exactly: `ButtonA.png`, `AxisLeftStickUp.png`. These are resolved automatically from `<Input name="…">`.
+  - Connector lines take `Line_{GenericInput}.png` and are referenced by `<Overlay src="…">` verbatim.
+  - Add `_Multi` for the variant drawn when a cluster shows per-direction labels rather than one glyph: `Line_AxisLeftStick.png` for the single line, `Line_AxisLeftStick_Multi.png` for the fanned-out version.
+  - An overlay attached to a `<Group>` or `<Stack>` serves a cluster and has no single input to name it after. Use the category from [Generic input names](templates.md#generic-input-names) instead — `Line_MetaButtons.png` for the Start/Back cluster.

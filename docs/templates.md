@@ -10,7 +10,7 @@ Templates/
     BaseImage.png               — controller chassis artwork; sets canvas dimensions
     Layout.xml                  — slot definitions and rendering rules
     {GenericInput}.png          — generic fallback images (ButtonA.png, ButtonB.png, …)
-    Line{Slot}.png              — connector line graphics (LineA.png, LineLB.png, …)
+    Line_{GenericInput}.png     — connector line for that input (Line_ButtonA.png, Line_AxisTriggerLeft.png, …)
     {Platform}/
       {PlatformButton}.png      — platform-specific button image
       {ControllerVariant}/

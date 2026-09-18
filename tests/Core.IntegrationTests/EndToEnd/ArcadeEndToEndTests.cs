@@ -42,16 +42,16 @@ public class ArcadeEndToEndTests
                 // so all buttons fall back to generic ButtonA.png / ButtonB.png / etc.
                 new(Input: "ButtonA",             Src: "ButtonA.png",             W: 64,  H: 64),              // Jump — active
                 new(Input: "ButtonA",             Src: "ButtonA.png",             W: 44,  H: 44),              // top-level + Stack
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonB",             Src: "ButtonB.png",             W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonB",             Src: "ButtonB.png",             W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonB",             Src: "LineB.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonX",             Src: "LineX.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonY",             Src: "LineY.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 // Start and Insert Coin — both active (inherited defaults supply labels)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),          // top-level + Stack
@@ -68,17 +68,17 @@ public class ArcadeEndToEndTests
                 // disabled inputs — no labels, not in Cabinet mapping, or beyond BUTTON4
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
-                // group-level decorations — LineL_Multi.png absent (no AxisLeftStick labels)
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineDpad_Multi.png"));
+                // group-level decorations — Line_AxisLeftStick_Multi.png absent (no AxisLeftStick labels)
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -144,17 +144,17 @@ public class ArcadeEndToEndTests
                 // disabled inputs
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decorations — both stick multi-line overlays appear; no LineDpad_Multi
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineL_Multi.png"),
-                new(Input: null,                  Src: "LineR_Multi.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
+                new(Input: null,                  Src: "Line_AxisRightStick_Multi.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -197,18 +197,18 @@ public class ArcadeEndToEndTests
                 // ButtonX (Fire) — active; BUTTON1 remapped from ButtonA to ButtonX by InputMappings
                 new(Input: "ButtonX",             Src: "ButtonX.png",              W: 64,  H: 64),
                 new(Input: "ButtonX",             Src: "ButtonX.png",              W: 44,  H: 44),  // top-level + Stack
-                new(Input: "ButtonX",             Src: "LineX.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
                 // ButtonA (Loop) — active; BUTTON2 remapped from ButtonB to ButtonA by InputMappings
                 new(Input: "ButtonA",             Src: "ButtonA.png",              W: 64,  H: 64),
                 new(Input: "ButtonA",             Src: "ButtonA.png",              W: 44,  H: 44),
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 // ButtonB now dim — Loop remapped away, nothing lands here
                 new(Input: "ButtonB",             Src: "ButtonB.png",              W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonB",             Src: "ButtonB.png",              W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonB",             Src: "LineB.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",              W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",              W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonY",             Src: "LineY.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 // Start and Insert Coin — both active (inherited defaults)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 34,  H: 34),  // top-level + Stack
@@ -221,26 +221,26 @@ public class ArcadeEndToEndTests
                 new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
                 new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",      W: 34,  H: 34),
                 new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "LineDpad_Multi.png"),       // overlay inside Input → InputName="ButtonDpad"
+                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),       // overlay inside Input → InputName="ButtonDpad"
                 // AxisLeftStick active — analogToDigital mirrors ButtonDpad→Move to AxisLeftStick (whole stick);
                 // no direction labels exist (no JOYSTICK_UP/DOWN labels), so AxisLeftStickUp etc. stay absent;
-                // OneOf second alt fires (show-if-label, has Move label): renders AxisLeftStick.png + LineL.png
+                // OneOf second alt fires (show-if-label, has Move label): renders AxisLeftStick.png + Line_AxisLeftStick.png
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",        W: 124, H: 124), // top-level auto-blur: active (hasLabel)
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",        W: 64,  H: 64),  // OneOf second alt render
-                new(Input: "AxisLeftStick",       Src: "LineL.png"),                // LineL (single-direction), not LineL_Multi
+                new(Input: "AxisLeftStick",       Src: "Line_AxisLeftStick.png"),                // LineL (single-direction), not LineL_Multi
                 // disabled inputs
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",          W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",      W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",   W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",       W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decoration
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -280,24 +280,24 @@ public class ArcadeEndToEndTests
                 // face buttons — all active; labels follow the remapped layout
                 new(Input: "ButtonA",             Src: "ButtonA.png",             W: 64,  H: 64), // Light Punch (unmoved)
                 new(Input: "ButtonA",             Src: "ButtonA.png",             W: 44,  H: 44), // top-level + Stack
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonB",             Src: "ButtonB.png",             W: 64,  H: 64), // Middle Punch (unmoved)
                 new(Input: "ButtonB",             Src: "ButtonB.png",             W: 44,  H: 44),
-                new(Input: "ButtonB",             Src: "LineB.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 64,  H: 64), // Light Kick (was Heavy Punch)
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 44,  H: 44),
-                new(Input: "ButtonX",             Src: "LineX.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 64,  H: 64), // Middle Kick (was Light Kick)
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 44,  H: 44),
-                new(Input: "ButtonY",             Src: "LineY.png"),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),
                 // ButtonLeftShoulder dim — Middle Kick remapped away; HasLabel=false in game-specific mode
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42), // Heavy Punch (was Heavy Kick)
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png"),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png"),
                 // AxisTriggerRight active for the first time — Heavy Kick remapped onto it
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png"),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png"),
                 // Start and Insert Coin
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),
@@ -318,11 +318,11 @@ public class ArcadeEndToEndTests
                 // disabled inputs
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                // group-level decorations — LineL_Multi.png now appears (AxisLeftStick active)
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineL_Multi.png"),
-                new(Input: null,                  Src: "LineDpad_Multi.png"));
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                // group-level decorations — Line_AxisLeftStick_Multi.png now appears (AxisLeftStick active)
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -374,13 +374,13 @@ public class ArcadeEndToEndTests
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",                          W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 // Brake (PEDAL2) and Accelerate (PEDAL) — active with line decorations
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",                      W: 65,  H: 65),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png"),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png"),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",                   W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                                               Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",                     W: 65,  H: 65),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png"),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png"),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png",                  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                               Opacity: 0.3, BlurRadius: 8.0),
                 // BUTTON1 (High/Low) active; other face buttons dim
                 new(Input: "ButtonY",             Src: "ButtonY.png",                              W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "ButtonX.png",                              W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
@@ -389,22 +389,22 @@ public class ArcadeEndToEndTests
                 // Start and Insert Coin — active (mapped + inherited labels)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                          W: 44,  H: 44),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                           W: 44,  H: 44),
-                new(Input: null,                  Src: "LineStart.png"),
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                          W: 34,  H: 34),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                           W: 34,  H: 34),
                 // face-button Stack renders (AnyVisible=true — ButtonA labeled)
                 new(Input: "ButtonY",             Src: "ButtonY.png",                              W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonY",             Src: "LineY.png",                                                Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                                                Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonB",             Src: "ButtonB.png",                              W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonB",             Src: "LineB.png",                                                Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png",                                                Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonA",             Src: "ButtonA.png",                              W: 44,  H: 44),
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonX",             Src: "ButtonX.png",                              W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonX",             Src: "LineX.png",                                                Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png",                                                Opacity: 0.3, BlurRadius: 8.0),
                 // AxisLeftStick top-level active — HasLabel fans out to directional descendants
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",                        W: 124, H: 124),
                 // first OneOf alt fires — Left/Right labeled; Up/Down dim
-                new(Input: null,                  Src: "LineL_Multi.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
                 new(Input: "AxisLeftStickUp",     Src: "AxisLeftStickUp.png",                      W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 new(Input: "AxisLeftStickLeft",   Src: "AxisLeftStickLeft.png",                    W: 34,  H: 34),
                 new(Input: "AxisLeftStickRight",  Src: "AxisLeftStickRight.png",                   W: 34,  H: 34),

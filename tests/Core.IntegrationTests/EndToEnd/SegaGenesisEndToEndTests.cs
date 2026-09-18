@@ -77,18 +77,18 @@ public class SegaGenesisEndToEndTests
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // per-input line decorations
-                new(Input: "ButtonX",             Src: "LineX.png"                                                ),
-                new(Input: "ButtonA",             Src: "LineA.png"                                                ),
-                new(Input: "ButtonY",             Src: "LineY.png",                               Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonB",             Src: "LineB.png",                               Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"                                                ),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"                                                ),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decorations with no associated input
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineL_Multi.png"),
-                new(Input: null,                  Src: "LineDpad_Multi.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         // and game-specific labels from OutRun's labels file land on the input slots their
@@ -173,9 +173,9 @@ public class SegaGenesisEndToEndTests
                 new(Input: "ButtonB",             Src: @"Sega Genesis\6-Button\C.png", W: 64,  H: 64),
                 new(Input: "ButtonY",             Src: @"Sega Genesis\6-Button\Y.png", W: 64,  H: 64),
                 new(Input: "ButtonLeftShoulder",  Src: @"Sega Genesis\6-Button\X.png", W: 64,  H: 42),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png"),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png"),
                 new(Input: "ButtonRightShoulder", Src: @"Sega Genesis\6-Button\Z.png", W: 64,  H: 42),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png"),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png"),
                 // Start and Mode buttons — active (showIf="mapping", both mapped in 6-Button)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),  // top-level + Stack
@@ -187,12 +187,12 @@ public class SegaGenesisEndToEndTests
                 // disabled inputs — not in 6-Button mapping
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decoration (always rendered)
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // no game-specific labels — only the inherited default Start=Pause from _DefaultLabels.xml
@@ -233,14 +233,14 @@ public class SegaGenesisEndToEndTests
                 new(Input: "ButtonY",             Src: @"Sega Genesis\6-Button\Y.png", W: 44,  H: 44),
                 // shoulder buttons — active for the first time (High Punch / High Kick)
                 new(Input: "ButtonLeftShoulder",  Src: @"Sega Genesis\6-Button\X.png", W: 64,  H: 42),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png"),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png"),
                 new(Input: "ButtonRightShoulder", Src: @"Sega Genesis\6-Button\Z.png", W: 64,  H: 42),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png"),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png"),
                 // per-input line decorations in the face-button Stack — all active
-                new(Input: "ButtonX",             Src: "LineX.png"),
-                new(Input: "ButtonA",             Src: "LineA.png"),
-                new(Input: "ButtonB",             Src: "LineB.png"),  // active — contrast OutRun
-                new(Input: "ButtonY",             Src: "LineY.png"),  // active — contrast OutRun
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),  // active — contrast OutRun
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),  // active — contrast OutRun
                 // Start (mapped + labeled) and Mode (mapped, no label → Stack entry still dimmed)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),
@@ -261,14 +261,14 @@ public class SegaGenesisEndToEndTests
                 // disabled inputs — not in 6-Button mapping or no label
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decorations
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineL_Multi.png"),
-                new(Input: null,                  Src: "LineDpad_Multi.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -317,22 +317,22 @@ public class SegaGenesisEndToEndTests
                 #pragma warning disable format
                 // Per-game override: A → ButtonRightShoulder. Remapped(A) → Sega Genesis/A.png.
                 new(Input: "ButtonRightShoulder", Src: @"Sega Genesis\A.png",     W: 64,  H: 42),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png"),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png"),
                 // 3-Button defaults: B → ButtonA (Jump), C → ButtonB (Throw) — MappedDefault, Genesis art
                 new(Input: "ButtonA",             Src: @"Sega Genesis\B.png",     W: 64,  H: 64),
                 new(Input: "ButtonA",             Src: @"Sega Genesis\B.png",     W: 44,  H: 44),
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonB",             Src: @"Sega Genesis\C.png",     W: 64,  H: 64),
                 new(Input: "ButtonB",             Src: @"Sega Genesis\C.png",     W: 44,  H: 44),
-                new(Input: "ButtonB",             Src: "LineB.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
                 // ButtonX: no current mapping (override moved A away); Unmapped → generic ButtonX.png dim
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonX",             Src: "LineX.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 // ButtonY: not in 3-Button at all → Unmapped, dim
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonY",             Src: "LineY.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                               Opacity: 0.3, BlurRadius: 8.0),
                 // Start active (Pause inherited); Back not in 3-Button → dim
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),
@@ -345,12 +345,12 @@ public class SegaGenesisEndToEndTests
                 // Inputs absent from 3-Button entirely → Unmapped, generic art, dim
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(

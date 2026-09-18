@@ -272,19 +272,19 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Input name="ButtonA" x="0" y="0">
-                  <Overlay src="LineA.png" x="+50" y="+10" />
+                  <Overlay src="Line_ButtonA.png" x="+50" y="+10" />
                   <Render width="64" height="64" />
                 </Input>
               </Body>
             </ControllerTemplate>
             """);
-        images.Stub(TemplateName, "LineA.png", generic: "/tmpl/LineA.png");
+        images.Stub(TemplateName, "Line_ButtonA.png", generic: "/tmpl/Line_ButtonA.png");
         images.Stub(TemplateName, "ButtonA.png", generic: "/tmpl/ButtonA.png");
 
         var t = service.Load(TemplateName);
 
         t.Layout.Elements.OfType<InputDefinition>().Single()
-            .Overlays.Single().Source.ShouldBe("/tmpl/LineA.png");
+            .Overlays.Single().Source.ShouldBe("/tmpl/Line_ButtonA.png");
     }
 
     // ---- structural elements ----

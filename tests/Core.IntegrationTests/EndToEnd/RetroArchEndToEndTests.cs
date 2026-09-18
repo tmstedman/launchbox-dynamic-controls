@@ -51,14 +51,14 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonY",             Src: @"Sega Genesis\6-Button\Y.png",     W: 44,  H: 44),
                 // shoulder buttons — active (High Punch / High Kick), unaffected; Genesis X/Z art (6-Button row)
                 new(Input: "ButtonLeftShoulder",  Src: @"Sega Genesis\6-Button\X.png",     W: 64,  H: 42),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png"),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png"),
                 new(Input: "ButtonRightShoulder", Src: @"Sega Genesis\6-Button\Z.png",     W: 64,  H: 42),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png"),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png"),
                 // per-input line decorations in the face-button Stack — all active
-                new(Input: "ButtonX",             Src: "LineX.png"),
-                new(Input: "ButtonA",             Src: "LineA.png"),
-                new(Input: "ButtonB",             Src: "LineB.png"),
-                new(Input: "ButtonY",             Src: "LineY.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),
                 // Start active (inherited Pause label); Mode mapped but not labeled → Stack entry dim
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),
@@ -79,14 +79,14 @@ public class RetroArchEndToEndTests
                 // disabled inputs — not in 6-Button mapping
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decorations
-                new(Input: null,                  Src: "LineStart.png"),
-                new(Input: null,                  Src: "LineL_Multi.png"),
-                new(Input: null,                  Src: "LineDpad_Multi.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"),
+                new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         // A↔B swap moves labels: ButtonX carries B's label ("Block"), ButtonA carries A's label ("Low Punch")
@@ -135,18 +135,18 @@ public class RetroArchEndToEndTests
                 // A→ButtonX, B→ButtonA, C→ButtonB — all labeled "Jump"; face-button Stack renders
                 new(Input: "ButtonX",             Src: @"Sega Genesis\A.png",     W: 64,  H: 64),
                 new(Input: "ButtonX",             Src: @"Sega Genesis\A.png",     W: 44,  H: 44),  // top-level + Stack
-                new(Input: "ButtonX",             Src: "LineX.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
                 new(Input: "ButtonA",             Src: @"Sega Genesis\B.png",     W: 64,  H: 64),
                 new(Input: "ButtonA",             Src: @"Sega Genesis\B.png",     W: 44,  H: 44),
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonB",             Src: @"Sega Genesis\C.png",     W: 64,  H: 64),
                 new(Input: "ButtonB",             Src: @"Sega Genesis\C.png",     W: 44,  H: 44),
-                new(Input: "ButtonB",             Src: "LineB.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
                 // ButtonY not in 3-Button mapping — dim; Stack group visible (A/B/C labeled), so
                 // ButtonY renders twice (top-level + Stack) and its line decoration also renders dim
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonY",             Src: "LineY.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 // Start active (inherited Pause label); ButtonBack not in 3-Button → dim
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),  // top-level + Stack
@@ -158,25 +158,25 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",      W: 34,  H: 34),
                 new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",     W: 34,  H: 34),
                 new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "LineDpad_Multi.png"),                               // overlay on Input, InputName="ButtonDpad"
+                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),                               // overlay on Input, InputName="ButtonDpad"
                 // AxisLeftStick "Move" via analogToDigital; no directional mirrors; OneOf second alt fires
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",       W: 124, H: 124), // top-level auto-blur: active (hasLabel)
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",       W: 64,  H: 64),  // OneOf second alt render
-                new(Input: "AxisLeftStick",       Src: "LineL.png"),
+                new(Input: "AxisLeftStick",       Src: "Line_AxisLeftStick.png"),
                 // shoulder/trigger buttons — not in 3-Button mapping → dim
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",         W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",    W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",      W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decoration; no LineL_Multi — Dpad label is whole-stick only, no direction
-                // labels exist, so AxisLeftStick OneOf fires its second alt (LineL.png), not the first
-                new(Input: null,                  Src: "LineStart.png"));
+                // labels exist, so AxisLeftStick OneOf fires its second alt (Line_AxisLeftStick.png), not the first
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
@@ -223,10 +223,10 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 64,  H: 64),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 44,  H: 44),
                 // per-input line decorations in the face-button Stack — all active (all face buttons labeled)
-                new(Input: "ButtonA",             Src: "LineA.png"),
-                new(Input: "ButtonB",             Src: "LineB.png"),
-                new(Input: "ButtonX",             Src: "LineX.png"),
-                new(Input: "ButtonY",             Src: "LineY.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),
                 // Start active (inherited Pause label); Back mapped (Select) but unlabeled — top-level
                 // mapped-input-blur passes showIf=mapping so it's active, Stack small-label-blur fails so dim
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 44,  H: 44),
@@ -235,13 +235,13 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                   W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 // shoulder/trigger buttons — mapped (L1/R1/L2/R2) but unlabeled → dim with platform images
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: @"Sony Playstation 2\L1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: @"Sony Playstation 2\R2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: @"Sony Playstation 2\R1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 // Guide not in DualShock mapping — fully unmapped, falls back to generic image
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",                  W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 // Sticks + Dpad mapped but unlabeled; no L/R/Dpad PS2 art → fall back to generic; OneOf
@@ -250,7 +250,7 @@ public class RetroArchEndToEndTests
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",               W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decoration above the Start/Back stack (group is visible because Start is labeled)
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // Cross↔Circle swap moves face-button labels: ButtonA carries Circle's "Right Kick",
@@ -290,14 +290,14 @@ public class RetroArchEndToEndTests
                 // L2↔R2 trigger swap: AxisTriggerLeft now carries R2 (Remapped → R2.png),
                 // AxisTriggerRight now carries L2 (Remapped → L2.png)
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\R2.png",       W: 65,  H: 65),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png"),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png"),
                 new(Input: "AxisTriggerRight",    Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png"),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png"),
                 // shoulders mapped (L1/R1) but unlabeled — dim, MappedDefault → platform images
                 new(Input: "ButtonLeftShoulder",  Src: @"Sony Playstation 2\L1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder",  Src: "LineLB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: @"Sony Playstation 2\R1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 // face buttons mapped but unlabeled — dim, MappedDefault, platform images
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Square.png",   W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
@@ -315,7 +315,7 @@ public class RetroArchEndToEndTests
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",               W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135, Opacity: 0.3, BlurRadius: 8.0),
                 // group-level decoration above the Start/Back stack
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // Trigger swap moves only the trigger labels; Start inherited
@@ -359,16 +359,16 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",               W: 34,  H: 34),
                 new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",               W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",              W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
-                new(Input: null,                  Src: "LineDpad_Multi.png"),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
                 // shoulders + triggers + face buttons + sticks all mapped but unlabeled → dim
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: @"Sony Playstation 2\L1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder", Src: "LineLB.png",                                        Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder", Src: "Line_ButtonLeftShoulder.png",                                        Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: @"Sony Playstation 2\R2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: @"Sony Playstation 2\R1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Square.png",   W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonA",             Src: @"Sony Playstation 2\Cross.png",    W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
@@ -381,7 +381,7 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 34,  H: 34),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                   W: 44,  H: 44),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                   W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // Hat swap moves Up↔Down labels to the opposite physical input
@@ -419,17 +419,17 @@ public class RetroArchEndToEndTests
                 // dim because auto-blur falls through to HasLabel=false in game-specific mode
                 new(Input: "ButtonA",             Src: "ButtonA.png",                      W: 64,  H: 64,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonA",             Src: "ButtonA.png",                      W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonA",             Src: "LineA.png",                                        Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png",                                        Opacity: 0.3, BlurRadius: 8.0),
                 // Circle/Square/Triangle unaffected: MappedDefault → PS2 platform images, active
                 new(Input: "ButtonB",             Src: @"Sony Playstation 2\Circle.png",   W: 64,  H: 64),
                 new(Input: "ButtonB",             Src: @"Sony Playstation 2\Circle.png",   W: 44,  H: 44),
-                new(Input: "ButtonB",             Src: "LineB.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Square.png",   W: 64,  H: 64),
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Square.png",   W: 44,  H: 44),
-                new(Input: "ButtonX",             Src: "LineX.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 64,  H: 64),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Triangle.png", W: 44,  H: 44),
-                new(Input: "ButtonY",             Src: "LineY.png"),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),
                 // Start/Back same as other PS2 tests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 34,  H: 34),
@@ -437,18 +437,18 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                   W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 // remaining inputs all mapped but unlabeled → dim with platform images
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: @"Sony Playstation 2\L1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder", Src: "LineLB.png",                                        Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder", Src: "Line_ButtonLeftShoulder.png",                                        Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: @"Sony Playstation 2\R2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: @"Sony Playstation 2\R1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",                  W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",                W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",               W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135, Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // Cross's "Boost" label is silently dropped — Cross is no longer in ButtonToInput so
@@ -487,17 +487,17 @@ public class RetroArchEndToEndTests
                 // Cfg Cross↔Circle: ButtonA carries Circle, ButtonB carries Cross
                 new(Input: "ButtonA",             Src: @"Sony Playstation 2\Circle.png",   W: 64,  H: 64),
                 new(Input: "ButtonA",             Src: @"Sony Playstation 2\Circle.png",   W: 44,  H: 44),
-                new(Input: "ButtonA",             Src: "LineA.png"),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonB",             Src: @"Sony Playstation 2\Cross.png",    W: 64,  H: 64),
                 new(Input: "ButtonB",             Src: @"Sony Playstation 2\Cross.png",    W: 44,  H: 44),
-                new(Input: "ButtonB",             Src: "LineB.png"),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
                 // Rmp Square↔Triangle: ButtonX carries Triangle, ButtonY carries Square
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Triangle.png", W: 64,  H: 64),
                 new(Input: "ButtonX",             Src: @"Sony Playstation 2\Triangle.png", W: 44,  H: 44),
-                new(Input: "ButtonX",             Src: "LineX.png"),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Square.png",   W: 64,  H: 64),
                 new(Input: "ButtonY",             Src: @"Sony Playstation 2\Square.png",   W: 44,  H: 44),
-                new(Input: "ButtonY",             Src: "LineY.png"),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png"),
                 // Start/Back same as other PS2 tests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",                  W: 34,  H: 34),
@@ -505,18 +505,18 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",                   W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 // unaffected mapped-but-unlabeled inputs
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerLeft",     Src: "LineLT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonLeftShoulder",  Src: @"Sony Playstation 2\L1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonLeftShoulder", Src: "LineLB.png",                                        Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder", Src: "Line_ButtonLeftShoulder.png",                                        Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisTriggerRight",    Src: @"Sony Playstation 2\R2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "AxisTriggerRight",    Src: "LineRT.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: @"Sony Playstation 2\R1.png",       W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: "ButtonRightShoulder", Src: "LineRB.png",                                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                                       Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonGuide",         Src: "ButtonGuide.png",                  W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",                W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",               W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135, Opacity: 0.3, BlurRadius: 8.0),
-                new(Input: null,                  Src: "LineStart.png"));
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
                 #pragma warning restore format
 
         // Cfg moves Cross/Circle labels; rmp moves Square/Triangle labels — all 4 visible on their new slots

@@ -183,5 +183,5 @@ Variant selection: rmp wins over cfg; neither → platform Controllers.xml defau
 - `Stack` (`AlwaysInclude=true`) — always included; individual entries handle their own visibility via `showIf`
 - `OneOf` picks first alternative where `AnyVisible` is true
 - Face-button cluster is a `<Group>` wrapping a `<Stack>` of `<Input>`s with `style="input-label"` (showIf=label). When no face-button labels exist, the Group's any-descendant-visible check fails and the whole cluster (Stack + overlays) drops out
-- Directional inputs (Dpad, AxisLeftStick) use a `<OneOf>`: per-direction labels fire the first alternative (directional Stack + `LineDpad_Multi.png` / `LineL_Multi.png`); a whole-input label only fires the second alternative (single render + `LineL.png` etc.)
+- Directional inputs (Dpad, AxisLeftStick) use a `<OneOf>`: per-direction labels fire the first alternative (directional Stack + `Line_ButtonDpad_Multi.png` / `Line_AxisLeftStick_Multi.png`); a whole-input label only fires the second alternative (single render + `Line_AxisLeftStick.png` etc.)
 - An `<Overlay>`'s `InputName` comes from its parent: null when parented to a `<Group>` or `<Stack>`, the input's name when parented to an `<Input>`
