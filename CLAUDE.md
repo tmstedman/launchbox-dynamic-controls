@@ -26,7 +26,7 @@ tests/LaunchBox.Tests/     LaunchBox-layer unit tests
 
 **Test tier placement:**
 - One class, mocked collaborators → `Core.Tests`
-- Real internal wiring, I/O faked, data inline → `Core.IntegrationTests/Subsystem`
+- Real internal wiring, I/O faked, data inline → `Core.IntegrationTests/Subsystem` (what counts as a subsystem: [architecture.md](docs/architecture.md#subsystems-as-the-unit-of-work-and-the-unit-of-test))
 - Full pipeline against `Fixtures/` on disk → `Core.IntegrationTests/EndToEnd`
 
 ## Changing documentation

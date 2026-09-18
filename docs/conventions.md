@@ -68,7 +68,7 @@ Example: `LayoutResolver.Resolve` builds a `List<ILayoutElement>` locally, compu
 ### Project structure
 
 - `tests/Core.Tests/` — unit tests, no fixture files, no I/O against disk
-- `tests/Core.IntegrationTests/` — integration tests above the unit level: subsystem tests (verify one subsystem with its real internal wiring; I/O mocked so test data lives inline) and end-to-end tests (real templates, real Fixtures/ tree, full production pipeline)
+- `tests/Core.IntegrationTests/` — integration tests above the unit level: subsystem tests (verify one [subsystem](architecture.md#subsystems-as-the-unit-of-work-and-the-unit-of-test) with its real internal wiring; I/O mocked so test data lives inline) and end-to-end tests (real templates, real Fixtures/ tree, full production pipeline)
 
 A test exercising one class with mocked collaborators belongs in `Core.Tests`. A test wiring several production classes together — whether with the filesystem substituted or with the real fixture tree — belongs in `Core.IntegrationTests`. Coverage on the two projects is reported independently so the unit signal stays separable from the integration signal.
 
@@ -98,6 +98,15 @@ src/Core/InputMapping/ → DynamicControls.InputMapping
 ```
 
 A type's file name matches its primary type. Multiple records in one file are fine when they're sub-types of that primary type (see `FilteredLayout.cs`).
+
+## Class name suffixes
+
+- **`*Service`** — a subsystem entry point. Expect a factory in `Composition/` and a subsystem-tier test to exist alongside it. `ControllerOverlayService` is the exception: it is the orchestrator that runs the subsystems, not one of them.
+- **`*Resolver`** — turns inputs into a resolved value. Normally internal to one subsystem (`LayoutResolver`, `TemplateImageResolver`, `InputImageResolver`).
+- **`*Loader`** — reads from disk and parses. Several also merge the `Defaults\`/`User\` layers or resolve `inheritFrom` chains while doing it (`ConfigLoader`, `InputLabelsLoader`, `InputMappingLoader`). `TemplateLoader` deliberately does not, leaving style inheritance and image lookup to `LayoutResolver` — so don't assume a loader is a pure parser without checking.
+- **`*Config` / `*Node`** — XML deserialisation targets, per the rule above.
+
+`StaticImageResolver` is the case that fixes the first two rules in place. It is called from outside its namespace like a subsystem entry point, but it is a file lookup that short-circuits the pipeline rather than a phase of it, so it stays a `*Resolver` — see [architecture.md](architecture.md#subsystems-as-the-unit-of-work-and-the-unit-of-test).
 
 ## Records: positional vs. init-property
 

@@ -48,7 +48,7 @@ The hard boundary is `Core/` ↔ `LaunchBox/`. Anything that needs WPF, referenc
 
 ## The pipeline
 
-A single call sequence on game launch. Each meaningful step is a **subsystem** — one phase of the work with a single entry-point class (`*Service` or `*Resolver`), taking resolved types in and out. Subsystems don't share state; one subsystem's output is the next one's input. That independence is what holds the codebase together — each subsystem can change and be tested on its own, and is also the natural unit for integration testing, since wiring one subsystem up with real internals reaches a far wider scenario range than an end-to-end test can economically cover (see [conventions.md](conventions.md) for the three test tiers).
+A single call sequence on game launch. Steps 2–5 are each a **subsystem** — one phase of the work with a single `*Service` entry point, taking resolved types in and out. Subsystems don't share state; one subsystem's output is the next one's input. Step 1 short-circuits the pipeline rather than forming a link in that chain, so it isn't one — see [Subsystems as the unit of work and the unit of test](#subsystems-as-the-unit-of-work-and-the-unit-of-test). That independence is what holds the codebase together — each subsystem can change and be tested on its own, and is also the natural unit for integration testing, since wiring one subsystem up with real internals reaches a far wider scenario range than an end-to-end test can economically cover (see [conventions.md](conventions.md) for the three test tiers).
 
 Top-down:
 
@@ -71,7 +71,7 @@ Steps 2–5 are the real work and what the rest of this document covers. Each st
 
 Some users supply per-game pre-rendered overlays as raw images. `StaticImageResolver.Find(GameInfo)` looks for `User/Static/{platform}/{rom}.png` (or `.jpg`); if it hits, the rest of the pipeline is skipped and that image is returned directly. Cheap, and lets users override the dynamic output for specific games. This is the one user-facing data path with no `Defaults/` counterpart — shipping a static image would defeat the dynamic overlay.
 
-Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` (a `*Resolver`, not a `*Service`, because there's no resolution chain to walk — just a file lookup).
+Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` — a `*Resolver` rather than a `*Service` because it is a file lookup, not a subsystem. Its result *replaces* the pipeline instead of feeding the next step, and it has no internals for a subsystem test to wire up, which is also why it needs no factory in `Composition/`. See [Subsystems as the unit of work and the unit of test](#subsystems-as-the-unit-of-work-and-the-unit-of-test).
 
 ### 2. Input mapping resolution
 
@@ -227,7 +227,14 @@ Coordinates in `Layout.xml` can be absolute (`x="100"`) or relative (`x="+5"`, `
 
 ### Subsystems as the unit of work and the unit of test
 
-A subsystem is one phase of the pipeline (`Templates/`, `Labels/`, `InputMapping/`, `Rendering/`) with one `*Service` entry point and resolved-type input and output. Subsystems don't share state — one subsystem's output is the next one's input — so each one can be thought about, changed, and tested on its own. The test tiers follow this split:
+A subsystem is one phase of the pipeline — `InputMapping/`, `Labels/`, `Templates/`, `Rendering/` — with one `*Service` entry point and resolved-type input and output. Subsystems don't share state: one subsystem's output is the next one's input, so each can be thought about, changed, and tested on its own.
+
+**Three signals travel together, and a new candidate should earn all three**: a `*Service` entry point, a factory in `Composition/`, and a subsystem-tier test. Two things sit outside deliberately:
+
+- **`Static/` is not a subsystem.** It short-circuits the pipeline rather than forming a link in it — on a hit its result replaces everything downstream, on a miss it contributes nothing to what follows. `StaticImageResolver` has no domain collaborators, so a subsystem test of it would be identical to its unit test. It has none of the three signals, and shouldn't.
+- **`ControllerOverlayService` is not a subsystem** either, despite the suffix. It is the orchestrator that runs them.
+
+The test tiers follow this split:
 
 - **Unit tests** (`tests/Core.Tests/`) — one class at a time, collaborators substituted
 - **Subsystem tests** (`tests/Core.IntegrationTests/Subsystem/`) — one subsystem wired up for real; scenario data lives inline next to the assertions, so each test covers a focused case without a new fixture tree
