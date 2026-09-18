@@ -1,4 +1,5 @@
 using DynamicControls;
+using DynamicControls.Infrastructure;
 using DynamicControls.Rendering;
 using NSubstitute;
 using Unbroken.LaunchBox.Plugins.Data;
@@ -10,9 +11,10 @@ public class OnGameLaunchHandlerTests
     private readonly IControllerOverlayService _overlayService = Substitute.For<IControllerOverlayService>();
     private readonly IRetroArchCoreResolver _coreResolver = Substitute.For<IRetroArchCoreResolver>();
     private readonly IDynamicControlsViewModel _viewModel = Substitute.For<IDynamicControlsViewModel>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
 
     private OnGameLaunchHandler CreateHandler() =>
-        new(_overlayService, _coreResolver, _viewModel);
+        new(_overlayService, _coreResolver, _viewModel, _logger);
 
     [Fact]
     public void OnBeforeGameLaunching_NullGame_DoesNothing()

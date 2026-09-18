@@ -1,3 +1,4 @@
+using DynamicControls.Infrastructure;
 using Unbroken.LaunchBox.Plugins.Data;
 using DynamicControls;
 using DynamicControls.Rendering;
@@ -15,11 +16,13 @@ namespace DynamicControls.LaunchBox;
 public class OnGameLaunchHandler(
     IControllerOverlayService overlayService,
     IRetroArchCoreResolver retroArchCoreResolver,
-    IDynamicControlsViewModel viewModel)
+    IDynamicControlsViewModel viewModel,
+    ILogger logger)
 {
     private readonly IControllerOverlayService _overlayService = overlayService;
     private readonly IRetroArchCoreResolver _retroArchCoreResolver = retroArchCoreResolver;
     private readonly IDynamicControlsViewModel _viewModel = viewModel;
+    private readonly ILogger _logger = logger;
 
     /// <summary>
     /// Resolves the controller overlay for the given game and updates the bound view model.
@@ -29,11 +32,19 @@ public class OnGameLaunchHandler(
     /// </summary>
     public void OnBeforeGameLaunching(IGame? game, IEmulator? emulator)
     {
-        if (game?.ApplicationPath == null) return;
+        if (game?.ApplicationPath == null)
+        {
+            _logger.Error("Game launch ignored: LaunchBox supplied no game or no ApplicationPath");
+            return;
+        }
 
         string romName = Path.GetFileNameWithoutExtension(game.ApplicationPath);
         string platform = game.Platform;
-        if (string.IsNullOrEmpty(romName) || string.IsNullOrEmpty(platform)) return;
+        if (string.IsNullOrEmpty(romName) || string.IsNullOrEmpty(platform))
+        {
+            _logger.Error($"Game launch ignored: romName='{romName}', platform='{platform}' — one is empty");
+            return;
+        }
 
         var gameInfo = new GameInfo(
             Platform: platform,

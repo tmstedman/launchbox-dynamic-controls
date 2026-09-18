@@ -46,7 +46,11 @@ public class ControllerOverlayService(
     /// <inheritdoc />
     public ControllerOverlayModel Resolve(GameInfo game)
     {
-        if (_defaultTemplate == null) return new ControllerOverlayModel();
+        if (_defaultTemplate == null)
+        {
+            _logger.Error("No DefaultTemplate configured — nothing will be rendered. Check <DefaultTemplate> in GlobalConfig.xml.");
+            return new ControllerOverlayModel();
+        }
 
         try
         {

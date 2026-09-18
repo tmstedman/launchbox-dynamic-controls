@@ -21,13 +21,16 @@ public static class ControllerOverlayFactory
     {
         var fs = new SystemFileSystem();
         var logger = Logger.ForRoot(fs, rootDir);
-        var lfs = new LayeredFileSystem(rootDir, fs);
 
+        // Clear before anything is written, so the session's first diagnostics survive. Doing it
+        // after loading config destroyed exactly the lines that explain a config problem.
+        logger.ClearLog();
+        logger.Info($"Data root: {rootDir}");
+
+        var lfs = new LayeredFileSystem(rootDir, fs);
         GlobalConfig config = ConfigLoader.Load(lfs, logger);
         logger.IsDebugEnabled = config.Debug;
-        // Always clear on startup so the log reflects only the current session and can't grow
-        // unbounded — Info/Error write regardless of the debug flag.
-        logger.ClearLog();
+        logger.Info($"Config: DefaultTemplate='{config.DefaultTemplate}', Debug={config.Debug}, EnableMame={config.EnableMame}, EnableRetroArch={config.EnableRetroArch}");
 
         InputLabelsService inputLabelsService = InputLabelsFactory.Create(lfs, logger, config);
         InputMappingService inputMappingService = InputMappingFactory.Create(lfs, fs, logger, config);
