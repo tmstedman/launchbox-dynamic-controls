@@ -3,4 +3,81 @@
         <START>Start</START>
         <COIN>Insert Coin</COIN>
     </Defaults>
+
+    <Game romName="005">
+        <BUTTON1>Shoot</BUTTON1>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="1on1gov">
+        <BUTTON1>Block</BUTTON1>
+        <BUTTON2>Steal</BUTTON2>
+        <BUTTON3>Shoot</BUTTON3>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3countb">
+        <BUTTON1>Punch / Malevolent Move</BUTTON1>
+        <BUTTON2>Kick / Pin</BUTTON2>
+        <BUTTON3>Jump</BUTTON3>
+        <BUTTON4>Tag / Fall</BUTTON4>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3in1semi">
+        <BUTTON1>A</BUTTON1>
+        <BUTTON2>B</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3kokushi">
+        <BUTTON1>Select</BUTTON1>
+        <BUTTON2>Cancel</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3on3dunk">
+        <BUTTON1>Pass</BUTTON1>
+        <BUTTON2>Jump / Shoot</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3stooges">
+        <BUTTON1>Attack</BUTTON1>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3wonders">
+        <BUTTON1>Shoot / Push</BUTTON1>
+        <BUTTON2>Jump / Special Shot</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="3x3puzzl">
+        <BUTTON1>A</BUTTON1>
+        <BUTTON2>B</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="4dwarrio">
+        <BUTTON1>Shoot</BUTTON1>
+        <BUTTON2>Alt Weapon</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="4enraya">
+        <BUTTON2>Shoot</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="4in1">
+        <BUTTON1>Shoot</BUTTON1>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
+
+    <Game romName="4in1boot">
+        <BUTTON1>A</BUTTON1>
+        <BUTTON2>B</BUTTON2>
+        <JOYSTICK>Move</JOYSTICK>
+    </Game>
 </Labels>
