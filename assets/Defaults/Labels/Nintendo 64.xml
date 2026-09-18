@@ -1,10 +1,10 @@
 <Labels>
     <Game romName="Super Mario 64">
-        <B>Punch</B>
-        <A>Jump</A>
-        <Z>Crouch</Z>
-        <Stick-Any>Move</Stick-Any>
-        <C-Any>Camera</C-Any>
-        <Start>Start</Start>
+        <Input name="B">Punch</Input>
+        <Input name="A">Jump</Input>
+        <Input name="Z">Crouch</Input>
+        <Input name="Stick-Any">Move</Input>
+        <Input name="C-Any">Camera</Input>
+        <Input name="Start">Start</Input>
     </Game>
 </Labels>

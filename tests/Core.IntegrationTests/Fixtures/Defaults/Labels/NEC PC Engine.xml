@@ -1,11 +1,11 @@
 <Labels>
   <Defaults>
-    <Run>Pause</Run>
+    <Input name="Run">Pause</Input>
   </Defaults>
   <Game romName="Street Fighter II Dash (Japan)">
-    <I>Light Punch</I>
-    <II>Medium Punch</II>
-    <III>Heavy Punch</III>
-    <IV>Light Kick</IV>
+    <Input name="I">Light Punch</Input>
+    <Input name="II">Medium Punch</Input>
+    <Input name="III">Heavy Punch</Input>
+    <Input name="IV">Light Kick</Input>
   </Game>
 </Labels>

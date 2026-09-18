@@ -11,12 +11,12 @@ Example:
 
   <Labels>
       <Defaults>
-          <Start>Pause</Start>
+          <Input name="Start">Pause</Input>
       </Defaults>
 
       <Game launchBoxId="1234" romName="Sonic the Hedgehog (USA)">
-          <A>Jump</A>
-          <B>Spin Dash</B>
+          <Input name="A">Jump</Input>
+          <Input name="B">Spin Dash</Input>
       </Game>
   </Labels>
 
@@ -27,7 +27,12 @@ The launchBoxId attribute is the LaunchBox Games Database ID and is the primary 
 the plugin finds the entry regardless of your ROM's filename. The romName attribute is
 a fallback for games without a database ID.
 
-Element names are the button names printed on the original hardware (A, B, C for
+A space-separated name describes an action performed by pressing several buttons at
+once, such as <Input name="BUTTON1 BUTTON2">Power Move</Input>. These are recorded
+for the future but are not displayed yet — the plugin notes them in the log and
+carries on.
+
+The name attribute is the button as printed on the original hardware (A, B, C for
 Sega Genesis; A, B, X, Y, L, R for Super Nintendo; etc.), not the names of buttons
 on your Xbox or PlayStation controller. They must match the Mapping/@name values
 defined in Defaults\Controllers\{Platform}.xml for that platform — unrecognised

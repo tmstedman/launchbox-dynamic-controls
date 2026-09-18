@@ -107,17 +107,19 @@ Labels tell the plugin what each button does in a specific game. All labels for 
 <!-- User\Labels\Sega Genesis.xml -->
 <Labels>
     <Defaults>
-        <Start>Pause</Start>
+        <Input name="Start">Pause</Input>
     </Defaults>
 
     <Game launchBoxId="1234" romName="Sonic the Hedgehog (USA)">
-        <A>Jump</A>
-        <B>Spin Dash</B>
+        <Input name="A">Jump</Input>
+        <Input name="B">Spin Dash</Input>
     </Game>
 </Labels>
 ```
 
-The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. Button names are the names printed on the original hardware (the same names used in Controllers and InputMappings).
+The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers and InputMappings — and the element's text is what the button does.
+
+A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. These are recorded for the future but **not yet displayed** — the plugin logs them and moves on. Existing entries are safe to add to; they will start rendering once combination support lands.
 
 ### MAME controls.xml support
 

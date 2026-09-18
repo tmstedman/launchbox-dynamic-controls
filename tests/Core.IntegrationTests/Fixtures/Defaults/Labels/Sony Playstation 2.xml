@@ -1,31 +1,31 @@
 <Labels>
   <Defaults>
-    <Start>Pause</Start>
+    <Input name="Start">Pause</Input>
   </Defaults>
   <Game romName="Burnout 3">
-    <Cross>Boost</Cross>
-    <Circle>Brake</Circle>
-    <Square>Handbrake</Square>
-    <Triangle>Camera</Triangle>
+    <Input name="Cross">Boost</Input>
+    <Input name="Circle">Brake</Input>
+    <Input name="Square">Handbrake</Input>
+    <Input name="Triangle">Camera</Input>
   </Game>
   <Game romName="Crash Bandicoot">
-    <Dpad-Up>Jump</Dpad-Up>
-    <Dpad-Down>Crouch</Dpad-Down>
+    <Input name="Dpad-Up">Jump</Input>
+    <Input name="Dpad-Down">Crouch</Input>
   </Game>
   <Game romName="Need for Speed Underground 2">
-    <L2>Brake</L2>
-    <R2>Accelerate</R2>
+    <Input name="L2">Brake</Input>
+    <Input name="R2">Accelerate</Input>
   </Game>
   <Game romName="Resident Evil 4">
-    <Cross>Attack</Cross>
-    <Circle>Cancel</Circle>
-    <Square>Reload</Square>
-    <Triangle>Inventory</Triangle>
+    <Input name="Cross">Attack</Input>
+    <Input name="Circle">Cancel</Input>
+    <Input name="Square">Reload</Input>
+    <Input name="Triangle">Inventory</Input>
   </Game>
   <Game romName="Tekken 5">
-    <Cross>Left Kick</Cross>
-    <Circle>Right Kick</Circle>
-    <Square>Left Punch</Square>
-    <Triangle>Right Punch</Triangle>
+    <Input name="Cross">Left Kick</Input>
+    <Input name="Circle">Right Kick</Input>
+    <Input name="Square">Left Punch</Input>
+    <Input name="Triangle">Right Punch</Input>
   </Game>
 </Labels>

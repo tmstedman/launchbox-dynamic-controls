@@ -1,10 +1,10 @@
 <Labels>
     <Defaults>
-        <Select>Select</Select>
-        <Reset>Reset</Reset>
-        <Left-Difficulty-A>Left Difficulty A</Left-Difficulty-A>
-        <Right-Difficulty-A>Right Difficulty A</Right-Difficulty-A>
-        <Left-Difficulty-B>Left Difficulty B</Left-Difficulty-B>
-        <Right-Difficulty-B>Right Difficulty B</Right-Difficulty-B>
+        <Input name="Select">Select</Input>
+        <Input name="Reset">Reset</Input>
+        <Input name="Left-Difficulty-A">Left Difficulty A</Input>
+        <Input name="Right-Difficulty-A">Right Difficulty A</Input>
+        <Input name="Left-Difficulty-B">Left Difficulty B</Input>
+        <Input name="Right-Difficulty-B">Right Difficulty B</Input>
     </Defaults>
 </Labels>

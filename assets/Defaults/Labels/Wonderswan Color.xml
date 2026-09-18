@@ -1,6 +1,6 @@
 <Labels>
     <Defaults>
         <!-- Emulator controls -->
-        <RotateScreen>Rotate screen &amp; Swap d-pads</RotateScreen>
+        <Input name="RotateScreen">Rotate screen &amp; Swap d-pads</Input>
     </Defaults>
 </Labels>

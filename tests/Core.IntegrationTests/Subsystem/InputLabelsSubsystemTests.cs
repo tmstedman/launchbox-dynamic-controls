@@ -9,15 +9,15 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the input-labels subsystem with its real internal wiring intact:
-/// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <c>&lt;Defaults&gt;</c>
-/// blocks from the per-platform <c>Labels/{platform}.xml</c> file) and
+/// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <Input name="c">&lt;Defaults&gt;</Input>
+/// blocks from the per-platform <Input name="c">Labels/{platform}.xml</Input> file) and
 /// <see cref="Plugins.ControlsXml.MameControlsXmlSource"/> +
 /// <see cref="Plugins.ControlsXml.ControlsXmlLoader"/> (BYOAC controls.xml parsing, MAME-gated)
 /// composing through <see cref="InputLabelsPlugins"/> (enable-filtering + chain order) into
 /// <see cref="InputLabelsService"/> (game-loader chain, inheritable-default merge,
-/// platform-button → generic-input translation, and the <c>IsGameSpecific</c> flag). Clone-of
+/// platform-button → generic-input translation, and the <Input name="c">IsGameSpecific</Input> flag). Clone-of
 /// fallback is pure service control flow with no loader-wiring dependency, so it stays in the
-/// unit tier (<c>InputLabelsServiceTests</c>) rather than being re-tested here.
+/// unit tier (<Input name="c">InputLabelsServiceTests</Input>) rather than being re-tested here.
 ///
 /// The only faked seam is <see cref="IFileSystem"/> — label XML lives inline in each test and is
 /// parsed for real. The <see cref="ResolvedMapping"/> that drives translation is supplied
@@ -45,7 +45,7 @@ public class InputLabelsSubsystemTests
             config: new GlobalConfig { EnableMame = enableMame });
 
     /// <summary>Builds a <see cref="ResolvedMapping"/> from a platform-button → generic-inputs
-    /// table; only <c>ButtonToInput</c> is read by the labels subsystem.</summary>
+    /// table; only <Input name="c">ButtonToInput</Input> is read by the labels subsystem.</summary>
     private static ResolvedMapping Mapping(params (string Button, string[] Inputs)[] entries) =>
         MappingOf(buttonToInput: entries.ToDictionary(
             e => e.Button,
@@ -58,8 +58,8 @@ public class InputLabelsSubsystemTests
     {
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Accelerate</A>
-              <B>Brake</B>
+              <Input name="A">Accelerate</Input>
+              <Input name="B">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"]));
@@ -78,8 +78,8 @@ public class InputLabelsSubsystemTests
         // C has a label but no entry in the mapping — it can't be placed on any input, so it drops.
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Accelerate</A>
-              <C>Nitro</C>
+              <Input name="A">Accelerate</Input>
+              <Input name="C">Nitro</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -95,7 +95,7 @@ public class InputLabelsSubsystemTests
         // A2D mirror: one Dpad button drives both the Dpad and the left stick generic.
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <Dpad-Up>Look Up</Dpad-Up>
+              <Input name="Dpad-Up">Look Up</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("Dpad-Up", ["ButtonDpadUp", "AxisLeftStickUp"]));
@@ -114,13 +114,13 @@ public class InputLabelsSubsystemTests
     {
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Accelerate</A>
+              <Input name="A">Accelerate</Input>
             </InputLabels>
             """);
         _dc.WriteDefaultLabels(Platform, """
             <InputLabels>
-              <Start>Pause</Start>
-              <B>Brake</B>
+              <Input name="Start">Pause</Input>
+              <Input name="B">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(
@@ -143,12 +143,12 @@ public class InputLabelsSubsystemTests
     {
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <Start>Resume Race</Start>
+              <Input name="Start">Resume Race</Input>
             </InputLabels>
             """);
         _dc.WriteDefaultLabels(Platform, """
             <InputLabels>
-              <Start inherit="true">Pause</Start>
+              <Input name="Start">Pause</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("Start", ["ButtonStart"]));
@@ -166,8 +166,8 @@ public class InputLabelsSubsystemTests
     {
         _dc.WriteDefaultLabels(Platform, """
             <InputLabels>
-              <Start inherit="true">Pause</Start>
-              <A>Accelerate</A>
+              <Input name="Start">Pause</Input>
+              <Input name="A">Accelerate</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("Start", ["ButtonStart"]), ("A", ["ButtonA"]));
@@ -196,7 +196,7 @@ public class InputLabelsSubsystemTests
         _dc.WriteGameLabels(Platform, "OutRun", "<InputLabels></InputLabels>");
         _dc.WriteDefaultLabels(Platform, """
             <InputLabels>
-              <A>Accelerate</A>
+              <Input name="A">Accelerate</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -290,7 +290,7 @@ public class InputLabelsSubsystemTests
         // The file-based loader is first in the chain, so it takes priority over controls.xml.
         _dc.WriteGameLabels(Arcade, "dkong", """
             <InputLabels>
-              <BUTTON1>Leap</BUTTON1>
+              <Input name="BUTTON1">Leap</Input>
             </InputLabels>
             """);
         _dc.WriteControlsXml("""
@@ -318,12 +318,12 @@ public class InputLabelsSubsystemTests
         // Defaults labels file has A=Accelerate; User labels file replaces it with A=Boost.
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Accelerate</A>
+              <Input name="A">Accelerate</Input>
             </InputLabels>
             """);
         _dc.WriteUserGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Boost</A>
+              <Input name="A">Boost</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -343,7 +343,7 @@ public class InputLabelsSubsystemTests
         // Matching by id lets the entry be found regardless of the ROM filename.
         _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
             <InputLabels>
-              <A>Brake</A>
+              <Input name="A">Brake</Input>
             </InputLabels>
             """, launchBoxId: 42);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -364,7 +364,7 @@ public class InputLabelsSubsystemTests
         // ROM's brackets so "OutRun (USA, Europe)" finds the "OutRun" entry.
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Brake</A>
+              <Input name="A">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -383,7 +383,7 @@ public class InputLabelsSubsystemTests
         // entry's brackets so "OutRun" finds the "OutRun (USA, Europe)" entry.
         _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
             <InputLabels>
-              <A>Brake</A>
+              <Input name="A">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -402,7 +402,7 @@ public class InputLabelsSubsystemTests
         // bare title, so the match succeeds.
         _dc.WriteGameLabels(Platform, "OutRun (USA, Europe)", """
             <InputLabels>
-              <A>Brake</A>
+              <Input name="A">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -421,7 +421,7 @@ public class InputLabelsSubsystemTests
         // "Sonic" should not match an "OutRun" entry.
         _dc.WriteGameLabels(Platform, "OutRun", """
             <InputLabels>
-              <A>Brake</A>
+              <Input name="A">Brake</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("A", ["ButtonA"]));
@@ -442,13 +442,13 @@ public class InputLabelsSubsystemTests
         // the Defaults entry is kept.
         _dc.WriteDefaultLabels(Platform, """
             <InputLabels>
-              <Start>Pause</Start>
-              <B>Cancel</B>
+              <Input name="Start">Pause</Input>
+              <Input name="B">Cancel</Input>
             </InputLabels>
             """);
         _dc.WriteUserDefaultLabels(Platform, """
             <InputLabels>
-              <Start>Resume</Start>
+              <Input name="Start">Resume</Input>
             </InputLabels>
             """);
         ResolvedMapping mapping = Mapping(("Start", ["ButtonStart"]), ("B", ["ButtonB"]));

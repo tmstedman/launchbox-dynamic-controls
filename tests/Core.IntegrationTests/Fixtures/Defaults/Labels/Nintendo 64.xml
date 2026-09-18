@@ -1,15 +1,15 @@
 <Labels>
   <Defaults>
-    <Start>Pause</Start>
+    <Input name="Start">Pause</Input>
   </Defaults>
   <Game romName="Goldeneye 007">
-    <B>Weapon</B>
-    <A>Action</A>
-    <L>Aim</L>
-    <R>Aim</R>
-    <Z>Fire</Z>
-    <Stick-Any>Look</Stick-Any>
-    <Dpad-Any>Move</Dpad-Any>
-    <C-Any>Move</C-Any>
+    <Input name="B">Weapon</Input>
+    <Input name="A">Action</Input>
+    <Input name="L">Aim</Input>
+    <Input name="R">Aim</Input>
+    <Input name="Z">Fire</Input>
+    <Input name="Stick-Any">Look</Input>
+    <Input name="Dpad-Any">Move</Input>
+    <Input name="C-Any">Move</Input>
   </Game>
 </Labels>

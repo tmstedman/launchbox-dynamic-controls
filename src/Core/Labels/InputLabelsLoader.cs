@@ -11,17 +11,20 @@ namespace DynamicControls.Labels;
 /// then by <c>name</c> (ROM name). The <c>&lt;Defaults&gt;</c> block is merged the same way:
 /// User button entries override Defaults button entries by name.
 ///
-/// <para>File format:</para>
+/// <para>File format. Each entry names a platform button in the <c>name</c> attribute and carries
+/// its display text as the element's content:</para>
 /// <code>
 /// &lt;Labels&gt;
 ///   &lt;Defaults&gt;
-///     &lt;Start&gt;Pause&lt;/Start&gt;
+///     &lt;Input name="Start"&gt;Pause&lt;/Input&gt;
 ///   &lt;/Defaults&gt;
 ///   &lt;Game launchBoxId="12345" romName="Sonic the Hedgehog (USA, Europe)"&gt;
-///     &lt;A&gt;Jump&lt;/A&gt;
+///     &lt;Input name="A"&gt;Jump&lt;/Input&gt;
 ///   &lt;/Game&gt;
 /// &lt;/Labels&gt;
 /// </code>
+/// <para>A space-separated <c>name</c> denotes a button combination. Those entries parse without
+/// error but are ignored, since resolving them needs mapping support that does not exist yet.</para>
 /// </summary>
 public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLabelsLoader
 {
@@ -125,13 +128,35 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         var result = new InputLabelsConfig();
         foreach (XmlElement node in parent.ChildNodes.OfType<XmlElement>())
         {
-            string label = node.InnerText;
-            if (string.IsNullOrEmpty(label))
+            if (node.Name != "Input")
             {
-                _logger.Error($"Skipping <{node.Name}> in {path}: element has no text value");
+                _logger.Error($"Skipping <{node.Name}> in {path}: expected <Input name=\"...\">label</Input>");
                 continue;
             }
-            result.Labels.Add(new LabelEntry { Name = node.Name, Label = label });
+
+            string? name = node.Attributes["name"]?.Value;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                _logger.Error($"Skipping <Input> in {path}: missing 'name' attribute");
+                continue;
+            }
+
+            // A space-separated name means "these buttons pressed together". Not yet resolvable,
+            // so the entry is skipped rather than mis-attributed to one of the buttons named.
+            if (name.Contains(' '))
+            {
+                _logger.Info($"Ignoring <Input name=\"{name}\"> in {path}: labels for button combinations are not supported yet");
+                continue;
+            }
+
+            string label = node.InnerText.Trim();
+            if (string.IsNullOrEmpty(label))
+            {
+                _logger.Error($"Skipping <Input name=\"{name}\"> in {path}: element has no text value");
+                continue;
+            }
+
+            result.Labels.Add(new LabelEntry { Name = name, Label = label });
         }
         return result;
     }

@@ -1,5 +1,5 @@
 <Labels>
   <Game romName="UserLabelsTest">
-    <A>User Brake</A>
+    <Input name="A">User Brake</Input>
   </Game>
 </Labels>

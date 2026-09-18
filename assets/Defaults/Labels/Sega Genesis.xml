@@ -1,11 +1,11 @@
 <Labels>
     <Game romName="OutRun">
-        <Dpad-Left>Steer</Dpad-Left>
-        <Dpad-Right>Steer</Dpad-Right>
-        <Dpad-Up>Low gear</Dpad-Up>
-        <Dpad-Down>High gear</Dpad-Down>
-        <A>Brake</A>
-        <B>Accelerate</B>
-        <Start>Pause</Start>
+        <Input name="Dpad-Left">Steer</Input>
+        <Input name="Dpad-Right">Steer</Input>
+        <Input name="Dpad-Up">Low gear</Input>
+        <Input name="Dpad-Down">High gear</Input>
+        <Input name="A">Brake</Input>
+        <Input name="B">Accelerate</Input>
+        <Input name="Start">Pause</Input>
     </Game>
 </Labels>

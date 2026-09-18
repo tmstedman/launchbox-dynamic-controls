@@ -1,42 +1,42 @@
 <Labels>
   <Defaults>
-    <Start>Pause</Start>
+    <Input name="Start">Pause</Input>
   </Defaults>
   <Game romName="Aladdin">
-    <A>Sword</A>
-    <B>Jump</B>
-    <C>Throw</C>
+    <Input name="A">Sword</Input>
+    <Input name="B">Jump</Input>
+    <Input name="C">Throw</Input>
   </Game>
   <Game romName="Mortal Kombat II">
-    <A>Low Punch</A>
-    <X>High Punch</X>
-    <C>Low Kick</C>
-    <Z>High Kick</Z>
-    <B>Block</B>
-    <Y>Block</Y>
-    <Dpad-Up>Jump</Dpad-Up>
-    <Dpad-Down>Crouch</Dpad-Down>
-    <Dpad-Left>Back</Dpad-Left>
-    <Dpad-Right>Forward</Dpad-Right>
+    <Input name="A">Low Punch</Input>
+    <Input name="X">High Punch</Input>
+    <Input name="C">Low Kick</Input>
+    <Input name="Z">High Kick</Input>
+    <Input name="B">Block</Input>
+    <Input name="Y">Block</Input>
+    <Input name="Dpad-Up">Jump</Input>
+    <Input name="Dpad-Down">Crouch</Input>
+    <Input name="Dpad-Left">Back</Input>
+    <Input name="Dpad-Right">Forward</Input>
   </Game>
   <Game launchBoxId="1" romName="OutRun">
-    <Dpad-Left>Steer</Dpad-Left>
-    <Dpad-Right>Steer</Dpad-Right>
-    <Dpad-Up>Low gear</Dpad-Up>
-    <Dpad-Down>High gear</Dpad-Down>
-    <A>Brake</A>
-    <B>Accelerate</B>
+    <Input name="Dpad-Left">Steer</Input>
+    <Input name="Dpad-Right">Steer</Input>
+    <Input name="Dpad-Up">Low gear</Input>
+    <Input name="Dpad-Down">High gear</Input>
+    <Input name="A">Brake</Input>
+    <Input name="B">Accelerate</Input>
   </Game>
   <Game romName="Sonic the Hedgehog">
-    <A>Jump</A>
-    <B>Jump</B>
-    <C>Jump</C>
-    <Dpad-Any>Move</Dpad-Any>
+    <Input name="A">Jump</Input>
+    <Input name="B">Jump</Input>
+    <Input name="C">Jump</Input>
+    <Input name="Dpad-Any">Move</Input>
   </Game>
   <Game romName="UserLabelsTest">
-    <A>Defaults Brake</A>
+    <Input name="A">Defaults Brake</Input>
   </Game>
   <Game romName="UserMappingTest">
-    <Y>Special Attack</Y>
+    <Input name="Y">Special Attack</Input>
   </Game>
 </Labels>

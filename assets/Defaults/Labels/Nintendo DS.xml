@@ -1,12 +1,12 @@
 <Labels>
     <Defaults>
-        <Select>Select</Select>
-        <Start>Start</Start>
+        <Input name="Select">Select</Input>
+        <Input name="Start">Start</Input>
         <!-- Emulator specific functionality -->
-        <MicNoise>Make microphone noise</MicNoise>
-        <SwapScreens>Swap screens</SwapScreens>
-        <CloseLid>Close lid</CloseLid>
-        <ToggleTouchStick>Toggle touch joystick</ToggleTouchStick>
-        <MoveTouchStick>Move touch joystick</MoveTouchStick>
+        <Input name="MicNoise">Make microphone noise</Input>
+        <Input name="SwapScreens">Swap screens</Input>
+        <Input name="CloseLid">Close lid</Input>
+        <Input name="ToggleTouchStick">Toggle touch joystick</Input>
+        <Input name="MoveTouchStick">Move touch joystick</Input>
     </Defaults>
 </Labels>

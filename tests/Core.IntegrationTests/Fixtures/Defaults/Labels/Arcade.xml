@@ -1,11 +1,11 @@
 <Labels>
   <Defaults>
-    <START>Start</START>
-    <COIN>Insert Coin</COIN>
+    <Input name="START">Start</Input>
+    <Input name="COIN">Insert Coin</Input>
   </Defaults>
   <Game romName="1942">
-    <BUTTON1>Fire</BUTTON1>
-    <BUTTON2>Loop</BUTTON2>
-    <JOYSTICK>Move</JOYSTICK>
+    <Input name="BUTTON1">Fire</Input>
+    <Input name="BUTTON2">Loop</Input>
+    <Input name="JOYSTICK">Move</Input>
   </Game>
 </Labels>

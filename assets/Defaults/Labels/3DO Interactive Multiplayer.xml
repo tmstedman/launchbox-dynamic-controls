@@ -1,5 +1,5 @@
 <Labels>
     <Defaults>
-        <Start>Start</Start>
+        <Input name="Start">Start</Input>
     </Defaults>
 </Labels>
