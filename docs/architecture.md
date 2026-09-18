@@ -241,17 +241,11 @@ The render pass takes `Template`, `ResolvedMapping` and `ResolvedLabels`. It doe
 
 ### Config layering
 
-Plugin data is split into two trees under the root: `Defaults/` (shipped with the plugin, overwritten wholesale on every update) and `User/` (the user's own files, never touched by an update). Every loader reads through `LayeredFileSystem.Resolve(...segments)`, which returns the `User/` path when that file exists and the `Defaults/` path otherwise. The effect is that a user file *wholesale shadows* its `Defaults/` counterpart — a `User/Controllers/Sega Genesis.xml` replaces the shipped one entirely. This keeps customizations update-safe without a migration step: the updater only ever writes `Defaults/`.
+Plugin data is split into two trees under the root: `Defaults/` (shipped, replaced wholesale on every update) and `User/` (the user's own files, never touched by an update). Loaders resolve through `LayeredFileSystem`, which prefers a `User/` copy and falls back to the shipped one, so a loader never needs to know which layer a file came from. That indirection is what keeps customizations update-safe without a migration step — the updater only ever writes `Defaults/`.
 
 `Templates/`, `Logs/`, and the RetroArch emulator config tree live at the root and bypass layering — templates ship fixed, logs are output, and RetroArch's own configs are read from the emulator install, not the plugin data folder.
 
-Two files are **exceptions** to wholesale shadowing, both because the shadowing granularity would be wrong for them.
-
-`GlobalConfig.xml` is merged per *field*. `ConfigLoader` deserialises `Defaults/GlobalConfig.xml` as a base, then overwrites only the fields whose elements are actually *present* in `User/GlobalConfig.xml` (detected with an `XmlDocument` pass over the child element names). Without this, a user file that sets a single field would let every omitted bool deserialise to `false` and silently clobber a shipped `true` default.
-
-`Labels/{platform}.xml` is merged per *entry*. `InputLabelsLoader` reads the `Defaults/` and `User/` copies separately and overlays the user's `<Game>` entries onto the shipped ones (matched by `launchBoxId`, then `romName`), and the user's `<Defaults>` buttons onto the shipped ones by name. Because one file now holds every game on a platform, wholesale shadowing would mean labelling one game costs you the labels for all the others.
-
-The full rationale for both lives in [config-layering.md](config-layering.md).
+Most files shadow wholesale. `GlobalConfig.xml` and `Labels/{platform}.xml` merge instead, and a couple of loaders address one layer directly rather than taking the usual resolution. Which files merge, at what granularity, and what a release zip may write are specified in [config-layering.md](config-layering.md).
 
 ## Extension points
 

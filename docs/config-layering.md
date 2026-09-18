@@ -1,75 +1,72 @@
-# Config layering — defaults vs. user overrides
+# Config layering
 
-## Problem
+How the plugin resolves a data file when both a shipped copy and a user copy exist. Read this before changing where a file is loaded from, or changing how two copies of one file combine. For what each file *contains*, see [templates.md](templates.md) and [layout-xml-schema.md](layout-xml-schema.md).
 
-The plugin's data folder (`…\LaunchBox\Data\Dynamic Controls\`) holds both **shipped defaults**
-(controller vocabularies for ~50 platforms, a starter `GlobalConfig.xml`, labels) and a user's
-**own customizations** (their settings, controller tweaks, per-game remaps). Today they live in the
-same tree, so re-extracting the assets/ALL zip on update overwrites the user's work.
+## The two layers
 
-The fix: split the data folder into two layers and resolve **user-over-default** at load time, so a
-download can refresh the defaults without ever touching what the user authored.
-
-## Layout
+Plugin data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two layers:
 
 ```
 Dynamic Controls\
-  Defaults\          ← shipped; the assets/ALL zip overwrites this wholesale (no user data here)
+  Defaults\                              ← shipped; replaced wholesale on every update
     GlobalConfig.xml
     Controllers\{Platform}.xml
     InputMappings\{Platform}\{Rom}.xml
     Labels\{Platform}.xml
-  User\              ← user-authored; no user file is ever in a zip or overwritten
-                     (a README.txt skeleton ships in the folders — see Packaging impact)
-    GlobalConfig.xml            (optional)
-    Controllers\{Platform}.xml  (optional)
-    InputMappings\{Platform}\{Rom}.xml (optional)
-    Labels\{Platform}.xml        (optional)
-    Static\{Platform}\{Rom}.png         (user-supplied; not layered)
-  Templates\{Name}\  ← shipped, fixed; not overridable, so not part of the layers
+    Emulators\MAME\JoycodeMapping.xml
+    Emulators\RetroArch\{CoreDisplayName}.xml
+  User\                                  ← user-authored; never overwritten
+    (same relative paths, all optional)
+    Static\{Platform}\{Rom}.png|.jpg     ← user-only; no shipped counterpart
+  Templates\{Name}\                      ← shipped; not layered
+  Logs\                                  ← output; not layered
+  controls.xml                           ← BYOAC MAME database; not layered
 ```
 
-`Defaults\` and `User\` are strictly the two **layers of the override mechanism** — only config
-that a user can shadow lives there. Two folders sit outside that mechanism:
-- **`Templates\`** — shipped and fixed; users can't override it, so it stays at the root (not in
-  `Defaults\`). Its resolver path is unchanged.
-- **`Static\`** — purely user-supplied per-game overlay images; there's no shipped default to
-  override, so it lives under `User\` (no image is ever zipped or overwritten).
+`Defaults\` holds only shipped data — never anything a user authored. `User\` holds only user-authored files. An update writes `Defaults\` and `Templates\` and nothing else, which is what makes re-extracting a release zip safe.
 
 ## Resolution
 
-Every layered lookup checks **`User\<path>` first, then falls back to `Defaults\<path>`.** A loader
-that today resolves `rootDir + relPath` instead resolves `rootDir\User\relPath` then
-`rootDir\Defaults\relPath`.
+**A layered lookup returns `User\{path}` when that file exists, otherwise `Defaults\{path}`, otherwise null.**
 
-The two non-layered folders resolve from a single location: `Templates\` from the root (unchanged),
-`Static\` from `User\` (a missing static image just falls through to the normal rendering pipeline,
-exactly as today).
+`LayeredFileSystem.Resolve(...segments)` performs it, and returns a root-relative path that the caller reads back through `FileExists`/`OpenRead`. Loaders call it without knowing which layer won.
 
-## Per-type behaviour
+Two loaders need a specific layer instead and address it directly through `LayeredFileSystem.Defaults` / `.User`:
 
-| Config | User override? | Strategy | Granularity |
+- `InputLabelsLoader` reads both and merges them (see [Labels](#labelsplatformxml--entry-level-merge)).
+- `StaticImageResolver` reads `User\` only, because `Static\` has no shipped counterpart.
+
+## What isn't layered
+
+| Path | Resolves from | Why |
+|---|---|---|
+| `Templates\` | root | Shipped and fixed — a user cannot override a template, so it needs no layer |
+| `Static\` | `User\` only | Purely user-supplied overlay images; there is no shipped default to override |
+| `Logs\` | root | Plugin output, not configuration |
+| `controls.xml` | root | Third-party database the user supplies; not shipped, so nothing to shadow |
+| RetroArch's own `.cfg`/`.rmp` files | the emulator installation | They belong to RetroArch, not to the plugin's data folder |
+
+## Merge strategy per file
+
+| File | User override | Strategy | Granularity |
 |---|---|---|---|
-| `GlobalConfig.xml` | yes | **Merged** | per-setting |
-| `Controllers\{Platform}.xml` | yes | **Overridden** | whole file, per platform |
-| `InputMappings\{Platform}\{Rom}.xml` | yes | **Overridden** | whole file, per game |
-| `Labels\{Platform}.xml` | yes | **Merged** | per entry (per game, per default button) |
-| `Templates\` | no | shipped, fixed — root, not layered | — |
-| `Static\` | n/a — user-only | user content under `User\`, no shipped default | per game image |
+| `GlobalConfig.xml` | yes | **Merged** | per setting |
+| `Labels\{Platform}.xml` | yes | **Merged** | per entry — per game, and per default button |
+| `Controllers\{Platform}.xml` | yes | **Replaced** | whole file, per platform |
+| `InputMappings\{Platform}\{Rom}.xml` | yes | **Replaced** | whole file, per game |
+| `Emulators\**` | yes | **Replaced** | whole file |
+| `Templates\` | no | not layered | — |
+| `Static\` | user-only | not layered | per image |
 
-**`GlobalConfig.xml` and `Labels\{Platform}.xml` are merged**; everything else is a **whole-file
-override** (the user's file for that platform/game replaces the default; if absent, the default is
-used). Whole-file override is the right granularity for `Controllers\` and `InputMappings\` — each
-file describes exactly one platform or one game, so replacing it is precisely the customization the
-user meant — and it avoids any cross-file merge logic. The two merged files are merged because each
-one holds *many* independent settings, so replacing the file would discard far more than the user
-intended to change.
+**Two files merge; everything else is replaced wholesale.**
 
-## GlobalConfig merge details
+A file is replaced when it describes exactly one thing — one platform's controllers, one game's mapping — because replacing it is precisely the customization the user meant, and it needs no cross-file merge logic. A file is merged when it holds many independent settings, because replacing it would discard far more than the user intended to change.
 
-`GlobalConfig.xml` is a single global file, so a whole-file override would force users to restate
-every setting. Instead: **load `Defaults\GlobalConfig.xml`, then overlay only the settings that are
-*present* in `User\GlobalConfig.xml`.** A user who only wants a different template writes:
+## `GlobalConfig.xml` — field-level merge
+
+**Load `Defaults\GlobalConfig.xml`, then overwrite only the settings that are *present* in `User\GlobalConfig.xml`.**
+
+A user changing one setting writes only that setting, and every other default — including ones added in later releases — still applies:
 
 ```xml
 <Config>
@@ -77,54 +74,21 @@ every setting. Instead: **load `Defaults\GlobalConfig.xml`, then overlay only th
 </Config>
 ```
 
-and the other defaults (incl. future new ones) still apply.
+**The overlay must detect presence by reading the user file's child element names, not by deserializing it into a `GlobalConfig` and copying fields.** Deserialization fills absent elements with type defaults, so an omitted `<EnableRetroArch>` becomes `false` and silently overrides a shipped `true`. `ConfigLoader` makes an `XmlDocument` pass over the element names for this reason.
 
-> **Implementation note:** the overlay must merge by **element presence**, not by deserializing the
-> user file into a `GlobalConfig` and copying fields. Plain deserialization fills absent elements
-> with type defaults (e.g. an omitted `<EnableRetroArch>` becomes `false`), which would silently
-> override a shipped `true`. Read which elements the user file actually contains and override only
-> those.
+## `Labels\{Platform}.xml` — entry-level merge
 
-## Labels merge details
+**Read both copies and overlay the user's entries onto the shipped ones.**
 
-`Labels\{Platform}.xml` holds every game on the platform in one file — a `<Defaults>` block plus a
-`<Game>` element per title. Whole-file override would mean that adding labels for one game silently
-drops the shipped labels for every other game on that platform, which is never what the user wanted.
+One file holds every game on a platform, so replacing it wholesale would mean that labelling a single game discards the shipped labels for every other game on that platform.
 
-So the loader reads **both** copies and overlays entry-by-entry:
+- `<Game>` entries match by `launchBoxId` first, then `romName`. A user entry matching a shipped one replaces it; an unmatched user entry is added.
+- `<Defaults>` button entries overlay by element name. A user `<Start>` replaces the shipped `<Start>`; shipped buttons the user didn't name survive.
 
-- `<Game>` entries are matched by `launchBoxId` first, then by `romName`; a user entry that matches a
-  shipped one replaces it, and an unmatched user entry is added.
-- `<Defaults>` button entries are overlaid by element name — a user `<Start>` replaces the shipped
-  `<Start>`, and shipped buttons the user didn't mention survive.
+**The merge is per entry, not per label.** A user `<Game>` entry replaces the shipped entry for that game outright rather than combining button-by-button — so "show *these* labels for this game" stays expressible, instead of leaving the user unable to remove a shipped label.
 
-The merge is per entry, not per label: a user `<Game>` entry replaces the shipped entry for that game
-outright rather than merging button-by-button within it. Redefining a game means redefining its
-buttons — which keeps "I want this game to show *these* labels" expressible, instead of leaving the
-user unable to delete a shipped label.
+## What ships in a release zip
 
-## Packaging impact
-
-- The **assets** and **ALL** release zips ship **`Defaults\` and `Templates\`**, and never any
-  user-authored file under `User\` (which is where the user's overrides *and* their `Static\`
-  images live). Re-extracting on update is therefore always safe.
-- The zips *do* carry a `User\` skeleton: the empty subfolders plus a `README.txt` in each
-  explaining what belongs there. Those README files are the only thing an update overwrites under
-  `User\`, and they hold no user data — so keep them documentation-only and never write config
-  into that path.
-- Absence of `User\` is still handled — layered lookups fall through to `Defaults\`, and a missing
-  `User\Static\` image just renders normally.
-
-## Migration
-
-Pre-1.0, so no shim: adopt the new layout directly. Release notes tell existing users to move any
-customizations from the old flat `Config\`/`Data\` into `User\`. (Their old files are otherwise
-inert, since loaders now read `User\`/`Defaults\`.)
-
-## Out of scope
-
-- `Templates\` user overrides — shipped-only for now; revisit if users want custom artwork.
-- Per-entry merging of `Controllers`/`InputMappings` — whole-file override is sufficient for the
-  one-platform-or-one-game files; finer merging can be added later if a real need appears.
-  (`Labels` started here and moved out — see *Labels merge details* above — once one file per
-  platform made whole-file override lossy.)
+- The **assets** and **ALL** zips contain `Defaults\` and `Templates\`, and no user-authored file.
+- They also carry a `User\` skeleton: the subfolders, each with a `README.txt` describing what belongs there. Those README files are the only thing an update overwrites under `User\`. Keep them documentation-only — never write configuration to that path.
+- A missing `User\` folder is handled: layered lookups fall through to `Defaults\`, and a missing `User\Static\` image renders through the normal pipeline.

@@ -126,19 +126,9 @@ Don't change a production type's API just to make it easier to test. If a test w
 
 ## Keeping documentation in step
 
-Most of this project's documentation drift has had one cause: a change landed in the code and in
-*one* doc, and the other places describing the same thing were never swept. Every instance found so
-far was this — the labels consolidation updated the README but not `docs/architecture.md` or
-`docs/config-layering.md`; replacing `System.IO.Abstractions` updated the README but not `CLAUDE.md` or
-the CI comments; the `<Unmap>` element was described only in the shipped `assets/` guide.
+**A change to visible behaviour means checking every place that documents it, not just the nearest one.**
 
-The cause is fan-out, not carelessness. A single concept is pitched at up to five audiences — users
-(`README.md`), contributors (`docs/`), agents (`CLAUDE.md`), people browsing the installed data
-folder (`assets/**/README.txt`), and whoever next edits the build (`.github/workflows/ci.yml`, `Directory.Build.props`)
-— and nobody holds that map in their head while making a change. So here it is.
-
-**Find the row for what you changed and check every file in it.** Not every file will need an edit;
-the point is to have looked.
+One concept is normally described across five audiences at once: users (`README.md`), contributors (`docs/`), agents (`CLAUDE.md`), people browsing the installed data folder (`assets/**/README.txt`), and whoever next edits the build (`.github/workflows/ci.yml`, `Directory.Build.props`). Find the row for what you changed and check every file in it. Not every file will need an edit — the point is to have looked.
 
 | If you change… | Check these |
 |---|---|
@@ -155,16 +145,9 @@ the point is to have looked.
 
 Two habits keep the map short:
 
-- **Prefer a pointer to a restatement.** Where a row names a canonical doc, the others should link to
-  it rather than duplicate its rules. A duplicated rule is a rule that will disagree with itself.
-- **Adding a new user-facing XML element or attribute means documenting it.** The README is where
-  users discover a feature exists; nothing else reaches them. `<Unmap>` shipped working and
-  undiscoverable for months because it was only ever written up in the installed data folder.
+- **Prefer a pointer to a restatement.** Where a row names a canonical doc, the others link to it rather than duplicating its rules. A duplicated rule is one that will eventually disagree with itself.
+- **A new user-facing XML element or attribute is not finished until the README names it.** The README is the only place a user discovers that a feature exists; documenting it solely in `assets/**/README.txt` reaches only people who already went looking in the data folder.
 
 ## Pull requests
 
-(To be expanded when the repository goes public.)
-
-For now: small, focused changes; tests pass locally before submitting; one logical change per PR.
-Run the table above before opening the PR — reviewers can spot wrong code, but nobody reviews the
-doc you didn't think to open.
+Small, focused changes; one logical change per PR; tests passing locally before submitting. Run the table above before opening the PR — a reviewer can spot wrong code, but nobody reviews the doc you didn't think to open.
