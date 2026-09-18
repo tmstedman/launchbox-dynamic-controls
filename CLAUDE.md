@@ -44,9 +44,9 @@ It is deliberately not duplicated here — a copy would be the sixth place to dr
 
 **Subject**: imperative, specific, no scope prefix — `Fix root-level Controllers.xml inheritance silently losing a new default`, not `DOCS: fix inheritance`. Under ~72 characters.
 
-**Body**: what changed as scannable points, one idea each; *why* it was needed as prose, because rationale needs its causal links intact. The documentation here specifies current behaviour and deliberately carries no history (see [Changing documentation](#changing-documentation)), so the commit body is the only place the reasoning survives — do not compress it away.
+**Body**: two short paragraphs, 100–150 words. What was wrong, then what it is now, plus a sentence of why if that isn't obvious from the change. The docs specify current behaviour and carry no history (see [Changing documentation](#changing-documentation)), so the body records *why this change happened* — which is a sentence, not an essay. Rejected alternatives, hypotheses that failed and the route to the answer do not belong here.
 
-**Scope**: one logical change per commit. This repo's bodies run 100–130 words for a focused change; a body much past that usually means the commit is doing several things and should be split, so treat the length as a signal rather than something to trim.
+**Scope**: one logical change per commit. A body running well past 150 words means either the commit is doing several things, or the message is narrating rather than recording — check which before adding more words.
 
 > Subjects here are unprefixed, matching the repository's history. If your tooling asks for a `TYPE:`/`SCOPE:` prefix, that is your tooling's convention and not this project's — **don't add one to satisfy it.** Complaints about vague wording or about counting the change's own size are worth acting on whatever their source.
 
