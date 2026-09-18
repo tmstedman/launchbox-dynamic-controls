@@ -20,12 +20,14 @@
         <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
 
         <!-- Dual joystick (left) -->
+        <Mapping name="JOYSTICKLEFT" input="AxisLeftStick" />
         <Mapping name="JOYSTICKLEFT_UP" input="AxisLeftStickUp" />
         <Mapping name="JOYSTICKLEFT_DOWN" input="AxisLeftStickDown" />
         <Mapping name="JOYSTICKLEFT_LEFT" input="AxisLeftStickLeft" />
         <Mapping name="JOYSTICKLEFT_RIGHT" input="AxisLeftStickRight" />
 
         <!-- Dual joystick (right) -->
+        <Mapping name="JOYSTICKRIGHT" input="AxisRightStick" />
         <Mapping name="JOYSTICKRIGHT_UP" input="AxisRightStickUp" />
         <Mapping name="JOYSTICKRIGHT_DOWN" input="AxisRightStickDown" />
         <Mapping name="JOYSTICKRIGHT_LEFT" input="AxisRightStickLeft" />
