@@ -15,7 +15,7 @@ public interface ITemplateLoader
     /// layout file does not exist.
     /// </summary>
     /// <param name="templateName">Template folder name under <c>Templates/</c>.</param>
-    LayoutConfig? LoadLayout(string templateName);
+    LayoutDocument? LoadLayout(string templateName);
 }
 
 /// <summary>
@@ -29,7 +29,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     private readonly string _templatesDir = Path.Combine(rootDir, "Templates");
 
     /// <inheritdoc />
-    public LayoutConfig? LoadLayout(string templateName)
+    public LayoutDocument? LoadLayout(string templateName)
     {
         string templateDir = Path.Combine(_templatesDir, templateName);
         string layoutPath = Path.Combine(templateDir, "Layout.xml");
@@ -37,7 +37,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
         if (!_fs.FileExists(layoutPath)) return null;
 
-        var result = new LayoutConfig();
+        var result = new LayoutDocument();
         using Stream stream = _fs.OpenRead(layoutPath);
         var doc = new XmlDocument();
         doc.Load(stream);
@@ -68,9 +68,9 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// <summary>Parses a &lt;Head&gt; element. Each &lt;Style&gt; child is either unnamed
     /// (template-wide defaults) or named (a referenceable bundle stored in NamedStyles). Other
     /// children are logged as errors.</summary>
-    private HeadConfig ParseHead(XmlElement headNode)
+    private HeadNode ParseHead(XmlElement headNode)
     {
-        var head = new HeadConfig();
+        var head = new HeadNode();
         foreach (XmlElement child in headNode.ChildNodes.OfType<XmlElement>())
         {
             if (child.Name != "Style")
@@ -80,7 +80,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             }
 
             string? name = child.Attributes["name"]?.Value;
-            StyleConfig style = ParseStyle(child);
+            StyleNode style = ParseStyle(child);
             if (string.IsNullOrEmpty(name))
                 head.Style = style;
             else
@@ -92,9 +92,9 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// <summary>Parses a &lt;Style&gt; element's attributes. Each is nullable — absence means
     /// "fall through to the next layer" in the resolution chain (Input's explicit value, then
     /// the referenced style, then per-element attribute, then the built-in default).</summary>
-    private StyleConfig ParseStyle(XmlElement styleNode)
+    private StyleNode ParseStyle(XmlElement styleNode)
     {
-        var style = new StyleConfig { ShowIf = styleNode.Attributes["showIf"]?.Value };
+        var style = new StyleNode { ShowIf = styleNode.Attributes["showIf"]?.Value };
         if (ReadDouble(styleNode, "fontSize") is double fontSize) style.FontSize = fontSize;
         if (ReadDouble(styleNode, "minOpacity") is double minOpacity) style.MinOpacity = minOpacity;
         if (ReadDouble(styleNode, "inactiveBlurRadius") is double blur) style.InactiveBlurRadius = blur;
@@ -103,7 +103,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
     /// <summary>Routes a &lt;Body&gt;'s children (Input / Group / Stack / OneOf) into the layout's
     /// Elements list.</summary>
-    private void ParseBodyInto(XmlElement bodyNode, List<IConfigNode> output)
+    private void ParseBodyInto(XmlElement bodyNode, List<ILayoutNode> output)
     {
         foreach (XmlElement child in bodyNode.ChildNodes.OfType<XmlElement>())
         {
@@ -116,7 +116,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// to <paramref name="output"/>. Returns true if the element name matched one of those four
     /// (caller is responsible for handling unknown names). An Input that fails its own validation
     /// is treated as matched but not appended.</summary>
-    private bool TryParseLayoutChild(XmlElement node, List<IConfigNode> output)
+    private bool TryParseLayoutChild(XmlElement node, List<ILayoutNode> output)
     {
         switch (node.Name)
         {

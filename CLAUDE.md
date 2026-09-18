@@ -18,7 +18,7 @@ tests/LaunchBox.Tests/     LaunchBox-layer unit tests
 ## Conventions
 
 **Three-layer type model** — data moves through three distinct shapes:
-1. `*Config` / `*Node` records — XML deserialisation targets; **all** properties are mutable `{ get; set; }` (the deserialiser needs setters — there is no `init` in this layer), collection fields are `List<T>` with `= []` initialisers (parsers call `.Add()` after construction); never escape the loader
+1. `*Config` / `*Node` / `*Entry` records — XML deserialisation targets. `Layout.xml` is the one config file that parses into a tree, so its DTOs take AST names (`*Node`, held by `LayoutDocument`); the flat settings files take `*Config`; name/value leaves take `*Entry` (see [conventions.md](docs/conventions.md#1-raw-config-dtos)); **all** properties are mutable `{ get; set; }` (the deserialiser needs setters — there is no `init` in this layer), collection fields are `List<T>` with `= []` initialisers (parsers call `.Add()` after construction); never escape the loader
 2. Immutable positional records (`ResolvedLayout`, `ResolvedMapping`, `InputDefinition`, …) — built once, `IReadOnlyList`/`IReadOnlyDictionary` collections, `with` for derivation
 3. Derived index fields (e.g. `InputDescendants`, `CollapseInfo`) computed during the build and stored on the resolved record — not recomputed on demand
 
@@ -76,7 +76,7 @@ All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.pr
   - `TemplateFixtures.TemplateOf(...)` — wraps `Template` construction
   - `LayoutElements.Input(...)` / `Group(...)` / `Stack(...)` / `OneOf(...)` — `ILayoutElement` builders
   - `RenderingFixtures.Ctx(...)` / `Descendants(...)` — `VisibilityContext` + descendants index
-  - `TestLayout` — fluent `LayoutConfig` builder (raw XML-shaped DTOs, for `LayoutResolver` tests)
+  - `TestLayout` — fluent `LayoutDocument` builder (raw XML-shaped DTOs, for `LayoutResolver` tests)
   - `InputMappingFixtures.Game(...)` / `MappingConfig(...)` / `PlatformConfig(...)` / `ControllerDef(...)` — builders for `GameInfo` and the raw Controllers/InputMappings DTOs; use these rather than hand-constructing `InputMappingConfig` / `PlatformControllersConfig` / `ControllerConfig` inline
   - `LayoutNavigation` — extensions on `ResolvedLayout` *and* on element sequences, so lookups chain (`result.FirstInput().Children.FirstInputGroup()`): `FirstInput()` / `FirstInputGroup()` / `FirstOneOf()`, plus `Flatten()` for a depth-first walk that reaches inputs nested inside transparent Groups
 - `ShouldBeDictionaryOf(...)` — custom Shouldly assertion for exact dict contents; `ShouldContainEntry(name, input)` / `ShouldNotContainEntry(...)` match a whole `MappingEntry` by value. Both live in `Core.TestHelpers/Shouldly/` and are declared *in the `Shouldly` namespace* so they autocomplete alongside the built-ins

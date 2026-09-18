@@ -514,7 +514,7 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_UnknownNodeType_Throws()
     {
-        // given a layout containing an IConfigNode subtype that BuildNode doesn't handle
+        // given a layout containing an ILayoutNode subtype that BuildNode doesn't handle
         var config = new TestLayout();
         config.ToConfig().Elements.Add(new UnknownNode());
 
@@ -526,8 +526,8 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_UnknownNodeTypeInStack_Throws()
     {
-        // given a stack containing an IConfigNode subtype that BuildNodeInStack doesn't handle
-        var config = new LayoutConfig();
+        // given a stack containing an ILayoutNode subtype that BuildNodeInStack doesn't handle
+        var config = new LayoutDocument();
         config.Elements.Add(new StackNode { Children = [new UnknownNode()] });
 
         // when the resolver runs
@@ -618,7 +618,7 @@ public class TemplateLayoutResolverTests
     public void Resolve_InputOverlay_NullSrc_IsSkipped()
     {
         // given an input with an overlay that has no src attribute in XML
-        var config = new LayoutConfig();
+        var config = new LayoutDocument();
         config.Elements.Add(new InputNode { Name = "A", Overlays = [new OverlayNode { Src = null }] });
 
         // when the resolver runs
@@ -632,7 +632,7 @@ public class TemplateLayoutResolverTests
     public void Resolve_GroupOverlay_NullSrc_IsSkipped()
     {
         // given a group with an overlay that has no src attribute in XML
-        var config = new LayoutConfig();
+        var config = new LayoutDocument();
         config.Elements.Add(new GroupNode { Overlays = [new OverlayNode { Src = null }] });
 
         // when the resolver runs
@@ -646,7 +646,7 @@ public class TemplateLayoutResolverTests
     public void Resolve_StackOverlay_NullSrc_IsSkipped()
     {
         // given a stack with an overlay that has no src attribute in XML
-        var config = new LayoutConfig();
+        var config = new LayoutDocument();
         config.Elements.Add(new StackNode { Overlays = [new OverlayNode { Src = null }] });
 
         // when the resolver runs
@@ -660,7 +660,7 @@ public class TemplateLayoutResolverTests
     public void Resolve_GroupInStack_Overlay_NullSrc_IsSkipped()
     {
         // given a plain group nested inside a stack, with an overlay that has no src attribute in XML
-        var config = new LayoutConfig();
+        var config = new LayoutDocument();
         config.Elements.Add(new StackNode
         {
             Children = [new GroupNode { Overlays = [new OverlayNode { Src = null }] }]
@@ -674,5 +674,5 @@ public class TemplateLayoutResolverTests
         nestedGroup.Overlays.ShouldBeEmpty();
     }
 
-    private record UnknownNode : IConfigNode;
+    private record UnknownNode : ILayoutNode;
 }

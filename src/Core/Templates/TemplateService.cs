@@ -37,7 +37,7 @@ public class TemplateService(
         if (_cache.TryGetValue(templateName, out Template? cached))
             return cached;
 
-        LayoutConfig layoutConfig = _loader.LoadLayout(templateName) ?? new LayoutConfig();
+        LayoutDocument layoutConfig = _loader.LoadLayout(templateName) ?? new LayoutDocument();
         ITemplateImageSource imageSource = new TemplateImageSource(_imageResolver, templateName);
         ResolvedLayout resolvedLayout = _layoutResolver.Resolve(layoutConfig, imageSource);
         BaseImage? baseImage = _imageResolver.FindBaseImage(templateName);

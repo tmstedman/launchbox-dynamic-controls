@@ -12,11 +12,14 @@ Types that exist as XML deserialisation targets. They mirror the on-disk schema 
 
 - Mutable: `public T Property { get; set; }`
 - Collection fields use mutable `List<T>` / `Dictionary<K, V>` with default empty initialisers
-- Naming suffix: `Config` or `Node` (e.g. `LayoutConfig`, `InputNode`, `LabelEntry`)
-- One-call-site loaders own them — they're populated and never mutated again
-- Default values use field initialisers (e.g. `= new()`) because deserialisers need a target to populate
+- Naming suffix — set by which file the DTO comes from:
+  - **`*Node`** — a node of the `Layout.xml` parse tree. That is the one config file with a real tree, so it takes AST vocabulary: `TemplateLoader` is the parser, `LayoutDocument` is the tree it returns, `LayoutResolver` binds it. Every element in the file is a `*Node` — `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`, `RenderNode`, `OverlayNode`, `LabelNode`, `HeadNode`, `StyleNode` — whether or not it is drawn.
+  - **`*Config`** — a DTO for one of the settings files, which are flat or list-shaped rather than trees: `GlobalConfig`, `PlatformControllersConfig`, `ControllerConfig`, `InputMappingConfig`, `InputLabelsConfig`.
+  - **`*Entry`** — a name/value leaf: `MappingEntry`, `LabelEntry`.
 
-Examples: `LayoutConfig`, `InputLabelsConfig`, `InputMappingConfig`, every `*Node` type in `Templates/LayoutConfig.cs`.
+  The cut is the **file**, not the semantics — ask "does this file parse into a tree?", not "is this type drawn?". `LayoutDocument` holds the tree rather than being a node within it, so it keeps a noun of its own, the same split as Roslyn's `SyntaxTree` and `SyntaxNode`.
+
+Examples: `LayoutDocument`, `InputLabelsConfig`, `InputMappingConfig`, every `*Node` type in `Templates/LayoutDocument.cs`.
 
 These look "dated" by modern .NET standards. That's intentional — the deserialiser needs setters and no-arg constructors. Don't fight this layer.
 
@@ -47,6 +50,10 @@ return new ResolvedLabels(LabelText: labelText);
 // Derivation uses `with`, never mutation
 return TranslateToGeneric(...) with { IsGameSpecific = true };
 ```
+
+**Layout element naming.** The resolved layout mirrors the parse tree type for type, so the suffix tells you which layer you are in: `LabelNode` → `LabelDefinition` → `RenderedLabel`, that is syntax → bound → output. `*Definition` marks a bound type carrying data of its own — a name, or a resolved position, size and visibility. `InputGroup` and `OneOf` take no suffix because they carry only structure: which children, and how to choose between them.
+
+**Marker interfaces mean "can nest", in both layers.** `ILayoutNode` (raw) and `ILayoutElement` (bound) are implemented only by types that can occupy a position in the tree — an input, a group or stack, a one-of. Renders, overlays and labels are owned by their parent and held in typed lists, so they carry the layer suffix without implementing the interface. This is deliberate and symmetric across the two layers; widening the interfaces would erase the distinction between what nests and what is owned.
 
 > **Rule**: Resolved domain types are positional records, read-only collections, no setters. Use `with` to derive modified copies.
 
@@ -104,7 +111,7 @@ A type's file name matches its primary type. Multiple records in one file are fi
 - **`*Service`** — a subsystem entry point. Expect a factory in `Composition/` and a subsystem-tier test to exist alongside it. `ControllerOverlayService` is the exception: it is the orchestrator that runs the subsystems, not one of them.
 - **`*Resolver`** — turns inputs into a resolved value. Normally internal to one subsystem (`LayoutResolver`, `TemplateImageResolver`, `InputImageResolver`).
 - **`*Loader`** — reads from disk and parses. Several also merge the `Defaults\`/`User\` layers or resolve `inheritFrom` chains while doing it (`ConfigLoader`, `InputLabelsLoader`, `InputMappingLoader`). `TemplateLoader` deliberately does not, leaving style inheritance and image lookup to `LayoutResolver` — so don't assume a loader is a pure parser without checking.
-- **`*Config` / `*Node`** — XML deserialisation targets, per the rule above.
+- **`*Config` / `*Node` / `*Entry`** — XML deserialisation targets; see [Raw config DTOs](#1-raw-config-dtos) for which of the three applies.
 
 `StaticImageResolver` is the case that fixes the first two rules in place. It is called from outside its namespace like a subsystem entry point, but it is a file lookup that short-circuits the pipeline rather than a phase of it, so it stays a `*Resolver` — see [architecture.md](architecture.md#subsystems-as-the-unit-of-work-and-the-unit-of-test).
 

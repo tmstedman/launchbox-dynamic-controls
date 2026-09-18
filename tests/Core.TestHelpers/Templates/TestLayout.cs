@@ -3,14 +3,14 @@ using DynamicControls.Templates;
 namespace DynamicControls.Core.TestHelpers.Templates;
 
 /// <summary>
-/// Fluent builder for <see cref="LayoutConfig"/> in tests. Lets a test declare a layout
+/// Fluent builder for <see cref="LayoutDocument"/> in tests. Lets a test declare a layout
 /// tree (Input/Group/Stack/OneOf with Renders/Labels/Overlays) without the verbose record-init
 /// syntax of the raw DTOs. Concrete-cast at the end with <see cref="ToConfig"/>, or via the
-/// implicit conversion when a method already expects a <see cref="LayoutConfig"/>.
+/// implicit conversion when a method already expects a <see cref="LayoutDocument"/>.
 /// </summary>
 internal class TestLayout
 {
-    private readonly LayoutConfig _config = new();
+    private readonly LayoutDocument _config = new();
 
     /// <summary>Sets the template's unnamed &lt;Style&gt; — the per-template visual defaults.</summary>
     public TestLayout DefaultStyle(
@@ -18,7 +18,7 @@ internal class TestLayout
         double? minOpacity = null,
         double? inactiveBlurRadius = null)
     {
-        _config.Head.Style = new StyleConfig
+        _config.Head.Style = new StyleNode
         {
             FontSize = fontSize,
             MinOpacity = minOpacity,
@@ -35,7 +35,7 @@ internal class TestLayout
         double? minOpacity = null,
         double? inactiveBlurRadius = null)
     {
-        _config.Head.NamedStyles[name] = new StyleConfig
+        _config.Head.NamedStyles[name] = new StyleNode
         {
             ShowIf = showIf,
             FontSize = fontSize,
@@ -69,9 +69,9 @@ internal class TestLayout
         return this;
     }
 
-    public LayoutConfig ToConfig() => _config;
+    public LayoutDocument ToConfig() => _config;
 
-    public static implicit operator LayoutConfig(TestLayout l) => l._config;
+    public static implicit operator LayoutDocument(TestLayout l) => l._config;
 
     internal static InputNode BuildInput(string name, Action<InputBuilder>? build)
     {

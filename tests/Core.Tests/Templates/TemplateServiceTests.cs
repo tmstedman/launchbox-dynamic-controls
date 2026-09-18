@@ -34,7 +34,7 @@ public class TemplateServiceTests
     public void Load_BuildsTemplateFromCollaboratorOutputs()
     {
         // given a layout, layout-resolver result, and base image all stubbed
-        var layout = new LayoutConfig();
+        var layout = new LayoutDocument();
         var input = new InputDefinition(
             Name: "ButtonA",
             InputImages: [],
@@ -71,8 +71,8 @@ public class TemplateServiceTests
     public void Load_NoBaseImage_LeavesBaseImageNull()
     {
         // given the image resolver cannot find a base image
-        _loader.LoadLayout("x").Returns(new LayoutConfig());
-        _layoutResolver.Resolve(Arg.Any<LayoutConfig>(), Arg.Any<ITemplateImageSource>())
+        _loader.LoadLayout("x").Returns(new LayoutDocument());
+        _layoutResolver.Resolve(Arg.Any<LayoutDocument>(), Arg.Any<ITemplateImageSource>())
             .Returns(EmptyResolvedLayout());
         _imageResolver.FindBaseImage("x").ReturnsNull();
 
@@ -89,7 +89,7 @@ public class TemplateServiceTests
     {
         // given the loader returns null (no Layout.xml on disk)
         _loader.LoadLayout("x").ReturnsNull();
-        _layoutResolver.Resolve(Arg.Any<LayoutConfig>(), Arg.Any<ITemplateImageSource>())
+        _layoutResolver.Resolve(Arg.Any<LayoutDocument>(), Arg.Any<ITemplateImageSource>())
             .Returns(EmptyResolvedLayout());
 
         // when the service loads the template
@@ -97,7 +97,7 @@ public class TemplateServiceTests
 
         // then the resolver is invoked with a fresh empty config (no elements, no head)
         _layoutResolver.Received(1).Resolve(
-            Arg.Is<LayoutConfig>(c => c.Elements.Count == 0),
+            Arg.Is<LayoutDocument>(c => c.Elements.Count == 0),
             Arg.Any<ITemplateImageSource>());
     }
 
@@ -105,8 +105,8 @@ public class TemplateServiceTests
     public void Load_Twice_ReturnsCachedInstanceAndDoesNotReinvokeCollaborators()
     {
         // given a template name that has been loaded once
-        _loader.LoadLayout("x").Returns(new LayoutConfig());
-        _layoutResolver.Resolve(Arg.Any<LayoutConfig>(), Arg.Any<ITemplateImageSource>())
+        _loader.LoadLayout("x").Returns(new LayoutDocument());
+        _layoutResolver.Resolve(Arg.Any<LayoutDocument>(), Arg.Any<ITemplateImageSource>())
             .Returns(EmptyResolvedLayout());
         Template first = _underTest.Load("x");
 
@@ -116,7 +116,7 @@ public class TemplateServiceTests
         // then the same instance is returned and no collaborator is invoked a second time
         second.ShouldBeSameAs(first);
         _loader.Received(1).LoadLayout("x");
-        _layoutResolver.Received(1).Resolve(Arg.Any<LayoutConfig>(), Arg.Any<ITemplateImageSource>());
+        _layoutResolver.Received(1).Resolve(Arg.Any<LayoutDocument>(), Arg.Any<ITemplateImageSource>());
         _imageResolver.Received(1).FindBaseImage("x");
     }
 
@@ -124,8 +124,8 @@ public class TemplateServiceTests
     public void Load_DifferentNames_AreCachedSeparately()
     {
         // given two distinct template names with distinct stubbed outputs
-        _loader.LoadLayout(Arg.Any<string>()).Returns(new LayoutConfig());
-        _layoutResolver.Resolve(Arg.Any<LayoutConfig>(), Arg.Any<ITemplateImageSource>())
+        _loader.LoadLayout(Arg.Any<string>()).Returns(new LayoutDocument());
+        _layoutResolver.Resolve(Arg.Any<LayoutDocument>(), Arg.Any<ITemplateImageSource>())
             .Returns(EmptyResolvedLayout());
 
         // when the service loads each name

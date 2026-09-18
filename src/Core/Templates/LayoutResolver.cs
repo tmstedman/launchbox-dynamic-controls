@@ -1,7 +1,7 @@
 namespace DynamicControls.Templates;
 
 /// <summary>
-/// Converts a <see cref="LayoutConfig"/> into a <see cref="ResolvedLayout"/>: resolves style
+/// Converts a <see cref="LayoutDocument"/> into a <see cref="ResolvedLayout"/>: resolves style
 /// defaults, builds the element tree with absolute coordinates and resolved styles, and
 /// precomputes the <c>InputDescendants</c> and <c>CollapseInfo</c> lookup tables. Pure
 /// transformation — no file I/O, no caching.
@@ -12,7 +12,7 @@ public interface ILayoutResolver
     /// Resolves style defaults from <paramref name="config"/>, builds the element tree, and
     /// precomputes both the descendants index and the collapse-info map from the resolved tree.
     /// </summary>
-    ResolvedLayout Resolve(LayoutConfig config, ITemplateImageSource imageSource);
+    ResolvedLayout Resolve(LayoutDocument config, ITemplateImageSource imageSource);
 }
 
 /// <summary>
@@ -27,10 +27,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
     /// <inheritdoc />
     public ResolvedLayout Resolve(
-        LayoutConfig config,
+        LayoutDocument config,
         ITemplateImageSource imageSource)
     {
-        StyleConfig? style = config.Head.Style;
+        StyleNode? style = config.Head.Style;
         double defaultFontSize = style?.FontSize ?? RenderingDefaults.FontSize;
         double defaultMinOpacity = style?.MinOpacity ?? 0;
         double defaultInactiveBlurRadius = style?.InactiveBlurRadius ?? RenderingDefaults.InactiveBlurRadius;
@@ -52,7 +52,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             DefaultInactiveBlurRadius: defaultInactiveBlurRadius);
     }
 
-    private ILayoutElement BuildNode(IConfigNode node, BuildContext ctx) => node switch
+    private ILayoutElement BuildNode(ILayoutNode node, BuildContext ctx) => node switch
     {
         InputNode inputXml => BuildInputDefinition(inputXml, ctx),
         GroupNode groupXml => BuildInputGroup(groupXml, ctx),
@@ -71,7 +71,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
         // Resolve the Input's referenced style (if any). Explicit Input attributes win over
         // the named style's values; absent attributes inherit from the style.
-        StyleConfig? namedStyle = null;
+        StyleNode? namedStyle = null;
         if (inputXml.Style != null && !ctx.NamedStyles.TryGetValue(inputXml.Style, out namedStyle))
             _logger.Error($"Input '{name}' references unknown style '{inputXml.Style}'");
 
@@ -169,7 +169,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         BuildContext stackCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY };
 
         var children = new List<ILayoutElement>();
-        foreach (IConfigNode child in stackXml.Children)
+        foreach (ILayoutNode child in stackXml.Children)
         {
             children.Add(BuildNodeInStack(child, frame, stackCtx));
         }
@@ -195,7 +195,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// a block and own their own inner traversal.
     /// </summary>
     private ILayoutElement BuildNodeInStack(
-        IConfigNode node,
+        ILayoutNode node,
         StackFrame frame,
         BuildContext ctx)
     {
@@ -215,7 +215,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             {
                 // Plain nested group: transparent to slot counting; its Inputs each advance the counter.
                 var children = new List<ILayoutElement>();
-                foreach (IConfigNode child in plainGroupXml.Children)
+                foreach (ILayoutNode child in plainGroupXml.Children)
                 {
                     children.Add(BuildNodeInStack(child, frame, ctx));
                 }
@@ -305,7 +305,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     private record BuildContext(
         ITemplateImageSource ImageSource,
         double DefaultFontSize,
-        Dictionary<string, StyleConfig> NamedStyles,
+        Dictionary<string, StyleNode> NamedStyles,
         Dictionary<InputDefinition, CollapseInfo> CollapseInfo,
         string? InheritedShowIf = null,
         double? InheritedMinOpacity = null,

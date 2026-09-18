@@ -116,7 +116,7 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 `TemplateService` leans on three pieces:
 
-1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutConfig` — a tree of `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`. Pure XML deserialisation.
+1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`. Pure XML deserialisation.
 
 2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, collapsing-Stack metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
 
@@ -124,7 +124,7 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 The result, a `Template`, holds the resolved layout, the image source, and the base image dimensions. Cached because templates rarely change and re-parsing them on every game launch would be wasteful.
 
-Namespace: `src/Core/Templates/`. Entry point: `TemplateService`. The raw `LayoutConfig` (DTOs) → `ResolvedLayout` (immutable domain) transition is the canonical example of the three-layer type model from [conventions.md](conventions.md).
+Namespace: `src/Core/Templates/`. Entry point: `TemplateService`. The raw `LayoutDocument` (DTOs) → `ResolvedLayout` (immutable domain) transition is the canonical example of the three-layer type model from [conventions.md](conventions.md).
 
 ### 5. Rendering
 
@@ -272,7 +272,7 @@ Make a folder under `Templates/{templateName}/`. Drop a `BaseImage.png` for the 
 
 ### Add a new layout container
 
-Create a `*Node` raw DTO under `Templates/LayoutConfig.cs`, a resolved `ILayoutElement` type under `Templates/LayoutNodes.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter` to handle the new type during visibility evaluation. The existing `<Group>`, `<Stack>`, `<OneOf>` types are good templates for the pattern.
+Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutNodes.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter` to handle the new type during visibility evaluation. The existing `<Group>`, `<Stack>`, `<OneOf>` types are good templates for the pattern.
 
 ### Add a new render condition
 

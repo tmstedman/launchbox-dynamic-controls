@@ -5,7 +5,7 @@ namespace DynamicControls.Core.Tests.Templates;
 
 /// <summary>
 /// Unit tests for <see cref="TemplateLoader"/>. The loader translates a Layout.xml document
-/// into raw <see cref="LayoutConfig"/> DTOs without applying any business logic. The
+/// into raw <see cref="LayoutDocument"/> DTOs without applying any business logic. The
 /// filesystem is a substitute so each test supplies a literal XML string for the parser to
 /// chew on, keeping the test focus on parsing rules rather than IO.
 /// </summary>
@@ -37,7 +37,7 @@ public class TemplateLoaderTests
         _fs.FileExists(LayoutPath).Returns(false);
 
         // when the loader is asked for it
-        LayoutConfig? result = _underTest.LoadLayout("x");
+        LayoutDocument? result = _underTest.LoadLayout("x");
 
         // then null is returned and the XML is not loaded
         result.ShouldBeNull();
@@ -51,7 +51,7 @@ public class TemplateLoaderTests
         StubLayoutXml("<ControllerTemplate />");
 
         // when the loader runs
-        LayoutConfig? result = _underTest.LoadLayout("x");
+        LayoutDocument? result = _underTest.LoadLayout("x");
 
         // then a default (but non-null) config is returned
         result.ShouldNotBeNull();
@@ -71,7 +71,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<InputNode>().Single().Name.ShouldBe("A");
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Garbage") && s.Contains("ControllerTemplate")));
@@ -92,7 +92,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the unnamed style surfaces as Head.Style
         result.Head.Style.ShouldNotBeNull();
@@ -115,7 +115,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the style lands in NamedStyles keyed by name, not on Head.Style
         result.Head.Style.ShouldBeNull();
@@ -135,7 +135,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the error is logged and parsing continues
         result.Head.Style.ShouldBeNull();
@@ -154,7 +154,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         var style = result.Head.Style;
         style.ShouldNotBeNull();
@@ -178,7 +178,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then every attribute lands on the InputNode
         InputNode input = result.Elements.OfType<InputNode>().Single();
@@ -204,7 +204,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then only the named input is kept and an error is logged for the nameless one
         result.Elements.ShouldHaveSingleItem();
@@ -229,7 +229,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then each child lands in its respective list with attributes parsed
         InputNode input = result.Elements.OfType<InputNode>().Single();
@@ -269,7 +269,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the overlay is dropped and an error is logged
         result.Elements.OfType<InputNode>().Single().Overlays.ShouldBeEmpty();
@@ -291,7 +291,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the nested input is captured under the parent's Children
         InputNode parent = result.Elements.OfType<InputNode>().Single();
@@ -313,7 +313,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         LabelNode label = result.Elements.OfType<InputNode>().Single().Labels.Single();
         label.Align.ShouldBe("left");
@@ -336,7 +336,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         RenderNode render = result.Elements.OfType<InputNode>().Single().Renders.Single();
         render.Width.ShouldBe(80);
@@ -357,7 +357,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         OverlayNode overlay = result.Elements.OfType<InputNode>().Single().Overlays.Single();
         overlay.Width.ShouldBe(120);
@@ -381,7 +381,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         InputNode input = result.Elements.OfType<InputNode>().Single();
         input.Children.ShouldBeEmpty();
@@ -407,7 +407,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then both inputs and the overlay land on the GroupNode
         GroupNode group = result.Elements.OfType<GroupNode>().Single();
@@ -430,7 +430,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<GroupNode>().Single().Overlays.ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
@@ -451,7 +451,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<GroupNode>().Single().Children.Count.ShouldBe(1);
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Group")));
@@ -472,7 +472,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then attributes parse: absolute x, relative y, gap, case-insensitive collapse=true
         StackNode stack = result.Elements.OfType<StackNode>().Single();
@@ -499,7 +499,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the overlay is collected onto the stack
         StackNode stack = result.Elements.OfType<StackNode>().Single();
@@ -525,7 +525,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the stack is returned without the unknown child, and an error is logged
         result.Elements.OfType<StackNode>().Single().Children.Count.ShouldBe(1);
@@ -543,7 +543,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<StackNode>().Single().Collapse.ShouldBeFalse();
     }
@@ -559,7 +559,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then Collapse defaults to false
         result.Elements.OfType<StackNode>().Single().Collapse.ShouldBeFalse();
@@ -580,7 +580,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<StackNode>().Single().Overlays.ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
@@ -602,7 +602,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then alternatives are kept in document order
         OneOfNode oneOf = result.Elements.OfType<OneOfNode>().Single();
@@ -625,7 +625,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<OneOfNode>().Single().Alternatives.Count.ShouldBe(1);
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("OneOf")));
@@ -645,7 +645,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the unknown element is logged and the valid Input is still parsed
         result.Elements.OfType<InputNode>().Single().Name.ShouldBe("A");
@@ -667,7 +667,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the bad x is logged and X stays at its default; Y still parses
         InputNode input = result.Elements.OfType<InputNode>().Single();
@@ -691,7 +691,7 @@ public class TemplateLoaderTests
             """);
 
         // when the loader runs
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then the render is kept with the default y, valid x preserved, and the error is logged
         RenderNode render = result.Elements.OfType<InputNode>().Single().Renders.Single();
@@ -713,7 +713,7 @@ public class TemplateLoaderTests
             </ControllerTemplate>
             """);
 
-        LayoutConfig result = _underTest.LoadLayout("x")!;
+        LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<InputNode>().Single().X.ShouldBe(Coordinate.Relative(0));
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("x=") && s.Contains("Input")));

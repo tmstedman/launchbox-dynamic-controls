@@ -6,17 +6,17 @@ namespace DynamicControls.Templates;
 /// Produced by TemplateLoader and consumed by TemplateService,
 /// which transforms it into a fully resolved Template.
 /// </summary>
-public record LayoutConfig
+public record LayoutDocument
 {
     /// <summary>The template's &lt;Head&gt; section — non-display metadata (template-wide visual
     /// defaults via &lt;Style&gt;, plus any future meta blocks). Defaults to an empty head when
     /// the file uses the flat schema (no &lt;Head&gt;/&lt;Body&gt; wrapper) or omits the element.</summary>
-    public HeadConfig Head { get; set; } = new();
+    public HeadNode Head { get; set; } = new();
 
     /// <summary>The body — display layout elements in document order. Polymorphic — entries are
     /// InputNode, GroupNode, or OneOfNode. When the file uses the flat schema (no
     /// &lt;Body&gt; wrapper), root-level layout children are collected here for compatibility.</summary>
-    public List<IConfigNode> Elements { get; set; } = [];
+    public List<ILayoutNode> Elements { get; set; } = [];
 }
 
 /// <summary>
@@ -25,16 +25,16 @@ public record LayoutConfig
 /// meta blocks. Kept separate from the body so the two concerns stay syntactically distinct
 /// within a single Layout.xml file.
 /// </summary>
-public record HeadConfig
+public record HeadNode
 {
     /// <summary>Optional unnamed &lt;Style&gt; — template-wide visual defaults. Null means
     /// use the built-in defaults from RenderingDefaults.</summary>
-    public StyleConfig? Style { get; set; }
+    public StyleNode? Style { get; set; }
 
     /// <summary>Named &lt;Style&gt; elements keyed by name. An Input with `style="X"` inherits
     /// each missing attribute from NamedStyles["X"]. Explicit attributes on the Input always
     /// win over the named-style value.</summary>
-    public Dictionary<string, StyleConfig> NamedStyles { get; set; } = [];
+    public Dictionary<string, StyleNode> NamedStyles { get; set; } = [];
 }
 
 /// <summary>
@@ -42,7 +42,7 @@ public record HeadConfig
 /// layer." Used in two modes selected by Name: unnamed (template-wide defaults) or named
 /// (referenceable bundle applied to Inputs via the `style` attribute).
 /// </summary>
-public record StyleConfig
+public record StyleNode
 {
     /// <summary>Visibility condition applied to the bundle. Layered with Input/Render's own
     /// `showIf` — explicit wins. Not used by the unnamed template-wide defaults form.</summary>
@@ -83,7 +83,7 @@ public readonly record struct Coordinate(bool IsRelative, double Value)
 /// Marker interface for anything that can appear in the parsed Layout.xml element tree —
 /// InputNode, GroupNode, StackNode, or OneOfNode. Used purely for polymorphic dispatch.
 /// </summary>
-public interface IConfigNode;
+public interface ILayoutNode;
 
 /// <summary>
 /// Raw DTO for a &lt;Group&gt; wrapper around a cluster of inputs. The whole cluster is included
@@ -91,12 +91,12 @@ public interface IConfigNode;
 /// in a failing group are semantically excluded (gone from inputsToRender), not just visually
 /// faded. The group has no explicit condition attribute — "any member visible" is the rule.
 /// </summary>
-public record GroupNode : IConfigNode
+public record GroupNode : ILayoutNode
 {
     /// <summary>Nested layout children — Input, Group, Stack, or OneOf in document order. The
     /// group is included whenever any descendant has a visible render, recursing through nested
     /// Groups and the active branch of nested OneOfs.</summary>
-    public List<IConfigNode> Children { get; set; } = [];
+    public List<ILayoutNode> Children { get; set; } = [];
 
     /// <summary>Overlays declared at the group level. Each renders once when the group is
     /// included; their visibility is binary (gated by group inclusion, not by per-overlay
@@ -112,7 +112,7 @@ public record GroupNode : IConfigNode
 /// (at any depth through transparent plain Groups) occupies one slot, with positions computed
 /// from the stack origin plus the running slot index times Gap.
 /// </summary>
-public record StackNode : IConfigNode
+public record StackNode : ILayoutNode
 {
     /// <summary>Horizontal canvas origin for the stack. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
@@ -128,7 +128,7 @@ public record StackNode : IConfigNode
     public bool Collapse { get; set; }
 
     /// <summary>Nested layout children — Input, Group, Stack, or OneOf in document order.</summary>
-    public List<IConfigNode> Children { get; set; } = [];
+    public List<ILayoutNode> Children { get; set; } = [];
 
     /// <summary>Overlays declared at the stack level. Rendered unconditionally whenever the
     /// stack itself renders.</summary>
@@ -140,23 +140,23 @@ public record StackNode : IConfigNode
 /// evaluated in document order; the first child whose own visibility check passes (any-render-
 /// visible for an Input, any-member-visible for a Group) is rendered, and the rest are dropped
 /// entirely. Used to express "render X, OR render Y, but not both" without per-element opt-out
-/// flags. Can appear anywhere a IConfigNode can: top-level, inside &lt;Input&gt;.Children,
+/// flags. Can appear anywhere a ILayoutNode can: top-level, inside &lt;Input&gt;.Children,
 /// or inside &lt;Group&gt; alongside its Inputs.
 /// </summary>
-public record OneOfNode : IConfigNode
+public record OneOfNode : ILayoutNode
 {
     /// <summary>The alternative branches in document order — each is an InputNode or
     /// GroupNode. Only the first whose visibility check passes is rendered.</summary>
-    public List<IConfigNode> Alternatives { get; set; } = [];
+    public List<ILayoutNode> Alternatives { get; set; } = [];
 }
 
 /// <summary>
 /// Raw DTO for a single named input within Layout.xml (e.g. ButtonA, AxisLeftStick).
 /// Contains unparsed render, overlay, and label child elements as read from XML.
-/// Nested within LayoutConfig or GroupNode; consumed by TemplateService
+/// Nested within LayoutDocument or GroupNode; consumed by TemplateService
 /// when building InputDefinition entries for a Template.
 /// </summary>
-public record InputNode : IConfigNode
+public record InputNode : ILayoutNode
 {
     /// <summary>Generic input name (e.g. "ButtonA"). Required.</summary>
     public string Name { get; set; } = null!;
@@ -207,7 +207,7 @@ public record InputNode : IConfigNode
     /// structural descendant set, and a nested input's per-render image fallback resolves
     /// through its structural parent's Name. Strict-self renders are written as a duplicate
     /// top-level &lt;Input&gt; with no nested children — its fan-out scope is empty.</summary>
-    public List<IConfigNode> Children { get; set; } = [];
+    public List<ILayoutNode> Children { get; set; } = [];
 }
 
 /// <summary>
