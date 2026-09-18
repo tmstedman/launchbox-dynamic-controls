@@ -48,7 +48,7 @@ It is deliberately not duplicated here — a copy would be the sixth place to dr
 
 **Scope**: one logical change per commit. This repo's bodies run 100–130 words for a focused change; a body much past that usually means the commit is doing several things and should be split, so treat the length as a signal rather than something to trim.
 
-> The commit-message hook demands `[SCOPE]: description` and will flag every commit in this repository. That is expected — this repo uses unprefixed subjects to match its existing history, and the divergence is deliberate. **Do not add the prefix to satisfy the hook.** Its other complaints (fluffy words, tallies of the change's own size) are worth acting on.
+> Subjects here are unprefixed, matching the repository's history. If your tooling asks for a `TYPE:`/`SCOPE:` prefix, that is your tooling's convention and not this project's — **don't add one to satisfy it.** Complaints about vague wording or about counting the change's own size are worth acting on whatever their source.
 
 ## Language
 
