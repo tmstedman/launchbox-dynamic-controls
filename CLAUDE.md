@@ -40,6 +40,16 @@ Before finishing any change that alters behaviour users or contributors can see,
 **"If you change… / Check these"** table in [`docs/conventions.md`](docs/conventions.md#keeping-documentation-in-step).
 It is deliberately not duplicated here — a copy would be the sixth place to drift.
 
+## Commits
+
+**Subject**: imperative, specific, no scope prefix — `Fix root-level Controllers.xml inheritance silently losing a new default`, not `DOCS: fix inheritance`. Under ~72 characters.
+
+**Body**: what changed as scannable points, one idea each; *why* it was needed as prose, because rationale needs its causal links intact. The documentation here specifies current behaviour and deliberately carries no history (see [Changing documentation](#changing-documentation)), so the commit body is the only place the reasoning survives — do not compress it away.
+
+**Scope**: one logical change per commit. This repo's bodies run 100–130 words for a focused change; a body much past that usually means the commit is doing several things and should be split, so treat the length as a signal rather than something to trim.
+
+> The commit-message hook demands `[SCOPE]: description` and will flag every commit in this repository. That is expected — this repo uses unprefixed subjects to match its existing history, and the divergence is deliberate. **Do not add the prefix to satisfy the hook.** Its other complaints (fluffy words, tallies of the change's own size) are worth acting on.
+
 ## Language
 
 All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.props`).
