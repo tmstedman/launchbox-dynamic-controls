@@ -137,7 +137,9 @@ Don't change a production type's API just to make it easier to test. If a test w
 
 **A change to visible behaviour means checking every place that documents it, not just the nearest one.**
 
-One concept is normally described across five audiences at once: users (`README.md`), contributors (`docs/`), agents (`CLAUDE.md`), people browsing the installed data folder (`assets/**/README.txt`), and whoever next edits the build (`.github/workflows/ci.yml`, `Directory.Build.props`). Find the row for what you changed and check every file in it. Not every file will need an edit — the point is to have looked.
+One concept commonly gets restated in five places: `README.md`, `docs/`, `CLAUDE.md`, `assets/**/README.txt`, and the build files (`.github/workflows/ci.yml`, `Directory.Build.props`). Those serve three audiences — users, contributors and agents — so two locations often serve the same reader. Where they do, collapse one into a pointer; the table is for facts that genuinely have to appear in more than one place.
+
+Find the row for what you changed and check every file in it. Not every file will need an edit — the point is to have looked.
 
 | If you change… | Check these |
 |---|---|
