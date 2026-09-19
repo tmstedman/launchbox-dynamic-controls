@@ -16,6 +16,9 @@ namespace DynamicControls.Core.Tests.InputMapping;
 public class WholeInputDeriverTests
 {
     private readonly ILogger _logger = Substitute.For<ILogger>();
+    private readonly WholeInputDeriver _underTest;
+
+    public WholeInputDeriverTests() => _underTest = new WholeInputDeriver(_logger);
 
     private const string Up = "ButtonDpadUp";
     private const string Down = "ButtonDpadDown";
@@ -51,8 +54,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right, StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
 
@@ -78,8 +81,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right, StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"][0].ShouldBe("ButtonDpad");
         result.ButtonToInput["JOYSTICK"][^1].ShouldBe("AxisLeftStick");
@@ -100,8 +103,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["AxisLeftStick"]);
         _logger.Received().Debug(
@@ -122,12 +125,11 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
+        ResolvedMapping result = _underTest.Derive(
             MappingOf(
                 buttonToInput: buttonToInput,
                 inputToButton: new Dictionary<string, string> { ["ButtonDpad"] = "JOYSTICK" },
-                naturalButtonToInput: Natural()),
-            _logger);
+                naturalButtonToInput: Natural()));
 
         result.InputToButton.ContainsKey("ButtonDpad").ShouldBeFalse();
         result.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICK");
@@ -148,8 +150,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldContain("ButtonDpad");
     }
@@ -167,8 +169,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: natural, naturalButtonToInput: natural), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: natural, naturalButtonToInput: natural));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
     }
@@ -185,8 +187,8 @@ public class WholeInputDeriverTests
             ["BUTTON1"] = ["ButtonA"],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: mapping, naturalButtonToInput: mapping), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: mapping, naturalButtonToInput: mapping));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
     }
@@ -206,8 +208,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
     }
@@ -225,8 +227,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_LEFT"] = [Left, StickLeft],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
     }
@@ -239,8 +241,8 @@ public class WholeInputDeriverTests
         // particular ButtonDpad is not appended to itself.
         Dictionary<string, IReadOnlyList<string>> buttonToInput = Natural();
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
         result.ButtonToInput["JOYSTICK_UP"].ShouldBe([Up]);
@@ -260,8 +262,8 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right, StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
     }
@@ -280,8 +282,8 @@ public class WholeInputDeriverTests
             ["BUTTON1"] = ["ButtonX"],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: naturalButtonToInput), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: naturalButtonToInput));
 
         result.ButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
     }
@@ -313,8 +315,8 @@ public class WholeInputDeriverTests
             ["JOYSTICKLEFT_RIGHT"] = [StickRight, Right],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
-            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: naturalButtonToInput), _logger);
+        ResolvedMapping result = _underTest.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: naturalButtonToInput));
 
         result.ButtonToInput["JOYSTICKLEFT"].ShouldBe(["AxisLeftStick", "ButtonDpad"]);
         result.ButtonToInput["JOYSTICKRIGHT"].ShouldBe(["AxisRightStick"]);
@@ -340,12 +342,11 @@ public class WholeInputDeriverTests
             ["JOYSTICK_RIGHT"] = [Right, StickRight],
         };
 
-        ResolvedMapping result = WholeInputDeriver.Derive(
+        ResolvedMapping result = _underTest.Derive(
             MappingOf(
                 buttonToInput: buttonToInput,
                 inputToButton: new Dictionary<string, string> { ["AxisLeftStick"] = "JOYSTICKLEFT" },
-                naturalButtonToInput: naturalButtonToInput),
-            _logger);
+                naturalButtonToInput: naturalButtonToInput));
 
         result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
         result.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICKLEFT");

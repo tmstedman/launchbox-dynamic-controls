@@ -14,7 +14,6 @@ namespace DynamicControls.Core.Tests.InputMapping;
 /// </summary>
 public class InputMappingServiceTests
 {
-    private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly IInputMappingLoader _loader = Substitute.For<IInputMappingLoader>();
     private readonly IInputMappingResolver _resolver = Substitute.For<IInputMappingResolver>();
     private readonly IInputMappingPlugins _plugins = Substitute.For<IInputMappingPlugins>();
@@ -22,7 +21,7 @@ public class InputMappingServiceTests
 
     public InputMappingServiceTests()
     {
-        _underTest = new(_logger, _loader, _resolver, _plugins);
+        _underTest = new(_loader, _resolver, _plugins, new WholeInputDeriver(Substitute.For<ILogger>()));
     }
 
     // ---- fixture builders ----

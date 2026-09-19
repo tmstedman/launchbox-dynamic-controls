@@ -20,9 +20,17 @@ namespace DynamicControls.InputMapping;
 /// outright, so where its author could have said it and did not, the silence is the instruction.
 /// That gate lives in <see cref="InputMappingService"/>, which decides whether to call this at
 /// all — provenance is not visible here.</para>
+///
+/// <para>A real class rather than a static one, and injected rather than called directly, so the
+/// logger arrives once through the constructor instead of being threaded down from a caller that
+/// has no other use for it. It holds no state: <see cref="Derive"/> is a function of its
+/// argument. Concrete rather than behind an interface, because nothing substitutes it — the
+/// logger is the seam, as with <c>LayeredFileSystem</c>.</para>
 /// </summary>
-public static class WholeInputDeriver
+public class WholeInputDeriver(ILogger logger)
 {
+    private readonly ILogger _logger = logger;
+
     /// <summary>
     /// The generic inputs that are whole controls, each with the four direction inputs that make
     /// it up. Fixed vocabulary: these names are the plugin's own, not platform data.
@@ -48,7 +56,7 @@ public static class WholeInputDeriver
     /// mapped directly to a control outranks one that merely reached it here — and for the same
     /// reason a derived binding never displaces an existing reverse-lookup entry.</para>
     /// </summary>
-    public static ResolvedMapping Derive(ResolvedMapping mapping, ILogger logger)
+    public ResolvedMapping Derive(ResolvedMapping mapping)
     {
         var buttonToInput = mapping.ButtonToInput.ToDictionary(e => e.Key, e => e.Value);
         var inputToButton = mapping.InputToButton.ToDictionary(e => e.Key, e => e.Value);
@@ -82,18 +90,18 @@ public static class WholeInputDeriver
             foreach (string stale in entry.Value.Where(i => !updated.Contains(i)))
             {
                 dropped.Add(stale);
-                logger.Debug($"Whole input: {entry.Key} no longer drives {stale} — every one of its directions has moved away");
+                _logger.Debug($"Whole input: {entry.Key} no longer drives {stale} — every one of its directions has moved away");
             }
 
             if (additions.Count > 0)
-                logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", additions)}");
+                _logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", additions)}");
 
             // First-seen-wins, as elsewhere: a button already on that control keeps it.
             foreach (string input in additions.Where(i => !inputToButton.ContainsKey(i)))
                 inputToButton[input] = entry.Key;
 
             foreach (string input in additions.Where(i => inputToButton[i] != entry.Key))
-                logger.Debug($"Whole input: {input} keeps {inputToButton[input]}, which is mapped to it directly");
+                _logger.Debug($"Whole input: {input} keeps {inputToButton[input]}, which is mapped to it directly");
         }
 
         // Bring the reverse lookup back into step for anything dropped. A control another button

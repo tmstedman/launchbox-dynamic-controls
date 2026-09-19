@@ -24,15 +24,15 @@ public interface IInputMappingService
 /// baseline's <c>Natural*</c> maps via <c>with</c> when a transform applies.
 /// </summary>
 public class InputMappingService(
-    ILogger logger,
     IInputMappingLoader loader,
     IInputMappingResolver resolver,
-    IInputMappingPlugins plugins) : IInputMappingService
+    IInputMappingPlugins plugins,
+    WholeInputDeriver deriver) : IInputMappingService
 {
-    private readonly ILogger _logger = logger;
     private readonly IInputMappingLoader _loader = loader;
     private readonly IInputMappingResolver _resolver = resolver;
     private readonly IInputMappingPlugins _plugins = plugins;
+    private readonly WholeInputDeriver _deriver = deriver;
 
     /// <inheritdoc />
     public ResolvedMapping Load(GameInfo game)
@@ -68,6 +68,6 @@ public class InputMappingService(
         // behind wherever its directions were moved to; follow it onto them. The naturals spliced
         // in above are what the derivation reads the whole-and-parts pairing from, so this runs
         // after that and not before.
-        return WholeInputDeriver.Derive(spliced, _logger);
+        return _deriver.Derive(spliced);
     }
 }
