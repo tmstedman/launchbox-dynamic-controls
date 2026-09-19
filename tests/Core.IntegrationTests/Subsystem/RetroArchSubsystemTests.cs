@@ -1,3 +1,5 @@
+using DynamicControls.Config;
+using DynamicControls.Composition;
 using DynamicControls.InputMapping;
 using DynamicControls.Plugins.RetroArch;
 using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
@@ -42,8 +44,20 @@ public class RetroArchSubsystemTests
     /// the system uses. The factory's optional <see cref="IApplicationData"/> parameter lets the
     /// non-portable cascade resolve into <see cref="MockFileSystem"/> instead of the host's
     /// actual APPDATA.</summary>
-    private RetroArchMappingSource Build() =>
-        RetroArchMappingSourceFactory.Create(_dc.Lfs, _dc.Fs, _logger, _appData);
+    private RetroArchPlugins Build() =>
+        RetroArchPluginsFactory.Create(_dc.Lfs, _dc.Fs, _logger, _appData);
+
+    /// <summary>Runs RetroArch's two plugins the way <c>InputMappingService</c> does: the source
+    /// picks the controller, then the transform applies the player's swaps on top. They are
+    /// separate plugins precisely so the mapping can be snapshotted between them, but every
+    /// assertion here is about their combined result, which is what reaches the screen.</summary>
+    private InputMappingConfig? Resolve(GameInfo game, PlatformControllersConfig? platform)
+    {
+        RetroArchPlugins plugins = Build();
+        InputMappingConfig? baseline = plugins.Source.Load(game, platform);
+        if (baseline == null) return null;
+        return plugins.Transform.Transform(game, baseline) ?? baseline;
+    }
 
     // ---- staging helpers ----
 
@@ -150,7 +164,7 @@ public class RetroArchSubsystemTests
             displayName: CoreDisplayName);
         StageGameCfg(SelectDevice("513"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -174,7 +188,7 @@ public class RetroArchSubsystemTests
             ("3-Button", "257"));
         StageGameCfg(SelectDevice("513"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: Path.Combine(RetroArchDir, "kega-fusion.exe"),
                 romDirectory: RomDir,
@@ -197,7 +211,7 @@ public class RetroArchSubsystemTests
             ("6-Button", "513"),
             ("3-Button", "257"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -222,7 +236,7 @@ public class RetroArchSubsystemTests
         StageCoreXml(("3-Button", "257"));
         StageGameCfg(SelectDevice("257"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -250,7 +264,7 @@ public class RetroArchSubsystemTests
         StageGameCfg(SelectDevice("257"));
         StageGameRmp(SelectDevice("513"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -275,7 +289,7 @@ public class RetroArchSubsystemTests
         // Canonical, no-op swap — just so a game-level cfg file exists in the cascade.
         StageGameCfg(CfgSwap("a", "1"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -301,7 +315,7 @@ public class RetroArchSubsystemTests
         // Swap: slot "a" canonical btn is 1; set it to 0 (slot "b") → b↔a swap detected.
         StageGameCfg(CfgSwap("a", "0"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -333,7 +347,7 @@ public class RetroArchSubsystemTests
         // ContentDir-level: would be a b↔a swap if applied.
         StageContentDirCfg(CfgSwap("b", "1"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -368,7 +382,7 @@ public class RetroArchSubsystemTests
         // rmp: y → slot "b" (coreId 0).
         StageGameRmp(RmpSwap("y", "0"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -386,6 +400,61 @@ public class RetroArchSubsystemTests
         result.Mappings.ShouldNotContainEntry("A", "ButtonX");
     }
 
+    // ---- the source/transform split ----
+
+    [Fact]
+    public void Scenario_RemapIsVisibleAsARemap_NotBakedIntoTheNaturalState()
+    {
+        // The reason the swaps were lifted out of the source. InputMappingService snapshots the
+        // mapping between the source and the transform, so with the swaps applied inside the
+        // source they landed inside the snapshot: the "before" and "after" states were identical
+        // and nothing downstream could tell a remapped button from an untouched one.
+        //
+        // InputImageResolver reads exactly that difference to decide whether the artwork should
+        // follow the action or the physical button being pressed.
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageCoreXml(("6-Button", "513"), ("3-Button", "257"));
+        StageGameRmp(RmpSwap("y", "0"));   // slot y -> slot b, moving B's name onto ButtonX
+
+        // The service reads Controllers.xml itself rather than being handed one, so the same
+        // controller the other tests pass in has to exist on the staged filesystem here.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="6-Button" default="true" analogToDigital="left">
+                <Mapping name="X" input="ButtonLeftShoulder" />
+                <Mapping name="Y" input="ButtonY" />
+                <Mapping name="Z" input="ButtonRightShoulder" />
+                <Mapping name="A" input="ButtonX" />
+                <Mapping name="B" input="ButtonA" />
+                <Mapping name="C" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+
+        RetroArchPlugins plugins = Build();
+        InputMappingService service = InputMappingFactory.Create(
+            _dc.Lfs, _dc.Fs, _logger,
+            config: new GlobalConfig { EnableRetroArch = true },
+            sources: [plugins.Source],
+            transforms: [plugins.Transform]);
+
+        ResolvedMapping mapping = service.Load(Game(
+            emulatorPath: RetroArchExe,
+            romDirectory: RomDir,
+            retroArchCore: CoreDll));
+
+        // The snapshot holds the controller as Controllers.xml declares it, before the remap.
+        mapping.NaturalButtonToInput["A"].ShouldBe(["ButtonX"]);
+
+        // The live mapping holds the remap: A has left ButtonX and B now drives it too.
+        mapping.ButtonToInput.ContainsKey("A").ShouldBeFalse();
+        mapping.ButtonToInput["B"].ShouldContain("ButtonX");
+
+        // The two disagreeing is what makes the remap detectable at all.
+        mapping.NaturalButtonToInput.ShouldNotBe(mapping.ButtonToInput);
+    }
+
     // ---- root-directory detection ----
 
     [Fact]
@@ -401,7 +470,7 @@ public class RetroArchSubsystemTests
         StageCoreXml(("3-Button", "257"));
         StageGameCfg(SelectDevice("257"), root: Path.Combine(AppDataRoot, "RetroArch"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -426,7 +495,7 @@ public class RetroArchSubsystemTests
         StageCoreXml(("3-Button", "257"));
         StageGameCfg(SelectDevice("257"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -457,7 +526,7 @@ public class RetroArchSubsystemTests
         // Game-level rmp: b→slot-a (coreId 8).
         StageGameRmp(RmpSwap("b", "8"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(
                 emulatorPath: RetroArchExe,
                 romDirectory: RomDir,
@@ -501,7 +570,7 @@ public class RetroArchSubsystemTests
             """);
         StageGameCfg(SelectDevice("513"));
 
-        InputMappingConfig? result = Build().Load(
+        InputMappingConfig? result = Resolve(
             Game(emulatorPath: RetroArchExe, romDirectory: RomDir, retroArchCore: CoreDll),
             GenesisPlatform());
 

@@ -37,7 +37,10 @@ internal static class InputMappingFactory
         var loader = new InputMappingLoader(logger, lfs);
         var resolver = new InputMappingResolver(logger);
 
-        sources ??= [RetroArchMappingSourceFactory.Create(lfs, fs, logger)];
+        // RetroArch contributes to both chains: a source that picks the controller, and a
+        // transform that applies the player's swaps on top. They share one overrides resolver.
+        RetroArchPlugins retroArch = RetroArchPluginsFactory.Create(lfs, fs, logger);
+        sources ??= [retroArch.Source];
 
         IInputMappingSource[] assembledSources =
         [
@@ -50,7 +53,7 @@ internal static class InputMappingFactory
         {
             var joycodes = new JoycodeMappingLoader(logger, lfs);
             var mameCfgLoader = new MameCfgLoader(logger, fs, joycodes);
-            transforms = [new MameInputMappingSource(logger, mameCfgLoader)];
+            transforms = [new MameInputMappingSource(logger, mameCfgLoader), retroArch.Transform];
         }
 
         var plugins = new InputMappingPlugins(logger, assembledSources, transforms, config);
