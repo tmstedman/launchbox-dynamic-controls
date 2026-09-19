@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  What the controller artwork says, transcribed and nothing more.
+
+  One <Game> per image. Each <Label> records the physical control the artwork draws a line
+  to, and the text beside it, exactly as printed — including its spelling, its punctuation
+  and its choice of words. No interpretation happens here: labels are not collapsed, not
+  shortened, not corrected against the MAME controls database, and not mapped to emulator
+  ports. Those are judgements, they belong downstream, and keeping them out means this file
+  never has to be rebuilt when one of them changes.
+
+  A control the artwork leaves unlabelled is simply absent. A directional cluster may carry
+  one label for the whole control or one per direction; transcribe whichever is drawn.
+
+  Control names are the plugin's own generic inputs, the same vocabulary Layout.xml uses:
+
+      ButtonA ButtonB ButtonX ButtonY
+      ButtonLeftShoulder ButtonRightShoulder AxisTriggerLeft AxisTriggerRight
+      ButtonStart ButtonBack ButtonGuide ButtonLeftStick ButtonRightStick
+      AxisLeftStick  AxisLeftStickUp/Down/Left/Right
+      AxisRightStick AxisRightStickUp/Down/Left/Right
+      ButtonDpad     ButtonDpadUp/Down/Left/Right
+
+  Seeded by hand from images read during the import's measurement step. The remainder comes
+  from the bulk read.
+-->
+<Artwork>
+    <Game romName="1941" title="1941: Counter Attack">
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot / (Hold) Charge</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+    <Game romName="bradley" title="Bradley Trainer">
+        <Label control="ButtonLeftShoulder">TOW Missile</Label>
+        <Label control="AxisTriggerLeft">Zoom In</Label>
+        <Label control="ButtonRightShoulder">7.62mm Machine Gun</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonY">High Rate Explosive Shot</Label>
+        <Label control="ButtonB">Low Rate Explosive Shot</Label>
+        <Label control="ButtonA">Single Explosive Shot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisRightStick">Change Range UP/DOWN</Label>
+        <Label control="ButtonDpadUp">High Rate Armor Peircing</Label>
+        <Label control="ButtonDpadLeft">Low Rate Armor Peircing</Label>
+        <Label control="ButtonDpadDown">Single Armor Peircing</Label>
+    </Game>
+    <Game romName="crgolf" title="Crowns Golf">
+        <Label control="ButtonLeftShoulder">Change Stance Left</Label>
+        <Label control="ButtonRightShoulder">Change Stance Right</Label>
+        <Label control="ButtonY">Change Club</Label>
+        <Label control="ButtonB">Move Club Forward</Label>
+        <Label control="ButtonA">Move Club Back</Label>
+        <Label control="ButtonX">Hit Ball</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Slice L&amp;R / Raise Club</Label>
+        <Label control="ButtonDpad">Slice Left / Right</Label>
+    </Game>
+    <Game romName="dkong" title="Donkey Kong">
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+    <Game romName="elim2" title="Eliminator">
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonX">Accelerate</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+    </Game>
+    <Game romName="redbaron" title="Red Baron">
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+    </Game>
+    <Game romName="robotron" title="Robotron: 2084">
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisRightStick">Shoot</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+    <Game romName="sarge" title="Sarge">
+        <Label control="AxisTriggerLeft">Air Attack</Label>
+        <Label control="AxisTriggerRight">Ground Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Left Stick</Label>
+        <Label control="AxisRightStick">Right Stick</Label>
+    </Game>
+    <Game romName="souledge" title="Soul Edge Ver. II">
+        <Label control="ButtonY">Vertical Slash</Label>
+        <Label control="ButtonB">Kick</Label>
+        <Label control="ButtonA">Guard</Label>
+        <Label control="ButtonX">Horizontal Slash</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+    <Game romName="spdodgeb" title="Super Dodge Ball">
+        <Label control="ButtonA">Pass / Duck</Label>
+        <Label control="ButtonX">Throw / Catch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+    <Game romName="toobin" title="Toobin'">
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonY">Right Backwards</Label>
+        <Label control="ButtonB">Left Backwards</Label>
+        <Label control="ButtonA">Right Forward</Label>
+        <Label control="ButtonX">Left Forward</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+    </Game>
+</Artwork>
