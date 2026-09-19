@@ -150,7 +150,8 @@ Find the row for what you changed and check every file in it. Not every file wil
 
 | If you change… | Check these |
 |---|---|
-| The `Labels/{Platform}.xml` format — `<Game>`, `<Defaults>`, lookup keys | `README.md` (Labels) · `docs/architecture.md` §3 · `docs/config-layering.md` · `CLAUDE.md` (Fixture structure + Labels pipeline) · `assets/User/Labels/README.txt` · `assets/README.txt` |
+| The `Labels/{Platform}.xml` format — `<Game>`, `<Defaults>`, lookup keys | `README.md` (Labels) · `docs/architecture.md` §3 · `docs/config-layering.md` · `docs/label-import.md` · `CLAUDE.md` (Fixture structure + Labels pipeline) · `assets/User/Labels/README.txt` · `assets/README.txt` |
+| What a label should *say* — wording, collapsing directions, which source wins | `docs/label-import.md` **(canonical)** · `README.md` (Labels) |
 | `Controllers/{Platform}.xml` — variants, `inheritFrom`, `analogToDigital`, `default` | `README.md` (Input mappings) · `docs/templates.md` · `docs/architecture.md` (Add a new platform) · `CLAUDE.md` · `assets/User/Controllers/README.txt` · `assets/README.txt` |
 | Per-game `InputMappings/` — `<GameMapping>`, `<Mapping>`, `<Unmap>` | `README.md` (Game-specific overrides) · `docs/architecture.md` §2 · `CLAUDE.md` (Input mapping) · `assets/User/InputMappings/README.txt` · `assets/README.txt` |
 | `Layout.xml` — any element, attribute or `showIf` mode | `docs/layout-xml-schema.md` **(canonical)** · `docs/templates.md` · `docs/architecture.md` §4–5 · `CLAUDE.md` (Layout rendering notes) |
