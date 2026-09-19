@@ -12,8 +12,9 @@ public class Nintendo64EndToEndTests
     private readonly ControllerOverlayService _service = ControllerOverlayFactory.Create(FixturesRoot);
 
     /// <summary>
-    /// Pad controller with full game-specific labels — the analogToDigital="left" mirror runs
-    /// after Stick-Any, so AxisLeftStick ends up labeled "Move" (from Dpad), not "Look" (from Stick).
+    /// Pad controller with full game-specific labels. The N64 has its own analog stick, so the pad
+    /// carries no analogToDigital mirror: AxisLeftStick is Stick-Any's and keeps "Look", while the
+    /// Dpad keeps "Move" on ButtonDpad.
     /// </summary>
     [Fact]
     public void Nintendo64_Goldeneye007()
@@ -67,9 +68,8 @@ public class Nintendo64EndToEndTests
                 new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
                 new(Input: "ButtonX",             Src: "ButtonX.png",            W: 44,  H: 44,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "Line_ButtonX.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                // Stick-Any=Look → AxisLeftStick; Dpad-Any=Move also mirrors to AxisLeftStick via
-                // analogToDigital and overwrites Look — final label "Move"; whole-stick label fires
-                // alt 2 (Line_AxisLeftStick.png), not directionals
+                // Stick-Any=Look → AxisLeftStick; whole-stick label fires alt 2
+                // (Line_AxisLeftStick.png), not the directionals
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",      W: 124, H: 124),
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",      W: 64,  H: 64),
                 new(Input: "AxisLeftStick",       Src: "Line_AxisLeftStick.png"),
@@ -93,7 +93,7 @@ public class Nintendo64EndToEndTests
             new(Input: "ButtonLeftShoulder",  Text: "Aim"),               // L → ButtonLeftShoulder
             new(Input: "ButtonRightShoulder", Text: "Aim"),               // R → ButtonRightShoulder
             new(Input: "AxisTriggerRight",    Text: "Fire"),              // Z → AxisTriggerRight
-            new(Input: "AxisLeftStick",       Text: "Move"),              // Dpad-Any mirror overwrites Stick-Any "Look"
+            new(Input: "AxisLeftStick",       Text: "Look"),              // Stick-Any → AxisLeftStick
             new(Input: "ButtonDpad",          Text: "Move"),              // Dpad-Any → ButtonDpad
             new(Input: "AxisRightStick",      Text: "Move"),              // C-Any → AxisRightStick
             new(Input: "ButtonStart",         Text: "Pause"));            // inherited default

@@ -21,6 +21,7 @@
         <Input name="BUTTON2">Kick / Pin</Input>
         <Input name="BUTTON3">Jump</Input>
         <Input name="BUTTON4">Tag / Fall</Input>
+        <Input name="BUTTON1 BUTTON2">Power Move</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
 

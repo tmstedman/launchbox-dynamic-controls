@@ -119,7 +119,7 @@ Labels tell the plugin what each button does in a specific game. All labels for 
 
 The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers and InputMappings — and the element's text is what the button does.
 
-A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. These are recorded for the future but **not yet displayed** — the plugin logs them and moves on. Existing entries are safe to add to; they will start rendering once combination support lands.
+A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. It labels whichever control your configuration binds to all of those buttons at once, and takes precedence over their individual labels there. If nothing on your controller fires them together, it simply doesn't appear.
 
 ### MAME controls.xml support
 

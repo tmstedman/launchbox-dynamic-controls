@@ -9,15 +9,15 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the input-labels subsystem with its real internal wiring intact:
-/// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <Input name="c">&lt;Defaults&gt;</Input>
-/// blocks from the per-platform <Input name="c">Labels/{platform}.xml</Input> file) and
+/// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <c>&lt;Defaults&gt;</c>
+/// blocks from the per-platform <c>Labels/{platform}.xml</c> file) and
 /// <see cref="Plugins.ControlsXml.MameControlsXmlSource"/> +
 /// <see cref="Plugins.ControlsXml.ControlsXmlLoader"/> (BYOAC controls.xml parsing, MAME-gated)
 /// composing through <see cref="InputLabelsPlugins"/> (enable-filtering + chain order) into
 /// <see cref="InputLabelsService"/> (game-loader chain, inheritable-default merge,
-/// platform-button → generic-input translation, and the <Input name="c">IsGameSpecific</Input> flag). Clone-of
+/// platform-button → generic-input translation, and the <c>IsGameSpecific</c> flag). Clone-of
 /// fallback is pure service control flow with no loader-wiring dependency, so it stays in the
-/// unit tier (<Input name="c">InputLabelsServiceTests</Input>) rather than being re-tested here.
+/// unit tier (<c>InputLabelsServiceTests</c>) rather than being re-tested here.
 ///
 /// The only faked seam is <see cref="IFileSystem"/> — label XML lives inline in each test and is
 /// parsed for real. The <see cref="ResolvedMapping"/> that drives translation is supplied
@@ -45,7 +45,7 @@ public class InputLabelsSubsystemTests
             config: new GlobalConfig { EnableMame = enableMame });
 
     /// <summary>Builds a <see cref="ResolvedMapping"/> from a platform-button → generic-inputs
-    /// table; only <Input name="c">ButtonToInput</Input> is read by the labels subsystem.</summary>
+    /// table; only <c>ButtonToInput</c> is read by the labels subsystem.</summary>
     private static ResolvedMapping Mapping(params (string Button, string[] Inputs)[] entries) =>
         MappingOf(buttonToInput: entries.ToDictionary(
             e => e.Button,

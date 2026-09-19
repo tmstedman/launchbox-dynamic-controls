@@ -29,6 +29,10 @@ public static class AnalogToDigitalMirror
     /// <summary>
     /// Appends the selected stick's generic to every list that contains the matching Dpad generic.
     /// Existing stick entries within the same list are not duplicated.
+    ///
+    /// <para>Mirrored entries are always appended, so they sit after the button's own bindings.
+    /// <c>InputLabelsService</c> relies on that ordering: where a mirrored binding and a real one
+    /// land on the same input, the earlier — real — binding owns the label.</para>
     /// </summary>
     public static void Mirror(Dictionary<string, List<string>> buttonToInput, AnalogToDigitalMode mode)
     {

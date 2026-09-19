@@ -290,4 +290,141 @@ public class InputLabelsServiceTests
         // then the game label wins over the default
         labels.LabelText["ButtonStart"].ShouldBe("Restart");
     }
+
+    // --- button combinations ---
+
+    /// <summary>
+    /// The 3countb shape: a per-game MAME cfg binds RB to both BUTTON1 and BUTTON2, so pressing it
+    /// performs the game's combined move. Only <c>ButtonToInput</c> is read here.
+    /// </summary>
+    #pragma warning disable format
+    private static ResolvedMapping SharedShoulderMapping() => Mapping(
+        platform: "Arcade",
+        buttonToInput: new()
+        {
+            ["BUTTON1"] = ["ButtonX", "ButtonRightShoulder"],
+            ["BUTTON2"] = ["ButtonA", "ButtonRightShoulder"],
+        });
+    #pragma warning restore format
+
+    [Fact]
+    public void Load_Combination_LabelsTheSharedInput_IndividualsKeepTheirOwn()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Punch"),
+            ("BUTTON2", "Kick"),
+            ("BUTTON1 BUTTON2", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonRightShoulder", "Power Move"),
+            ("ButtonX", "Punch"),
+            ("ButtonA", "Kick"));
+    }
+
+    [Fact]
+    public void Load_Combination_NameOrderDoesNotMatter()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("BUTTON2 BUTTON1", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        labels.LabelText["ButtonRightShoulder"].ShouldBe("Power Move");
+    }
+
+    [Fact]
+    public void Load_Combination_NoSharedBinding_RendersNothing()
+    {
+        // this player's configuration gives the two buttons no control in common
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["BUTTON1"] = ["ButtonX"],
+            ["BUTTON2"] = ["ButtonA"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Punch"),
+            ("BUTTON1 BUTTON2", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonX", "Punch"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_Combination_NamingAnUnmappedButton_RendersNothing()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("BUTTON1 BUTTON9", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        labels.LabelText.ContainsKey("ButtonRightShoulder").ShouldBeFalse();
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_ButtonsShareAnInputEquallyWithNoCombination_LogsAndKeepsTheLast()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Punch"),
+            ("BUTTON2", "Kick")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        // RB is an equally direct binding for both buttons, so nothing can choose between them.
+        // The last still wins, and the log says the choice was arbitrary.
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonX", "Punch"),
+            ("ButtonA", "Kick"),
+            ("ButtonRightShoulder", "Kick"));
+        _logger.Received().Error(Arg.Is<string>(m =>
+            m.Contains("ButtonRightShoulder") && m.Contains("BUTTON1") && m.Contains("BUTTON2")));
+    }
+
+    [Fact]
+    public void Load_MirroredBindingDoesNotOverwriteTheInputsOwnLabel()
+    {
+        // the N64 shape: the pad mirrors its Dpad onto the left stick, which the platform already
+        // drives with the console's own analog stick
+        ResolvedMapping mapping = Mapping(platform: "Nintendo 64", buttonToInput: new()
+        {
+            ["Stick-Any"] = ["AxisLeftStick"],
+            ["Dpad-Any"] = ["ButtonDpad", "AxisLeftStick"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("Stick-Any", "Look"),
+            ("Dpad-Any", "Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
+
+        // the stick is Stick-Any's own binding and only a mirrored one for Dpad-Any, so it keeps
+        // its own label rather than being overwritten
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisLeftStick", "Look"),
+            ("ButtonDpad", "Move"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_Combination_ClaimingAButtonsOnlyInput_TakesPrecedence()
+    {
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["BUTTON1"] = ["ButtonRightShoulder"],
+            ["BUTTON2"] = ["ButtonA", "ButtonRightShoulder"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Punch"),
+            ("BUTTON2", "Kick"),
+            ("BUTTON1 BUTTON2", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), mapping);
+
+        // BUTTON1 drives nothing of its own, so its label has nowhere to go — that is correct,
+        // since the only control it reaches performs the combined action
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonRightShoulder", "Power Move"),
+            ("ButtonA", "Kick"));
+    }
 }

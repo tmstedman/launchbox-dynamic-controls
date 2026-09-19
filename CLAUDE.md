@@ -174,9 +174,10 @@ Variant selection: rmp wins over cfg; neither → platform Controllers.xml defau
 1. `InputLabelsLoader` — the `<Game>` entry in `Labels/{platform}.xml` (tried first). Lookup order: `launchBoxId` → case-insensitive `romName` → `RomNameUtils.NormalizeRomName` on both sides (strips `(...)`/`[...]` groups)
 2. `MameControlsXmlSource` — `controls.xml` (only when `EmulatorPath` is MAME; gated on the emulator, *not* on `EnableMame`)
 3. If no game labels found → the `<Defaults>` block of `Labels/{platform}.xml` on its own
-4. Entries are `<Input name="BUTTON1">label</Input>`; the `name` attribute is the platform button and the element text is the label, trimmed on read. A space-separated `name` denotes a button combination — it parses, logs at `Info` and is skipped, since resolving it needs mapping support that doesn't exist yet
-5. Every `<Defaults>` entry is inheritable — merged into game-specific labels for any platform button the game didn't name (e.g. Start=Pause applies even when the game only defines button labels). There is no `inherit` attribute
-6. Clone-of ROMs inherit their parent's labels
+4. Entries are `<Input name="BUTTON1">label</Input>`; the `name` attribute is the platform button and the element text is the label, trimmed on read. A space-separated `name` is a button combination: it resolves to the inputs *every* named button drives (the intersection) and outranks those buttons' individual labels there. An empty intersection renders nothing
+5. Where buttons contend for one input and no combination covers it, the most direct binding wins — a button's own bindings precede any `analogToDigital` mirror in its list, so a mirrored claim never overwrites a real one. Equally direct claims keep the last and log at `Error`
+6. Every `<Defaults>` entry is inheritable — merged into game-specific labels for any platform button the game didn't name (e.g. Start=Pause applies even when the game only defines button labels). There is no `inherit` attribute
+7. Clone-of ROMs inherit their parent's labels
 
 ## Layout rendering notes
 

@@ -6,9 +6,9 @@ namespace DynamicControls.Core.Tests.Labels;
 
 /// <summary>
 /// Unit tests for <see cref="InputLabelsLoader"/>. The loader parses a per-platform
-/// <Input name="c">Labels/{platform}.xml</Input> file that combines all game entries and a <Input name="c">&lt;Defaults&gt;</Input>
-/// block. Both the <Input name="c">Defaults\</Input> and <Input name="c">User\</Input> tiers are loaded and merged: User game
-/// entries override Defaults entries (by id, then by name); User <Input name="c">&lt;Defaults&gt;</Input> entries
+/// <c>Labels/{platform}.xml</c> file that combines all game entries and a <c>&lt;Defaults&gt;</c>
+/// block. Both the <c>Defaults\</c> and <c>User\</c> tiers are loaded and merged: User game
+/// entries override Defaults entries (by id, then by name); User <c>&lt;Defaults&gt;</c> entries
 /// override Defaults entries per button. Filesystem is a substitute; each test stubs only the
 /// exact paths it exercises.
 /// </summary>
@@ -430,7 +430,7 @@ public class InputLabelsLoaderTests
     }
 
     [Fact]
-    public void Load_CombinationName_IsIgnoredAndLogged_OtherEntriesSurvive()
+    public void Load_CombinationName_IsCarriedThroughVerbatim()
     {
         string path = Path.Combine(DefaultsLabels, "Arcade.xml");
         StubXml(path, """
@@ -444,10 +444,9 @@ public class InputLabelsLoaderTests
 
         InputLabelsConfig result = _underTest.Load(Game("Arcade", "3countb"))!;
 
-        // the combination parses without error but cannot be resolved yet, so it is dropped
-        // rather than attributed to either button named in it
-        result.Labels.Select(e => e.Name).ShouldBe(["BUTTON1"]);
-        _logger.Received().Info(Arg.Is<string>(s => s.Contains("BUTTON1 BUTTON2") && s.Contains("not supported yet")));
+        // the loader does not interpret the name — resolving it against the mapping is the
+        // service's job, so the entry arrives unchanged
+        result.Labels.Select(e => e.Name).ShouldBe(["BUTTON1", "BUTTON1 BUTTON2"]);
     }
 
     [Fact]

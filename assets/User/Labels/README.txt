@@ -28,9 +28,9 @@ the plugin finds the entry regardless of your ROM's filename. The romName attrib
 a fallback for games without a database ID.
 
 A space-separated name describes an action performed by pressing several buttons at
-once, such as <Input name="BUTTON1 BUTTON2">Power Move</Input>. These are recorded
-for the future but are not displayed yet — the plugin notes them in the log and
-carries on.
+once, such as <Input name="BUTTON1 BUTTON2">Power Move</Input>. It labels whichever
+control your configuration binds to all of those buttons together, in preference to
+their individual labels. If nothing fires them together, it does not appear.
 
 The name attribute is the button as printed on the original hardware (A, B, C for
 Sega Genesis; A, B, X, Y, L, R for Super Nintendo; etc.), not the names of buttons

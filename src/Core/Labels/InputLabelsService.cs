@@ -129,13 +129,47 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// <summary>
     /// Translates platform button labels to generic input names using the input mapping.
     /// Entries with no mapping are logged and discarded.
+    ///
+    /// <para>A label whose name is space-separated describes an action performed by pressing
+    /// those buttons together. It resolves to the inputs every named button drives — the
+    /// intersection — and outranks the individual labels of the buttons involved, because a
+    /// control that fires several buttons at once is doing the combined action rather than any
+    /// one of them.</para>
+    ///
+    /// <para>Where buttons contend for an input and no combination covers it, the input is left
+    /// unlabelled. Pressing it does more than one thing, so no single label is true, and showing
+    /// an arbitrary one would be worse than showing none.</para>
     /// </summary>
     private ResolvedLabels TranslateToGeneric(
         Dictionary<string, string> platformLabels,
         IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping)
     {
         var labelText = new Dictionary<string, string>();
-        foreach (KeyValuePair<string, string> entry in platformLabels)
+        var claimedByCombination = new HashSet<string>();
+
+        // Combinations first, so their claim is already recorded when individual labels are placed.
+        foreach (KeyValuePair<string, string> entry in platformLabels.Where(e => IsCombination(e.Key)))
+        {
+            IReadOnlyCollection<string> shared = SharedInputs(entry.Key, inputMapping);
+            if (shared.Count == 0)
+            {
+                _logger.Debug($"Label: '{entry.Key}' shares no input in this mapping, nothing to label");
+                continue;
+            }
+
+            foreach (string input in shared)
+            {
+                labelText[input] = entry.Value;
+                claimedByCombination.Add(input);
+                _logger.Debug($"Label: '{entry.Key}' -> generic: {input} -> {entry.Value}");
+            }
+        }
+
+        // Record which buttons claim each input, and how directly. A button's own bindings come
+        // first in its list and anything derived — an analogToDigital mirror — is appended after,
+        // so a lower position means a stronger claim on that input.
+        var claims = new Dictionary<string, List<(string Button, int Rank)>>();
+        foreach (KeyValuePair<string, string> entry in platformLabels.Where(e => !IsCombination(e.Key)))
         {
             if (!inputMapping.TryGetValue(entry.Key, out IReadOnlyList<string>? genericNames))
             {
@@ -143,12 +177,66 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                 continue;
             }
 
-            foreach (string genericName in genericNames)
+            for (int rank = 0; rank < genericNames.Count; rank++)
             {
-                labelText[genericName] = entry.Value;
-                _logger.Debug($"Label: {entry.Key} -> generic: {genericName} -> {entry.Value}");
+                if (!claims.TryGetValue(genericNames[rank], out List<(string, int)>? buttons))
+                    claims[genericNames[rank]] = buttons = [];
+                buttons.Add((entry.Key, rank));
             }
         }
+
+        foreach ((string input, List<(string Button, int Rank)> buttons) in claims)
+        {
+            if (claimedByCombination.Contains(input))
+            {
+                _logger.Debug($"Label: {string.Join(", ", buttons.Select(b => b.Button))} -> {input} superseded by a combination label");
+                continue;
+            }
+
+            int strongest = buttons.Min(b => b.Rank);
+            List<string> contenders = [.. buttons.Where(b => b.Rank == strongest).Select(b => b.Button)];
+
+            if (contenders.Count > 1)
+            {
+                // Equally direct claims, so nothing here can choose between them. The last still
+                // wins as it always has; the log says so because the result is wrong for whichever
+                // button lost, and a genuine simultaneous action should say so with
+                // <Input name="A B"> instead.
+                _logger.Error($"{input} is driven by {string.Join(" and ", contenders)} at once; showing '{platformLabels[contenders[^1]]}'. If these fire together, label them with <Input name=\"{string.Join(" ", contenders)}\">.");
+            }
+
+            labelText[input] = platformLabels[contenders[^1]];
+            _logger.Debug($"Label: {contenders[^1]} -> generic: {input} -> {labelText[input]}");
+        }
+
         return new ResolvedLabels(LabelText: labelText);
+    }
+
+    /// <summary>True when the entry names several buttons pressed together.</summary>
+    private static bool IsCombination(string name) => name.Contains(' ');
+
+    /// <summary>
+    /// The generic inputs driven by every button in a combination. Empty when the buttons share no
+    /// input, or when any of them is absent from the mapping — in both cases the player's
+    /// configuration has no single control performing the combined action.
+    /// </summary>
+    private static IReadOnlyCollection<string> SharedInputs(
+        string combinationName,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping)
+    {
+        string[] buttons = [.. combinationName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct()];
+
+        HashSet<string>? shared = null;
+        foreach (string button in buttons)
+        {
+            if (!inputMapping.TryGetValue(button, out IReadOnlyList<string>? inputs))
+                return [];
+
+            if (shared == null) shared = [.. inputs];
+            else shared.IntersectWith(inputs);
+
+            if (shared.Count == 0) return [];
+        }
+        return shared ?? (IReadOnlyCollection<string>)[];
     }
 }

@@ -23,8 +23,9 @@ namespace DynamicControls.Labels;
 ///   &lt;/Game&gt;
 /// &lt;/Labels&gt;
 /// </code>
-/// <para>A space-separated <c>name</c> denotes a button combination. Those entries parse without
-/// error but are ignored, since resolving them needs mapping support that does not exist yet.</para>
+/// <para>A space-separated <c>name</c> denotes a button combination — an action performed by
+/// pressing those buttons together. It is carried through unchanged; <see cref="InputLabelsService"/>
+/// resolves it against the mapping.</para>
 /// </summary>
 public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLabelsLoader
 {
@@ -138,14 +139,6 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
             if (string.IsNullOrWhiteSpace(name))
             {
                 _logger.Error($"Skipping <Input> in {path}: missing 'name' attribute");
-                continue;
-            }
-
-            // A space-separated name means "these buttons pressed together". Not yet resolvable,
-            // so the entry is skipped rather than mis-attributed to one of the buttons named.
-            if (name.Contains(' '))
-            {
-                _logger.Info($"Ignoring <Input name=\"{name}\"> in {path}: labels for button combinations are not supported yet");
                 continue;
             }
 
