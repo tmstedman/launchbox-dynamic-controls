@@ -8,8 +8,8 @@ namespace DynamicControls.Core.Tests.InputMapping;
 /// <summary>
 /// Unit tests for <see cref="InputMappingPlugins"/>. Two responsibilities:
 /// (1) IsEnabled filtering at construction — disabled underTest are dropped from the chains and
-/// never consulted at runtime; (2) priority-order selection at call time — SelectSource and
-/// SelectTransform iterate their respective filtered chains and return the first non-null
+/// never consulted at runtime; (2) priority order at call time — ResolveBaseline and
+/// ApplyTransform iterate their respective filtered chains and return the first non-null
 /// contribution, falling back to an empty config (sources) or null (transforms) when none apply.
 /// Substitutes stand in for the source/transform implementations so each test states the
 /// IsEnabled and Load/Transform return values directly.
@@ -42,16 +42,16 @@ public class InputMappingPluginsTests
         IReadOnlyList<IInputMappingTransform>? transforms = null) =>
         new(_logger, sources ?? [], transforms ?? [], _config);
 
-    // ---- SelectSource ----
+    // ---- ResolveBaseline ----
 
     [Fact]
-    public void SelectSource_NoSources_ReturnsEmptyConfig()
+    public void ResolveBaseline_NoSources_ReturnsEmptyConfig()
     {
         // given a underTest instance with no sources registered
         var underTest = Build();
 
-        // when SelectSource runs
-        InputMappingConfig result = underTest.SelectSource(Game(), platform: null);
+        // when ResolveBaseline runs
+        InputMappingConfig result = underTest.ResolveBaseline(Game(), platform: null);
 
         // then a default-constructed config falls out (no controller, no mappings)
         result.Controller.ShouldBeNull();
@@ -59,7 +59,7 @@ public class InputMappingPluginsTests
     }
 
     [Fact]
-    public void SelectSource_FirstNonNullWins_LaterSourcesNotConsulted()
+    public void ResolveBaseline_FirstNonNullWins_LaterSourcesNotConsulted()
     {
         // given three sources: first returns null (skipped), second wins, third must never be
         // consulted because iteration stops at the first non-null
@@ -68,8 +68,8 @@ public class InputMappingPluginsTests
         var unreached = Source(enabled: true, returns: MappingConfig(controller: "Should Not Be Used"));
         var underTest = Build(sources: [nulled, winner, unreached]);
 
-        // when SelectSource runs
-        InputMappingConfig result = underTest.SelectSource(Game(), platform: null);
+        // when ResolveBaseline runs
+        InputMappingConfig result = underTest.ResolveBaseline(Game(), platform: null);
 
         // then the null source was tried, the winner was tried, the third was skipped
         nulled.Received(1).Load(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>());
@@ -79,15 +79,15 @@ public class InputMappingPluginsTests
     }
 
     [Fact]
-    public void SelectSource_DisabledSource_IsNeverConsulted()
+    public void ResolveBaseline_DisabledSource_IsNeverConsulted()
     {
         // given two sources: the first is disabled (would otherwise win), the second is enabled
         var disabled = Source(enabled: false, returns: MappingConfig(controller: "Disabled"));
         var enabled = Source(enabled: true, returns: MappingConfig(controller: "Enabled"));
         var underTest = Build(sources: [disabled, enabled]);
 
-        // when SelectSource runs
-        InputMappingConfig result = underTest.SelectSource(Game(), platform: null);
+        // when ResolveBaseline runs
+        InputMappingConfig result = underTest.ResolveBaseline(Game(), platform: null);
 
         // then the disabled source is filtered out at construction; the enabled source wins
         disabled.DidNotReceive().Load(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>());
@@ -95,7 +95,7 @@ public class InputMappingPluginsTests
     }
 
     [Fact]
-    public void SelectSource_ForwardsPlatformControllers()
+    public void ResolveBaseline_ForwardsPlatformControllers()
     {
         // given a platform controllers config
         var platform = new PlatformControllersConfig
@@ -105,30 +105,30 @@ public class InputMappingPluginsTests
         var source = Source(enabled: true, returns: MappingConfig(controller: "Pad"));
         var underTest = Build(sources: [source]);
 
-        // when SelectSource runs with the platform argument
-        underTest.SelectSource(Game(), platform);
+        // when ResolveBaseline runs with the platform argument
+        underTest.ResolveBaseline(Game(), platform);
 
         // then the same platform instance is forwarded to the source
         source.Received(1).Load(Arg.Any<GameInfo>(), platform);
     }
 
-    // ---- SelectTransform ----
+    // ---- ApplyTransform ----
 
     [Fact]
-    public void SelectTransform_NoTransforms_ReturnsNull()
+    public void ApplyTransform_NoTransforms_ReturnsNull()
     {
         // given no transforms registered
         var underTest = Build();
 
-        // when SelectTransform runs
-        InputMappingConfig? result = underTest.SelectTransform(Game(), MappingConfig(controller: "Pad"));
+        // when ApplyTransform runs
+        InputMappingConfig? result = underTest.ApplyTransform(Game(), MappingConfig(controller: "Pad"));
 
         // then null falls out — there is no transform to apply
         result.ShouldBeNull();
     }
 
     [Fact]
-    public void SelectTransform_FirstNonNullWins_LaterTransformsNotConsulted()
+    public void ApplyTransform_FirstNonNullWins_LaterTransformsNotConsulted()
     {
         // given three transforms: first returns null, second wins, third must never be consulted
         var nulled = Transform(enabled: true, returns: null);
@@ -136,8 +136,8 @@ public class InputMappingPluginsTests
         var unreached = Transform(enabled: true, returns: MappingConfig(controller: "Pad", mappings: [("A", "ButtonC")]));
         var underTest = Build(transforms: [nulled, winner, unreached]);
 
-        // when SelectTransform runs
-        InputMappingConfig? result = underTest.SelectTransform(Game(), MappingConfig(controller: "Pad"));
+        // when ApplyTransform runs
+        InputMappingConfig? result = underTest.ApplyTransform(Game(), MappingConfig(controller: "Pad"));
 
         // then the null transform was tried, the winner was tried, the third was skipped
         nulled.Received(1).Transform(Arg.Any<GameInfo>(), Arg.Any<InputMappingConfig>());
@@ -148,15 +148,15 @@ public class InputMappingPluginsTests
     }
 
     [Fact]
-    public void SelectTransform_DisabledTransform_IsNeverConsulted()
+    public void ApplyTransform_DisabledTransform_IsNeverConsulted()
     {
         // given two transforms: the first is disabled (would otherwise win), the second enabled
         var disabled = Transform(enabled: false, returns: MappingConfig(controller: "Pad", mappings: [("A", "ButtonZ")]));
         var enabled = Transform(enabled: true, returns: MappingConfig(controller: "Pad", mappings: [("A", "ButtonY")]));
         var underTest = Build(transforms: [disabled, enabled]);
 
-        // when SelectTransform runs
-        InputMappingConfig? result = underTest.SelectTransform(Game(), MappingConfig(controller: "Pad"));
+        // when ApplyTransform runs
+        InputMappingConfig? result = underTest.ApplyTransform(Game(), MappingConfig(controller: "Pad"));
 
         // then the disabled transform is filtered out at construction; the enabled one wins
         disabled.DidNotReceive().Transform(Arg.Any<GameInfo>(), Arg.Any<InputMappingConfig>());

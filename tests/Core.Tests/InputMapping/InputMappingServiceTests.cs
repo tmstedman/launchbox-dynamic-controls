@@ -8,7 +8,7 @@ namespace DynamicControls.Core.Tests.InputMapping;
 /// Unit tests for <see cref="InputMappingService"/>. All collaborators are substituted —
 /// <see cref="IInputMappingPlugins"/> stands in for the source/transform iteration (covered by
 /// <see cref="InputMappingPluginsTests"/>) so each test states the chosen baseline and transformed
-/// config directly. Focus: the pipeline shape (loader → SelectSource → resolver → SelectTransform
+/// config directly. Focus: the pipeline shape (loader → ResolveBaseline → resolver → ApplyTransform
 /// → re-splice naturals), with special attention to the natural-snapshot invariant when a
 /// transform applies.
 /// </summary>
@@ -42,9 +42,9 @@ public class InputMappingServiceTests
 
     private void StubSelection(InputMappingConfig baseline, InputMappingConfig? transformed = null)
     {
-        _plugins.SelectSource(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>())
+        _plugins.ResolveBaseline(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>())
             .Returns(baseline);
-        _plugins.SelectTransform(Arg.Any<GameInfo>(), Arg.Any<InputMappingConfig>())
+        _plugins.ApplyTransform(Arg.Any<GameInfo>(), Arg.Any<InputMappingConfig>())
             .Returns(transformed);
     }
 
@@ -142,7 +142,7 @@ public class InputMappingServiceTests
     }
 
     [Fact]
-    public void Load_ForwardsLoaderPlatformControllersToSelectSource()
+    public void Load_ForwardsLoaderPlatformControllersToResolveBaseline()
     {
         // given the loader produces a platform controllers config
         var platform = new PlatformControllersConfig
@@ -156,7 +156,7 @@ public class InputMappingServiceTests
         // when the service loads
         _underTest.Load(Game());
 
-        // then the same platform instance is forwarded to plugins.SelectSource
-        _plugins.Received(1).SelectSource(Arg.Any<GameInfo>(), platform);
+        // then the same platform instance is forwarded to plugins.ResolveBaseline
+        _plugins.Received(1).ResolveBaseline(Arg.Any<GameInfo>(), platform);
     }
 }

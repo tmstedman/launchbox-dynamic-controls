@@ -38,8 +38,8 @@ public class InputMappingService(
     public ResolvedMapping Load(GameInfo game)
     {
         PlatformControllersConfig? platform = _loader.LoadPlatformMapping(game.Platform);
-        InputMappingConfig baseline = _plugins.SelectSource(game, platform);
-        InputMappingConfig? transformed = _plugins.SelectTransform(game, baseline);
+        InputMappingConfig baseline = _plugins.ResolveBaseline(game, platform);
+        InputMappingConfig? transformed = _plugins.ApplyTransform(game, baseline);
 
         if (transformed == null)
             return _resolver.Resolve(game.Platform, baseline, baseline.Controller);

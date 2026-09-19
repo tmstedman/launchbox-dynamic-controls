@@ -83,7 +83,7 @@ The resolution chain (highest priority wins):
 2. **Emulator-specific** — RetroArch core config + per-content overrides
 3. **Platform default** — the controller selected from `Controllers/{platform}.xml`
 
-On top of whichever source wins, an ordered list of `IInputMappingTransform`s runs. MAME is the only one today: it overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
+On top of whichever source wins, the first applicable `IInputMappingTransform` runs — transforms are first-match-wins like sources, not a chain each layering onto the last. MAME is the only one today: it overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
 
 (All paths resolve through the `Defaults/`+`User/` layering — see [Config layering](#config-layering).)
 

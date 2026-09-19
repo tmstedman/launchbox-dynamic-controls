@@ -134,7 +134,7 @@ InputRenderingService.Render(...)  → RenderResult (flat lists of RenderedImage
 
 ## Input mapping
 
-**Source priority** (first non-null wins): `PerGameXmlMappingSource` → `RetroArchMappingSource` → `PlatformDefaultMappingSource`. Transforms (`MameInputMappingSource`) are applied on top of whichever source wins. When a transform applies, `InputMappingService` re-splices the `Natural*` maps from the pre-transform baseline so remap detection still works correctly.
+**Source priority** (first non-null wins): `PerGameXmlMappingSource` → `RetroArchMappingSource` → `PlatformDefaultMappingSource`. The first applicable transform (`MameInputMappingSource`) is applied on top of whichever source wins — transforms are first-match-wins like sources, not a chain. When a transform applies, `InputMappingService` re-splices the `Natural*` maps from the pre-transform baseline so remap detection still works correctly.
 
 **Per-game overlay** (`PerGameXmlMappingSource`, via `MappingOverlay.Apply`): a `<GameMapping>` file overlays the selected controller's baseline. `<Mapping name="A" input="..."/>` replaces whatever that platform button had; `<Unmap name="C"/>` drops a baseline button with nothing in its place — for buttons a game isn't meant to use, in parity with RetroArch's `-1` sentinel. Baseline entries whose `name` appears in either list are dropped, then every overlay entry is appended — so repeating `<Mapping name="A">` with different `input` values drives several template slots from one platform button. The same `MappingOverlay.Apply` backs controller-level `inheritFrom` resolution.
 
