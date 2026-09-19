@@ -344,7 +344,7 @@ public class ArcadeEndToEndTests
             #pragma warning restore format
     }
 
-    [Fact(Skip = "#10 — a whole-control label is not yet dropped from a control its directions have left. The test states the wanted behaviour and fails today.")]
+    [Fact]
     public void Arcade_MetalSlug_WholeJoystickLabelIsNotStrandedOnTheDeadDpad()
     {
         // The stranding half of the whole-control problem, end to end and still failing.

@@ -52,17 +52,41 @@ public static class WholeInputDeriver
     {
         var buttonToInput = mapping.ButtonToInput.ToDictionary(e => e.Key, e => e.Value);
         var inputToButton = mapping.InputToButton.ToDictionary(e => e.Key, e => e.Value);
+        var dropped = new HashSet<string>();
         bool changed = false;
 
         foreach (KeyValuePair<string, IReadOnlyList<string>> entry in mapping.ButtonToInput)
         {
-            IReadOnlyList<string> claimed = ClaimedWholes(entry.Key, mapping);
-            List<string> additions = [.. claimed.Where(w => !entry.Value.Contains(w))];
-            if (additions.Count == 0) continue;
+            DirectionReach? reach = Reach(entry.Key, mapping);
 
-            buttonToInput[entry.Key] = [.. entry.Value, .. additions];
+            // Null means there was nothing to test this button against — it names no whole
+            // control, or no sibling drives any of its directions. Leave it exactly as it is:
+            // a button mapped straight to a whole control with no directions anywhere still
+            // drives that control, and silence is not evidence against it.
+            if (reach == null) continue;
+            IReadOnlyCollection<string> claimed = reach.Claimed;
+
+            // Keep everything that isn't a whole control, and every whole control that at least
+            // one direction still reaches. Dropping needs the stronger evidence: a control some
+            // directions still work on is a control the label is still true of, and plenty of
+            // arcade cabinets have two-way joysticks that never drove all four to begin with.
+            List<string> kept = [.. entry.Value.Where(i =>
+                !WholeToDirections.ContainsKey(i) || WholeToDirections[i].Any(reach.Reached.Contains))];
+            List<string> additions = [.. claimed.Where(w => !entry.Value.Contains(w))];
+            List<string> updated = [.. kept, .. additions];
+            if (updated.SequenceEqual(entry.Value)) continue;
+
+            buttonToInput[entry.Key] = updated;
             changed = true;
-            logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", additions)}");
+
+            foreach (string stale in entry.Value.Where(i => !updated.Contains(i)))
+            {
+                dropped.Add(stale);
+                logger.Debug($"Whole input: {entry.Key} no longer drives {stale} — every one of its directions has moved away");
+            }
+
+            if (additions.Count > 0)
+                logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", additions)}");
 
             // First-seen-wins, as elsewhere: a button already on that control keeps it.
             foreach (string input in additions.Where(i => !inputToButton.ContainsKey(i)))
@@ -70,6 +94,22 @@ public static class WholeInputDeriver
 
             foreach (string input in additions.Where(i => inputToButton[i] != entry.Key))
                 logger.Debug($"Whole input: {input} keeps {inputToButton[input]}, which is mapped to it directly");
+        }
+
+        // Bring the reverse lookup back into step for anything dropped. A control another button
+        // still drives passes to that button; one nothing drives leaves the lookup altogether,
+        // which is what makes it read as unmapped.
+        foreach (string stale in dropped)
+        {
+            if (!inputToButton.ContainsKey(stale)) continue;
+
+            string? survivor = buttonToInput
+                .Where(e => e.Value.Contains(stale))
+                .Select(e => e.Key)
+                .FirstOrDefault();
+
+            if (survivor == null) inputToButton.Remove(stale);
+            else inputToButton[stale] = survivor;
         }
 
         return changed
@@ -81,33 +121,48 @@ public static class WholeInputDeriver
             : mapping;
     }
 
+    /// <summary>Where a button's direction siblings have ended up: every input they now drive,
+    /// and the whole controls they cover completely.</summary>
+    /// <param name="Reached">Every input the siblings drive in the current mapping. One of a
+    /// whole control's directions appearing here is enough to keep an existing claim.</param>
+    /// <param name="Claimed">The whole controls every one of whose directions is reached. Only
+    /// these are added, because asserting a new claim takes the stronger evidence.</param>
+    private sealed record DirectionReach(
+        IReadOnlySet<string> Reached,
+        IReadOnlyCollection<string> Claimed);
+
     /// <summary>
-    /// The whole controls that <paramref name="button"/>'s direction siblings collectively cover
-    /// in the current mapping. Empty when the button names no whole control naturally, or when
-    /// no whole control has all four of its directions accounted for.
+    /// Follows <paramref name="button"/>'s direction siblings to wherever the config has put them.
+    ///
+    /// <para>Returns <c>null</c> rather than an empty result when the question does not apply: the
+    /// button names no whole control naturally, or no other button drives any of its directions.
+    /// Those cases carry no evidence either way, and must not be read as evidence of absence.</para>
     /// </summary>
-    private static IReadOnlyList<string> ClaimedWholes(string button, ResolvedMapping mapping)
+    private static DirectionReach? Reach(string button, ResolvedMapping mapping)
     {
         if (!mapping.NaturalButtonToInput.TryGetValue(button, out IReadOnlyList<string>? naturalInputs))
-            return [];
+            return null;
 
         // The directions belonging to whichever whole controls this button names naturally.
         var ownDirections = new HashSet<string>(
             naturalInputs.Where(WholeToDirections.ContainsKey).SelectMany(w => WholeToDirections[w]));
-        if (ownDirections.Count == 0) return [];
+        if (ownDirections.Count == 0) return null;
 
         // Its sibling buttons: the ones that drive those directions in the natural mapping.
         // Read from the *current* mapping, which is where the config moved them to.
         var reached = new HashSet<string>();
+        bool anySibling = false;
         foreach (KeyValuePair<string, IReadOnlyList<string>> sibling in mapping.NaturalButtonToInput)
         {
             if (sibling.Key == button || !sibling.Value.Any(ownDirections.Contains)) continue;
+            anySibling = true;
             if (mapping.ButtonToInput.TryGetValue(sibling.Key, out IReadOnlyList<string>? current))
                 reached.UnionWith(current);
         }
+        if (!anySibling) return null;
 
-        return [.. WholeToDirections
-            .Where(w => w.Value.All(reached.Contains))
-            .Select(w => w.Key)];
+        return new DirectionReach(
+            Reached: reached,
+            Claimed: [.. WholeToDirections.Where(w => w.Value.All(reached.Contains)).Select(w => w.Key)]);
     }
 }

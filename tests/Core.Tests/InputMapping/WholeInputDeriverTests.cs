@@ -66,9 +66,31 @@ public class WholeInputDeriverTests
     public void Derive_DerivedControlIsAppendedAfterTheButtonsOwnBinding()
     {
         // Ordering is the contract InputLabelsService ranks claims by: a button mapped directly
-        // to a control must outrank one that only reached it through this derivation. Here the
-        // directions land on the stick alone, so the derived entry is unambiguous — and must
-        // still follow ButtonDpad rather than displace it.
+        // to a control must outrank one that only reached it through this derivation. The hat is
+        // still bound alongside the axes here, so the D-pad survives and both entries are present
+        // to be ordered.
+        Dictionary<string, IReadOnlyList<string>> buttonToInput = new()
+        {
+            ["JOYSTICK"] = ["ButtonDpad"],
+            ["JOYSTICK_UP"] = [Up, StickUp],
+            ["JOYSTICK_DOWN"] = [Down, StickDown],
+            ["JOYSTICK_LEFT"] = [Left, StickLeft],
+            ["JOYSTICK_RIGHT"] = [Right, StickRight],
+        };
+
+        ResolvedMapping result = WholeInputDeriver.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+
+        result.ButtonToInput["JOYSTICK"][0].ShouldBe("ButtonDpad");
+        result.ButtonToInput["JOYSTICK"][^1].ShouldBe("AxisLeftStick");
+    }
+
+    [Fact]
+    public void Derive_EveryDirectionLeavesAControl_TheWholeButtonStopsClaimingIt()
+    {
+        // The config binds each direction to a stick axis alone — no hat — which is what a player
+        // on a gamepad rather than an arcade stick would write. Nothing drives the D-pad any
+        // more, so a label left on it would tell the player a dead control moves them.
         Dictionary<string, IReadOnlyList<string>> buttonToInput = new()
         {
             ["JOYSTICK"] = ["ButtonDpad"],
@@ -81,8 +103,92 @@ public class WholeInputDeriverTests
         ResolvedMapping result = WholeInputDeriver.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
 
-        result.ButtonToInput["JOYSTICK"][0].ShouldBe("ButtonDpad");
-        result.ButtonToInput["JOYSTICK"][^1].ShouldBe("AxisLeftStick");
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["AxisLeftStick"]);
+        _logger.Received().Debug(
+            "Whole input: JOYSTICK no longer drives ButtonDpad — every one of its directions has moved away");
+    }
+
+    [Fact]
+    public void Derive_DroppedControlLeavesTheReverseLookupWhenNothingElseDrivesIt()
+    {
+        // The two views have to stay in step. VisibilityEvaluator asks the reverse lookup whether
+        // an input is driven at all, so a D-pad still listed there would render as live.
+        Dictionary<string, IReadOnlyList<string>> buttonToInput = new()
+        {
+            ["JOYSTICK"] = ["ButtonDpad"],
+            ["JOYSTICK_UP"] = [StickUp],
+            ["JOYSTICK_DOWN"] = [StickDown],
+            ["JOYSTICK_LEFT"] = [StickLeft],
+            ["JOYSTICK_RIGHT"] = [StickRight],
+        };
+
+        ResolvedMapping result = WholeInputDeriver.Derive(
+            MappingOf(
+                buttonToInput: buttonToInput,
+                inputToButton: new Dictionary<string, string> { ["ButtonDpad"] = "JOYSTICK" },
+                naturalButtonToInput: Natural()),
+            _logger);
+
+        result.InputToButton.ContainsKey("ButtonDpad").ShouldBeFalse();
+        result.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICK");
+    }
+
+    [Fact]
+    public void Derive_OneDirectionStillReachesTheControl_TheWholeButtonKeepsIt()
+    {
+        // Three directions moved to the stick and Right stayed on the D-pad. Pushing right still
+        // moves the player, so the D-pad is not dead and the label is still true of it. Dropping
+        // needs every direction gone, not merely most of them.
+        Dictionary<string, IReadOnlyList<string>> buttonToInput = new()
+        {
+            ["JOYSTICK"] = ["ButtonDpad"],
+            ["JOYSTICK_UP"] = [StickUp],
+            ["JOYSTICK_DOWN"] = [StickDown],
+            ["JOYSTICK_LEFT"] = [StickLeft],
+            ["JOYSTICK_RIGHT"] = [Right],
+        };
+
+        ResolvedMapping result = WholeInputDeriver.Derive(
+            MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()), _logger);
+
+        result.ButtonToInput["JOYSTICK"].ShouldContain("ButtonDpad");
+    }
+
+    [Fact]
+    public void Derive_TwoWayJoystick_KeepsItsControlThoughItNeverDroveAllFourDirections()
+    {
+        // Plenty of cabinets have a left/right-only joystick, so the D-pad is only ever driven by
+        // two of its four directions. Requiring all four before keeping a claim would erase the
+        // label on every one of those games.
+        Dictionary<string, IReadOnlyList<string>> natural = new()
+        {
+            ["JOYSTICK"] = ["ButtonDpad"],
+            ["JOYSTICK_LEFT"] = [Left],
+            ["JOYSTICK_RIGHT"] = [Right],
+        };
+
+        ResolvedMapping result = WholeInputDeriver.Derive(
+            MappingOf(buttonToInput: natural, naturalButtonToInput: natural), _logger);
+
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+    }
+
+    [Fact]
+    public void Derive_ButtonOnAWholeControlWithNoDirectionsAnywhere_KeepsIt()
+    {
+        // A platform can map a button straight to a whole control with no per-direction buttons
+        // at all. There is nothing to test the claim against, and absence of evidence must not be
+        // read as evidence the control is dead.
+        Dictionary<string, IReadOnlyList<string>> mapping = new()
+        {
+            ["JOYSTICK"] = ["ButtonDpad"],
+            ["BUTTON1"] = ["ButtonA"],
+        };
+
+        ResolvedMapping result = WholeInputDeriver.Derive(
+            MappingOf(buttonToInput: mapping, naturalButtonToInput: mapping), _logger);
+
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
     }
 
     [Fact]

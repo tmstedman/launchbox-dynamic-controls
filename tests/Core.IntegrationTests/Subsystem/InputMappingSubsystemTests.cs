@@ -764,7 +764,7 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
     }
 
-    [Fact(Skip = "#10 — a whole-control label is not yet dropped from a control its directions have left. The test states the wanted behaviour and fails today.")]
+    [Fact]
     public void Scenario_EveryDirectionMovedOffTheDpad_WholeJoystickStopsClaimingIt()
     {
         // The other half of the whole-input problem, and the one still open. A config that binds
