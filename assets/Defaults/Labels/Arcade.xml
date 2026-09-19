@@ -593,8 +593,8 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="blkheart">
-        <Input name="BUTTON1">Fire A</Input>
-        <Input name="BUTTON2">Fire B</Input>
+        <Input name="BUTTON1">Shoot</Input>
+        <Input name="BUTTON2">Alt Fire</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="blkhole">
@@ -616,9 +616,9 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="blockout">
-        <Input name="BUTTON1">A Button</Input>
-        <Input name="BUTTON2">B Button</Input>
-        <Input name="BUTTON3">C Button</Input>
+        <Input name="BUTTON1">Flip Vertical</Input>
+        <Input name="BUTTON2">Flip Horizontal</Input>
+        <Input name="BUTTON3">Rotate</Input>
         <Input name="BUTTON4">Drop</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
@@ -1017,7 +1017,7 @@
         <Input name="BUTTON1">Fire</Input>
         <Input name="BUTTON2">Mega - Blaster</Input>
         <Input name="BUTTON3">Eradicator</Input>
-        <Input name="JOYSTICK">Control</Input>
+        <Input name="JOYSTICK">Move Crosshair</Input>
     </Game>
     <Game romName="columns">
         <Input name="BUTTON1">Switch Pieces</Input>
@@ -1519,8 +1519,8 @@
     </Game>
     <Game romName="galaxian">
         <Input name="BUTTON1">Fire</Input>
-        <Input name="JOYSTICK_LEFT">Control</Input>
-        <Input name="JOYSTICK_RIGHT">Control</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="galpani2">
         <Input name="BUTTON1">Cut</Input>
@@ -1611,9 +1611,9 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="goldmedl">
-        <Input name="BUTTON1">Button A</Input>
-        <Input name="BUTTON2">Button B</Input>
-        <Input name="BUTTON3">Button C</Input>
+        <Input name="BUTTON1">Run / Spin / Punch</Input>
+        <Input name="BUTTON2">Jump/Angle/Throw/Jab</Input>
+        <Input name="BUTTON3">Run / Spin / Hit Power</Input>
     </Game>
     <Game romName="goldnaxe">
         <Input name="BUTTON1">Attack</Input>
@@ -1820,8 +1820,9 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="hyperspt">
-        <Input name="BUTTON1">Go (Left)</Input>
-        <Input name="BUTTON3">Go (Right)</Input>
+        <Input name="BUTTON1">(Tap) Power 1</Input>
+        <Input name="BUTTON2">Action</Input>
+        <Input name="BUTTON3">(Tap) Power 2</Input>
     </Game>
     <Game romName="iceclimb">
         <Input name="BUTTON1">B</Input>
@@ -1860,8 +1861,8 @@
     </Game>
     <Game romName="invaders">
         <Input name="BUTTON1">Fire</Input>
-        <Input name="JOYSTICK_LEFT">Control</Input>
-        <Input name="JOYSTICK_RIGHT">Control</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="invadpt2">
         <Input name="BUTTON1">Fire Laser</Input>
@@ -2044,8 +2045,8 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="lastduel">
-        <Input name="BUTTON1">Button 1</Input>
-        <Input name="BUTTON2">Button 2</Input>
+        <Input name="BUTTON1">Shoot</Input>
+        <Input name="BUTTON2">Bomb / Jump</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="ldrun">
@@ -2110,7 +2111,7 @@
         <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="lupin3">
-        <Input name="BUTTON1">Magic Button</Input>
+        <Input name="BUTTON1">Teleport</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="m4">
@@ -2832,15 +2833,15 @@
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sarge">
-        <Input name="BUTTON1">Trigger Switch</Input>
-        <Input name="BUTTON2">Thumb Button</Input>
+        <Input name="BUTTON1">Ground Attack</Input>
+        <Input name="BUTTON2">Air Attack</Input>
         <Input name="JOYSTICKLEFT_UP">Left Tread Forward</Input>
         <Input name="JOYSTICKLEFT_DOWN">Left Tread Backward</Input>
         <Input name="JOYSTICKRIGHT_UP">Right Tread Forward</Input>
         <Input name="JOYSTICKRIGHT_DOWN">Right Tread Backward</Input>
     </Game>
     <Game romName="satansat">
-        <Input name="BUTTON1">Firing Button</Input>
+        <Input name="BUTTON1">Shoot</Input>
         <Input name="BUTTON2">Laser Beam</Input>
         <Input name="JOYSTICK_LEFT">Move</Input>
         <Input name="JOYSTICK_RIGHT">Move</Input>
@@ -3127,7 +3128,7 @@
     </Game>
     <Game romName="solarfox">
         <Input name="BUTTON1">Fire</Input>
-        <Input name="BUTTON2">Speed Control</Input>
+        <Input name="BUTTON2">Go Faster</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="solarq">
@@ -3143,8 +3144,8 @@
         <Input name="BUTTON2">Blaster</Input>
     </Game>
     <Game romName="souledge">
-        <Input name="BUTTON1">Attack A</Input>
-        <Input name="BUTTON2">Attack B</Input>
+        <Input name="BUTTON1">Horizontal Slash</Input>
+        <Input name="BUTTON2">Vertical Slash</Input>
         <Input name="BUTTON3">Kick</Input>
         <Input name="BUTTON4">Guard</Input>
         <Input name="JOYSTICK">Move</Input>
@@ -3163,8 +3164,8 @@
     <Game romName="spacefb">
         <Input name="BUTTON1">Fire</Input>
         <Input name="BUTTON2">Warp</Input>
-        <Input name="JOYSTICK_LEFT">Port (Left)</Input>
-        <Input name="JOYSTICK_RIGHT">Starboard (Right)</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="spacegun">
         <Input name="BUTTON1">Trigger</Input>
@@ -3267,8 +3268,8 @@
     </Game>
     <Game romName="sspaceat">
         <Input name="BUTTON1">Fire</Input>
-        <Input name="JOYSTICK_LEFT">Control</Input>
-        <Input name="JOYSTICK_RIGHT">Control</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="ssriders">
         <Input name="BUTTON1">Shoot</Input>
@@ -3573,10 +3574,10 @@
     </Game>
     <Game romName="toobin">
         <Input name="BUTTON1">Throw Can / Start</Input>
-        <Input name="BUTTON2">Paddle Forward (Right)</Input>
-        <Input name="BUTTON3">Paddle Forward (Left)</Input>
-        <Input name="BUTTON4">Back Paddle (Left)</Input>
-        <Input name="BUTTON5">Back Paddle (Right)</Input>
+        <Input name="BUTTON2">Right Forward</Input>
+        <Input name="BUTTON3">Left Forward</Input>
+        <Input name="BUTTON4">Right Backwards</Input>
+        <Input name="BUTTON5">Left Backwards</Input>
     </Game>
     <Game romName="topgun">
         <Input name="BUTTON1">B</Input>
@@ -3672,9 +3673,9 @@
         <Input name="LIGHTGUN_Y_EXT">Aim Down</Input>
     </Game>
     <Game romName="uniwars">
-        <Input name="BUTTON1">Firing Button</Input>
-        <Input name="JOYSTICK_LEFT">Control Lever (Left)</Input>
-        <Input name="JOYSTICK_RIGHT">Control Lever (Right)</Input>
+        <Input name="BUTTON1">Shoot</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="unsquad">
         <Input name="BUTTON1">Fire</Input>
@@ -3943,8 +3944,8 @@
     </Game>
     <Game romName="xenophob">
         <Input name="BUTTON1">Fire / Punch</Input>
-        <Input name="BUTTON2">Left Button</Input>
-        <Input name="BUTTON3">Right Button</Input>
+        <Input name="BUTTON2">Jump / Stand</Input>
+        <Input name="BUTTON3">Crouch / Pick Up</Input>
         <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="xevious">
