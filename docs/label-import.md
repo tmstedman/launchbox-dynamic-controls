@@ -142,7 +142,8 @@ python3 ~/.work/dynamic-controls/scripts/gen_labels.py /tmp/generated.xml
 
 # The brief for reading a game's artwork: which physical control each port reaches,
 # which directions its movement control has, which shape of directional label to expect,
-# whether its config is empty, and which buttons the database already names.
+# whether its config is empty, and what the database already names — including whether it
+# gives the movement control a real verb, which the artwork cannot be trusted to supply.
 # Read the artwork against this. Never against the image alone.
 python3 ~/.work/dynamic-controls/scripts/decode.py crgolf redbaron
 
