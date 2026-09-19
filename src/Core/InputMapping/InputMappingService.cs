@@ -24,10 +24,12 @@ public interface IInputMappingService
 /// baseline's <c>Natural*</c> maps via <c>with</c> when a transform applies.
 /// </summary>
 public class InputMappingService(
+    ILogger logger,
     IInputMappingLoader loader,
     IInputMappingResolver resolver,
     IInputMappingPlugins plugins) : IInputMappingService
 {
+    private readonly ILogger _logger = logger;
     private readonly IInputMappingLoader _loader = loader;
     private readonly IInputMappingResolver _resolver = resolver;
     private readonly IInputMappingPlugins _plugins = plugins;
@@ -55,10 +57,17 @@ public class InputMappingService(
             transformed,
             transformed.Controller ?? baseline.Controller);
 
-        return transformedMapping with
+        ResolvedMapping spliced = transformedMapping with
         {
             NaturalInputToButton = baselineMapping.InputToButton,
             NaturalButtonToInput = baselineMapping.ButtonToInput,
         };
+
+        // A transform came from an emulator's config, which binds individual directions and has
+        // no way to name a whole control. So a whole-input button (JOYSTICK, Dpad-Any) is left
+        // behind wherever its directions were moved to; follow it onto them. The naturals spliced
+        // in above are what the derivation reads the whole-and-parts pairing from, so this runs
+        // after that and not before.
+        return WholeInputDeriver.Derive(spliced, _logger);
     }
 }

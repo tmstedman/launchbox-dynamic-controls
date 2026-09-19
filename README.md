@@ -121,6 +121,8 @@ The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and
 
 A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. It labels whichever control your configuration binds to all of those buttons at once, and takes precedence over their individual labels there. If nothing on your controller fires them together, it simply doesn't appear.
 
+A `name` that means a whole control — MAME's `JOYSTICK`, or a platform's `Dpad-Any` — follows your emulator's configuration onto every control it ends up driving. If a MAME cfg binds the joystick directions to the D-pad and the analogue stick at once, a single `<Input name="JOYSTICK">Move</Input>` labels both, because both move you. It only does this when *all four* directions reach a control: binding just up to the stick doesn't make the stick move you, so the label stays on the D-pad alone.
+
 ### MAME controls.xml support
 
 The plugin automatically reads a `controls.xml` database to display what each button does in each game. `controls.xml` is not distributed with the plugin: download the BYOAC MAME controls database and place it at `Data\Dynamic Controls\controls.xml`.
@@ -142,6 +144,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 - **DirectInput users in RetroArch do not get button swap detection.** XInput controllers get full game-level swap detection; DirectInput controllers get controller variant and remap file support but no swap detection through cfg files.
 - **DirectInput users in MAME do get button swap detection.** However, it is not reliable since DirectInput devices do not adhere to a standard layout.
 - **RetroArch button swap detection covers game-level remaps only.** Swaps configured in global, core, or core-remap files are not applied — only game-level remap files are checked. If you configure button swaps at those levels the overlay may not reflect them.
+- **Whole-control labels follow MAME remaps but not RetroArch ones.** A label written against a whole control (`JOYSTICK`, `Dpad-Any`) follows the directions that a MAME cfg moves; the equivalent RetroArch remap is not yet followed, so such a label stays on the control the platform's `Controllers.xml` gives it.
 - **RetroArch controller variant detection requires a core definition file.** The plugin can only detect the active controller variant for RetroArch cores that have a shipped `Emulators/RetroArch/{CoreDisplayName}.xml`. Six ship today - Genesis Plus GX, Beetle PSX, Beetle Saturn, Flycast, PCSX-ReARMed and Atari800 - so controller variant detection is a no-op for any other core unless you add one.
 
 ## Contributing

@@ -8,4 +8,9 @@
     <Input name="BUTTON2">Loop</Input>
     <Input name="JOYSTICK">Move</Input>
   </Game>
+  <Game romName="3on3dunk">
+    <Input name="BUTTON1">Pass</Input>
+    <Input name="BUTTON2">Jump / Shoot</Input>
+    <Input name="JOYSTICK">Move</Input>
+  </Game>
 </Labels>

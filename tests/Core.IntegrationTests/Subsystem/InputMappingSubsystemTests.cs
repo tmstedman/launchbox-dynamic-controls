@@ -485,6 +485,285 @@ public class InputMappingSubsystemTests
         mapping.NaturalInputToButton["ButtonY"].ShouldBe("Y");
     }
 
+    [Fact]
+    public void Scenario_TransformMovesJoystickDirectionsOntoASecondControl_WholeJoystickFollows()
+    {
+        // The MAME shape, through the real pipeline. A cfg binds each P1_JOYSTICK_* port to the
+        // hat OR the matching axis, so every direction drives a Dpad control and a left-stick
+        // control at once. JOYSTICK itself cannot be moved by a cfg — MAME has no whole-joystick
+        // port — so without the derivation it stays on ButtonDpad and a label written against it
+        // reaches only half the controls the player is using.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="BUTTON1" input="ButtonA" />
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        // Each direction gains its stick equivalent, exactly as an OR'd JOYCODE sequence does.
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                ("JOYSTICK_UP", "AxisLeftStickUp"),
+                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+
+        // The whole joystick now drives both controls, with the derived one appended.
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+
+        // The directions are untouched by the derivation, and an ordinary button is unaffected.
+        mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
+        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);
+
+        // Naturals still record the pre-transform state, so remap detection is unaffected.
+        mapping.NaturalButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        mapping.NaturalButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp"]);
+    }
+
+    [Fact]
+    public void Scenario_TransformMovesOnlyOneJoystickDirection_WholeJoystickStaysPut()
+    {
+        // Only UP reaches the stick. Pushing the stick up moves the player, but the stick as a
+        // whole does not, so the whole-joystick binding stays on the Dpad alone.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings: [.. baseline.Mappings.Select(m => (m.Name, m.Input)), ("JOYSTICK_UP", "AxisLeftStickUp")]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+    }
+
+    [Fact]
+    public void Scenario_PerGameXmlMovesJoystickDirections_WholeJoystickIsLeftAlone()
+    {
+        // The gate, stated as a test. A per-game file moves every direction onto the stick and
+        // says nothing about JOYSTICK — and JOYSTICK must stay on the Dpad alone.
+        //
+        // This is the one layer that is NOT derived over. Its author writes in the plugin's own
+        // vocabulary and could have said `<Mapping name="JOYSTICK" input="AxisLeftStick" />`
+        // outright; an emulator cfg cannot, which is the whole reason the derivation exists.
+        // Where an author could have spoken and did not, the silence is the instruction.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping("Arcade", "handmade", """
+            <GameMapping>
+              <Mapping name="JOYSTICK_UP" input="AxisLeftStickUp" />
+              <Mapping name="JOYSTICK_DOWN" input="AxisLeftStickDown" />
+              <Mapping name="JOYSTICK_LEFT" input="AxisLeftStickLeft" />
+              <Mapping name="JOYSTICK_RIGHT" input="AxisLeftStickRight" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(platform: "Arcade", romName: "handmade"));
+
+        mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["AxisLeftStickUp"]);
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+    }
+
+    [Fact]
+    public void Scenario_WholeJoystickFollowsTheCfg_ReverseLookupAgrees()
+    {
+        // ButtonToInput and InputToButton are two views of one mapping, and the derivation must
+        // leave them agreeing. VisibilityEvaluator asks the reverse map whether an input is
+        // driven at all, and InputImageResolver asks it which physical button to draw — so a
+        // stick that gained a binding in the forward map but not the reverse would render dim
+        // and fall back to a generic image while being fully playable.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                ("JOYSTICK_UP", "AxisLeftStickUp"),
+                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        mapping.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICK");
+    }
+
+    [Fact]
+    public void Scenario_DerivedBindingDoesNotDisplaceAButtonAlreadyOnThatControl()
+    {
+        // The cabinet has a real JOYSTICKLEFT on the stick, so when JOYSTICK derives its way
+        // there too, two buttons drive it. Reverse lookup is first-seen-wins and the derived
+        // binding is appended, so the button genuinely mapped to the stick keeps it — a name
+        // that means "the left stick" outranks one that merely turned out to reach it.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+                <Mapping name="JOYSTICKLEFT" input="AxisLeftStick" />
+              </Controller>
+            </Controllers>
+            """);
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                ("JOYSTICK_UP", "AxisLeftStickUp"),
+                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        mapping.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICKLEFT");
+    }
+
+    [Fact]
+    public void Scenario_WholeInputFollowsDirections_WithAnalogToDigitalMirrorAlreadyApplied()
+    {
+        // Two derivations meeting. AnalogToDigitalMirror runs inside InputMappingResolver, so by
+        // the time the whole-input derivation sees either mapping, Dpad-Any is already on the
+        // left stick and every direction already carries its stick equivalent — in the reference
+        // as well as the current mapping. The derivation must reach the same conclusion the
+        // mirror did without restating it, and must still pick up the genuinely new control.
+        //
+        // Deliberately not MAME's vocabulary: Sega Genesis names its whole input Dpad-Any, and
+        // the pairing is discovered from the mapping rather than parsed out of the name, so the
+        // derivation has to work here identically.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true" analogToDigital="left">
+                <Mapping name="Dpad-Any" input="ButtonDpad" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+                <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+                <Mapping name="Dpad-Right" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        // The config moves every direction onto the right stick as well.
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                ("Dpad-Up", "AxisRightStickUp"),
+                ("Dpad-Down", "AxisRightStickDown"),
+                ("Dpad-Left", "AxisRightStickLeft"),
+                ("Dpad-Right", "AxisRightStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform).Load(Game());
+
+        // AxisLeftStick came from the mirror and is not restated; AxisRightStick is derived.
+        mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpad", "AxisLeftStick", "AxisRightStick"]);
+    }
+
+    [Fact]
+    public void Scenario_PerGameXmlRemapsButtons_ThenCfgMovesDirections_BothSurvive()
+    {
+        // The real 3on3dunk shape, which the end-to-end fixture deliberately simplifies away:
+        // the companion cfg pack rotates the face buttons *and* ORs the joystick onto the axes.
+        // Here the button rotation arrives from the authored per-game file and the direction
+        // move from the config, so the derivation reads a reference that already carries
+        // someone else's edits. The whole-input pairing must still be found in it.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="BUTTON1" input="ButtonA" />
+                <Mapping name="BUTTON2" input="ButtonB" />
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping("Arcade", "3on3dunk", """
+            <GameMapping>
+              <Mapping name="BUTTON1" input="ButtonX" />
+              <Mapping name="BUTTON2" input="ButtonY" />
+            </GameMapping>
+            """);
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                ("JOYSTICK_UP", "AxisLeftStickUp"),
+                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+
+        // The authored button rotation is intact and is the natural state, not a remap.
+        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
+        mapping.NaturalButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
+
+        // The derivation still found the joystick pairing in that edited reference.
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+    }
+
     // ---- user-layer override ----
 
     [Fact]

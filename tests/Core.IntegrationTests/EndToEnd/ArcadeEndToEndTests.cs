@@ -260,6 +260,91 @@ public class ArcadeEndToEndTests
     /// so all six face buttons are labeled and both Dpad and AxisLeftStick activate together.
     /// </summary>
     [Fact]
+    public void Arcade_3on3dunk_WholeJoystickFollowsTheCfgOntoTheStick()
+    {
+        // The #6 shape, end to end. The cfg binds each P1_JOYSTICK_* port to the hat OR the
+        // matching axis, so all four directions drive the Dpad and the left stick at once —
+        // and in the game both do move the player. MAME has no whole-joystick port, so no cfg
+        // can move JOYSTICK itself; without the derivation its "Move" label reaches the Dpad
+        // only and the stick renders dim beside it.
+        //
+        // Unlike 1942, which arrives at the same end state through an analogToDigital mirror,
+        // nothing here is declared in the plugin's own data: the second control comes purely
+        // from what the emulator was configured to do.
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "3on3dunk",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        var t = overlay.InTemplate(@"Templates\Xbox Series X");
+        t.ShouldHaveBaseImage("BaseImage.png", width: 1600, height: 1000);
+        t.ShouldHaveImages(
+                #pragma warning disable format
+                // face buttons at their cabinet defaults — the cfg remaps no buttons
+                new(Input: "ButtonA",             Src: "ButtonA.png",              W: 64,  H: 64),
+                new(Input: "ButtonA",             Src: "ButtonA.png",              W: 44,  H: 44),  // top-level + Stack
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png"),
+                new(Input: "ButtonB",             Src: "ButtonB.png",              W: 64,  H: 64),
+                new(Input: "ButtonB",             Src: "ButtonB.png",              W: 44,  H: 44),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png"),
+                new(Input: "ButtonX",             Src: "ButtonX.png",              W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "ButtonX.png",              W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "ButtonY.png",              W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "ButtonY.png",              W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                // Start and Insert Coin — inherited Arcade defaults
+                new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 44,  H: 44),
+                new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 34,  H: 34),
+                new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 44,  H: 44),
+                new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 34,  H: 34),
+                // ButtonDpad carries the whole-joystick label; no per-direction labels exist, so
+                // the OneOf's second alternative fires and every render is InputName="ButtonDpad"
+                new(Input: "ButtonDpad",          Src: "ButtonDpad.png",           W: 135, H: 135),
+                new(Input: "ButtonDpad",          Src: "ButtonDpadUp.png",         W: 34,  H: 34),
+                new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
+                new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",      W: 34,  H: 34),
+                new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",       W: 34,  H: 34),
+                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),
+                // AxisLeftStick active for the same reason — the derived whole-joystick binding
+                // gives it the "Move" label, so its OneOf second alternative fires too
+                new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",        W: 124, H: 124),
+                new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",        W: 64,  H: 64),
+                new(Input: "AxisLeftStick",       Src: "Line_AxisLeftStick.png"),
+                // disabled inputs
+                new(Input: "ButtonGuide",         Src: "ButtonGuide.png",          W: 68,  H: 68,  Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "AxisTriggerLeft.png",      W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerLeft",     Src: "Line_AxisTriggerLeft.png",                               Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "ButtonLeftShoulder.png",   W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonLeftShoulder",  Src: "Line_ButtonLeftShoulder.png",                            Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "AxisTriggerRight.png",     W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png",  W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                           Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "AxisRightStick",      Src: "AxisRightStick.png",       W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
+                // group-level decoration
+                new(Input: null,                  Src: "Line_MetaButtons.png"));
+                #pragma warning restore format
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonA",        Text: "Pass"),
+            new(Input: "ButtonB",        Text: "Jump / Shoot"),
+            new(Input: "ButtonDpad",     Text: "Move"),   // whole-joystick label, as written
+            new(Input: "AxisLeftStick",  Text: "Move"),   // derived: the cfg put all four directions here too
+            // inherited Arcade defaults
+            new(Input: "ButtonStart",    Text: "Start"),
+            new(Input: "ButtonBack",     Text: "Insert Coin"));
+            #pragma warning restore format
+    }
+
+    [Fact]
     public void Arcade_StreetFighterIICE()
     {
         var game = new GameInfo(

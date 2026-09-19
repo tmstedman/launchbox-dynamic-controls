@@ -89,6 +89,8 @@ On top of whichever source wins, an ordered list of `IInputMappingTransform`s ru
 
 After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once.
 
+A transform is also where whole-input derivation happens. Emulator configs bind individual directions and have no way to name a whole control, so a button meaning "the joystick" is left behind wherever its directions were moved to. `WholeInputDeriver` follows it onto them, discovering which button pairs with which from the pre-transform snapshot rather than from button names, which vary by platform. Only emulator-derived layers are treated this way: a per-game `InputMappings` file is written in the plugin's own vocabulary and can name a whole control outright, so it is taken at its word.
+
 `ResolvedMapping` carries two reverse-direction snapshots (`NaturalButtonToInput`, `NaturalInputToButton`) of the pre-game-modifier state, so the renderer can later detect when a button has been remapped and choose the right artwork.
 
 Namespace: `src/Core/InputMapping/`. Entry point: `InputMappingService`. Emulator-specific sources are pluggable — see [Plugin architecture](#plugin-architecture).
