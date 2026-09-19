@@ -764,6 +764,51 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
     }
 
+    [Fact(Skip = "#10 — a whole-control label is not yet dropped from a control its directions have left. The test states the wanted behaviour and fails today.")]
+    public void Scenario_EveryDirectionMovedOffTheDpad_WholeJoystickStopsClaimingIt()
+    {
+        // The other half of the whole-input problem, and the one still open. A config that binds
+        // each joystick direction to a stick axis *alone* — no hat, which is what a player on a
+        // gamepad would write — moves every direction off the D-pad. JOYSTICK follows onto the
+        // stick correctly, but it also keeps its original claim on the D-pad, which nothing
+        // drives any more.
+        //
+        // The player sees "Move" printed on a D-pad that does nothing, beside a correctly
+        // labelled stick. A stranded label is worse than a missing one: it actively misdirects.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        // Each direction is *replaced*, not added to — the axis only, no hat.
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings:
+            [
+                ("JOYSTICK", "ButtonDpad"),
+                ("JOYSTICK_UP", "AxisLeftStickUp"),
+                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+            ]));
+
+        ResolvedMapping mapping = Build(transform: transform)
+            .Load(Game(platform: "Arcade", romName: "mslug"));
+
+        // Following onto the stick is right and already works.
+        mapping.ButtonToInput["JOYSTICK"].ShouldContain("AxisLeftStick");
+
+        // Keeping the D-pad is the bug: no direction of it is driven any more.
+        mapping.ButtonToInput["JOYSTICK"].ShouldNotContain("ButtonDpad");
+    }
+
     // ---- user-layer override ----
 
     [Fact]

@@ -344,6 +344,41 @@ public class ArcadeEndToEndTests
             #pragma warning restore format
     }
 
+    [Fact(Skip = "#10 — a whole-control label is not yet dropped from a control its directions have left. The test states the wanted behaviour and fails today.")]
+    public void Arcade_MetalSlug_WholeJoystickLabelIsNotStrandedOnTheDeadDpad()
+    {
+        // The stranding half of the whole-control problem, end to end and still failing.
+        //
+        // This cfg binds each joystick direction to a stick axis alone — no hat — which is what
+        // a player using a gamepad rather than an arcade stick would have. Every direction leaves
+        // the D-pad. "Move" correctly follows onto the left stick, and also stays printed on the
+        // D-pad, which now does nothing at all.
+        //
+        // Only the labels are asserted here. What a D-pad with no label should *render* is part
+        // of the fix's design rather than settled behaviour, so pinning an image list now would
+        // assert a decision nobody has made.
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "mslug",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonA",        Text: "Shoot"),
+            new(Input: "ButtonB",        Text: "Jump"),
+            new(Input: "AxisLeftStick",  Text: "Move"),   // the control that actually moves you
+            // and NOT ButtonDpad — nothing drives any of its directions any more
+            new(Input: "ButtonStart",    Text: "Start"),
+            new(Input: "ButtonBack",     Text: "Insert Coin"));
+            #pragma warning restore format
+    }
+
     [Fact]
     public void Arcade_StreetFighterIICE()
     {

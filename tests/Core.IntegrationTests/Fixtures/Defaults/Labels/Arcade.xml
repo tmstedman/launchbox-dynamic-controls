@@ -13,4 +13,9 @@
     <Input name="BUTTON2">Jump / Shoot</Input>
     <Input name="JOYSTICK">Move</Input>
   </Game>
+  <Game romName="mslug">
+    <Input name="BUTTON1">Shoot</Input>
+    <Input name="BUTTON2">Jump</Input>
+    <Input name="JOYSTICK">Move</Input>
+  </Game>
 </Labels>
