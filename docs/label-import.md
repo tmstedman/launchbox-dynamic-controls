@@ -15,6 +15,12 @@ document is about filling one.
 | MAME controls database | `controls.xml`, the BYOAC project's label database | Per-direction detail, and machine-readable |
 | MAME config | One `cfg` per game, remapping ports to physical buttons | Which control each port actually reaches |
 
+**Run `decode.py` first and read the artwork against its output.** It answers the questions the
+image cannot: which physical control a port reaches, which directions the movement control
+actually has, and whether to expect one directional label or four. A reader given only the
+image will invent explanations for gaps the config would have closed — and those explanations
+are plausible enough to survive review.
+
 **The config is never optional.** A game's cfg decides which physical button a port lands on,
 and those configs rotate the buttons freely — reading a label's position off the artwork and
 assuming the port beneath it will mislabel most multi-button games. Red Baron is the clearest
@@ -134,7 +140,10 @@ two inputs that are not distributed with the plugin: the controls database and t
 # Existing entries are left alone — several were hand-read and say more than the database does.
 python3 ~/.work/dynamic-controls/scripts/gen_labels.py /tmp/generated.xml
 
-# Decode a game's config to physical buttons, for reading its artwork against.
+# The brief for reading a game's artwork: which physical control each port reaches,
+# which directions its movement control has, which shape of directional label to expect,
+# whether its config is empty, and which buttons the database already names.
+# Read the artwork against this. Never against the image alone.
 python3 ~/.work/dynamic-controls/scripts/decode.py crgolf redbaron
 
 # Check a platform's label file for every defect class this document describes.
