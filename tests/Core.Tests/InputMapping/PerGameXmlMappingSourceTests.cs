@@ -165,6 +165,67 @@ public class PerGameXmlMappingSourceTests
     }
 
     [Fact]
+    public void Load_SwapsTwoButtons_BothOldBindingsCleared()
+    {
+        // given a per-game XML that exchanges the controls A and B sit on
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(
+            MappingConfig(mappings:
+            [
+                ("A", "ButtonB"),
+                ("B", "ButtonA"),
+            ]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings:
+            [
+                ("A", "ButtonA"),
+                ("B", "ButtonB"),
+                ("Start", "ButtonStart"),
+            ]));
+
+        // when the source loads
+        var result = _underTest.Load(game, platform);
+
+        // then each button sits on the other's control, with no leftover baseline entry keeping
+        // either control double-bound — naming both buttons is what makes a swap expressible
+        result.ShouldNotBeNull();
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("Start", "ButtonStart"),
+            ("A", "ButtonB"),
+            ("B", "ButtonA"),
+        ]);
+    }
+
+    [Fact]
+    public void Load_MovesOneButtonOntoAnOccupiedControl_LeavesTheOccupantInPlace()
+    {
+        // given a per-game XML that moves A onto B's control without saying what becomes of B
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(
+            MappingConfig(mappings: [("A", "ButtonB")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings:
+            [
+                ("A", "ButtonA"),
+                ("B", "ButtonB"),
+            ]));
+
+        // when the source loads
+        var result = _underTest.Load(game, platform);
+
+        // then B keeps ButtonB and A joins it there: the overlay drops baseline entries by button
+        // name, never by the control they occupy. Both now drive ButtonB, which InputLabelsService
+        // reports as a collision it cannot resolve. See issue #8.
+        result.ShouldNotBeNull();
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("B", "ButtonB"),
+            ("A", "ButtonB"),
+        ]);
+    }
+
+    [Fact]
     public void Load_Unmap_DropsBaselineEntryWithoutReplacement()
     {
         // given a baseline with A, B, Start and a per-game XML that <Unmap>s B
