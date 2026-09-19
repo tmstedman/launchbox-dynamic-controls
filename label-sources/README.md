@@ -33,6 +33,20 @@ the spelling is corrected when the shipped file is built, not here.
 
 ### Transcribing
 
+The loop, one batch at a time:
+
+```sh
+python3 ~/.work/dynamic-controls/scripts/next_batch.py 25   # what to read, and where to write it
+#   ... read those images in ONE message, write the batch file ...
+python3 ~/.work/dynamic-controls/scripts/merge_artwork.py   # fold it in, delete the batch
+python3 ~/.work/dynamic-controls/scripts/check_artwork.py   # verify
+```
+
+Batches are written to `batches/` and merged separately so a bad one can be deleted and redone
+without touching anything already transcribed. A game that is already present is never
+overwritten — a duplicate means the same image was read twice and only a person can say which
+reading is right, so the merge leaves both in place and says so.
+
 Reading is mechanical, so the instruction is short:
 
 > For each image, output the ROM name, the title, and every label the artwork prints, each
