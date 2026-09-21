@@ -9102,6 +9102,828 @@
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
+    <Game romName="gauntleg" title="Gauntlet Legends">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Turbo / Run</Label>
+        <Label control="ButtonA">Fight</Label>
+        <Label control="ButtonX">Magic</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gauntlet" title="Gauntlet">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Magic</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gaxeduel" title="Golden Axe: The Duel">
+        <Label control="ButtonLeftShoulder">Heavy Slash</Label>
+        <Label control="ButtonRightShoulder">Heavy Kick</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonY">Medium Slash</Label>
+        <Label control="ButtonB">Medium Kick</Label>
+        <Label control="ButtonA">Light Kick</Label>
+        <Label control="ButtonX">Light Slash</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gbbchmp" title="Great Bishi Bashi Champ">
+        <Label control="ButtonB">Blue</Label>
+        <Label control="ButtonA">Green</Label>
+        <Label control="ButtonX">Red</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gberet" title="Green Beret">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Shoot</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gblchmp" title="Global Champion">
+        <Label control="ButtonLeftShoulder">Strong Punch</Label>
+        <Label control="ButtonRightShoulder">Strong Kick</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonY">Medium Punch</Label>
+        <Label control="ButtonB">Medium Kick</Label>
+        <Label control="ButtonA">Quick Kick</Label>
+        <Label control="ButtonX">Quick Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gbusters" title="Gang Busters">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Super</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gchgchmp" title="Gechaga Champ">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisRightStick">Right Stick</Label>
+    </Game>
+    <Game romName="gcpinbal" title="Grand Cross">
+        <Label control="ButtonLeftShoulder">Left Flipper</Label>
+        <Label control="ButtonRightShoulder">Right Flipper</Label>
+        <Label control="AxisLeftStick">Tilt</Label>
+        <Label control="ButtonA">Use Item Right</Label>
+        <Label control="ButtonX">Use Item Left</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gdarius2" title="G-Darius Ver.2">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Autofire</Label>
+        <Label control="ButtonA">Capture</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gdariusu" title="G-Darius">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Capture</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gdfs" title="Mobile Suit Gundam Final Shooting">
+        <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="ButtonA">Bazooka</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="geebee" title="Gee Bee">
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonA">Button</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gekiridn" title="Gekirindan">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gemcrush" title="Gemcrush">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Flip</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gemini" title="Gemini Wing">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="genix" title="Genix Family">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="genpeitd" title="Genpei ToumaDen">
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="getaway" title="Get A Way">
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gfire2" title="Golden Fire II">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Cancel</Label>
+        <Label control="ButtonX">Select</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gforce2" title="Galaxy Force 2">
+        <Label control="AxisTriggerLeft">Shoot</Label>
+        <Label control="AxisTriggerRight">Missiles</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Missiles</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="AxisRightStick">Throttle</Label>
+    </Game>
+    <Game romName="gghost" title="Goalie Ghost">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ggoemon" title="Ganbare Goemon">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Throw</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gground" title="Gain Ground">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shot 2</Label>
+        <Label control="ButtonX">Shot 1</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghlpanic" title="Ghoul Panic">
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghoshunt" title="Ghost Hunt">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghostb" title="The Real Ghostbusters">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghostb3" title="The Real Ghostbusters">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghostlop" title="Ghostlop (Prototype)">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Throw Blue</Label>
+        <Label control="ButtonX">Throw Orange</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghouls" title="Ghouls'n Ghosts">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghox" title="Ghox">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ghoxj" title="Ghox">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gigandes" title="Gigandes">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Rotate</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gigas" title="Gigas">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Release Ball / Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gigasm2" title="Gigas Mark II">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Release Ball / Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gigawing" title="Giga Wing">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Shoot / (Hold) Shield</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gijoe" title="G.I. Joe">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gimeabrk" title="Gimme A Break">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Set Shot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ginganin" title="Ginga Ninkyouden">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="ginkun" title="Ganbare Ginkun">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">B</Label>
+        <Label control="ButtonX">A</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gjspace" title="GekiToride-Jong Space">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Menu</Label>
+        <Label control="ButtonA">Change Tile / Dice</Label>
+        <Label control="ButtonX">Fire Tile / Decide</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gladiatr" title="Gladiator">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Low Attack</Label>
+        <Label control="ButtonA">Middle Attack</Label>
+        <Label control="ButtonX">High Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="glass" title="Glass">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Shield</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="glfgreat" title="Golfing Greats">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shot</Label>
+        <Label control="ButtonX">Draw / Fade</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gloc" title="G-LOC Air Battle">
+        <Label control="AxisTriggerLeft">Machine Gun</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerRight">Missiles</Label>
+        <Label control="ButtonY">After Burner</Label>
+        <Label control="ButtonA">Missiles</Label>
+        <Label control="ButtonX">Machine Gun</Label>
+        <Label control="AxisRightStick">Throttle</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="glpracr" title="Gallop Racer">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">View</Label>
+        <Label control="ButtonX">Whip</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="glpracr2" title="Gallop Racer 2">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">View</Label>
+        <Label control="ButtonX">Whip</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="glpracr3" title="Gallop Racer 3">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">View</Label>
+        <Label control="ButtonX">Whip</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gmissile" title="Guided Missile">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gnbarich" title="Gunbarich">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Flipper</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gng" title="Ghosts'n Goblins">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goalx3" title="Goal! Goal! Goal!">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Heel Up</Label>
+        <Label control="ButtonB">Short Kick</Label>
+        <Label control="ButtonA">Pass / Tackle</Label>
+        <Label control="ButtonX">Shoot / Slide</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gobyrc" title="Go By RC">
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="godzilla" title="Godzilla">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Jump</Label>
+        <Label control="ButtonA">Kick</Label>
+        <Label control="ButtonX">Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gogomile" title="Go Go! Mile Smile">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goindol" title="Goindol">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goldbug" title="Gold Bug">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goldmedl" title="Gold Medalist">
+        <Label control="ButtonB">Run / Spin/ Hit Power</Label>
+        <Label control="ButtonA">Jump/Angle/Throw/Jab</Label>
+        <Label control="ButtonX">Run / Spin / Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goldnaxe" title="Golden Axe">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Special</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="golgo13" title="Golgo 13">
+        <Label control="AxisTriggerLeft">(Hold) Scope</Label>
+        <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonX">(Hold) Scope</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gollygho" title="Golly! Ghost!">
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gomoku" title="Gomoku Narabe Renju">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Select</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gondo" title="Gondomania">
+        <Label control="ButtonLeftShoulder">Alt Fire</Label>
+        <Label control="AxisTriggerLeft">Rotate Left</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Shoot</Label>
+        <Label control="AxisTriggerRight">Rotate Right</Label>
+        <Label control="ButtonA">Alt Fire</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="AxisRightStick">Aim Direction / Rotate Left &amp; Right</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goonies" title="Vs. The Goonies">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">A</Label>
+        <Label control="ButtonX">B</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="goori" title="Goori Goori">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Cycle Row</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gorf" title="Gorf">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gotcha" title="Got-cha Mini Game Festival">
+        <Label control="ButtonB">Blue</Label>
+        <Label control="ButtonA">Green</Label>
+        <Label control="ButtonX">Red</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gowcaizr" title="Voltage Fighter: Gowcaizer">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonY">Strong Punch</Label>
+        <Label control="ButtonB">Strong Kick</Label>
+        <Label control="ButtonA">Quick Kick</Label>
+        <Label control="ButtonX">Quick Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gp2quiz" title="Gals Panic II: Quiz Version">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Draw</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gp2se" title="Gals Panic II: Special Edition">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Draw</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gpgolf" title="Golden Par Golf">
+        <Label control="AxisLeftStick">Move / Change Club</Label>
+        <Label control="ButtonDpad">Move / Change Club</Label>
+        <Label control="ButtonA">Swing</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gpilots" title="Ghost Pilots">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gprider" title="GP Rider">
+        <Label control="ButtonLeftShoulder">Shift Down</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="ButtonRightShoulder">Shift Up</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonB">Shift Down</Label>
+        <Label control="ButtonX">Shift Up</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gpriders" title="GP Rider">
+        <Label control="ButtonLeftShoulder">Shift Down</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="ButtonRightShoulder">Shift Up</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonB">Shift Down</Label>
+        <Label control="ButtonX">Shift Up</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gradius" title="Gradius">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Use Power-Up</Label>
+        <Label control="ButtonA">Missile</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gradius2" title="Gradius II: GOFER no Yabou">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Power Up</Label>
+        <Label control="ButtonA">Missile</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gradius3" title="Gradius III">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Power Up</Label>
+        <Label control="ButtonA">Missiles</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gradius4" title="Gradius IV: Fukkatsu">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Power Up</Label>
+        <Label control="ButtonA">Missiles</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gradiusb" title="Gradius (Bubble System)">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Use Power-Up</Label>
+        <Label control="ButtonA">Missile</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grainbow" title="SD Gundam Sangokushi Rainbow Tairiku Senki">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grasspin" title="Grasspin">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Flip</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gratia" title="Gratia: Second Earth">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Bomb</Label>
+        <Label control="ButtonA">Ground Attack</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gravitar" title="Gravitar">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerRight">Shield</Label>
+        <Label control="ButtonB">Shield</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonX">Boost</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grchamp" title="Grand Champion">
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonX">Change Gear</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grdforce" title="Guardian Force">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="AxisRightStick">Turn Turret</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grdian" title="Guardian">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Kick</Label>
+        <Label control="ButtonX">Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grdians" title="Guardians / Denjin Makai II">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonB">Special</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grdnstrm" title="Guardian Storm (Horizontal)">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grdnstrmv" title="Guardian Storm (Vertical)">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Special</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="greatgun" title="Great Guns">
+        <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="greenber" title="Green Beret (Irem)">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gridiron" title="Gridiron Fight">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Button</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="gridlee" title="Gridlee">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grindstm" title="Grind Stormer">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Bomb</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grmatch" title="Grudge Match">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Kick</Label>
+        <Label control="ButtonX">Punch</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grndtour" title="Grand Tour">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Change Block</Label>
+        <Label control="ButtonX">Rotate</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="grobda" title="Grobda">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Shield</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="groovef" title="Groove On Fight: Gouketsuji Ichizoku 3">
+        <Label control="ButtonLeftShoulder">Overhead Attack</Label>
+        <Label control="ButtonRightShoulder">Dash Attack</Label>
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonY">SP</Label>
+        <Label control="ButtonB">SK</Label>
+        <Label control="ButtonA">LK</Label>
+        <Label control="ButtonX">LP</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="groundfx" title="Ground Effects / Super Ground Effects">
+        <Label control="ButtonLeftShoulder">Shift Down</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisLeftStick">Steering</Label>
+        <Label control="ButtonRightShoulder">Shift Up</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonA">Shift Down</Label>
+        <Label control="ButtonX">Shift Up</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
+    <Game romName="growl" title="Growl">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Attack</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+    </Game>
     <Game romName="redbaron" title="Red Baron">
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
