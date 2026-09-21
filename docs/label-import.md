@@ -37,6 +37,15 @@ Street Fighter's *Jump* and *Crouch* — that detail is worth keeping.
 Neither source is automatically right about *content*. Giga Wing's artwork labels a button
 *Jump*, which is impossible in a vertical shooter.
 
+A specific word can also be accurate and still wrong as a caption: the artist may have watched
+the game and correctly seen a button do one real thing, without knowing it does something else
+in a state they didn't see — offense versus defense, before the snap versus after. All American
+Football's `BUTTON1` reads *Dive* on the card; the database calls it *Action*. Both could be true
+of the moment each source was looking at, and neither rules out the button meaning something
+else in a state neither source saw. Where a specific word could be one of several
+context-dependent actions and nothing settles which, the database's placeholder is the safer
+choice — it never claims more than it knows.
+
 ## Reading the artwork
 
 Every image in the pack uses one template — same chassis, same label positions — so a label's
@@ -129,6 +138,26 @@ None of them belong on screen; a blank space is better.
 `A`, `B`, `1`–`4` look like placeholders but usually are not. Most belong to Nintendo VS. System
 and PlayChoice-10 cabinets, where the buttons really are named that way and the game's own
 instructions refer to them.
+
+### Every judgement call gets recorded, not just made
+
+Most entries need no judgement — the rules above resolve them one way. Some do: which wording is
+right when both sources are plausible, whether a stick's directions collapse, whether a specific
+verb on an action button is trustworthy or just one context of a multi-purpose button (the
+`BUTTON1` case above). A decision like that can be wrong, so it has to be checkable later without
+redoing the research that produced it.
+
+Whatever builds the shipped file keeps a review list alongside it — not a comment buried inside
+one of 3,571 entries, a separate list a person can actually work through. Each row names the rom,
+the control, what was chosen, what the alternative was, and why in enough detail to agree or
+disagree on sight: *"aafb BUTTON1: kept 'Action' over the artwork's 'Dive' — the button may be
+context-dependent (offense/defense) and neither source confirms which"* is the right shape;
+*"aafb BUTTON1: chose Action"* is not, because it gives a reviewer nothing to check the decision
+against.
+
+Anything the rules above settle outright — a bare-direction collapse, a dropped `N/A`, a kept
+letter label — is not a judgement call and does not belong on this list. Padding it with certain
+decisions trains reviewers to skim past the ones that actually need their attention.
 
 ## Running an import
 
