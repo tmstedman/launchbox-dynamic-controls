@@ -17,6 +17,19 @@ Controls are named with the plugin's own generic inputs — the vocabulary in `L
 A control the artwork leaves blank is simply absent. A directional cluster carries either one
 label for the whole control or one per direction; transcribe whichever is drawn.
 
+### `<Note>`: when a `<Label>` doesn't fit
+
+Some cards print text a `<Label>` can't hold: a footnote below the whole diagram instead of a
+line to one icon, or a control with no clear match among the generic inputs. Record what's on
+the card and where it sits, in a `<Note>` on the game, and move on — never fold it into a guessed
+`<Label>`. A judgement about what it means belongs downstream, in `docs/label-import.md`'s rules,
+where the MAME cfg and controls database are also in view. Guessing at transcription time throws
+that context away before it's even consulted.
+
+Ace Attacker is the case that forced this: its D-pad carries no line to any icon, only a footnote
+below the diagram reading *"(UP&DOWN) Hit Ball - (LEFT&RIGHT) Save Ball"*. Recorded as a `<Note>`,
+not split into four guessed `<Label>`s.
+
 ```xml
 <Game romName="bradley" title="Bradley Trainer">
     <Label control="ButtonRightShoulder">7.62mm Machine Gun</Label>
@@ -52,7 +65,8 @@ Reading is mechanical, so the instruction is short:
 > For each image, output the ROM name, the title, and every label the artwork prints, each
 > against the control it points to. Use the control vocabulary above. Copy the text exactly,
 > including spelling and punctuation. Omit any control with no label. Do not collapse, shorten,
-> reword or interpret anything.
+> reword or interpret anything. If something printed on the card doesn't fit that — a footnote,
+> a control with no clear vocabulary match — record it in a `<Note>` instead of guessing.
 
 Batch the images into single messages and discard context between batches. One image per turn
 in a growing conversation re-sends every earlier image and makes the job quadratic.
