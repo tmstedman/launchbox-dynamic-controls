@@ -5,6 +5,8 @@ namespace DynamicControls.Plugins.Mame;
 /// <summary>
 /// Loads the JOYCODE-to-generic-input mapping from JoycodeMapping.xml. The parsed result is
 /// cached on first call; subsequent calls return the same instance without re-reading the file.
+/// Multiple &lt;Mapping&gt; entries for the same joycode accumulate rather than overwrite — a
+/// bare analogue axis has no sign, so it is expected to carry both halves.
 /// </summary>
 public class JoycodeMappingLoader(
     ILogger logger,
@@ -22,7 +24,7 @@ public class JoycodeMappingLoader(
 
     private JoycodeMapping LoadFromFile()
     {
-        var map = new Dictionary<string, string>();
+        var map = new Dictionary<string, List<string>>();
 
         string? path = _lfs.Resolve("Emulators", "MAME", "JoycodeMapping.xml");
         _logger.Debug($"Joycode mapping path: {path}");
@@ -51,7 +53,12 @@ public class JoycodeMappingLoader(
                 continue;
             }
 
-            map[joycode] = input;
+            if (!map.TryGetValue(joycode, out List<string>? inputs))
+            {
+                inputs = [];
+                map[joycode] = inputs;
+            }
+            inputs.Add(input);
         }
 
         _logger.Debug($"Joycode mapping entries loaded: {map.Count}");
