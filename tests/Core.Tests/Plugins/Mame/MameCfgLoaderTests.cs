@@ -21,15 +21,15 @@ public class MameCfgLoaderTests
 
     public MameCfgLoaderTests()
     {
-        var joycodeMapping = new JoycodeMapping(new Dictionary<string, string>
+        var joycodeMapping = new JoycodeMapping(new Dictionary<string, List<string>>
         {
-            ["JOYCODE_1_BUTTON1"] = "ButtonA",
-            ["JOYCODE_1_BUTTON2"] = "ButtonB",
-            ["JOYCODE_1_BUTTON3"] = "ButtonC",
-            ["JOYCODE_1_HATUP"] = "Up",
-            ["JOYCODE_1_HATDOWN"] = "Down",
-            ["JOYCODE_1_START"] = "Start",
-            ["JOYCODE_1_COIN"] = "Coin",
+            ["JOYCODE_1_BUTTON1"] = ["ButtonA"],
+            ["JOYCODE_1_BUTTON2"] = ["ButtonB"],
+            ["JOYCODE_1_BUTTON3"] = ["ButtonC"],
+            ["JOYCODE_1_HATUP"] = ["Up"],
+            ["JOYCODE_1_HATDOWN"] = ["Down"],
+            ["JOYCODE_1_START"] = ["Start"],
+            ["JOYCODE_1_COIN"] = ["Coin"],
         });
         _joycodeMappingLoader.Load().Returns(joycodeMapping);
         _underTest = new MameCfgLoader(_logger, _fs, _joycodeMappingLoader);

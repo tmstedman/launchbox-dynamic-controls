@@ -57,6 +57,30 @@
   <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />
   <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
 
+  <!-- Bare analogue axes (no _SWITCH/_NEG/_POS suffix). MAME's true analogue ports — DIAL,
+       AD_STICK_X/Y, PADDLE, TRACKBALL_X/Y, LIGHTGUN_X/Y — read the axis directly rather than
+       thresholding it into a digital switch, so the joycode itself carries no sign. Both
+       halves are declared against the same joycode; which one a given port actually means is
+       decided by the port name's own bare/_EXT pairing (see Controllers.xml's Mapping table),
+       not by this file. -->
+  <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickLeft" />
+  <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickRight" />
+  <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickUp" />
+  <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickDown" />
+  <Mapping joycode="JOYCODE_1_RXAXIS" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_RXAXIS" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RYAXIS" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RYAXIS" input="AxisRightStickDown" />
+  <Mapping joycode="JOYCODE_1_ZAXIS" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_ZAXIS" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickDown" />
+
+  <!-- Bare trigger sliders. A pedal travels rest-to-floor, one direction only, not a two-way
+       axis like the sticks above — it needs just the one input the _SWITCH variant already uses. -->
+  <Mapping joycode="JOYCODE_1_SLIDER1_NEG" input="AxisTriggerLeft" />
+  <Mapping joycode="JOYCODE_1_SLIDER2_NEG" input="AxisTriggerRight" />
+
   <!-- Start / Select -->
   <Mapping joycode="JOYCODE_1_START" input="ButtonStart" />
   <Mapping joycode="JOYCODE_1_SELECT" input="ButtonBack" />

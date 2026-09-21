@@ -106,20 +106,22 @@ public class JoycodeMappingLoaderTests
     }
 
     [Fact]
-    public void Load_DuplicateJoycode_LastEntryWins()
+    public void Load_DuplicateJoycode_EntriesAccumulate()
     {
-        // given two entries for the same joycode
+        // given two entries for the same joycode — a bare analogue axis has no sign, so both
+        // halves are declared against the same joycode rather than a directional variant
         StubXml("""
             <JoycodeMapping>
-              <Mapping joycode='JOYCODE_1_BUTTON1' input='ButtonA' />
-              <Mapping joycode='JOYCODE_1_BUTTON1' input='ButtonOverride' />
+              <Mapping joycode='JOYCODE_1_XAXIS' input='AxisLeftStickLeft' />
+              <Mapping joycode='JOYCODE_1_XAXIS' input='AxisLeftStickRight' />
             </JoycodeMapping>
             """);
 
         // when the loader runs
         var result = _underTest.Load();
 
-        // then the later entry replaces the earlier one (dictionary assignment semantics)
-        result.Translate("JOYCODE_1_BUTTON1").ShouldBe(["ButtonOverride"]);
+        // then both entries are kept, in declaration order, rather than the second overwriting
+        // the first
+        result.Translate("JOYCODE_1_XAXIS").ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
     }
 }

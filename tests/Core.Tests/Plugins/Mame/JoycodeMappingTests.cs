@@ -12,11 +12,11 @@ namespace DynamicControls.Core.Tests.Plugins.Mame;
 /// </summary>
 public class JoycodeMappingTests
 {
-    private static readonly Dictionary<string, string> _data = new()
+    private static readonly Dictionary<string, List<string>> _data = new()
     {
-        ["JOYCODE_1_BUTTON1"] = "ButtonA",
-        ["JOYCODE_1_BUTTON2"] = "ButtonB",
-        ["JOYCODE_1_BUTTON3"] = "ButtonC",
+        ["JOYCODE_1_BUTTON1"] = ["ButtonA"],
+        ["JOYCODE_1_BUTTON2"] = ["ButtonB"],
+        ["JOYCODE_1_BUTTON3"] = ["ButtonC"],
     };
     private readonly JoycodeMapping _underTest = new(_data);
 
@@ -90,10 +90,10 @@ public class JoycodeMappingTests
     public void Translate_DuplicateMappedInputs_AreDeduplicated()
     {
         // given a mapping where two distinct JOYCODEs alias the same generic input
-        var mapping = new JoycodeMapping(new Dictionary<string, string>
+        var mapping = new JoycodeMapping(new Dictionary<string, List<string>>
         {
-            ["JOYCODE_1_BUTTON1"] = "ButtonA",
-            ["JOYCODE_1_BUTTON2"] = "ButtonA",
+            ["JOYCODE_1_BUTTON1"] = ["ButtonA"],
+            ["JOYCODE_1_BUTTON2"] = ["ButtonA"],
         });
 
         // when both appear in the same sequence
@@ -101,6 +101,23 @@ public class JoycodeMappingTests
 
         // then the duplicate output is collapsed
         result.ShouldBe(["ButtonA"]);
+    }
+
+    [Fact]
+    public void Translate_JoycodeMapsToMultipleInputs_ReturnsAllOfThem()
+    {
+        // given a single joycode (a bare analogue axis, with no sign of its own) mapped to both
+        // halves of the axis it drives
+        var mapping = new JoycodeMapping(new Dictionary<string, List<string>>
+        {
+            ["JOYCODE_1_XAXIS"] = ["AxisLeftStickLeft", "AxisLeftStickRight"],
+        });
+
+        // when that joycode is translated on its own
+        var result = mapping.Translate("JOYCODE_1_XAXIS");
+
+        // then both generic inputs it maps to are returned, in the order declared
+        result.ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
     }
 
     [Fact]
@@ -119,7 +136,7 @@ public class JoycodeMappingTests
     // Every element in the result is a value from the mapping dictionary.
     [Property]
     public bool Translate_ResultOnlyContainsMappedValues(NonNull<string> input) =>
-        _underTest.Translate(input.Get).All(_data.Values.Contains);
+        _underTest.Translate(input.Get).All(_data.Values.SelectMany(v => v).Contains);
 
     // The result never contains duplicate entries.
     [Property]
@@ -132,5 +149,5 @@ public class JoycodeMappingTests
     // The result cannot be longer than the number of distinct values in the dictionary.
     [Property]
     public bool Translate_ResultCountBoundedByDistinctMappingValues(NonNull<string> input) =>
-        _underTest.Translate(input.Get).Count <= _data.Values.Distinct().Count();
+        _underTest.Translate(input.Get).Count <= _data.Values.SelectMany(v => v).Distinct().Count();
 }

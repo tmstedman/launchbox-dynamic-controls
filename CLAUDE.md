@@ -159,7 +159,7 @@ Two parts with different roles:
 - `MameControlsXmlSource` — `IInputLabelsLoader`; supplies labels from `controls.xml` when the emulator is MAME
 - `MameInputMappingSource` — `IInputMappingTransform` (not `IInputMappingSource`); overlays JOYCODE overrides onto the baseline mapping rather than producing a full mapping from scratch
 
-cfg lookup: `cfg/{romName}.cfg` first, fallback to `cfg/default.cfg`. JOYCODE values are translated to generic input names via `JoycodeMapping.xml` (must exist; empty mapping if absent). A single MAME port can list multiple JOYCODEs joined with `OR`, driving multiple generic inputs simultaneously — this is how joystick ports can label both Dpad and AxisLeftStick at once.
+cfg lookup: `cfg/{romName}.cfg` first, fallback to `cfg/default.cfg`. JOYCODE values are translated to generic input names via `JoycodeMapping.xml` (must exist; empty mapping if absent). A single MAME port can list multiple JOYCODEs joined with `OR`, driving multiple generic inputs simultaneously — this is how joystick ports can label both Dpad and AxisLeftStick at once. A single JOYCODE can likewise map to more than one generic input in `JoycodeMapping.xml` itself — a bare analogue axis (`JOYCODE_1_XAXIS`) carries no sign, so both halves are declared against it rather than guessed; `JoycodeMappingLoader` accumulates same-joycode `<Mapping>` entries instead of the last one winning.
 
 ## RetroArch config resolution
 
