@@ -5002,7 +5002,7 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="ButtonDpad">Steering</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonY">Horn</Label>
+        <Label control="ButtonB">Horn</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
@@ -5682,7 +5682,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerRight">Right Punch</Label>
-        <Label control="ButtonY">Jump</Label>
+        <Label control="ButtonB">Jump</Label>
         <Label control="ButtonA">Right Punch</Label>
         <Label control="ButtonX">Left Punch</Label>
         <Label control="ButtonStart">Start</Label>
@@ -9465,7 +9465,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
-        <Label control="ButtonY">After Burner</Label>
+        <Label control="ButtonB">After Burner</Label>
         <Label control="ButtonA">Missiles</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="AxisRightStick">Throttle</Label>
