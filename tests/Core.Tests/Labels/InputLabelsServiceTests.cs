@@ -406,6 +406,75 @@ public class InputLabelsServiceTests
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
+    // --- whole-direction collapse ---
+
+    /// <summary>
+    /// The MAME shape after WholeInputDeriver's extension: JOYSTICK carries its own whole-level
+    /// claims (as it always has) plus, alongside them, every individual direction its siblings
+    /// currently reach.
+    /// </summary>
+    #pragma warning disable format
+    private static ResolvedMapping WholeJoystickWithBothFamilies() => Mapping(
+        platform: "Arcade",
+        buttonToInput: new()
+        {
+            ["JOYSTICK"] = [
+                "ButtonDpad", "AxisLeftStick",
+                "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+                "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+            ],
+        });
+    #pragma warning restore format
+
+    [Fact]
+    public void Load_AllFourDirectionsAgree_CollapseOntoBothWholes()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("JOYSTICK", "Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3on3dunk"), WholeJoystickWithBothFamilies());
+
+        // Every direction of both families agrees ("Move" broadcasts from the one JOYSTICK
+        // label), so both collapse onto their whole and none of the eight direction inputs
+        // survive individually -- that's what makes the layout pick a single render instead of
+        // four redundant per-direction ones for each control.
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonDpad", "Move"),
+            ("AxisLeftStick", "Move"));
+    }
+
+    [Fact]
+    public void Load_OneDirectionSwappedOntoAnOrdinaryButton_ThatWholeStaysUncollapsed()
+    {
+        // BUTTON2 has been swapped onto ButtonDpadUp -- a real, independently-labelled button now
+        // drives that one direction, while Down/Left/Right still only carry JOYSTICK's broadcast.
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["JOYSTICK"] = [
+                "ButtonDpad", "AxisLeftStick",
+                "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+                "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+            ],
+            ["BUTTON2"] = ["ButtonDpadUp"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("JOYSTICK", "Move"),
+            ("BUTTON2", "Jump")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3on3dunk"), mapping);
+
+        // BUTTON2's direct claim on ButtonDpadUp outranks JOYSTICK's derived one there, so the
+        // four Dpad directions no longer all agree -- the whole stays uncollapsed and each
+        // direction renders its own, correct text. AxisLeftStick is untouched by the swap, so it
+        // still collapses normally.
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonDpad", "Move"),
+            ("ButtonDpadUp", "Jump"),
+            ("ButtonDpadDown", "Move"),
+            ("ButtonDpadLeft", "Move"),
+            ("ButtonDpadRight", "Move"),
+            ("AxisLeftStick", "Move"));
+    }
+
     [Fact]
     public void Load_Combination_ClaimingAButtonsOnlyInput_TakesPrecedence()
     {

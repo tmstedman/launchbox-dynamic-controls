@@ -57,7 +57,12 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        // The whole-level claim (as always) plus each individual direction its siblings
+        // currently reach -- the latter is what lets the labels layer's collapse pass detect a
+        // genuine per-direction disagreement later, rather than this whole-level claim alone
+        // smoothing it over.
+        result.ButtonToInput["JOYSTICK"].ShouldBe(
+            ["ButtonDpad", "AxisLeftStick", Up, StickUp, Down, StickDown, Left, StickLeft, Right, StickRight]);
 
         // Asserted rather than assumed: a derivation that happens silently is indistinguishable
         // from one that did not happen, which is precisely what makes a wrong label hard to
@@ -84,8 +89,11 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
+        // The button's own binding ranks first; the derived whole-level claim ranks next; the
+        // individual directions (added alongside it, for the labels layer's own purposes) rank
+        // last of all, after both.
         result.ButtonToInput["JOYSTICK"][0].ShouldBe("ButtonDpad");
-        result.ButtonToInput["JOYSTICK"][^1].ShouldBe("AxisLeftStick");
+        result.ButtonToInput["JOYSTICK"][1].ShouldBe("AxisLeftStick");
     }
 
     [Fact]
@@ -106,7 +114,7 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["AxisLeftStick"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["AxisLeftStick", StickUp, StickDown, StickLeft, StickRight]);
         _logger.Received().Debug(
             "Whole input: JOYSTICK no longer drives ButtonDpad — every one of its directions has moved away");
     }
@@ -172,7 +180,7 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: natural, naturalButtonToInput: natural));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", Left, Right]);
     }
 
     [Fact]
@@ -211,7 +219,10 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        // The whole-level claim stays exactly as it was -- no new whole is added -- but the
+        // individual directions a sibling currently reaches are still appended alongside it, the
+        // same as any other case.
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", Up, StickUp, Down, Left, Right]);
     }
 
     [Fact]
@@ -230,21 +241,23 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", Up, StickUp, Down, StickDown, Left, StickLeft]);
     }
 
     [Fact]
     public void Derive_DirectionsUnmoved_MappingIsUnchanged()
     {
         // No cfg applied: the directions still drive exactly what the controller file gave them.
-        // The Dpad is already the whole button's binding, so nothing is added — and in
-        // particular ButtonDpad is not appended to itself.
+        // The Dpad is already the whole button's binding, so no NEW whole is added — and in
+        // particular ButtonDpad is not appended to itself. The individual directions are still
+        // appended alongside it regardless, same as every other case; they're what a later
+        // per-game remap could disturb, and it costs nothing when (as here) nothing has.
         Dictionary<string, IReadOnlyList<string>> buttonToInput = Natural();
 
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", Up, Down, Left, Right]);
         result.ButtonToInput["JOYSTICK_UP"].ShouldBe([Up]);
     }
 
@@ -265,7 +278,8 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: Natural()));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(
+            ["ButtonDpad", "AxisLeftStick", Up, StickUp, Down, StickDown, Left, StickLeft, Right, StickRight]);
     }
 
     [Fact]
@@ -318,8 +332,10 @@ public class WholeInputDeriverTests
         ResolvedMapping result = _underTest.Derive(
             MappingOf(buttonToInput: buttonToInput, naturalButtonToInput: naturalButtonToInput));
 
-        result.ButtonToInput["JOYSTICKLEFT"].ShouldBe(["AxisLeftStick", "ButtonDpad"]);
-        result.ButtonToInput["JOYSTICKRIGHT"].ShouldBe(["AxisRightStick"]);
+        result.ButtonToInput["JOYSTICKLEFT"].ShouldBe(
+            ["AxisLeftStick", "ButtonDpad", StickUp, Up, StickDown, Down, StickLeft, Left, StickRight, Right]);
+        result.ButtonToInput["JOYSTICKRIGHT"].ShouldBe(
+            ["AxisRightStick", "AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"]);
     }
 
     [Fact]
@@ -348,7 +364,8 @@ public class WholeInputDeriverTests
                 inputToButton: new Dictionary<string, string> { ["AxisLeftStick"] = "JOYSTICKLEFT" },
                 naturalButtonToInput: naturalButtonToInput));
 
-        result.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        result.ButtonToInput["JOYSTICK"].ShouldBe(
+            ["ButtonDpad", "AxisLeftStick", Up, StickUp, Down, StickDown, Left, StickLeft, Right, StickRight]);
         result.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICKLEFT");
         _logger.Received().Debug("Whole input: AxisLeftStick keeps JOYSTICKLEFT, which is mapped to it directly");
     }
