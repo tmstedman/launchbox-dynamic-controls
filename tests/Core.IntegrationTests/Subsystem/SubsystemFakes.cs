@@ -1,3 +1,5 @@
+using DynamicControls.Config;
+using DynamicControls.InputMapping;
 using DynamicControls.Templates;
 
 namespace DynamicControls.Core.IntegrationTests.Subsystem;
@@ -39,4 +41,13 @@ internal sealed class FakeTemplateImageSource : ITemplateImageSource
 
     public ResolvedImagePaths Resolve(string src, string? platform, string? controller = null) =>
         _entries.TryGetValue((src, platform, controller), out ResolvedImagePaths? r) ? r : new ResolvedImagePaths(src, null);
+}
+
+/// <summary>Wraps a delegate as an <see cref="IInputMappingTransform"/> so tests can describe
+/// their own per-game overlay without dragging in the MAME plugin internals.</summary>
+internal sealed class StubMappingTransform(Func<GameInfo, InputMappingConfig, InputMappingConfig?> fn)
+    : IInputMappingTransform
+{
+    public bool IsEnabled(GlobalConfig config) => true;
+    public InputMappingConfig? Transform(GameInfo game, InputMappingConfig baseline) => fn(game, baseline);
 }

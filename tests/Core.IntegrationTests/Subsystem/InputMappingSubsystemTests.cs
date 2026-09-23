@@ -521,8 +521,15 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build(transform: transform)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        // The whole joystick now drives both controls, with the derived one appended.
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        // The whole joystick now drives both controls, with the derived one appended -- and,
+        // alongside it, each individual direction its siblings currently reach (what lets the
+        // labels layer's own collapse pass tell a genuine per-direction disagreement apart from
+        // the ordinary case, later).
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe([
+            "ButtonDpad", "AxisLeftStick",
+            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+            "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+        ]);
 
         // The directions are untouched by the derivation, and an ordinary button is unaffected.
         mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
@@ -557,7 +564,11 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build(transform: transform)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        // No new whole is added -- but the directions siblings currently reach still are, same
+        // as any other case, including the one that moved onto the stick.
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe([
+            "ButtonDpad", "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight",
+        ]);
     }
 
     [Fact]
@@ -630,7 +641,11 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build(transform: transform)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe([
+            "ButtonDpad", "AxisLeftStick",
+            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+            "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+        ]);
         mapping.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICK");
     }
 
@@ -668,7 +683,11 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build(transform: transform)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe([
+            "ButtonDpad", "AxisLeftStick",
+            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+            "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+        ]);
         mapping.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICKLEFT");
     }
 
@@ -710,8 +729,17 @@ public class InputMappingSubsystemTests
 
         ResolvedMapping mapping = Build(transform: transform).Load(Game());
 
-        // AxisLeftStick came from the mirror and is not restated; AxisRightStick is derived.
-        mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpad", "AxisLeftStick", "AxisRightStick"]);
+        // AxisLeftStick came from the mirror and is not restated; AxisRightStick is derived --
+        // and, alongside all three wholes, every individual direction the siblings currently
+        // reach (each direction now carries three targets: its own Dpad part, the mirror's left-
+        // stick part, and this transform's right-stick part).
+        mapping.ButtonToInput["Dpad-Any"].ShouldBe([
+            "ButtonDpad", "AxisLeftStick", "AxisRightStick",
+            "ButtonDpadUp", "AxisRightStickUp", "AxisLeftStickUp",
+            "ButtonDpadDown", "AxisRightStickDown", "AxisLeftStickDown",
+            "ButtonDpadLeft", "AxisRightStickLeft", "AxisLeftStickLeft",
+            "ButtonDpadRight", "AxisRightStickRight", "AxisLeftStickRight",
+        ]);
     }
 
     [Fact]
@@ -761,7 +789,11 @@ public class InputMappingSubsystemTests
         mapping.NaturalButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
 
         // The derivation still found the joystick pairing in that edited reference.
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad", "AxisLeftStick"]);
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe([
+            "ButtonDpad", "AxisLeftStick",
+            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
+            "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+        ]);
     }
 
     [Fact]
@@ -874,12 +906,4 @@ public class InputMappingSubsystemTests
         public InputMappingConfig? Load(GameInfo game, PlatformControllersConfig? platform) => returns;
     }
 
-    /// <summary>Wraps a delegate as an <see cref="IInputMappingTransform"/> so tests can describe
-    /// their own per-game overlay without dragging in the MAME plugin internals.</summary>
-    private sealed class StubMappingTransform(Func<GameInfo, InputMappingConfig, InputMappingConfig?> fn)
-        : IInputMappingTransform
-    {
-        public bool IsEnabled(GlobalConfig config) => true;
-        public InputMappingConfig? Transform(GameInfo game, InputMappingConfig baseline) => fn(game, baseline);
-    }
 }

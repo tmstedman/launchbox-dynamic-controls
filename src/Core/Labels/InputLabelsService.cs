@@ -209,7 +209,32 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             _logger.Debug($"Label: {contenders[^1]} -> generic: {input} -> {labelText[input]}");
         }
 
+        CollapseWholeDirections(labelText);
         return new ResolvedLabels(LabelText: labelText);
+    }
+
+    /// <summary>
+    /// Final pass: where all four direction inputs of a whole control (<see cref="WholeInputs.PartsOf"/>)
+    /// currently carry the same text, fold them onto the whole and drop the four -- that's what
+    /// makes the layout's OneOf pick its single-render alternative instead of four redundant
+    /// per-direction ones. Left alone whenever they disagree (or aren't all present), so a genuine
+    /// per-direction remap -- one direction swapped onto an ordinary button, say -- renders each
+    /// direction with its own, correct text instead of being smoothed over by whichever whole-level
+    /// claim <see cref="WholeInputDeriver"/> may separately have added.
+    /// </summary>
+    private void CollapseWholeDirections(Dictionary<string, string> labelText)
+    {
+        foreach ((string whole, IReadOnlyList<string> parts) in WholeInputs.PartsOf)
+        {
+            if (!parts.All(labelText.ContainsKey)) continue;
+
+            List<string> distinct = [.. parts.Select(p => labelText[p]).Distinct()];
+            if (distinct.Count != 1) continue;
+
+            foreach (string part in parts) labelText.Remove(part);
+            labelText[whole] = distinct[0];
+            _logger.Debug($"Label: {string.Join(", ", parts)} agree on '{distinct[0]}' -- collapsed onto {whole}");
+        }
     }
 
     /// <summary>True when the entry names several buttons pressed together.</summary>

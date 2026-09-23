@@ -21,6 +21,15 @@ namespace DynamicControls.InputMapping;
 /// That gate lives in <see cref="InputMappingService"/>, which decides whether to call this at
 /// all — provenance is not visible here.</para>
 ///
+/// <para>Alongside the whole-level claim this has always added, the button is also extended onto
+/// each individual direction its siblings currently reach — the plugin's own vocabulary
+/// (<see cref="WholeInputs.PartsOf"/>), not the platform's. That's what lets
+/// <c>InputLabelsService</c>'s final collapse pass tell a genuine per-direction disagreement
+/// (one direction swapped onto an ordinary button) from the ordinary case where all four still
+/// agree, rather than this class's own whole-level rule silently smoothing either shape over. The
+/// direction additions cost nothing when everything agrees — the labels layer collapses them
+/// straight back down to the same result this class already produces on its own.</para>
+///
 /// <para>A real class rather than a static one, and injected rather than called directly, so the
 /// logger arrives once through the constructor instead of being threaded down from a caller that
 /// has no other use for it. It holds no state: <see cref="Derive"/> is a function of its
@@ -30,18 +39,7 @@ namespace DynamicControls.InputMapping;
 public class WholeInputDeriver(ILogger logger)
 {
     private readonly ILogger _logger = logger;
-
-    /// <summary>
-    /// The generic inputs that are whole controls, each with the four direction inputs that make
-    /// it up. Fixed vocabulary: these names are the plugin's own, not platform data.
-    /// </summary>
-    private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> WholeToDirections =
-        new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["ButtonDpad"] = ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"],
-            ["AxisLeftStick"] = ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"],
-            ["AxisRightStick"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
-        };
+    private static IReadOnlyDictionary<string, IReadOnlyList<string>> WholeToDirections => WholeInputs.PartsOf;
 
     /// <summary>
     /// Returns <paramref name="mapping"/> with each whole-input button extended to the controls
@@ -80,7 +78,16 @@ public class WholeInputDeriver(ILogger logger)
             // arcade cabinets have two-way joysticks that never drove all four to begin with.
             List<string> kept = [.. entry.Value.Where(i =>
                 !WholeToDirections.ContainsKey(i) || WholeToDirections[i].Any(reach.Reached.Contains))];
-            List<string> additions = [.. claimed.Where(w => !entry.Value.Contains(w))];
+            List<string> wholeAdditions = [.. claimed.Where(w => !entry.Value.Contains(w))];
+
+            // Alongside the whole controls (above), also add each individual direction a sibling
+            // currently reaches. This is what lets a label collapse pass (InputLabelsService)
+            // detect a real per-direction disagreement -- e.g. one direction swapped onto an
+            // ordinary button -- instead of the whole's own label silently smoothing it over. It
+            // costs nothing when every direction agrees: the labels layer collapses them straight
+            // back down to the same whole-level result this class already produces on its own.
+            List<string> directionAdditions = [.. reach.Reached.Where(i => !entry.Value.Contains(i))];
+            List<string> additions = [.. wholeAdditions, .. directionAdditions];
             List<string> updated = [.. kept, .. additions];
             if (updated.SequenceEqual(entry.Value)) continue;
 
@@ -93,8 +100,8 @@ public class WholeInputDeriver(ILogger logger)
                 _logger.Debug($"Whole input: {entry.Key} no longer drives {stale} — every one of its directions has moved away");
             }
 
-            if (additions.Count > 0)
-                _logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", additions)}");
+            if (wholeAdditions.Count > 0)
+                _logger.Debug($"Whole input: {entry.Key} follows its directions onto {string.Join(", ", wholeAdditions)}");
 
             // First-seen-wins, as elsewhere: a button already on that control keeps it.
             foreach (string input in additions.Where(i => !inputToButton.ContainsKey(i)))
