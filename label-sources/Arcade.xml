@@ -935,7 +935,7 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON2">Overhead View</Input>
-        <Input name="JOYSTICKLEFT">Swing / Move</Input>
+        <Input name="JOYSTICK">Swing / Move</Input>
     </Game>
     <Game romName="ar_ninj">
         <Input name="BUTTON1">Attack</Input>
@@ -1428,7 +1428,7 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="PADDLE">Steering</Input>
-        <Input name="JOYSTICKLEFT">Steering</Input>
+        <Input name="JOYSTICK">Steering</Input>
     </Game>
     <Game romName="backfirea">
         <Input name="BUTTON1">Accelerate</Input>
@@ -1436,7 +1436,7 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="PADDLE">Steering</Input>
-        <Input name="JOYSTICKLEFT">Steering</Input>
+        <Input name="JOYSTICK">Steering</Input>
     </Game>
     <Game romName="backfirt">
         <Input name="BUTTON2">Shoot</Input>
@@ -3406,7 +3406,7 @@
         <Input name="BUTTON2">Grenade</Input>
         <Input name="START">Start</Input>
         <Input name="DIAL">Rotate</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="calipso">
         <Input name="COIN">Insert Coin</Input>
@@ -4087,7 +4087,7 @@
         <Input name="BUTTON3">Bat/Pitch Power/Throw</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move/Pitch Type/Base</Input>
+        <Input name="JOYSTICK">Move/Pitch Type/Base</Input>
     </Game>
     <Game romName="cluclu">
         <Input name="COIN">Insert Coin</Input>
@@ -4140,7 +4140,7 @@
         <Input name="BUTTON2">Mega Blaster</Input>
         <Input name="BUTTON3">Eradicator</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move Crosshair</Input>
+        <Input name="JOYSTICK">Move Crosshair</Input>
     </Game>
     <Game romName="columns">
         <Input name="BUTTON1">Spin Piece</Input>
@@ -4716,17 +4716,17 @@
     <Game romName="cyberbal">
         <Input name="BUTTON1">Button</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="cyberbal2p">
         <Input name="BUTTON1">Button</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="cyberbalt">
         <Input name="BUTTON1">Button</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="cyberlip">
         <Input name="COIN">Insert Coin</Input>
@@ -4985,7 +4985,7 @@
         <Input name="BUTTON1">Whip</Input>
         <Input name="BUTTON3">Select</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move / Up=Speed-Up</Input>
+        <Input name="JOYSTICK">Move / Up=Speed-Up</Input>
     </Game>
     <Game romName="darkmist">
         <Input name="BUTTON1">Weapon</Input>
@@ -5943,14 +5943,14 @@
         <Input name="BUTTON1">Punch</Input>
         <Input name="BUTTON2">Kick</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="downtownj">
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Punch</Input>
         <Input name="BUTTON2">Kick</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="dplay">
         <Input name="START">Start</Input>
@@ -5994,7 +5994,7 @@
         <Input name="BUTTON3">Heavy Punch</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="dragrace">
         <Input name="DIAL_V">Move</Input>
@@ -6105,14 +6105,14 @@
         <Input name="BUTTON2">Accelerate</Input>
         <Input name="BUTTON1">Brake</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Steering</Input>
+        <Input name="JOYSTICK">Steering</Input>
     </Game>
     <Game romName="driftout">
         <Input name="BUTTON1">Accelerate</Input>
         <Input name="BUTTON2">Brake / Reverse</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Steering</Input>
+        <Input name="JOYSTICK">Steering</Input>
     </Game>
     <Game romName="drivedge">
         <Input name="PEDAL2">Brake</Input>
@@ -6373,7 +6373,7 @@
         <Input name="BUTTON3">Rotate Shoot Position</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="edf">
         <Input name="BUTTON1">Shoot</Input>
@@ -6435,7 +6435,7 @@
         <Input name="START">Start</Input>
         <Input name="BUTTON4">Guard Low</Input>
         <Input name="BUTTON3">Special Attack</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="eightfrc">
         <Input name="COIN">Insert Coin</Input>
@@ -6556,7 +6556,7 @@
         <Input name="BUTTON2">Shoot</Input>
         <Input name="BUTTON1">Special Fire / Laser</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move Crosshair</Input>
+        <Input name="JOYSTICK">Move Crosshair</Input>
     </Game>
     <Game romName="enforceja">
         <Input name="COIN">Insert Coin</Input>
@@ -7037,14 +7037,14 @@
         <Input name="BUTTON1">Menu / Lures</Input>
         <Input name="START">Cast / Start</Input>
         <Input name="MOUSE_Y">Reel</Input>
-        <Input name="JOYSTICKLEFT">Rod</Input>
+        <Input name="JOYSTICK">Rod</Input>
     </Game>
     <Game romName="fbaitbc">
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Menu / Lures</Input>
         <Input name="START">Cast / Start</Input>
         <Input name="MOUSE_Y">Reel</Input>
-        <Input name="JOYSTICKLEFT">Rod</Input>
+        <Input name="JOYSTICK">Rod</Input>
     </Game>
     <Game romName="fbaitmc">
         <Input name="COIN">Insert Coin</Input>
@@ -7344,6 +7344,8 @@
         <Input name="START">Start</Input>
         <Input name="JOYSTICK_UP">Select Slice Direction</Input>
         <Input name="JOYSTICK_DOWN">Select Slice Direction</Input>
+        <Input name="JOYSTICK_LEFT">Move</Input>
+        <Input name="JOYSTICK_RIGHT">Move</Input>
         <Input name="BUTTON1">Power Select</Input>
         <Input name="BUTTON2">Change Club</Input>
         <Input name="JOYSTICKLEFT">Move</Input>
@@ -8217,7 +8219,7 @@
         <Input name="BUTTON2">Bazooka</Input>
         <Input name="BUTTON1">Shoot</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move Crosshair</Input>
+        <Input name="JOYSTICK">Move Crosshair</Input>
     </Game>
     <Game romName="geebee">
         <Input name="PADDLE">Move</Input>
@@ -9283,8 +9285,7 @@
         <Input name="LIGHTGUN_Y">Move Crosshair</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move Crosshair</Input>
-        <Input name="JOYSTICKRIGHT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="gunchamp">
         <Input name="LIGHTGUN_X">Move Crosshair</Input>
@@ -10508,13 +10509,13 @@
         <Input name="BUTTON2">Release/Retrieve Robot</Input>
         <Input name="BUTTON3">Bomb</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="ironfort">
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Shoot</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="ironhors">
         <Input name="BUTTON1">Power</Input>
@@ -10633,7 +10634,7 @@
         <Input name="BUTTON4">Crouch / Pick Up</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="jedi">
         <Input name="BUTTON2">Shoot</Input>
@@ -11671,7 +11672,7 @@
         <Input name="BUTTON3">C</Input>
         <Input name="BUTTON2">B / Bat / Pitch / Throw</Input>
         <Input name="BUTTON1">A / Bunt / Slide</Input>
-        <Input name="JOYSTICKLEFT">Move/Mod Pitch&amp;Throw</Input>
+        <Input name="JOYSTICK">Move/Mod Pitch&amp;Throw</Input>
     </Game>
     <Game romName="kyustrkr">
         <Input name="BUTTON1">Shoot</Input>
@@ -13709,7 +13710,7 @@
         <Input name="START">Start</Input>
         <Input name="BUTTON2">Shoot</Input>
         <Input name="DIAL">Rotate</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="mpumpkin">
         <Input name="COIN">Insert Coin</Input>
@@ -14034,7 +14035,7 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="BUTTON1">Button</Input>
-        <Input name="JOYSTICKLEFT">Pull Down To Launch</Input>
+        <Input name="JOYSTICK">Pull Down To Launch</Input>
     </Game>
     <Game romName="musicbal">
         <Input name="BUTTON1">Left Flipper</Input>
@@ -17394,7 +17395,7 @@
         <Input name="BUTTON5">A</Input>
         <Input name="BUTTON6">B</Input>
         <Input name="BUTTON7">C</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="quantum">
         <Input name="START">Start</Input>
@@ -17407,14 +17408,14 @@
         <Input name="BUTTON2">Shoot</Input>
         <Input name="BUTTON1">Jump</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="quartet2">
         <Input name="BUTTON1">Jump</Input>
         <Input name="BUTTON2">Shoot</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="quasar">
         <Input name="START">Start</Input>
@@ -17435,19 +17436,19 @@
         <Input name="BUTTON5">A</Input>
         <Input name="BUTTON6">B</Input>
         <Input name="BUTTON7">C</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="qwak">
         <Input name="START">Start</Input>
         <Input name="BUTTON1">Button</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="r2dtank">
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="r2dx_v33">
         <Input name="BUTTON1">Shoot</Input>
@@ -17455,7 +17456,7 @@
         <Input name="BUTTON3">Auto Fire</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="r2dx_v33_r2">
         <Input name="BUTTON1">Shoot</Input>
@@ -17463,7 +17464,7 @@
         <Input name="BUTTON3">Auto Fire</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="rabbit">
         <Input name="START">Start</Input>
@@ -17472,21 +17473,21 @@
         <Input name="BUTTON2">Strong Attack</Input>
         <Input name="BUTTON3">Quick Kick</Input>
         <Input name="BUTTON4">Strong Kick</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="rabiolep">
         <Input name="BUTTON1">Shoot</Input>
         <Input name="BUTTON2">Missile</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="raccoon">
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Jump</Input>
         <Input name="BUTTON2">Shoot</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="racedriv">
         <Input name="PADDLE">Steering</Input>
@@ -18046,7 +18047,7 @@
         <Input name="BUTTON2">Brake</Input>
         <Input name="BUTTON3">Turbo</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="ridingf">
         <Input name="COIN">Insert Coin</Input>
@@ -18201,7 +18202,7 @@
         <Input name="BUTTON2">Brake</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Steering</Input>
+        <Input name="JOYSTICK">Steering</Input>
     </Game>
     <Game romName="roadriot">
         <Input name="AD_STICK_X">Steering</Input>
@@ -19857,7 +19858,7 @@
         <Input name="BUTTON1">Attack</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shienryu">
         <Input name="BUTTON1">Shoot</Input>
@@ -19900,13 +19901,13 @@
         <Input name="BUTTON2">Cancel / Help</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shocking">
         <Input name="BUTTON1">Attack</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shocktr2">
         <Input name="COIN">Insert Coin</Input>
@@ -19914,7 +19915,7 @@
         <Input name="BUTTON2">Grenade</Input>
         <Input name="BUTTON3">Jump</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shocktro">
         <Input name="COIN">Insert Coin</Input>
@@ -19922,7 +19923,7 @@
         <Input name="BUTTON2">Roll</Input>
         <Input name="BUTTON3">Grenade</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shogwarr">
         <Input name="BUTTON1">Quick Punch</Input>
@@ -19931,7 +19932,7 @@
         <Input name="START">Start</Input>
         <Input name="BUTTON4">Heavy Kick</Input>
         <Input name="BUTTON3">Quick Kick</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shollow">
         <Input name="COIN">Insert Coin</Input>
@@ -19961,7 +19962,7 @@
         <Input name="BUTTON2">Dive</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shoottv">
         <Input name="LIGHTGUN_X">Move Crosshair</Input>
@@ -19985,7 +19986,7 @@
         <Input name="BUTTON1">Jump</Input>
         <Input name="BUTTON2">Hammer</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="shrike">
         <Input name="AD_STICK_Y">Move</Input>
@@ -21039,8 +21040,7 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
-        <Input name="JOYSTICKRIGHT">Outfielder</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="spdcoin">
         <Input name="START">Start</Input>
@@ -21607,7 +21607,7 @@
         <Input name="BUTTON2">Shot 2</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sstriker">
         <Input name="BUTTON1">Shoot</Input>
@@ -22457,7 +22457,7 @@
         <Input name="BUTTON3">Timeout</Input>
         <Input name="BUTTON2">Bat / Pitch / Field</Input>
         <Input name="BUTTON1">Run / Steal / Pick Off</Input>
-        <Input name="JOYSTICKLEFT">Move / Mod Pitch</Input>
+        <Input name="JOYSTICK">Move / Mod Pitch</Input>
     </Game>
     <Game romName="sws93">
         <Input name="START">Start</Input>
@@ -22465,28 +22465,28 @@
         <Input name="BUTTON3">Timeout</Input>
         <Input name="BUTTON2">Bat / Pitch / Field</Input>
         <Input name="BUTTON1">Run / Steal / Pick Off</Input>
-        <Input name="JOYSTICKLEFT">Move / Mod Pitch</Input>
+        <Input name="JOYSTICK">Move / Mod Pitch</Input>
     </Game>
     <Game romName="sws95">
         <Input name="BUTTON1">Steal / Run / Pick Off</Input>
         <Input name="BUTTON2">Bat / Pitch / Field</Input>
         <Input name="BUTTON3">Timeout</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sws96">
         <Input name="BUTTON1">Steal / Run / Pick Off</Input>
         <Input name="BUTTON2">Bat / Pitch / Field</Input>
         <Input name="BUTTON3">Timeout</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sws97">
         <Input name="BUTTON1">Steal / Run / Pick Off</Input>
         <Input name="BUTTON2">Bat / Pitch / Field</Input>
         <Input name="BUTTON3">Timeout</Input>
         <Input name="START">Start</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sws98">
         <Input name="COIN">Insert Coin</Input>
@@ -22494,7 +22494,7 @@
         <Input name="BUTTON1">Run / Pick Off</Input>
         <Input name="START">Start</Input>
         <Input name="BUTTON4">Timeout</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sws99">
         <Input name="COIN">Insert Coin</Input>
@@ -22502,7 +22502,7 @@
         <Input name="BUTTON1">Run / Pick Off</Input>
         <Input name="START">Start</Input>
         <Input name="BUTTON4">Timeout</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="sxevious">
         <Input name="BUTTON2">Bomb</Input>
@@ -22517,7 +22517,7 @@
         <Input name="BUTTON1">Select</Input>
         <Input name="PADDLE">Move Shot Position</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move Shot Position</Input>
+        <Input name="JOYSTICK">Move Shot Position</Input>
     </Game>
     <Game romName="sxyreact">
         <Input name="START">Start</Input>
@@ -22525,7 +22525,7 @@
         <Input name="BUTTON1">Select</Input>
         <Input name="PADDLE">Move Shot Position</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move Shot Position</Input>
+        <Input name="JOYSTICK">Move Shot Position</Input>
     </Game>
     <Game romName="syvalion">
         <Input name="COIN">Insert Coin</Input>
@@ -23157,7 +23157,7 @@
         <Input name="BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move Crosshair</Input>
+        <Input name="JOYSTICK">Move Crosshair</Input>
     </Game>
     <Game romName="thunderj">
         <Input name="BUTTON1">Shoot</Input>
@@ -24422,7 +24422,7 @@
         <Input name="BUTTON1">Button</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Launch Ball</Input>
+        <Input name="JOYSTICK">Launch Ball</Input>
     </Game>
     <Game romName="upndown">
         <Input name="BUTTON1">Jump</Input>
@@ -25080,7 +25080,7 @@
     <Game romName="warrior">
         <Input name="BUTTON1">(Hold) Attack</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move / Attack</Input>
+        <Input name="JOYSTICK">Move / Attack</Input>
     </Game>
     <Game romName="warriorb">
         <Input name="COIN">Insert Coin</Input>
@@ -25860,7 +25860,7 @@
         <Input name="START">Start</Input>
         <Input name="BUTTON1">Shoot</Input>
         <Input name="COIN">Insert Coin</Input>
-        <Input name="JOYSTICKLEFT">Move</Input>
+        <Input name="JOYSTICK">Move</Input>
     </Game>
     <Game romName="xyonix">
         <Input name="BUTTON2">Rotate</Input>
