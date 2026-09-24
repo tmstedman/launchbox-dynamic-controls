@@ -18,4 +18,13 @@
     <Input name="BUTTON2">Jump</Input>
     <Input name="JOYSTICK">Move</Input>
   </Game>
+  <Game romName="rsgun">
+    <Input name="BUTTON1">Vulcan</Input>
+    <Input name="BUTTON2">Homing</Input>
+    <Input name="BUTTON3">Spread</Input>
+    <Input name="BUTTON1 BUTTON2 BUTTON3">Sword</Input>
+    <Input name="BUTTON1 BUTTON2">Homing Plasma</Input>
+    <Input name="BUTTON1 BUTTON3">Back Wide</Input>
+    <Input name="BUTTON2 BUTTON3">Lock On Spread</Input>
+  </Game>
 </Labels>

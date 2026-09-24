@@ -136,6 +136,14 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// control that fires several buttons at once is doing the combined action rather than any
     /// one of them.</para>
     ///
+    /// <para>Two combinations can both reach the same generic even though they name different
+    /// buttons — e.g. three buttons that all fire together on one shared trigger will also, in
+    /// every pairwise combination among them, share that same generic alongside whichever
+    /// generic is that pair's own distinct trigger. The combination naming more buttons is the
+    /// more specific claim (the same "most direct binding wins" principle used for individual
+    /// buttons below, applied to combinations instead), so it wins; equally-specific combinations
+    /// contending for one generic log an error the same way individual buttons do.</para>
+    ///
     /// <para>Where buttons contend for an input and no combination covers it, the input is left
     /// unlabelled. Pressing it does more than one thing, so no single label is true, and showing
     /// an arbitrary one would be worse than showing none.</para>
@@ -148,6 +156,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         var claimedByCombination = new HashSet<string>();
 
         // Combinations first, so their claim is already recorded when individual labels are placed.
+        var comboClaims = new Dictionary<string, List<(string Combo, int Size, string Text)>>();
         foreach (KeyValuePair<string, string> entry in platformLabels.Where(e => IsCombination(e.Key)))
         {
             IReadOnlyCollection<string> shared = SharedInputs(entry.Key, inputMapping);
@@ -157,12 +166,28 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                 continue;
             }
 
+            int size = entry.Key.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().Count();
             foreach (string input in shared)
             {
-                labelText[input] = entry.Value;
-                claimedByCombination.Add(input);
-                _logger.Debug($"Label: '{entry.Key}' -> generic: {input} -> {entry.Value}");
+                if (!comboClaims.TryGetValue(input, out List<(string, int, string)>? claimants))
+                    comboClaims[input] = claimants = [];
+                claimants.Add((entry.Key, size, entry.Value));
             }
+        }
+
+        foreach ((string input, List<(string Combo, int Size, string Text)> claimants) in comboClaims)
+        {
+            int largest = claimants.Max(c => c.Size);
+            List<(string Combo, int Size, string Text)> winners = [.. claimants.Where(c => c.Size == largest)];
+
+            if (winners.Count > 1)
+            {
+                _logger.Error($"{input} is claimed by equally specific combinations {string.Join(" and ", winners.Select(w => $"\"{w.Combo}\""))}; showing '{winners[^1].Text}'.");
+            }
+
+            labelText[input] = winners[^1].Text;
+            claimedByCombination.Add(input);
+            _logger.Debug($"Label: '{winners[^1].Combo}' -> generic: {input} -> {winners[^1].Text}");
         }
 
         // Record which buttons claim each input, and how directly. A button's own bindings come

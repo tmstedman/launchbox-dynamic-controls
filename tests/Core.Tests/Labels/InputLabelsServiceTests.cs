@@ -382,6 +382,71 @@ public class InputLabelsServiceTests
             m.Contains("ButtonRightShoulder") && m.Contains("BUTTON1") && m.Contains("BUTTON2")));
     }
 
+    /// <summary>
+    /// The rsgun shape: three buttons all fire together on one shared trigger (Sword), and each
+    /// pair among them ALSO shares a second, distinct trigger of its own -- because all three
+    /// individually reach Sword, every pairwise combination's intersection includes it too,
+    /// alongside that pair's own generic.
+    /// </summary>
+    #pragma warning disable format
+    private static ResolvedMapping ThreeWayOverlapMapping() => Mapping(
+        platform: "Arcade",
+        buttonToInput: new()
+        {
+            ["BUTTON1"] = ["ButtonX", "Sword", "ButtonY"],
+            ["BUTTON2"] = ["ButtonA", "Sword", "ButtonY", "AxisTriggerLeft"],
+            ["BUTTON3"] = ["ButtonB", "Sword", "AxisTriggerLeft"],
+        });
+    #pragma warning restore format
+
+    [Fact]
+    public void Load_CombinationsOverlapOnAGeneric_TheMoreSpecificComboWins()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Vulcan"),
+            ("BUTTON2", "Homing"),
+            ("BUTTON3", "Spread"),
+            ("BUTTON1 BUTTON2 BUTTON3", "Sword"),
+            ("BUTTON1 BUTTON2", "Homing Plasma"),
+            ("BUTTON2 BUTTON3", "Lock On Spread")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("rsgun"), ThreeWayOverlapMapping());
+
+        // The 3-button combo is the more specific claim on the generic all three incidentally
+        // share, so it wins there -- each 2-button combo's OWN distinct generic is unaffected.
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonX", "Vulcan"),
+            ("ButtonA", "Homing"),
+            ("ButtonB", "Spread"),
+            ("Sword", "Sword"),
+            ("ButtonY", "Homing Plasma"),
+            ("AxisTriggerLeft", "Lock On Spread"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_EquallySpecificCombinationsContendForAGeneric_LogsAndKeepsTheLast()
+    {
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["BUTTON1"] = ["ButtonX", "Shared"],
+            ["BUTTON2"] = ["ButtonA", "Shared"],
+            ["BUTTON3"] = ["ButtonB", "Shared"],
+            ["BUTTON4"] = ["ButtonY", "Shared"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1 BUTTON2", "Combo A"),
+            ("BUTTON3 BUTTON4", "Combo B")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("rsgun"), mapping);
+
+        // Neither combination is more specific than the other, so nothing here can choose
+        // between them -- the last still wins, and the log says the choice was arbitrary.
+        labels.LabelText["Shared"].ShouldBe("Combo B");
+        _logger.Received().Error(Arg.Is<string>(m =>
+            m.Contains("Shared") && m.Contains("BUTTON1 BUTTON2") && m.Contains("BUTTON3 BUTTON4")));
+    }
+
     [Fact]
     public void Load_MirroredBindingDoesNotOverwriteTheInputsOwnLabel()
     {

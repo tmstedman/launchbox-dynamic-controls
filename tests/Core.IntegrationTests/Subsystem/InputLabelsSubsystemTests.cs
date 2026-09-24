@@ -107,6 +107,41 @@ public class InputLabelsSubsystemTests
             ("AxisLeftStickUp", "Look Up"));
     }
 
+    // ---- button combinations, loaded from a real file ----
+
+    [Fact]
+    public void Load_CombinationsOverlapOnAGeneric_TheMoreSpecificComboWins()
+    {
+        // The rsgun shape: three buttons all fire together on one shared trigger (Sword), and
+        // each pair among them ALSO shares a second, distinct trigger of its own -- because all
+        // three individually reach Sword, every pairwise combination's intersection includes it
+        // too, alongside that pair's own generic. The combination naming more buttons wins.
+        _dc.WriteGameLabels(Platform, "rsgun", """
+            <InputLabels>
+              <Input name="BUTTON1">Vulcan</Input>
+              <Input name="BUTTON2">Homing</Input>
+              <Input name="BUTTON3">Spread</Input>
+              <Input name="BUTTON1 BUTTON2 BUTTON3">Sword</Input>
+              <Input name="BUTTON1 BUTTON2">Homing Plasma</Input>
+              <Input name="BUTTON2 BUTTON3">Lock On Spread</Input>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(
+            ("BUTTON1", ["ButtonX", "Sword", "ButtonY"]),
+            ("BUTTON2", ["ButtonA", "Sword", "ButtonY", "AxisTriggerLeft"]),
+            ("BUTTON3", ["ButtonB", "Sword", "AxisTriggerLeft"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "rsgun"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonX", "Vulcan"),
+            ("ButtonA", "Homing"),
+            ("ButtonB", "Spread"),
+            ("Sword", "Sword"),
+            ("ButtonY", "Homing Plasma"),
+            ("AxisTriggerLeft", "Lock On Spread"));
+    }
+
     // ---- inheritable-default merge ----
 
     [Fact]
