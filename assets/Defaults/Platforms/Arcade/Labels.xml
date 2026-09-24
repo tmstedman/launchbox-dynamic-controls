@@ -16022,10 +16022,10 @@
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="pingpong">
-        <Input name="P1_BUTTON2">Change Side</Input>
-        <Input name="P1_JOYSTICK_LEFT">Swing Paddle</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Swing Paddle</Input>
         <Input name="P1_BUTTON1">Serve</Input>
+        <Input name="P1_BUTTON2">Swing Paddle</Input>
+        <Input name="P1_BUTTON3">Swing Paddle</Input>
+        <Input name="P1_BUTTON4">Change Side</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -18003,7 +18003,6 @@
         <Input name="P1_BUTTON8">Shift Up</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="P1_JOYSTICK">Change Music</Input>
     </Game>
     <Game romName="roadf">
         <Input name="P1_BUTTON1">Accelerate</Input>
@@ -25558,7 +25557,6 @@
         <Input name="P1_BUTTON8">Shift Up</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
-        <Input name="P1_JOYSTICK">Change Music</Input>
     </Game>
     <Game romName="xsleena">
         <Input name="P1_BUTTON1">Shoot</Input>
