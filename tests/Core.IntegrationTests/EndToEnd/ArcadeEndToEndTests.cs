@@ -379,6 +379,42 @@ public class ArcadeEndToEndTests
             #pragma warning restore format
     }
 
+    /// <summary>
+    /// Radiant Silvergun's real cfg: BUTTON1/2/3 all fire together on one shared trigger
+    /// (Sword) alongside their own individual shot, and each pair among them ALSO shares a
+    /// second, distinct trigger — because all three individually reach AxisTriggerRight, every
+    /// pairwise combination's intersection includes it too, alongside that pair's own generic.
+    /// The 3-button combo is the more specific claim on the generic all three share, so it wins
+    /// there instead of whichever 2-button combo happened to be resolved last.
+    /// </summary>
+    [Fact]
+    public void Arcade_RadiantSilvergun_MoreSpecificComboWinsTheSharedTrigger()
+    {
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "rsgun",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonX",             Text: "Vulcan"),
+            new(Input: "ButtonA",             Text: "Homing"),
+            new(Input: "ButtonB",             Text: "Spread"),
+            new(Input: "AxisTriggerRight",    Text: "Sword"),          // the 3-way combo, not any 2-way one
+            new(Input: "ButtonY",             Text: "Homing Plasma"),  // BUTTON1+BUTTON2's own distinct trigger
+            new(Input: "ButtonRightShoulder", Text: "Back Wide"),      // BUTTON1+BUTTON3's own distinct trigger
+            new(Input: "AxisTriggerLeft",     Text: "Lock On Spread"), // BUTTON2+BUTTON3's own distinct trigger
+            new(Input: "ButtonStart",         Text: "Start"),
+            new(Input: "ButtonBack",          Text: "Insert Coin"));
+            #pragma warning restore format
+    }
+
     [Fact]
     public void Arcade_StreetFighterIICE()
     {
