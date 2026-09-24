@@ -11138,7 +11138,9 @@
         <Input name="P1_BUTTON2">Kick</Input>
         <Input name="P1_BUTTON3">Jump</Input>
         <Input name="START">Start</Input>
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICK_DOWN">Move</Input>
+        <Input name="P1_JOYSTICK_LEFT">Move</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Move</Input>
     </Game>
     <Game romName="kncljoe">
         <Input name="P1_BUTTON1">Punch</Input>
