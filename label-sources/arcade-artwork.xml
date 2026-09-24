@@ -20607,7 +20607,6 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">View 1</Label>
-        <Label control="ButtonDpad">Change Music</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonY">View 2</Label>
@@ -29161,7 +29160,6 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">View 1</Label>
-        <Label control="ButtonDpad">Change Music</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonY">View 2</Label>
