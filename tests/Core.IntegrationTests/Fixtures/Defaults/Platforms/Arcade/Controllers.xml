@@ -63,6 +63,12 @@
         <Mapping name="P1_TRACKBALL_Y" input="AxisLeftStickUp" />
         <Mapping name="P1_TRACKBALL_Y_EXT" input="AxisLeftStickDown" />
 
+        <!-- Positional -->
+        <Mapping name="POSITIONAL" input="AxisLeftStickLeft" />
+        <Mapping name="POSITIONAL_EXT" input="AxisLeftStickRight" />
+        <Mapping name="POSITIONAL_V" input="AxisLeftStickUp" />
+        <Mapping name="POSITIONAL_V_EXT" input="AxisLeftStickDown" />
+
         <!-- Lightgun -->
         <Mapping name="P1_LIGHTGUN_X" input="AxisRightStickLeft" />
         <Mapping name="P1_LIGHTGUN_X_EXT" input="AxisRightStickRight" />
