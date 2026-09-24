@@ -137,6 +137,7 @@
         <Input name="P1_BUTTON2">Kick / Pin</Input>
         <Input name="P1_BUTTON3">Jump</Input>
         <Input name="P1_BUTTON4">Tag / Fall</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Power Move</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
@@ -5917,6 +5918,8 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON4 P1_BUTTON5 P1_BUTTON6">Hang</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Super Attack</Input>
     </Game>
     <Game romName="dragrace">
         <Input name="P1_DIAL_V">Move</Input>
@@ -6907,6 +6910,8 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Line Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Super Strong Attack</Input>
     </Game>
     <Game romName="fatfurwa">
         <Input name="P1_BUTTON1">Punch</Input>
@@ -6933,6 +6938,8 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Line Change Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="fatfury3">
         <Input name="COIN">Insert Coin</Input>
@@ -6942,6 +6949,8 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Line Dodge/Attack</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Line Dodge/Attack</Input>
     </Game>
     <Game romName="fbait2bc">
         <Input name="COIN">Insert Coin</Input>
@@ -7146,6 +7155,7 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Hard Punch</Input>
     </Game>
     <Game romName="finalizr">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -7915,6 +7925,8 @@
         <Input name="P1_BUTTON2">Right Flipper / Launch</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON3">Left Flipper / Launch</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON4">Right Flipper / Launch</Input>
     </Game>
     <Game romName="galxwars">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -7994,6 +8006,7 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Evasive Attack</Input>
     </Game>
     <Game romName="garyoret">
         <Input name="COIN">Insert Coin</Input>
@@ -8403,6 +8416,7 @@
         <Input name="P1_BUTTON3">Short Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Heel Up</Input>
     </Game>
     <Game romName="gobyrc">
         <Input name="P1_PADDLE">Steering</Input>
@@ -8639,6 +8653,7 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON3">Special</Input>
     </Game>
     <Game romName="grdian">
         <Input name="P1_BUTTON2">Kick</Input>
@@ -9849,6 +9864,8 @@
         <Input name="P1_BUTTON4">Right Flipper / Launch</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON3">Left Flipper / Launch</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON4">Right Flipper / Launch</Input>
     </Game>
     <Game romName="hotrod">
         <Input name="P1_DIAL">Steering</Input>
@@ -10764,6 +10781,9 @@
         <Input name="P1_BUTTON4">Medium Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Strong Attack</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Super Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Strong Kick</Input>
     </Game>
     <Game romName="kabukiz">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -11120,6 +11140,7 @@
         <Input name="P1_BUTTON4">Tag In</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
     </Game>
     <Game romName="klax">
         <Input name="COIN">Insert Coin</Input>
@@ -11188,6 +11209,10 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof2001">
         <Input name="COIN">Insert Coin</Input>
@@ -11197,6 +11222,10 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof2002">
         <Input name="COIN">Insert Coin</Input>
@@ -11206,6 +11235,9 @@
         <Input name="P1_BUTTON4">Strong Kick / Grab</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Max State</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof2003">
         <Input name="COIN">Insert Coin</Input>
@@ -11215,6 +11247,9 @@
         <Input name="P1_BUTTON4">Strong Kick / Grab</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag In</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Tag In</Input>
     </Game>
     <Game romName="kof94">
         <Input name="COIN">Insert Coin</Input>
@@ -11224,6 +11259,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof95">
         <Input name="COIN">Insert Coin</Input>
@@ -11233,6 +11271,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Grab</Input>
     </Game>
     <Game romName="kof96">
         <Input name="COIN">Insert Coin</Input>
@@ -11242,6 +11283,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Grab</Input>
     </Game>
     <Game romName="kof97">
         <Input name="COIN">Insert Coin</Input>
@@ -11251,6 +11295,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof98">
         <Input name="COIN">Insert Coin</Input>
@@ -11260,6 +11307,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kof98umh">
         <Input name="P1_BUTTON1">Quick Punch</Input>
@@ -11278,6 +11328,10 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Slide / Escape / Block</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Charge</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag Attack</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Very Strong Attack</Input>
     </Game>
     <Game romName="kollon">
         <Input name="P1_BUTTON1">Spin Left</Input>
@@ -11662,6 +11716,7 @@
         <Input name="P1_BUTTON4">Deflect / Block</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Throw</Input>
     </Game>
     <Game romName="lastday">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -11877,6 +11932,8 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON6">Down</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON5">Left</Input>
     </Game>
     <Game romName="levers">
         <Input name="COIN">Insert Coin</Input>
@@ -12655,6 +12712,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Roll / Evade</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag Enabler</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Crush Attack</Input>
     </Game>
     <Game romName="mausuke">
         <Input name="P1_BUTTON1">Spin Piece</Input>
@@ -14379,6 +14439,7 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Draw Weapon</Input>
     </Game>
     <Game romName="ninjaw">
         <Input name="COIN">Insert Coin</Input>
@@ -16125,6 +16186,7 @@
         <Input name="P1_BUTTON3">Jump</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON3">Block</Input>
     </Game>
     <Game romName="pitnrun">
         <Input name="P1_BUTTON1">Accelerate</Input>
@@ -18243,6 +18305,9 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Roll / Evade</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Tag</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Combo Starter</Input>
     </Game>
     <Game romName="rotr">
         <Input name="COIN">Insert Coin</Input>
@@ -18309,6 +18374,10 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON3">Back Wide</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Sword</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Homing Plasma</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Lock On Spread</Input>
     </Game>
     <Game romName="rshark">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -18560,6 +18629,8 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Rage</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Start Combo</Input>
     </Game>
     <Game romName="sams64_2">
         <Input name="P1_BUTTON1">Light Attack</Input>
@@ -18569,6 +18640,8 @@
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Rage</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Start Combo</Input>
     </Game>
     <Game romName="samsh5sp">
         <Input name="COIN">Insert Coin</Input>
@@ -18578,6 +18651,8 @@
         <Input name="P1_BUTTON4">Dodge / Evade</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Heavy Slash</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Explosive Rage</Input>
     </Game>
     <Game romName="samsho">
         <Input name="COIN">Insert Coin</Input>
@@ -18587,6 +18662,8 @@
         <Input name="P1_BUTTON4">Medium Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Strong Punch / Weapon</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Strong Kick</Input>
     </Game>
     <Game romName="samsho2">
         <Input name="COIN">Insert Coin</Input>
@@ -18596,6 +18673,8 @@
         <Input name="P1_BUTTON4">Medium Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Strong Punch / Weapon</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Strong Kick</Input>
     </Game>
     <Game romName="samsho3">
         <Input name="COIN">Insert Coin</Input>
@@ -18605,6 +18684,8 @@
         <Input name="P1_BUTTON4">Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Dodge / Evade</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Torso Attack</Input>
     </Game>
     <Game romName="samsho4">
         <Input name="COIN">Insert Coin</Input>
@@ -18614,6 +18695,9 @@
         <Input name="P1_BUTTON4">Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Block / Evade</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Explosive Rage</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Combo Slice</Input>
     </Game>
     <Game romName="samsho5">
         <Input name="COIN">Insert Coin</Input>
@@ -18623,6 +18707,8 @@
         <Input name="P1_BUTTON4">Dodge / Evade</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Heavy Slash</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Explosive Rage</Input>
     </Game>
     <Game romName="samurai">
         <Input name="COIN">Insert Coin</Input>
@@ -18709,6 +18795,7 @@
         <Input name="P1_BUTTON4">Dimention Attack</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3">Throw Weapon</Input>
     </Game>
     <Game romName="savgbees">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -19111,6 +19198,8 @@
         <Input name="P1_BUTTON4">Transform</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Special</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Block</Input>
     </Game>
     <Game romName="sengoku3">
         <Input name="COIN">Insert Coin</Input>
@@ -19547,6 +19636,7 @@
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Possession</Input>
     </Game>
     <Game romName="shadowld">
         <Input name="COIN">Insert Coin</Input>
@@ -22139,6 +22229,8 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Throw 1</Input>
+        <Input name="P1_BUTTON3 P1_BUTTON4">Throw 2</Input>
     </Game>
     <Game romName="svf">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -25030,6 +25122,8 @@
         <Input name="P1_BUTTON4">Strong Kick</Input>
         <Input name="START">Start</Input>
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Throw</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2 P1_BUTTON3">Special Move</Input>
     </Game>
     <Game romName="wiggie">
         <Input name="COIN">Insert Coin</Input>
