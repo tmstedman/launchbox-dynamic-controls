@@ -14281,7 +14281,7 @@
     <Game romName="mars" title="Mars">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonRightStick">Shoot</Label>
+        <Label control="AxisRightStick">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -23982,6 +23982,8 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="splat" title="Splat!">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28476,7 +28478,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonRightStick">Aim</Label>
+        <Label control="AxisRightStick">Aim</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -28761,7 +28763,7 @@
     <Game romName="wmatch" title="Water Match">
         <Label control="AxisLeftStick">Left Stick</Label>
         <Label control="ButtonA">Dive / Turn</Label>
-        <Label control="ButtonRightStick">Right Stick</Label>
+        <Label control="AxisRightStick">Right Stick</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>

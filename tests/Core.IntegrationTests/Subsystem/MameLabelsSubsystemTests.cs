@@ -45,10 +45,10 @@ public class MameLabelsSubsystemTests
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="AD_STICK_X" input="AxisRightStickLeft" />
-                <Mapping name="AD_STICK_X" input="AxisRightStickRight" />
-                <Mapping name="AD_STICK_Y" input="AxisRightStickUp" />
-                <Mapping name="AD_STICK_Y" input="AxisRightStickDown" />
+                <Mapping name="P1_AD_STICK_X" input="AxisRightStickLeft" />
+                <Mapping name="P1_AD_STICK_X" input="AxisRightStickRight" />
+                <Mapping name="P1_AD_STICK_Y" input="AxisRightStickUp" />
+                <Mapping name="P1_AD_STICK_Y" input="AxisRightStickDown" />
               </Controller>
             </Controllers>
             """);
@@ -64,8 +64,8 @@ public class MameLabelsSubsystemTests
             """);
         _dc.WriteGameLabels(Platform, "revx", """
             <InputLabels>
-              <Input name="AD_STICK_X">Move Crosshair</Input>
-              <Input name="AD_STICK_Y">Move Crosshair</Input>
+              <Input name="P1_AD_STICK_X">Move Crosshair</Input>
+              <Input name="P1_AD_STICK_Y">Move Crosshair</Input>
             </InputLabels>
             """);
         _dc.WriteMameCfg("revx.cfg", """
@@ -90,5 +90,53 @@ public class MameLabelsSubsystemTests
         labels.LabelText.ContainsKey("AxisRightStick").ShouldBeFalse();
         labels.LabelText.ContainsKey("AxisRightStickLeft").ShouldBeFalse();
         labels.LabelText.ContainsKey("AxisRightStickUp").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Load_LabelNamesTheRealPort_NotTheStaleCfgCapture_RemapStillFollowsIt()
+    {
+        // adillor's real control is a trackball, read through TRACKBALL_X/Y ports -- the
+        // reference cfg this pack shipped with was simply captured wrong (it showed AD_STICK_X/Y
+        // instead), and that wrong capture is why the label named AD_STICK_X/Y before both the
+        // cfg and the label got corrected to TRACKBALL_X/Y. This is the regression guard for the
+        // corrected data: labelling the real port tracks a remap correctly.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="P1_TRACKBALL_X" input="AxisLeftStickLeft" />
+                <Mapping name="P1_TRACKBALL_Y" input="AxisLeftStickUp" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_2_XAXIS" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_2_XAXIS" input="AxisLeftStickRight" />
+              <Mapping joycode="JOYCODE_2_YAXIS" input="AxisLeftStickUp" />
+              <Mapping joycode="JOYCODE_2_YAXIS" input="AxisLeftStickDown" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "adillor", """
+            <InputLabels>
+              <Input name="P1_TRACKBALL_X">TrackBall Movement</Input>
+              <Input name="P1_TRACKBALL_Y">TrackBall Movement</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("adillor.cfg", """
+            <mameconfig>
+              <system name="adillor">
+                <input>
+                  <port type="P1_TRACKBALL_X"><newseq type="standard">JOYCODE_2_XAXIS</newseq></port>
+                  <port type="P1_TRACKBALL_Y"><newseq type="standard">JOYCODE_2_YAXIS</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "adillor", emulatorPath: MamePath);
+
+        ResolvedMapping mapping = LoadMapping(game);
+        ResolvedLabels labels = LoadLabels(game, mapping);
+
+        labels.LabelText["AxisLeftStick"].ShouldBe("TrackBall Movement");
     }
 }
