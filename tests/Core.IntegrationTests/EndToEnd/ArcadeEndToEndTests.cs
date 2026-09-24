@@ -380,15 +380,46 @@ public class ArcadeEndToEndTests
     }
 
     /// <summary>
+    /// 3 Count Bout's real cfg, with no "BUTTON1 BUTTON2" combination entry: BUTTON1 and
+    /// BUTTON2 both reach ButtonRightShoulder (RB) equally directly alongside their own
+    /// individual generic. Neither button's own text was written to describe RB specifically,
+    /// so it renders unlabelled rather than showing whichever button was resolved last.
+    /// </summary>
+    [Fact]
+    public void Arcade_3CountBout_SharedShoulderWithNoCombinationIsLeftUnlabelled()
+    {
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "3countb",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonX",             Text: "Punch"),
+            new(Input: "ButtonA",             Text: "Kick"),
+            // no ButtonRightShoulder — BUTTON1 and BUTTON2 tie for it with no combination to say
+            // which (if either) is right
+            new(Input: "ButtonStart",         Text: "Start"),
+            new(Input: "ButtonBack",          Text: "Insert Coin"));
+            #pragma warning restore format
+    }
+
+    /// <summary>
     /// Radiant Silvergun's real cfg: BUTTON1/2/3 all fire together on one shared trigger
     /// (Sword) alongside their own individual shot, and each pair among them ALSO shares a
     /// second, distinct trigger — because all three individually reach AxisTriggerRight, every
     /// pairwise combination's intersection includes it too, alongside that pair's own generic.
-    /// The 3-button combo is the more specific claim on the generic all three share, so it wins
-    /// there instead of whichever 2-button combo happened to be resolved last.
+    /// Only the 3-button combo names exactly the set of buttons driving AxisTriggerRight, so it's
+    /// the one that wins there — a 2-button combo naming a subset is not a partial match.
     /// </summary>
     [Fact]
-    public void Arcade_RadiantSilvergun_MoreSpecificComboWinsTheSharedTrigger()
+    public void Arcade_RadiantSilvergun_ExactlyMatchingComboWinsTheSharedTrigger()
     {
         var game = new GameInfo(
             Platform: "Arcade",
@@ -410,6 +441,40 @@ public class ArcadeEndToEndTests
             new(Input: "ButtonY",             Text: "Homing Plasma"),  // BUTTON1+BUTTON2's own distinct trigger
             new(Input: "ButtonRightShoulder", Text: "Back Wide"),      // BUTTON1+BUTTON3's own distinct trigger
             new(Input: "AxisTriggerLeft",     Text: "Lock On Spread"), // BUTTON2+BUTTON3's own distinct trigger
+            new(Input: "ButtonStart",         Text: "Start"),
+            new(Input: "ButtonBack",          Text: "Insert Coin"));
+            #pragma warning restore format
+    }
+
+    /// <summary>
+    /// Same cfg shape as rsgun, but its label file's "BUTTON1 BUTTON2 BUTTON3"="Sword" entry is
+    /// missing. All three buttons still drive AxisTriggerRight together, but every remaining
+    /// entry names only two of them — none is an exact match, so AxisTriggerRight renders with no
+    /// label at all rather than showing whichever pair happened to be resolved last.
+    /// </summary>
+    [Fact]
+    public void Arcade_RadiantSilvergun_MissingThreeWayComboLeavesTheSharedTriggerUnlabelled()
+    {
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "rsgun2",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonX",             Text: "Vulcan"),
+            new(Input: "ButtonA",             Text: "Homing"),
+            new(Input: "ButtonB",             Text: "Spread"),
+            // no AxisTriggerRight — no entry names all three buttons that drive it together
+            new(Input: "ButtonY",             Text: "Homing Plasma"),
+            new(Input: "ButtonRightShoulder", Text: "Back Wide"),
+            new(Input: "AxisTriggerLeft",     Text: "Lock On Spread"),
             new(Input: "ButtonStart",         Text: "Start"),
             new(Input: "ButtonBack",          Text: "Insert Coin"));
             #pragma warning restore format
@@ -617,8 +682,11 @@ public class ArcadeEndToEndTests
 
     /// <summary>
     /// MAME default.cfg fallback: a ROM with no per-rom cfg picks up cfg/default.cfg, whose remap
-    /// moves BUTTON7 onto ButtonRightShoulder — proven by the "Attack 7" label landing there
-    /// rather than on AxisTriggerLeft (its baseline binding).
+    /// moves BUTTON7 onto ButtonRightShoulder — BUTTON6's own baseline binding. Neither button's
+    /// text was written to describe ButtonRightShoulder once both reach it equally directly, so
+    /// it renders unlabelled; that absence, alongside AxisTriggerLeft's, is what proves the remap
+    /// took effect (without it, ButtonRightShoulder would cleanly show BUTTON6's "Attack 6" alone,
+    /// and AxisTriggerLeft would carry BUTTON7's "Attack 7").
     /// </summary>
     [Fact]
     public void Arcade_MoleAttack_MameDefaultCfgFallback()
@@ -635,8 +703,8 @@ public class ArcadeEndToEndTests
         ControllerOverlayModel overlay = _service.Resolve(game);
 
         // Discriminators that prove default.cfg was applied:
-        // (1) ButtonRightShoulder ends with BUTTON7's "Attack 7" label (not BUTTON6's "Attack 6")
-        overlay.ShouldHaveLabel("ButtonRightShoulder", "Attack 7");
+        // (1) ButtonRightShoulder has no label — BUTTON6 and BUTTON7 now tie for it equally
+        overlay.InputLabels.ShouldNotContain(l => l.InputName == "ButtonRightShoulder");
         // (2) AxisTriggerLeft has no label — without default.cfg it would carry BUTTON7's "Attack 7"
         overlay.InputLabels.ShouldNotContain(l => l.InputName == "AxisTriggerLeft");
 

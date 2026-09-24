@@ -364,7 +364,7 @@ public class InputLabelsServiceTests
     }
 
     [Fact]
-    public void Load_ButtonsShareAnInputEquallyWithNoCombination_LogsAndKeepsTheLast()
+    public void Load_ButtonsShareAnInputEquallyWithNoCombination_LogsAndLeavesItUnlabelled()
     {
         _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
             ("BUTTON1", "Punch"),
@@ -372,12 +372,14 @@ public class InputLabelsServiceTests
 
         ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
 
-        // RB is an equally direct binding for both buttons, so nothing can choose between them.
-        // The last still wins, and the log says the choice was arbitrary.
+        // RB is an equally direct binding for both buttons, so nothing can choose between them,
+        // and neither button's own text was written to describe RB specifically -- pressing it
+        // does more than one thing, so showing either "Punch" or "Kick" there would be showing a
+        // claim nobody made. Each button's own generic is unaffected.
         labels.LabelText.ShouldBeDictionaryOf(
             ("ButtonX", "Punch"),
-            ("ButtonA", "Kick"),
-            ("ButtonRightShoulder", "Kick"));
+            ("ButtonA", "Kick"));
+        labels.LabelText.ContainsKey("ButtonRightShoulder").ShouldBeFalse();
         _logger.Received().Error(Arg.Is<string>(m =>
             m.Contains("ButtonRightShoulder") && m.Contains("BUTTON1") && m.Contains("BUTTON2")));
     }
@@ -400,7 +402,7 @@ public class InputLabelsServiceTests
     #pragma warning restore format
 
     [Fact]
-    public void Load_CombinationsOverlapOnAGeneric_TheMoreSpecificComboWins()
+    public void Load_CombinationsOverlapOnAGeneric_TheExactlyMatchingComboWins()
     {
         _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
             ("BUTTON1", "Vulcan"),
@@ -412,8 +414,8 @@ public class InputLabelsServiceTests
 
         ResolvedLabels labels = BuildTestFixture.Load(Game("rsgun"), ThreeWayOverlapMapping());
 
-        // The 3-button combo is the more specific claim on the generic all three incidentally
-        // share, so it wins there -- each 2-button combo's OWN distinct generic is unaffected.
+        // All three buttons drive Sword, so the 3-button combo -- the only entry naming exactly
+        // that set -- is its label; each 2-button combo's own distinct generic is unaffected.
         labels.LabelText.ShouldBeDictionaryOf(
             ("ButtonX", "Vulcan"),
             ("ButtonA", "Homing"),
@@ -425,7 +427,7 @@ public class InputLabelsServiceTests
     }
 
     [Fact]
-    public void Load_EquallySpecificCombinationsContendForAGeneric_LogsAndKeepsTheLast()
+    public void Load_NoEntryNamesTheFullSetOfButtonsSharingAGeneric_LogsAndLeavesItUnlabelled()
     {
         ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
         {
@@ -440,11 +442,40 @@ public class InputLabelsServiceTests
 
         ResolvedLabels labels = BuildTestFixture.Load(Game("rsgun"), mapping);
 
-        // Neither combination is more specific than the other, so nothing here can choose
-        // between them -- the last still wins, and the log says the choice was arbitrary.
-        labels.LabelText["Shared"].ShouldBe("Combo B");
+        // All four buttons drive Shared, but neither combo names that full set -- a label naming
+        // a subset isn't a partial match, so showing either one would be showing a claim nobody
+        // actually made.
+        labels.LabelText.ContainsKey("Shared").ShouldBeFalse();
         _logger.Received().Error(Arg.Is<string>(m =>
-            m.Contains("Shared") && m.Contains("BUTTON1 BUTTON2") && m.Contains("BUTTON3 BUTTON4")));
+            m.Contains("Shared") && m.Contains("BUTTON1") && m.Contains("BUTTON4")));
+    }
+
+    [Fact]
+    public void Load_ThreeWayComboMissing_NoPairNamesTheFullSharedTrigger_LeavesItUnlabelled()
+    {
+        // rsgun with its "BUTTON1 BUTTON2 BUTTON3"="Sword" entry deleted: all three buttons still
+        // drive Sword together, but every remaining entry names only two of them -- none is an
+        // exact match, so Sword goes unlabelled rather than showing an unrelated pair's text.
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Vulcan"),
+            ("BUTTON2", "Homing"),
+            ("BUTTON3", "Spread"),
+            ("BUTTON1 BUTTON2", "Homing Plasma"),
+            ("BUTTON1 BUTTON3", "Back Wide"),
+            ("BUTTON2 BUTTON3", "Lock On Spread")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("rsgun"), ThreeWayOverlapMapping());
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonX", "Vulcan"),
+            ("ButtonA", "Homing"),
+            ("ButtonB", "Spread"),
+            ("ButtonY", "Homing Plasma"),
+            ("AxisTriggerLeft", "Lock On Spread"));
+        // Back Wide's own generic (ButtonRightShoulder) isn't in ThreeWayOverlapMapping's
+        // reach lists, so it can't appear here either way -- ShouldBeDictionaryOf above already
+        // pins the complete set, confirming Sword's absence alongside it.
+        _logger.Received().Error(Arg.Is<string>(m => m.Contains("Sword")));
     }
 
     [Fact]

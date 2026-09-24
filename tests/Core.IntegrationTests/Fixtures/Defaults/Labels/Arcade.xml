@@ -3,6 +3,12 @@
     <Input name="START">Start</Input>
     <Input name="COIN">Insert Coin</Input>
   </Defaults>
+  <Game romName="3countb">
+    <!-- No combination entry for RB, BUTTON1/BUTTON2's shared trigger (see 3countb.cfg),
+         so it should render unlabelled rather than showing either button's own text. -->
+    <Input name="BUTTON1">Punch</Input>
+    <Input name="BUTTON2">Kick</Input>
+  </Game>
   <Game romName="1942">
     <Input name="BUTTON1">Fire</Input>
     <Input name="BUTTON2">Loop</Input>
@@ -23,6 +29,17 @@
     <Input name="BUTTON2">Homing</Input>
     <Input name="BUTTON3">Spread</Input>
     <Input name="BUTTON1 BUTTON2 BUTTON3">Sword</Input>
+    <Input name="BUTTON1 BUTTON2">Homing Plasma</Input>
+    <Input name="BUTTON1 BUTTON3">Back Wide</Input>
+    <Input name="BUTTON2 BUTTON3">Lock On Spread</Input>
+  </Game>
+  <Game romName="rsgun2">
+    <!-- Same cfg shape as rsgun, but the "BUTTON1 BUTTON2 BUTTON3"="Sword" entry is missing,
+         so the three remaining pairwise combos are now equally specific and all still reach
+         AxisTriggerRight; it should render unlabelled rather than showing any of them. -->
+    <Input name="BUTTON1">Vulcan</Input>
+    <Input name="BUTTON2">Homing</Input>
+    <Input name="BUTTON3">Spread</Input>
     <Input name="BUTTON1 BUTTON2">Homing Plasma</Input>
     <Input name="BUTTON1 BUTTON3">Back Wide</Input>
     <Input name="BUTTON2 BUTTON3">Lock On Spread</Input>
