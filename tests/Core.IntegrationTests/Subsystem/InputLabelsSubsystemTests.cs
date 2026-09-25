@@ -317,12 +317,12 @@ public class InputLabelsSubsystemTests
               </game>
             </dat>
             """);
-        ResolvedMapping mapping = Mapping(("BUTTON1", ["ButtonA"]));
+        ResolvedMapping mapping = Mapping(("P1_BUTTON1", ["ButtonA"]));
         GameInfo game = Game(platform: Arcade, romName: "dkong", emulatorPath: MamePath);
 
         ResolvedLabels labels = Build(enableMame: true).Load(game, mapping);
 
-        // controls.xml parsed (P1_ prefix stripped) and translated through the mapping
+        // controls.xml parsed (name kept as-is, "P1_" included) and translated through the mapping
         labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Jump"));
         labels.IsGameSpecific.ShouldBeTrue();
     }
@@ -341,13 +341,13 @@ public class InputLabelsSubsystemTests
               </game>
             </dat>
             """);
-        ResolvedMapping mapping = Mapping(("BUTTON1", ["ButtonA"]));
+        ResolvedMapping mapping = Mapping(("P1_BUTTON1", ["ButtonA"]));
         GameInfo game = Game(platform: Arcade, romName: "dkong", emulatorPath: MamePath);
 
         // EnableMame=false filters the controls.xml source out of the chain entirely
         ResolvedLabels labels = Build(enableMame: false).Load(game, mapping);
 
-        // controls.xml parsed (P1_ prefix stripped) and translated through the mapping
+        // controls.xml parsed (name kept as-is, "P1_" included) and translated through the mapping
         labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Jump"));
         labels.IsGameSpecific.ShouldBeTrue();
     }

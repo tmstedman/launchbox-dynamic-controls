@@ -108,16 +108,25 @@ public class MameCfgLoader(
     }
 
     /// <summary>
-    /// Normalizes a MAME cfg port type to the canonical input name used by the platform XML
-    /// and labels. Returns null for ports we ignore (player 2-4, unrecognized types).
-    /// MAME uses two conventions for player-1 inputs:
-    ///   "P1_*" for per-player actions (BUTTONn, JOYSTICK_*) -> strip the "P1_" prefix.
-    ///   Trailing "1" for cabinet/system inputs (START1, COIN1) -> drop the digit.
+    /// Normalizes a MAME cfg port type to the canonical input name used by the platform XML and
+    /// labels. Returns null for ports we ignore (player 3-4, unrecognized types).
+    ///
+    /// <para><c>P1_*</c>/<c>P2_*</c> per-player actions (BUTTONn, JOYSTICK_*, AD_STICK_*, ...)
+    /// pass through unchanged, prefix included. A single-player game sometimes has no room left
+    /// in its P1 input slots for an extra axis or button, so MAME borrows a P2 slot for it — the
+    /// player-1 controller's own JOYCODE still drives that <c>P2_*</c> port (see #16). Keeping
+    /// the prefix, rather than stripping "P1_" and dropping "P2_" as before, is what lets a
+    /// borrowed P2 slot and a real P1 slot coexist as distinct button names instead of colliding
+    /// on write; a genuine second player's <c>P2_*</c> port still produces nothing downstream,
+    /// since <see cref="JoycodeMapping"/> only ever recognizes <c>JOYCODE_1_*</c> tokens.</para>
+    ///
+    /// <para>Cabinet/system inputs use a trailing "1" instead (START1, COIN1) -> drop the digit;
+    /// these have no per-player borrowing concern, so they stay collapsed to one name.</para>
     /// </summary>
     private static string? NormalizePortType(string? portType) => portType switch
     {
         null => null,
-        string t when t.StartsWith("P1_") => t[3..],
+        string t when t.StartsWith("P1_") || t.StartsWith("P2_") => t,
         "START1" => "START",
         "COIN1" => "COIN",
         _ => null

@@ -50,15 +50,17 @@ public class MameInputMappingSubsystemTests
         Game(platform: Platform, romName: romName, emulatorPath: MamePath);
 
     /// <summary>Trimmed Arcade "Cabinet" baseline: just the ports these tests touch. Note BUTTON4
-    /// (→ButtonY) is intentionally absent so a swap onto it has a conflict-free reverse lookup.</summary>
+    /// (→ButtonY) is intentionally absent so a swap onto it has a conflict-free reverse lookup.
+    /// Mapping names carry the "P1_" prefix, matching the raw cfg port types verbatim (#16); only
+    /// START stays bare, since START1/COIN1 collapse to one cabinet-level name regardless of player.</summary>
     private void WriteBaseline() => _dc.WritePlatform(Platform, """
         <Controllers>
           <Controller name="Cabinet" default="true">
-            <Mapping name="BUTTON1" input="ButtonA" />
-            <Mapping name="BUTTON2" input="ButtonB" />
-            <Mapping name="BUTTON3" input="ButtonX" />
-            <Mapping name="BUTTON6" input="ButtonRightShoulder" />
-            <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
+            <Mapping name="P1_BUTTON1" input="ButtonA" />
+            <Mapping name="P1_BUTTON2" input="ButtonB" />
+            <Mapping name="P1_BUTTON3" input="ButtonX" />
+            <Mapping name="P1_BUTTON6" input="ButtonRightShoulder" />
+            <Mapping name="P1_JOYSTICK_UP" input="ButtonDpadUp" />
             <Mapping name="START" input="ButtonStart" />
           </Controller>
         </Controllers>
@@ -100,9 +102,9 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["BUTTON3"].ShouldBe(["ButtonY"]);          // matched → replaced
-        mapping.ButtonToInput["BUTTON5"].ShouldBe(["ButtonRightShoulder"]); // not in baseline → appended
-        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);          // untouched → verbatim
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonY"]);          // matched → replaced
+        mapping.ButtonToInput["P1_BUTTON5"].ShouldBe(["ButtonRightShoulder"]); // not in baseline → appended
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonA"]);          // untouched → verbatim
     }
 
     [Fact]
@@ -125,16 +127,16 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
+        mapping.ButtonToInput["P1_JOYSTICK_UP"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
     }
 
     [Fact]
-    public void Load_PortTypeNormalization_StartNormalized_OtherPlayersIgnored()
+    public void Load_PortTypeNormalization_StartNormalized_P2KeepsItsOwnDistinctKey()
     {
         WriteBaseline();
         WriteJoycodeMapping();
-        // START1 normalizes to START; the P2 port is not a player-1 input and must be dropped, so
-        // it can't smuggle an override onto BUTTON1.
+        // START1 normalizes to START. P2_BUTTON1 is a distinct key from P1_BUTTON1 (#16), so its
+        // own override lands under its own name rather than smuggling onto P1_BUTTON1.
         _dc.WriteMameCfg("dkong.cfg", """
             <mameconfig>
               <system name="dkong">
@@ -149,8 +151,9 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonB"]);   // only P1's override applied
-        mapping.ButtonToInput["START"].ShouldBe(["ButtonStart"]); // START1 → START
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonB"]);              // P1's own override
+        mapping.ButtonToInput["P2_BUTTON1"].ShouldBe(["ButtonRightShoulder"]);  // P2's own, distinct key
+        mapping.ButtonToInput["START"].ShouldBe(["ButtonStart"]);               // START1 → START
     }
 
     // ---- true analogue ports: standard, increment and decrement newseqs ----
@@ -180,7 +183,55 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["PADDLE"].ShouldBe(["ButtonA", "ButtonB"]);
+        mapping.ButtonToInput["P1_PADDLE"].ShouldBe(["ButtonA", "ButtonB"]);
+    }
+
+    // ---- single-player games borrowing a P2 slot for a second P1 axis (#16) ----
+
+    [Fact]
+    public void Scenario_Hwchamp_BorrowedP2SlotForASecondLever_RecognizedUnderItsOwnKey()
+    {
+        // hwchamp's real cfg shape: a single-player boxing game with two analogue levers, one per
+        // fist. MAME represents the second lever as a P2_AD_STICK_Z port, but the joycode is still
+        // player 1's own controller (JOYCODE_1_RZAXIS) -- there is no second player anywhere in
+        // this cfg. P1_AD_STICK_X/Z stay distinct from P2_AD_STICK_Z, so recognizing the borrowed
+        // slot doesn't collide with or overwrite either genuine P1 lever.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="P1_AD_STICK_X" input="AxisLeftStickLeft" />
+                <Mapping name="P1_AD_STICK_Z" input="AxisRightStickUp" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickRight" />
+              <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickUp" />
+              <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickDown" />
+              <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickUp" />
+              <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickDown" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteMameCfg("hwchamp.cfg", """
+            <mameconfig>
+              <system name="hwchamp">
+                <input>
+                  <port type="P1_AD_STICK_Z"><newseq type="standard">JOYCODE_1_YAXIS</newseq></port>
+                  <port type="P1_AD_STICK_X"><newseq type="standard">JOYCODE_1_XAXIS</newseq></port>
+                  <port type="P2_AD_STICK_Z"><newseq type="standard">JOYCODE_1_RZAXIS</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("hwchamp"));
+
+        mapping.ButtonToInput["P1_AD_STICK_X"].ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
+        mapping.ButtonToInput["P1_AD_STICK_Z"].ShouldBe(["AxisLeftStickUp", "AxisLeftStickDown"]);
+        // The second (borrowed-slot) lever -- previously dropped entirely, now its own key.
+        mapping.ButtonToInput["P2_AD_STICK_Z"].ShouldBe(["AxisRightStickUp", "AxisRightStickDown"]);
     }
 
     // ---- cfg cascade: {rom}.cfg first, then default.cfg ----
@@ -203,7 +254,7 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonB"]);
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonB"]);
     }
 
     [Fact]
@@ -233,7 +284,7 @@ public class MameInputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
         // dkong.cfg short-circuits the cascade, so BUTTON1 follows it (ButtonX), not default (ButtonB).
-        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonX"]);
     }
 
     // ---- no overrides → baseline passes through unchanged ----
@@ -247,7 +298,7 @@ public class MameInputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
         // No cfg → no transform → active map equals the natural baseline.
-        mapping.ButtonToInput["BUTTON3"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
         mapping.ButtonToInput.ShouldBe(mapping.NaturalButtonToInput);
         mapping.InputToButton.ShouldBe(mapping.NaturalInputToButton);
     }
@@ -272,7 +323,7 @@ public class MameInputMappingSubsystemTests
         // EnableMame=false removes the transform from the pipeline entirely.
         ResolvedMapping mapping = Build(enableMame: false).Load(MameGame("dkong"));
 
-        mapping.ButtonToInput["BUTTON3"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
     }
 
     [Fact]
@@ -294,7 +345,7 @@ public class MameInputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(
             Game(platform: Platform, romName: "dkong", emulatorPath: NonMamePath));
 
-        mapping.ButtonToInput["BUTTON3"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
     }
 
     // ---- user-layer override ----
@@ -330,7 +381,7 @@ public class MameInputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
         // The User MameMapping wins — ButtonB, not the Defaults ButtonA
-        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonB"]);
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonB"]);
     }
 
     // ---- composition: natural-map re-splice survives a real JOYCODE swap ----
@@ -354,12 +405,12 @@ public class MameInputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
         // Active view reflects the swap...
-        mapping.ButtonToInput["BUTTON3"].ShouldBe(["ButtonY"]);
-        mapping.InputToButton["ButtonY"].ShouldBe("BUTTON3");
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonY"]);
+        mapping.InputToButton["ButtonY"].ShouldBe("P1_BUTTON3");
         // ...but the Naturals re-spliced from the pre-transform baseline still record ButtonX,
         // so IsMapped/remap detection can tell ButtonX's physical button is no longer in play.
-        mapping.NaturalButtonToInput["BUTTON3"].ShouldBe(["ButtonX"]);
-        mapping.NaturalInputToButton["ButtonX"].ShouldBe("BUTTON3");
+        mapping.NaturalButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
+        mapping.NaturalInputToButton["ButtonX"].ShouldBe("P1_BUTTON3");
         mapping.InputToButton.ContainsKey("ButtonX").ShouldBeFalse();
     }
 }
