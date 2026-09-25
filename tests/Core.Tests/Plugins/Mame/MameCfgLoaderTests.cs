@@ -5,10 +5,10 @@ namespace DynamicControls.Core.Tests.Plugins.Mame;
 
 /// <summary>
 /// Unit tests for <see cref="MameCfgLoader"/>. The loader reads a MAME .cfg file and produces a
-/// dictionary of {input name -> generic inputs} by walking system/input/port/newseq[type=standard]
-/// and translating each port's joycode sequence via an injected <see cref="IJoycodeMappingLoader"/>.
-/// Filesystem and joycode loader are both substituted so each test supplies a literal cfg XML and a
-/// fixed joycode dictionary.
+/// dictionary of {input name -> generic inputs} by walking system/input/port/newseq, translating
+/// whichever of standard/increment/decrement are bound (standard-first, deduped) via an injected
+/// <see cref="IJoycodeMappingLoader"/>. Filesystem and joycode loader are both substituted so each
+/// test supplies a literal cfg XML and a fixed joycode dictionary.
 /// </summary>
 public class MameCfgLoaderTests
 {
@@ -207,17 +207,14 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_PortMissingStandardSequence_IsSkipped()
+    public void Load_PortWithNoSequenceAtAll_IsSkipped()
     {
-        // given a port with no <newseq> at all, and another with newseq type != "standard"
+        // given a port with no <newseq> children at all, alongside one that has a standard sequence
         StubXml("""
             <mameconfig>
               <system name='galaga'>
                 <input>
                   <port type='P1_BUTTON1' />
-                  <port type='P1_BUTTON2'>
-                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
-                  </port>
                   <port type='P1_BUTTON3'>
                     <newseq type='standard'>JOYCODE_1_BUTTON3</newseq>
                   </port>
@@ -229,8 +226,109 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then only the port with a standard sequence contributes; no errors are logged for the skips
+        // then only the port with a sequence contributes; no error is logged for the skip
         result.ShouldBeDictionaryOf(("BUTTON3", ["ButtonC"]));
+    }
+
+    [Fact]
+    public void Load_AllSequencesNone_IsSkipped()
+    {
+        // given a port whose standard, increment and decrement are all unbound -- a true analogue
+        // control with no assignment at all, digital or otherwise
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>NONE</newseq>
+                    <newseq type='increment'>NONE</newseq>
+                    <newseq type='decrement'>NONE</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then nothing is recorded
+        result.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_StandardNone_IncrementAndDecrementBound_UsesBoth()
+    {
+        // the adillor/spacwalk shape: a true analogue control (a trackball or paddle axis) with no
+        // analogue hardware assigned, driven instead by two ordinary buttons nudging it each way
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>NONE</newseq>
+                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
+                    <newseq type='decrement'>JOYCODE_1_BUTTON3</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then both the increment and decrement buttons are recorded, standard-first order (moot
+        // here since standard is unbound) then increment, then decrement
+        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonB", "ButtonC"]));
+    }
+
+    [Fact]
+    public void Load_StandardAndIncrementBothBound_StandardOrderedFirst()
+    {
+        // a port with real analogue hardware assigned AND a digital fallback for one direction --
+        // both are recognized, analogue first since it's the more direct binding
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonA", "ButtonB"]));
+    }
+
+    [Fact]
+    public void Load_SameGenericReachableFromStandardAndIncrement_DedupsToOneEntry()
+    {
+        // increment happens to translate to a generic the standard sequence already reached --
+        // shouldn't appear twice
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                    <newseq type='increment'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonA"]));
     }
 
     [Fact]

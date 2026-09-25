@@ -153,6 +153,36 @@ public class MameInputMappingSubsystemTests
         mapping.ButtonToInput["START"].ShouldBe(["ButtonStart"]); // START1 → START
     }
 
+    // ---- true analogue ports: standard, increment and decrement newseqs ----
+
+    [Fact]
+    public void Load_AnalogueStandardUnbound_DigitalIncrementAndDecrementBindingsApply()
+    {
+        WriteBaseline();
+        WriteJoycodeMapping();
+        // adillor's shape: a trackball/paddle axis with no analogue hardware assigned, driven
+        // instead by two ordinary buttons nudging the value each way. PADDLE isn't in the
+        // baseline, so this appends rather than overriding, but the mechanism is the same either
+        // way -- both digital directions should still be recognized.
+        _dc.WriteMameCfg("dkong.cfg", """
+            <mameconfig>
+              <system name="dkong">
+                <input>
+                  <port type="P1_PADDLE">
+                    <newseq type="standard">NONE</newseq>
+                    <newseq type="increment">JOYCODE_1_BUTTON1</newseq>
+                    <newseq type="decrement">JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("dkong"));
+
+        mapping.ButtonToInput["PADDLE"].ShouldBe(["ButtonA", "ButtonB"]);
+    }
+
     // ---- cfg cascade: {rom}.cfg first, then default.cfg ----
 
     [Fact]
