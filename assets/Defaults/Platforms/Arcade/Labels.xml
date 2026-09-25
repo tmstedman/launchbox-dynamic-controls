@@ -3517,9 +3517,14 @@
         <Input name="P1_PADDLE">Steering</Input>
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PEDAL2">Brake</Input>
+        <Input name="P1_BUTTON4">1st Gear</Input>
+        <Input name="P1_BUTTON5">2nd Gear</Input>
+        <Input name="P1_BUTTON6">3rd Gear</Input>
+        <Input name="P1_BUTTON7">4th Gear</Input>
         <Input name="P1_BUTTON9">View 1</Input>
         <Input name="P1_BUTTON10">View 2</Input>
         <Input name="P1_BUTTON11">View 3</Input>
+        <Input name="P1_BUTTON12">Boost</Input>
         <Input name="COIN">Insert Coin</Input>
         <Input name="START">Start</Input>
     </Game>
@@ -4477,6 +4482,10 @@
         <Input name="P1_PEDAL2">Brake</Input>
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PADDLE">Steering</Input>
+        <Input name="P1_BUTTON2">1st Gear</Input>
+        <Input name="P1_BUTTON3">2nd Gear</Input>
+        <Input name="P1_BUTTON4">3rd Gear</Input>
+        <Input name="P1_BUTTON5">4th Gear</Input>
         <Input name="P1_BUTTON6">Change Music</Input>
         <Input name="P1_BUTTON7">View 1</Input>
         <Input name="P1_BUTTON8">View 4</Input>
@@ -4494,6 +4503,10 @@
         <Input name="P1_BUTTON2">View 1</Input>
         <Input name="P1_BUTTON3">View 2</Input>
         <Input name="P1_BUTTON4">View 3</Input>
+        <Input name="P1_BUTTON5">1st Gear</Input>
+        <Input name="P1_BUTTON6">2nd Gear</Input>
+        <Input name="P1_BUTTON7">3rd Gear</Input>
+        <Input name="P1_BUTTON8">4th Gear</Input>
         <Input name="P1_PADDLE">Steering</Input>
     </Game>
     <Game romName="crusnwld">
@@ -4505,6 +4518,10 @@
         <Input name="P1_BUTTON2">View 1</Input>
         <Input name="P1_BUTTON3">View 2</Input>
         <Input name="P1_BUTTON4">View 3</Input>
+        <Input name="P1_BUTTON5">1st Gear</Input>
+        <Input name="P1_BUTTON6">2nd Gear</Input>
+        <Input name="P1_BUTTON7">3rd Gear</Input>
+        <Input name="P1_BUTTON8">4th Gear</Input>
         <Input name="P1_PADDLE">Steering</Input>
     </Game>
     <Game romName="cryptklr">
@@ -6046,6 +6063,10 @@
         <Input name="P1_BUTTON4">Recover</Input>
         <Input name="P1_BUTTON5">Horn</Input>
         <Input name="P1_BUTTON2">Turbo</Input>
+        <Input name="P1_BUTTON7">1st Gear</Input>
+        <Input name="P1_BUTTON8">2nd Gear</Input>
+        <Input name="P1_BUTTON9">3rd Gear</Input>
+        <Input name="P1_BUTTON10">4th Gear</Input>
         <Input name="START">Start / Key</Input>
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PADDLE">Steering</Input>
@@ -6054,6 +6075,10 @@
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PADDLE">Steering</Input>
         <Input name="P1_PEDAL2">Brake</Input>
+        <!-- <Input name="P1_JOYSTICK_UP">1st Gear</Input>
+        <Input name="P1_JOYSTICK_DOWN">2nd Gear</Input>
+        <Input name="P1_JOYSTICK_LEFT">3rd Gear</Input>
+        <Input name="P1_JOYSTICK_RIGHT">4th Gear</Input> -->
         <Input name="COIN">Insert Coin</Input>
         <Input name="P1_BUTTON2">Green Button</Input>
         <Input name="P1_BUTTON1">Red Button</Input>
@@ -20780,6 +20805,7 @@
         <Input name="START">Start</Input>
     </Game>
     <Game romName="spacwalk">
+        <Input name="P1_PADDLE">Move</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
