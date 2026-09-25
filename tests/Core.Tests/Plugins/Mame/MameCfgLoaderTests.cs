@@ -72,7 +72,7 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_ParsesPlayer1ButtonsAndStripsP1Prefix()
+    public void Load_ParsesPlayer1Buttons_KeepsP1Prefix()
     {
         // given a cfg with two player-1 button ports, each with a standard sequence
         StubXml("""
@@ -93,10 +93,10 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then each port is keyed by the input name with "P1_" stripped, value is the translated input
+        // then each port is keyed by its raw "P1_" type, value is the translated input
         result.ShouldBeDictionaryOf(
-            ("BUTTON1", ["ButtonA"]),
-            ("BUTTON2", ["ButtonB"]));
+            ("P1_BUTTON1", ["ButtonA"]),
+            ("P1_BUTTON2", ["ButtonB"]));
     }
 
     [Fact]
@@ -128,16 +128,13 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_IgnoresOtherPlayerAndUnknownPortTypes()
+    public void Load_IgnoresPlayer3PlusAndUnknownPortTypes()
     {
-        // given a cfg with P2 / P3 / unrecognized port types alongside one valid P1 port
+        // given a cfg with P3 / unrecognized port types alongside one valid P1 port
         StubXml("""
             <mameconfig>
               <system name='galaga'>
                 <input>
-                  <port type='P2_BUTTON1'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                  </port>
                   <port type='P3_BUTTON1'>
                     <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
                   </port>
@@ -155,8 +152,57 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then only the P1 port survives — P2/P3 prefixes don't normalize, SERVICE is unrecognized
-        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonA"]));
+        // then only the P1 port survives — P3+ never normalizes, SERVICE is unrecognized
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
+    }
+
+    [Fact]
+    public void Load_P2Port_KeepsP2Prefix_NoLongerDropped()
+    {
+        // the hwchamp shape: a single-player game borrows a P2 input slot for a second axis or
+        // button, but the JOYCODE is still player 1's own controller (#16) -- P2_* now passes
+        // through unchanged instead of being dropped, distinct from any real P1_* port
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P2_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(("P2_BUTTON1", ["ButtonA"]));
+    }
+
+    [Fact]
+    public void Load_GenuineP2Port_BoundToAPlayer2Joycode_ProducesNothing()
+    {
+        // a real second player's port -- JOYCODE_2_* is never in the vocabulary (this plugin only
+        // ever recognizes player 1's controller), so a genuine P2 binding still resolves to
+        // nothing even though the P2_* port type itself is no longer dropped outright
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P2_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_2_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeEmpty();
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("unknown JOYCODE") && s.Contains("P2_BUTTON1")));
     }
 
     [Fact]
@@ -179,7 +225,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then both translated inputs are recorded in source order (renderer marks every physical button)
-        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonB", "ButtonA"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonB", "ButtonA"]));
     }
 
     [Fact]
@@ -227,7 +273,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then only the port with a sequence contributes; no error is logged for the skip
-        result.ShouldBeDictionaryOf(("BUTTON3", ["ButtonC"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON3", ["ButtonC"]));
     }
 
     [Fact]
@@ -280,7 +326,7 @@ public class MameCfgLoaderTests
 
         // then both the increment and decrement buttons are recorded, standard-first order (moot
         // here since standard is unbound) then increment, then decrement
-        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonB", "ButtonC"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonB", "ButtonC"]));
     }
 
     [Fact]
@@ -304,7 +350,7 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonA", "ButtonB"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA", "ButtonB"]));
     }
 
     [Fact]
@@ -328,7 +374,7 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        result.ShouldBeDictionaryOf(("BUTTON1", ["ButtonA"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
     }
 
     [Fact]
@@ -354,7 +400,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then the typeless port is skipped and only the typed port contributes
-        result.ShouldBeDictionaryOf(("BUTTON2", ["ButtonB"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
     }
 
     [Fact]
@@ -380,7 +426,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then the typeless newseq is not treated as standard and BUTTON1 is skipped
-        result.ShouldBeDictionaryOf(("BUTTON2", ["ButtonB"]));
+        result.ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
     }
 
     [Fact]

@@ -127,7 +127,7 @@ public class ControlsXmlLoaderTests
     // ---- XML parsing ----
 
     [Fact]
-    public void Lookup_StripsP1Prefix_FromLabelNames()
+    public void Lookup_KeepsP1Prefix_OnLabelNames()
     {
         // given a realistic controls.xml entry exercising several P1_ name shapes plus cabinet names
         StubXml("""
@@ -160,16 +160,16 @@ public class ControlsXmlLoaderTests
         // when the game is looked up
         var result = _underTest.Lookup("1941");
 
-        // then every "P1_" prefix is stripped; "START" (no prefix) passes through unchanged.
+        // then every "P1_" name is kept as-is; "START" (no prefix) passes through unchanged too.
         // Order matches document order. The meta block, miscDetails, and <controls>/<control>/<constant>
         // tree are all ignored — only <label> entries inside <labels> contribute.
         result.ShouldNotBeNull();
         result.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
         [
-            ("BUTTON1", "Fire"),
-            ("BUTTON2", "Loop"),
-            ("JOYSTICK_UP", "Up"),
-            ("JOYSTICK_DOWN", "Down"),
+            ("P1_BUTTON1", "Fire"),
+            ("P1_BUTTON2", "Loop"),
+            ("P1_JOYSTICK_UP", "Up"),
+            ("P1_JOYSTICK_DOWN", "Down"),
             ("START", "Start"),
         ]);
     }
@@ -260,8 +260,8 @@ public class ControlsXmlLoaderTests
         result.ShouldNotBeNull();
         result.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
         [
-            ("BUTTON1", "Fire"),
-            ("JOYSTICK_LEFT", "Left"),
+            ("P1_BUTTON1", "Fire"),
+            ("P1_JOYSTICK_LEFT", "Left"),
         ]);
     }
 
@@ -288,19 +288,19 @@ public class ControlsXmlLoaderTests
 
         // then only the complete entry survives; malformed entries are silently dropped
         result.ShouldNotBeNull();
-        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("BUTTON1", "Fire")]);
+        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("P1_BUTTON1", "Fire")]);
     }
 
     [Fact]
-    public void Lookup_SkipsLabelWithEmptyNameAfterStrip()
+    public void Lookup_SkipsLabelWithEmptyNameAttribute()
     {
-        // given a label whose name is exactly "P1_" — stripping leaves an empty string
+        // given a label whose name attribute is present but literally empty
         StubXml("""
             <dat>
               <game romname='galaga' gamename='Galaga'>
                 <player number='1' numButtons='2'>
                   <labels>
-                    <label name='P1_' value='Junk' />
+                    <label name='' value='Junk' />
                     <label name='P1_BUTTON2' value='Bomb' />
                   </labels>
                 </player>
@@ -311,9 +311,9 @@ public class ControlsXmlLoaderTests
         // when the game is looked up
         var result = _underTest.Lookup("galaga");
 
-        // then the empty-after-strip entry is dropped; the valid entry is kept
+        // then the empty-name entry is dropped; the valid entry is kept
         result.ShouldNotBeNull();
-        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("BUTTON2", "Bomb")]);
+        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("P1_BUTTON2", "Bomb")]);
     }
 
     [Fact]
@@ -345,9 +345,9 @@ public class ControlsXmlLoaderTests
         // then both load with their own labels — the orphan in between did not halt the parse,
         // and its labels did not leak into either valid game's result
         galaga.ShouldNotBeNull();
-        galaga.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("BUTTON1", "Fire")]);
+        galaga.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("P1_BUTTON1", "Fire")]);
         pacman.ShouldNotBeNull();
-        pacman.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("BUTTON1", "Eat")]);
+        pacman.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("P1_BUTTON1", "Eat")]);
     }
 
     [Fact]
@@ -423,16 +423,16 @@ public class ControlsXmlLoaderTests
         football.ShouldNotBeNull();
         football.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
         [
-            ("BUTTON1", "Pass / Hike"),
-            ("BUTTON2", "Lateral"),
-            ("JOYSTICK_UP", "Up"),
+            ("P1_BUTTON1", "Pass / Hike"),
+            ("P1_BUTTON2", "Lateral"),
+            ("P1_JOYSTICK_UP", "Up"),
         ]);
         racing.ShouldNotBeNull();
         racing.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
         [
-            ("BUTTON1", "Accelerate"),
-            ("PADDLE", "Left"),
-            ("PADDLE_EXT", "Right"),
+            ("P1_BUTTON1", "Accelerate"),
+            ("P1_PADDLE", "Left"),
+            ("P1_PADDLE_EXT", "Right"),
         ]);
     }
 }

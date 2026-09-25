@@ -110,13 +110,8 @@ public class ControlsXmlLoader(ILogger logger, LayeredFileSystem lfs) : IControl
                     string? name = labelNode.Attributes["name"]?.Value;
                     string? value = labelNode.Attributes["value"]?.Value;
 
-                    if (name != null && value != null)
+                    if (name != null && value != null && !string.IsNullOrEmpty(name))
                     {
-                        if (name.StartsWith("P1_"))
-                            name = name[3..];
-
-                        if (string.IsNullOrEmpty(name)) continue;
-
                         result.Labels.Add(new LabelEntry
                         {
                             Name = name,
