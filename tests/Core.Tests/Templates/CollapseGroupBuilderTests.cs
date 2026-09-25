@@ -45,6 +45,22 @@ public class CollapseGroupBuilderTests
         output[b].Group.ShouldBeSameAs(output[a].Group);
         output[a].Gap.ShouldBe(50);
         output[b].Gap.ShouldBe(50);
+        // and VAlign defaults to "top" when the caller doesn't pass one (every pre-existing caller)
+        output[a].VAlign.ShouldBe("top");
+    }
+
+    [Fact]
+    public void Build_VAlignPassedByCaller_FlowsThroughToCollapseInfo()
+    {
+        // given a Stack whose LayoutResolver already validated vAlign="bottom"
+        InputDefinition a = Input("A");
+        Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
+
+        // when the builder runs with that value
+        CollapseGroupBuilder.Build(children: [a], gap: 50, output, vAlign: "bottom");
+
+        // then it lands on the CollapseInfo entry, for LayoutFilter's render-time correction
+        output[a].VAlign.ShouldBe("bottom");
     }
 
     [Fact]

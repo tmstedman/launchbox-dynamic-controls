@@ -182,6 +182,36 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
+    public void Load_StackVAlignBottom_DeclaredYIsTheLastChildNotTheFirst()
+    {
+        // A Stack at (10,100) with gap=45 and vAlign="bottom": with the last of two children on
+        // y=100, the first lands 45 above it at y=55.
+        var t = Load("""
+            <ControllerTemplate>
+              <Body>
+                <Group>
+                  <Stack x="10" y="100" gap="45" vAlign="bottom">
+                    <Input name="ButtonA">
+                      <Render width="34" height="34" />
+                    </Input>
+                    <Input name="ButtonB">
+                      <Render width="34" height="34" />
+                    </Input>
+                  </Stack>
+                </Group>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var stack = group.Children.OfType<InputGroup>().Single();
+        var inputs = stack.Children.OfType<InputDefinition>().ToList();
+
+        inputs[0].InputImages.Single().Y.ShouldBe(55);
+        inputs[1].InputImages.Single().Y.ShouldBe(100);
+    }
+
+    [Fact]
     public void Load_NestedInput_InheritsParentOriginNotStackOrigin()
     {
         // Children of an Input start a new coord context from that Input's origin — they do NOT

@@ -566,6 +566,40 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_StackWithoutVAlignAttribute_DefaultsToTop()
+    {
+        // given a Stack with no vAlign attribute
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Stack><Input name='A' /></Stack></Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then VAlign defaults to "top"
+        result.Elements.OfType<StackNode>().Single().VAlign.ShouldBe("top");
+    }
+
+    [Fact]
+    public void LoadLayout_StackWithVAlign_ParsesLowerCased()
+    {
+        // given a Stack with a mixed-case vAlign attribute
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Stack vAlign='Bottom'><Input name='A' /></Stack></Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then VAlign is lower-cased, matching the Align precedent on Label
+        result.Elements.OfType<StackNode>().Single().VAlign.ShouldBe("bottom");
+    }
+
+    [Fact]
     public void LoadLayout_StackOverlayMissingSrc_IsSkippedAndLogged()
     {
         // given a Stack whose Overlay is missing a src attribute

@@ -246,7 +246,7 @@ A Group inside a `<Stack>` is *transparent* to slot counting — each Input in t
 
 ### `<Stack>` — positioned cluster
 
-A vertical list of inputs, each spaced `gap` pixels below the last. The first child sits at the Stack's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on.
+A vertical list of inputs, each spaced `gap` pixels below the last. Which slot sits at `y` itself depends on `vAlign`: by default (`vAlign="top"`) the first child sits at the Stack's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on.
 
 Unlike `<Group>`, a Stack is always included in the layout — it never hides itself based on whether its children are visible. Each child decides its own visibility independently.
 
@@ -264,7 +264,22 @@ Unlike `<Group>`, a Stack is always included in the layout — it never hides it
 | `x` | coordinate | no | Stack origin. Default `+0` |
 | `y` | coordinate | no | Same. Default `+0` |
 | `gap` | double | no | Vertical spacing between children. Default 0 |
+| `vAlign` | `top` \| `bottom` \| `center` | no | Which slot `y` refers to. Default `top` — see below |
 | `collapse` | bool (`true`/anything-else) | no | When `true`, hidden children vacate their slot and later children shift up to close the gap |
+
+**`vAlign`** shifts the stack's whole origin *before* slots are laid out, so it changes where every child ends up, not just one of them:
+
+- `top` (default) — `y` is the first slot; children fall below it, same as always.
+- `bottom` — `y` is the *last* slot; children are laid out so the last one lands exactly on `y`, with earlier ones above it.
+- `center` — `y` is the midpoint between the first and last slot.
+
+The slot count used for this is the template's fixed slot count (the same one in the table below), computed once when the template loads and cached from then on — not how many children happen to be visible at render time. On its own that's exactly right, since without `collapse` every slot always renders (just possibly faded), so the fixed count and the actual count never differ.
+
+Combined with `collapse`, they can differ — a vacated slot means fewer are actually left than `vAlign` was anchored against. Rather than drift toward `top` as slots vacate, the anchor is corrected at render time: the same `vAlign` shift is re-derived against however many slots collapse has actually left, and the difference from the fixed-count shift is folded uniformly into every remaining child's position, on top of collapse's own per-vacancy shift. The net effect: `bottom`/`center` stay pinned to the declared `y` no matter how many children are actually showing.
+
+A Stack with only one slot renders identically under every `vAlign` value, since there's nothing to distribute around.
+
+An unrecognized `vAlign` value logs an error and falls back to `top`.
 
 **Children** can be `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Overlay>` in any order.
 

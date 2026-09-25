@@ -160,6 +160,7 @@ internal class StackBuilder
     public StackBuilder Offset(double dx, double dy) { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
     public StackBuilder Gap(double v)                { Node.Gap = v;       return this; }
     public StackBuilder Collapse()                   { Node.Collapse = true; return this; }
+    public StackBuilder VAlign(string v)             { Node.VAlign = v;    return this; }
 
     public StackBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
     public StackBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }

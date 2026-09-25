@@ -274,6 +274,82 @@ public class LayoutFilterTests
     }
 
     [Fact]
+    public void Filter_CollapseStack_VAlignBottomNothingVacates_NoCorrectionNeeded()
+    {
+        // given a bottom-aligned collapsing stack where nothing vacates -- the visible count
+        // already equals the nominal count LayoutResolver anchored against, so no correction
+        InputDefinition slot0 = Input("ButtonA");
+        InputDefinition slot1 = Input("ButtonB");
+        ILayoutElement[] group = [slot0, slot1];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [slot0] = new(group, Gap: 50, VAlign: "bottom"),
+            [slot1] = new(group, Gap: 50, VAlign: "bottom"),
+        };
+        Template template = TemplateOf(elements: [slot0, slot1], collapseInfo: collapseInfo);
+
+        // when filtering (AllImagesZeroOpacity default false for both)
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.Inputs.Select(i => i.YOffset).ShouldBe([0.0, 0.0]);
+    }
+
+    [Fact]
+    public void Filter_CollapseStack_VAlignBottom_VacatedSlot_ShiftsRemainingDownToStayAnchoredAtY()
+    {
+        // given a bottom-aligned 3-slot stack (gap=100) where slot0 vacates -- LayoutResolver
+        // anchored Y against 3 nominal slots, but only 2 are actually left, so every remaining
+        // slot needs correcting by the one-slot difference or the visible content drifts toward
+        // the top instead of staying pinned to the declared Y
+        InputDefinition slot0 = Input("ButtonA");
+        InputDefinition slot1 = Input("ButtonB");
+        InputDefinition slot2 = Input("ButtonC");
+        ILayoutElement[] group = [slot0, slot1, slot2];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [slot0] = new(group, Gap: 100, VAlign: "bottom"),
+            [slot1] = new(group, Gap: 100, VAlign: "bottom"),
+            [slot2] = new(group, Gap: 100, VAlign: "bottom"),
+        };
+        Template template = TemplateOf(elements: [slot0, slot1, slot2], collapseInfo: collapseInfo);
+        _evaluator.AllImagesZeroOpacity(slot0, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the correction (one gap, since 3 nominal vs 2 visible) is folded into every
+        // offset up front, then slot0 vacating shifts everything after it up by its own gap on
+        // top of that -- the two adjustments compose rather than fighting each other
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 100.0), ("ButtonB", 0.0), ("ButtonC", 0.0)]);
+    }
+
+    [Fact]
+    public void Filter_CollapseStack_VAlignCenter_VacatedSlot_AppliesHalfCorrection()
+    {
+        // given a center-aligned 3-slot stack (gap=100) where slot0 vacates -- the correction
+        // for center is half of bottom's, since center only shifts by half the slot-count delta
+        InputDefinition slot0 = Input("ButtonA");
+        InputDefinition slot1 = Input("ButtonB");
+        InputDefinition slot2 = Input("ButtonC");
+        ILayoutElement[] group = [slot0, slot1, slot2];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [slot0] = new(group, Gap: 100, VAlign: "center"),
+            [slot1] = new(group, Gap: 100, VAlign: "center"),
+            [slot2] = new(group, Gap: 100, VAlign: "center"),
+        };
+        Template template = TemplateOf(elements: [slot0, slot1, slot2], collapseInfo: collapseInfo);
+        _evaluator.AllImagesZeroOpacity(slot0, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 50.0), ("ButtonB", -50.0), ("ButtonC", -50.0)]);
+    }
+
+    [Fact]
     public void Filter_CollapseStack_OneOfWithVisibleAlternative_AssignsOffset()
     {
         // given a collapsing stack where the first slot is a OneOf with a visible, non-zero-opacity

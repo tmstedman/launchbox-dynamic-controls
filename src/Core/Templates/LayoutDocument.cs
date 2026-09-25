@@ -123,6 +123,10 @@ public record StackNode : ILayoutNode
     /// <summary>Vertical spacing between slots in pixels.</summary>
     public double? Gap { get; set; }
 
+    /// <summary>Which slot the vertical origin (Y) refers to: "top" (default) — the first slot;
+    /// "bottom" — the last slot; "center" — the midpoint between the first and last slot.</summary>
+    public string VAlign { get; set; } = "top";
+
     /// <summary>When true, inputs that are fully hidden (all renders have opacity=0) vacate
     /// their slot and subsequent inputs shift up to fill the gap.</summary>
     public bool Collapse { get; set; }

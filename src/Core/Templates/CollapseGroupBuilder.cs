@@ -4,12 +4,15 @@ namespace DynamicControls.Templates;
 
 /// <summary>
 /// Per-input collapse metadata: the shared list of slot-level nodes for the collapsing Stack
-/// the input belongs to, and the gap distance between slots. Multiple InputDefinitions in the
-/// same Stack point at the same <see cref="Group"/> list — the reference identity is used by
-/// LayoutFilter as the dedup key when computing offsets.
+/// the input belongs to, the gap distance between slots, and the Stack's own <c>vAlign</c>
+/// (already validated/normalized by <see cref="LayoutResolver"/> — always "top", "bottom", or
+/// "center"). Multiple InputDefinitions in the same Stack point at the same <see cref="Group"/>
+/// list — the reference identity is used by LayoutFilter as the dedup key when computing
+/// offsets, and <see cref="VAlign"/> lets it correct the collapsed (actually-visible) slot count
+/// against the fixed count <see cref="StackVAlign.Shift"/> used when the stack was resolved.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public record CollapseInfo(IReadOnlyList<ILayoutElement> Group, double Gap);
+public record CollapseInfo(IReadOnlyList<ILayoutElement> Group, double Gap, string VAlign = "top");
 
 /// <summary>
 /// Computes collapse group metadata for a collapsing Stack's children. Identifies the
@@ -27,14 +30,15 @@ internal static class CollapseGroupBuilder
     internal static void Build(
         IReadOnlyList<ILayoutElement> children,
         double gap,
-        Dictionary<InputDefinition, CollapseInfo> output)
+        Dictionary<InputDefinition, CollapseInfo> output,
+        string vAlign = "top")
     {
         var collapseGroup = new List<ILayoutElement>();
         foreach (ILayoutElement child in children)
         {
             CollectSlots(child, collapseGroup);
         }
-        var info = new CollapseInfo(collapseGroup, gap);
+        var info = new CollapseInfo(collapseGroup, gap, vAlign);
         foreach (ILayoutElement slot in collapseGroup)
         {
             SetMetadata(slot, info, output);

@@ -156,14 +156,26 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
     /// <summary>Resolves a StackNode DTO into an always-included InputGroup. Establishes a
     /// canvas origin and stacks children vertically: each Input (at any depth through transparent
-    /// plain Groups) consumes one slot, advancing the y position by Gap.</summary>
+    /// plain Groups) consumes one slot, advancing the y position by Gap. <c>VAlign</c> shifts
+    /// that origin up front so the declared Y lands on the first, last, or middle slot rather
+    /// than always being the first — using the template's fixed slot count, since this runs once
+    /// at template-load time. When the stack also collapses, that fixed-count shift is corrected
+    /// at render time (see <see cref="Rendering.LayoutFilter"/>) against whatever slot count is
+    /// actually left, using the same <see cref="StackVAlign.Shift"/> math with the vAlign this
+    /// method already validated — carried through <see cref="CollapseInfo"/> so a bad value is
+    /// only ever logged once, here.</summary>
     private InputGroup BuildInputStack(StackNode stackXml, BuildContext ctx)
     {
+        double gap = stackXml.Gap ?? 0;
+        int slotCount = CountSlots(stackXml.Children);
+        string vAlign = NormalizeVAlign(stackXml.VAlign);
+        double vAlignShift = StackVAlign.Shift(vAlign, slotCount, gap);
+
         var frame = new StackFrame
         {
             OriginX = stackXml.X.Resolve(ctx.OriginX),
-            OriginY = stackXml.Y.Resolve(ctx.OriginY),
-            Gap = stackXml.Gap ?? 0,
+            OriginY = stackXml.Y.Resolve(ctx.OriginY) - vAlignShift,
+            Gap = gap,
             SlotIndex = 0,
         };
         BuildContext stackCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY };
@@ -182,10 +194,46 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 .Select(o => BuildOverlayDefinition(o, stackCtx))]);
 
         if (stackXml.Collapse)
-            CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo);
+            CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
 
-        _logger.Debug($"Stack (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} collapse={stackXml.Collapse}): children={stack.Children.Count}, overlays={stack.Overlays.Count}");
+        _logger.Debug($"Stack (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} vAlign={vAlign} collapse={stackXml.Collapse}): children={stack.Children.Count}, overlays={stack.Overlays.Count}");
         return stack;
+    }
+
+    /// <summary>
+    /// Counts the slots <paramref name="nodes"/> will consume once built, mirroring
+    /// <see cref="BuildNodeInStack"/>'s own slot rule exactly: Input/Stack/OneOf each consume
+    /// one slot, and a plain Group is transparent, contributing its children's slots instead of
+    /// one of its own. Computed ahead of the build so <see cref="StackVAlign.Shift"/> can shift
+    /// the origin before the first slot is actually consumed.
+    /// </summary>
+    private static int CountSlots(IReadOnlyList<ILayoutNode> nodes) => nodes.Sum(CountSlots);
+
+    private static int CountSlots(ILayoutNode node) => node switch
+    {
+        InputNode => 1,
+        StackNode => 1,
+        OneOfNode => 1,
+        GroupNode plainGroupXml => CountSlots(plainGroupXml.Children),
+        _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
+    };
+
+    /// <summary>
+    /// Validates a Stack's <c>vAlign</c> against the values <see cref="StackVAlign.Shift"/>
+    /// recognizes. An unrecognized value is logged and replaced with "top" — the only point in
+    /// the pipeline this is ever checked, since render-time re-use of the value (for a
+    /// collapsing stack's correction) trusts whatever this method already normalized.
+    /// </summary>
+    private string NormalizeVAlign(string vAlign) => vAlign switch
+    {
+        "top" or "bottom" or "center" => vAlign,
+        _ => LogUnknownVAlign(vAlign)
+    };
+
+    private string LogUnknownVAlign(string value)
+    {
+        _logger.Error($"Unknown vAlign value: \"{value}\". Expected: top, bottom, center. Defaulting to top.");
+        return "top";
     }
 
     /// <summary>
