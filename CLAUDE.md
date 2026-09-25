@@ -161,6 +161,8 @@ Two parts with different roles:
 
 cfg lookup: `cfg/{romName}.cfg` first, fallback to `cfg/default.cfg`. JOYCODE values are translated to generic input names via `JoycodeMapping.xml` (must exist; empty mapping if absent). A single MAME port can list multiple JOYCODEs joined with `OR`, driving multiple generic inputs simultaneously — this is how joystick ports can label both Dpad and AxisLeftStick at once. A single JOYCODE can likewise map to more than one generic input in `JoycodeMapping.xml` itself — a bare analogue axis (`JOYCODE_1_XAXIS`) carries no sign, so both halves are declared against it rather than guessed; `JoycodeMappingLoader` accumulates same-joycode `<Mapping>` entries instead of the last one winning.
 
+`MameCfgLoader` reads a port's `standard`, `increment`, and `decrement` `<newseq>` children, not just `standard` — a true analogue port (`DIAL`, `PADDLE`, `PEDAL`, `TRACKBALL_X/Y`, ...) can be driven by real analogue hardware (`standard`) or by two ordinary buttons nudging the value each way (`increment`/`decrement`) when no analogue device is bound. All three are translated and unioned (standard first, deduped) so a digital-only paddle/dial binding is recognized exactly like an analogue one; `NONE` means that sequence isn't bound and contributes nothing.
+
 ## RetroArch config resolution
 
 Portable mode: `retroarch.cfg` exists next to `retroarch.exe` → config root = exe dir.

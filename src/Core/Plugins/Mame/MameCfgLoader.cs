@@ -25,6 +25,16 @@ public class MameCfgLoader(
     IFileSystem fs,
     IJoycodeMappingLoader joycodeMappingLoader) : IMameCfgLoader
 {
+    /// <summary>
+    /// A true analogue port (DIAL, PADDLE, PEDAL, TRACKBALL_X/Y, ...) carries its "standard"
+    /// joycode from real analogue hardware, but MAME also lets a player nudge the same value
+    /// with two ordinary buttons instead — "increment" and "decrement" — for whichever direction
+    /// analogue hardware isn't present. All three are read and unioned in this order (most direct
+    /// first) so a digital-only binding is recognized exactly like an analogue one; "NONE" means
+    /// that sequence isn't bound and contributes nothing.
+    /// </summary>
+    private static readonly string[] SequenceTypes = ["standard", "increment", "decrement"];
+
     private readonly ILogger _logger = logger;
     private readonly IFileSystem _fs = fs;
     private readonly IJoycodeMappingLoader _joycodeMappingLoader = joycodeMappingLoader;
@@ -59,29 +69,36 @@ public class MameCfgLoader(
                     string? inputName = NormalizePortType(portType);
                     if (inputName == null) continue;
 
-                    string? joycode = null;
+                    var joycodesBySeqType = new Dictionary<string, string>();
                     foreach (XmlElement seqNode in portNode.ChildNodes.OfType<XmlElement>())
                     {
                         if (seqNode.Name != "newseq") continue;
                         string? seqType = seqNode.Attributes["type"]?.Value;
-                        if (seqType == "standard")
-                        {
-                            joycode = seqNode.InnerText.Trim();
-                            break;
-                        }
+                        if (seqType == null || !SequenceTypes.Contains(seqType)) continue;
+
+                        string text = seqNode.InnerText.Trim();
+                        if (text.Length > 0 && text != "NONE") joycodesBySeqType[seqType] = text;
                     }
 
-                    if (joycode == null) continue;
+                    if (joycodesBySeqType.Count == 0) continue;
 
-                    IReadOnlyList<string> genericInputs = joycodeMapping.Translate(joycode);
+                    var genericInputs = new List<string>();
+                    foreach (string seqType in SequenceTypes)
+                    {
+                        if (!joycodesBySeqType.TryGetValue(seqType, out string? joycode)) continue;
+                        foreach (string generic in joycodeMapping.Translate(joycode))
+                            if (!genericInputs.Contains(generic)) genericInputs.Add(generic);
+                    }
+
+                    string joycodes = string.Join(", ", joycodesBySeqType.Values);
                     if (genericInputs.Count > 0)
                     {
-                        overrides[inputName] = [.. genericInputs];
-                        _logger.Debug($"MAME override: {inputName} ({joycode}) -> {string.Join(", ", genericInputs)}");
+                        overrides[inputName] = genericInputs;
+                        _logger.Debug($"MAME override: {inputName} ({joycodes}) -> {string.Join(", ", genericInputs)}");
                     }
                     else
                     {
-                        _logger.Debug($"MAME cfg: {inputName} ({joycode}) -> unknown JOYCODE");
+                        _logger.Debug($"MAME cfg: {inputName} ({joycodes}) -> unknown JOYCODE");
                     }
                 }
             }
