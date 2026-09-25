@@ -424,6 +424,154 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_StackVAlignTop_IsTheDefaultAndLeavesYUnshifted()
+    {
+        // given a stack with vAlign explicitly "top" -- the default
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("top")
+                .Input("A", i => i.Render())
+                .Input("B", i => i.Render())
+                .Input("C", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the declared Y is the first slot, same as if vAlign were omitted
+        InputGroup stack = result.FirstInputGroup();
+        stack.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([100.0, 150.0, 200.0]);
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignBottom_ShiftsOriginSoTheLastSlotLandsOnY()
+    {
+        // given a stack with vAlign="bottom" -- the declared Y should be the LAST slot
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
+                .Input("A", i => i.Render())
+                .Input("B", i => i.Render())
+                .Input("C", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the origin shifts up by (slotCount-1)*gap, so slot 2 (the last) lands on Y=100
+        InputGroup stack = result.FirstInputGroup();
+        stack.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([0.0, 50.0, 100.0]);
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignCenter_ShiftsOriginSoTheMiddleSlotLandsOnY()
+    {
+        // given a stack with vAlign="center" -- the declared Y should be the midpoint
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("center")
+                .Input("A", i => i.Render())
+                .Input("B", i => i.Render())
+                .Input("C", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the origin shifts up by half of (slotCount-1)*gap, so slot 1 (the middle) lands on Y=100
+        InputGroup stack = result.FirstInputGroup();
+        stack.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([50.0, 100.0, 150.0]);
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignBottom_CountsPlainGroupChildrenTransparently()
+    {
+        // given vAlign="bottom" on a stack whose slots come from A, [Group(B, C)], D -- 4 slots
+        // total, matching Resolve_StackPlainGroupChildren_AreTransparentToSlotCounting's shape
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 300).Gap(50).VAlign("bottom")
+                .Input("A", i => i.Render())
+                .Group(g => g
+                    .Input("B", i => i.Render())
+                    .Input("C", i => i.Render()))
+                .Input("D", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the shift is (4-1)*50=150, so the last of the 4 slots lands on Y=300
+        InputGroup stack = result.FirstInputGroup();
+        var renders = stack.Children.Flatten()
+            .OfType<InputDefinition>()
+            .Select(i => i.InputImages.Single())
+            .ToList();
+        renders.Select(r => r.Y).ShouldBe([150.0, 200.0, 250.0, 300.0]);
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignBottom_CountsANestedStackAsOneSlot()
+    {
+        // given vAlign="bottom" on an outer stack with 2 slots -- A, then a nested stack (which
+        // counts as one slot in the OUTER stack regardless of its own inner slot count)
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
+                .Input("A", i => i.Render())
+                .Stack(inner => inner.Gap(10)
+                    .Input("B", i => i.Render())
+                    .Input("C", i => i.Render())));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the outer shift is (2-1)*50=50: A lands at Y=50, the nested stack's own origin
+        // (its one slot) lands at Y=100 -- unaffected by vAlign, since only the OUTER declared
+        // it -- and its own children stack from there with their own gap.
+        InputGroup outer = result.FirstInputGroup();
+        var a = (InputDefinition)outer.Children[0];
+        var inner = (InputGroup)outer.Children[1];
+        a.InputImages.Single().Y.ShouldBe(50);
+        inner.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([100.0, 110.0]);
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignUnknown_LogsError_AndDefaultsToTop()
+    {
+        // given a stack with a vAlign value the resolver doesn't recognize
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bogus")
+                .Input("A", i => i.Render())
+                .Input("B", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then it behaves as "top" (no shift) and logs an error naming the value
+        InputGroup stack = result.FirstInputGroup();
+        stack.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([100.0, 150.0]);
+        _logger.Received().Error(Arg.Is<string>(m => m.Contains("bogus")));
+    }
+
+    [Fact]
+    public void Resolve_StackVAlignBottom_SingleSlot_IsUnaffected()
+    {
+        // given vAlign="bottom" on a stack with only one slot -- bottom and top coincide when
+        // there's nothing to distribute around
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
+                .Input("A", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then A still lands exactly on the declared Y
+        result.FirstInputGroup().Children.FirstInput().InputImages.Single().Y.ShouldBe(100);
+    }
+
+    [Fact]
     public void Resolve_StackCollapse_RecordsCollapseInfoForInputs()
     {
         // given a stack with collapse="true" containing two inputs
@@ -441,6 +589,39 @@ public class TemplateLayoutResolverTests
         result.CollapseInfo.Keys.ShouldBe(inputs, ignoreOrder: true);
         foreach (InputDefinition input in inputs)
             result.CollapseInfo[input].Gap.ShouldBe(50);
+    }
+
+    [Fact]
+    public void Resolve_StackCollapseWithVAlign_CarriesTheValueIntoCollapseInfo()
+    {
+        // given a collapsing stack with vAlign="bottom" -- LayoutFilter needs this at render time
+        // to correct its own shift for whatever slots collapse actually leaves visible
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
+                .Input("A", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition input = result.FirstInputGroup().Children.FirstInput();
+        result.CollapseInfo[input].VAlign.ShouldBe("bottom");
+    }
+
+    [Fact]
+    public void Resolve_StackCollapseWithUnknownVAlign_CollapseInfoCarriesTheNormalizedDefault()
+    {
+        // given a collapsing stack with a vAlign value the resolver doesn't recognize -- it's
+        // validated (and logged) exactly once, here; CollapseInfo must carry the normalized
+        // "top", not the raw invalid string, since nothing downstream re-validates it
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
+                .Input("A", i => i.Render()));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition input = result.FirstInputGroup().Children.FirstInput();
+        result.CollapseInfo[input].VAlign.ShouldBe("top");
     }
 
     [Fact]

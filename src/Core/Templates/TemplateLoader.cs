@@ -220,7 +220,9 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
     /// <summary>
     /// Parses a &lt;Stack&gt; positioned layout container. Children are stacked vertically with
-    /// positions computed from the stack origin (x, y) plus slot index times gap.
+    /// positions computed from the stack origin (x, y) plus slot index times gap. <c>vAlign</c>
+    /// (top/bottom/center, default top) is validated against the origin's slot count by the
+    /// resolver, not here — an invalid value just flows through as an arbitrary string.
     /// </summary>
     private StackNode ParseStackNode(XmlElement stackNode)
     {
@@ -229,6 +231,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         if (ReadCoordinate(stackNode, "x", "Stack") is Coordinate sx) stack.X = sx;
         if (ReadCoordinate(stackNode, "y", "Stack") is Coordinate sy) stack.Y = sy;
         if (ReadDouble(stackNode, "gap") is double gap) stack.Gap = gap;
+        stack.VAlign = stackNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
         if (string.Equals(stackNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) stack.Collapse = true;
 
         foreach (XmlElement child in stackNode.ChildNodes.OfType<XmlElement>())
@@ -246,7 +249,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             }
         }
 
-        _logger.Debug($"Stack: x={stack.X}, y={stack.Y}, gap={stack.Gap}, children={stack.Children.Count}, overlays={stack.Overlays.Count}");
+        _logger.Debug($"Stack: x={stack.X}, y={stack.Y}, gap={stack.Gap}, vAlign={stack.VAlign}, children={stack.Children.Count}, overlays={stack.Overlays.Count}");
         return stack;
     }
 

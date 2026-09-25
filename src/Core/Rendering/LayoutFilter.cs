@@ -54,6 +54,15 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// gap. Each collapse group is processed once — the shared <see cref="CollapseInfo.Group"/>
     /// reference serves as the dedup key. OneOf slots vacate when no alternative rendered or all
     /// rendered inputs are zero-opacity.
+    ///
+    /// <para>When the stack's <see cref="CollapseInfo.VAlign"/> isn't "top", every member also
+    /// gets a uniform correction on top of that: <see cref="LayoutResolver"/> anchored "bottom"
+    /// or "center" against the stack's full, fixed slot count when the template was resolved, but
+    /// vacated slots mean fewer are actually left at render time, so that anchor would otherwise
+    /// drift toward the top by one gap per vacated slot. The correction re-derives the same shift
+    /// against the count that's actually left and folds the difference into the running offset
+    /// before the vacate loop below ever touches it, so the two adjustments compose exactly
+    /// instead of fighting each other.</para>
     /// </summary>
     private Dictionary<InputDefinition, double> ComputeCollapseAdjustments(
         List<InputDefinition> inputsToRender,
@@ -65,31 +74,51 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
         IReadOnlyDictionary<InputDefinition, CollapseInfo> collapseInfo = template.Layout.CollapseInfo;
 
+        List<InputDefinition> SelectedLeaves(OneOf oneOf) =>
+            [.. oneOf.Alternatives.SelectMany(CollectInputLeaves).Where(renderSet.Contains)];
+
+        bool IsHidden(ILayoutElement slot)
+        {
+            switch (slot)
+            {
+                case InputDefinition slotInput:
+                    return _evaluator.AllImagesZeroOpacity(slotInput, template.Layout.DefaultMinOpacity, ctx);
+                case OneOf oneOf:
+                    List<InputDefinition> selected = SelectedLeaves(oneOf);
+                    return selected.Count == 0
+                        || selected.All(leaf => _evaluator.AllImagesZeroOpacity(leaf, template.Layout.DefaultMinOpacity, ctx));
+                case InputGroup:
+                    return false; // Stack-as-slot: never considered hidden, so it never vacates.
+                default:
+                    throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");
+            }
+        }
+
         foreach (InputDefinition input in inputsToRender)
         {
             if (!collapseInfo.TryGetValue(input, out CollapseInfo? info) || !processedGroups.Add(info.Group)) continue;
 
             double gap = info.Gap;
-            double cumulativeOffset = 0;
+            int visibleCount = info.Group.Count(slot => !IsHidden(slot));
+            double vAlignCorrection = StackVAlign.Shift(info.VAlign, info.Group.Count, gap)
+                - StackVAlign.Shift(info.VAlign, visibleCount, gap);
+
+            double cumulativeOffset = vAlignCorrection;
             foreach (ILayoutElement slot in info.Group)
             {
                 switch (slot)
                 {
                     case InputDefinition slotInput:
                         adjustments[slotInput] = cumulativeOffset;
-                        if (_evaluator.AllImagesZeroOpacity(slotInput, template.Layout.DefaultMinOpacity, ctx))
+                        if (IsHidden(slotInput))
                             cumulativeOffset -= gap;
                         break;
                     case OneOf oneOf:
-                        var selected = oneOf.Alternatives
-                            .SelectMany(CollectInputLeaves)
-                            .Where(renderSet.Contains)
-                            .ToList();
-                        foreach (InputDefinition leaf in selected)
+                        foreach (InputDefinition leaf in SelectedLeaves(oneOf))
                         {
                             adjustments[leaf] = cumulativeOffset;
                         }
-                        if (selected.Count == 0 || selected.All(leaf => _evaluator.AllImagesZeroOpacity(leaf, template.Layout.DefaultMinOpacity, ctx)))
+                        if (IsHidden(oneOf))
                             cumulativeOffset -= gap;
                         break;
                     case InputGroup:

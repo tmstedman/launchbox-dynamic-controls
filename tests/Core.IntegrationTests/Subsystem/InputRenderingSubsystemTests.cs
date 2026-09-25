@@ -140,6 +140,43 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
+    public void Render_CollapsingStackWithVAlignBottom_VacatedFirstSlot_StaysAnchoredAtDeclaredY()
+    {
+        // given a bottom-aligned 3-slot stack (gap=100), Y values as LayoutResolver would have
+        // resolved them for a stack anchored at Y=300: slot0=100, slot1=200, slot2=300. The first
+        // input is unmapped with MinOpacity=0, so it vacates; the other two always render.
+        var first = Input(
+            name: "ButtonY",
+            images: [new InputImageDefinition(X: 0, Y: 100, ImageFile: "ButtonY.png", ShowIf: Mapped, MinOpacity: 0)]);
+        var second = Input(
+            name: "ButtonA",
+            images: [new InputImageDefinition(X: 0, Y: 200, ImageFile: "ButtonA.png")]);
+        var third = Input(
+            name: "ButtonB",
+            images: [new InputImageDefinition(X: 0, Y: 300, ImageFile: "ButtonB.png")]);
+        var stack = new InputGroup(AlwaysInclude: true, Children: [first, second, third], Overlays: []);
+
+        _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "ButtonB.png", generic: "ButtonB.png", platform: Genesis, controller: ThreeButton);
+
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>();
+        CollapseGroupBuilder.Build(stack.Children, 100, collapseInfo, vAlign: "bottom");
+        Template template = TemplateOf([stack], collapseInfo);
+        ResolvedMapping mapping = MappingOf(("A", "ButtonA"), ("B", "ButtonB"));
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then the first slot vacates as before, but the vAlign correction (one gap, since 3
+        // nominal slots became 2 visible) keeps the last visible input exactly at the declared
+        // Y=300 -- without the correction it would land at 200, drifting toward the top as if
+        // vAlign had no effect.
+        result.Images.Single(i => i.InputName == "ButtonA").Top.ShouldBe(200);
+        result.Images.Single(i => i.InputName == "ButtonB").Top.ShouldBe(300);
+    }
+
+    [Fact]
     public void Render_GroupOverlayWithShowIfMapped_VisibilityAggregatedAcrossMembers()
     {
         // given a Group with two inputs and a single group-level overlay (showIf=Mapped). Only
