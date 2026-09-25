@@ -27,7 +27,7 @@ public class NecPcEngineEndToEndTests
     {
         var game = new GameInfo(
             Platform: "NEC PC Engine",
-            RomName: "Street Fighter II Dash (Japan)",   // InputMappings picks the 6-Button controller
+            RomName: "Street Fighter II Dash (Japan)",   // ControllerOverrides picks the 6-Button controller
             CloneOf: null,
             LaunchBoxId: null,
             EmulatorPath: null,

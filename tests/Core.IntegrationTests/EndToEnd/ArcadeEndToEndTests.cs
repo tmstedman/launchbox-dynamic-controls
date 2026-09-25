@@ -173,7 +173,7 @@ public class ArcadeEndToEndTests
     }
 
     /// <summary>
-    /// Per-game InputMappings remap BUTTON1/2 onto ButtonX/A (file labels win over controls.xml);
+    /// Per-game ControllerOverrides remap BUTTON1/2 onto ButtonX/A (file labels win over controls.xml);
     /// a whole-Joystick label fires the OneOf second alt and mirrors Move onto AxisLeftStick.
     /// </summary>
     [Fact]
@@ -194,11 +194,11 @@ public class ArcadeEndToEndTests
         t.ShouldHaveBaseImage("BaseImage.png", width: 1600, height: 1000);
         t.ShouldHaveImages(
                 #pragma warning disable format
-                // ButtonX (Fire) — active; BUTTON1 remapped from ButtonA to ButtonX by InputMappings
+                // ButtonX (Fire) — active; BUTTON1 remapped from ButtonA to ButtonX by ControllerOverrides
                 new(Input: "ButtonX",             Src: "ButtonX.png",              W: 64,  H: 64),
                 new(Input: "ButtonX",             Src: "ButtonX.png",              W: 44,  H: 44),  // top-level + Stack
                 new(Input: "ButtonX",             Src: "Line_ButtonX.png"),
-                // ButtonA (Loop) — active; BUTTON2 remapped from ButtonB to ButtonA by InputMappings
+                // ButtonA (Loop) — active; BUTTON2 remapped from ButtonB to ButtonA by ControllerOverrides
                 new(Input: "ButtonA",             Src: "ButtonA.png",              W: 64,  H: 64),
                 new(Input: "ButtonA",             Src: "ButtonA.png",              W: 44,  H: 44),
                 new(Input: "ButtonA",             Src: "Line_ButtonA.png"),

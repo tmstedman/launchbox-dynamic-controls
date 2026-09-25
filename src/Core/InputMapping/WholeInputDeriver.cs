@@ -16,7 +16,7 @@ namespace DynamicControls.InputMapping;
 /// relied on.</para>
 ///
 /// <para>Only layers that came from an emulator's configuration are derived over. A per-game
-/// <c>InputMappings</c> file is written in the plugin's own vocabulary and can name a whole input
+/// <c>ControllerOverrides</c> file is written in the plugin's own vocabulary and can name a whole input
 /// outright, so where its author could have said it and did not, the silence is the instruction.
 /// That gate lives in <see cref="InputMappingService"/>, which decides whether to call this at
 /// all — provenance is not visible here.</para>

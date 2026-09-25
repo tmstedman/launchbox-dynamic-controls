@@ -10,9 +10,9 @@ Plugin data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two l
 Dynamic Controls\
   Defaults\                              ← shipped; replaced wholesale on every update
     GlobalConfig.xml
-    Controllers\{Platform}.xml
-    InputMappings\{Platform}\{Rom}.xml
-    Labels\{Platform}.xml
+    Platforms\{Platform}\Controllers.xml
+    Platforms\{Platform}\ControllerOverrides\{Rom}.xml
+    Platforms\{Platform}\Labels.xml
     Emulators\MAME\JoycodeMapping.xml
     Emulators\RetroArch\{CoreDisplayName}.xml
   User\                                  ← user-authored; never overwritten
@@ -33,7 +33,7 @@ Dynamic Controls\
 
 Two loaders need a specific layer instead and address it directly through `LayeredFileSystem.Defaults` / `.User`:
 
-- `InputLabelsLoader` reads both and merges them (see [Labels](#labelsplatformxml--entry-level-merge)).
+- `InputLabelsLoader` reads both and merges them (see [Labels](#platformsplatformlabelsxml--entry-level-merge)).
 - `StaticImageResolver` reads `User\` only, because `Static\` has no shipped counterpart.
 
 ## What isn't layered
@@ -51,9 +51,9 @@ Two loaders need a specific layer instead and address it directly through `Layer
 | File | User override | Strategy | Granularity |
 |---|---|---|---|
 | `GlobalConfig.xml` | yes | **Merged** | per setting |
-| `Labels\{Platform}.xml` | yes | **Merged** | per entry — per game, and per default button |
-| `Controllers\{Platform}.xml` | yes | **Replaced** | whole file, per platform |
-| `InputMappings\{Platform}\{Rom}.xml` | yes | **Replaced** | whole file, per game |
+| `Platforms\{Platform}\Labels.xml` | yes | **Merged** | per entry — per game, and per default button |
+| `Platforms\{Platform}\Controllers.xml` | yes | **Replaced** | whole file, per platform |
+| `Platforms\{Platform}\ControllerOverrides\{Rom}.xml` | yes | **Replaced** | whole file, per game |
 | `Emulators\**` | yes | **Replaced** | whole file |
 | `Templates\` | no | not layered | — |
 | `Static\` | user-only | not layered | per image |
@@ -76,7 +76,7 @@ A user changing one setting writes only that setting, and every other default �
 
 **The overlay must detect presence by reading the user file's child element names, not by deserializing it into a `GlobalConfig` and copying fields.** Deserialization fills absent elements with type defaults, so an omitted `<EnableRetroArch>` becomes `false` and silently overrides a shipped `true`. `ConfigLoader` makes an `XmlDocument` pass over the element names for this reason.
 
-## `Labels\{Platform}.xml` — entry-level merge
+## `Platforms\{Platform}\Labels.xml` — entry-level merge
 
 **Read both copies and overlay the user's entries onto the shipped ones.**
 

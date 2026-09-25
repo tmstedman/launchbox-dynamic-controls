@@ -11,7 +11,7 @@ namespace DynamicControls.Core.IntegrationTests.TestHelpers;
 /// <see cref="IFileSystem"/> (via <see cref="MockFsAdapter"/>) for passing to factory methods.
 ///
 /// Label helpers accumulate entries in memory and re-write the combined per-platform
-/// <c>Labels/{platform}.xml</c> file each time an entry is added, so tests can call
+/// <c>Platforms/{platform}/Labels.xml</c> file each time an entry is added, so tests can call
 /// <see cref="WriteGameLabels"/> and <see cref="WriteDefaultLabels"/> independently in any order.
 /// </summary>
 internal sealed class MockDynamicControlsFilesystem(string root)
@@ -34,10 +34,10 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     // ---- Defaults layer (shipped config) ----
 
     public void WritePlatform(string platform, string xml) =>
-        WriteFile(Path.Combine("Defaults", "Controllers", platform + ".xml"), xml);
+        WriteFile(Path.Combine("Defaults", "Platforms", platform, "Controllers.xml"), xml);
 
     public void WriteGameMapping(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("Defaults", "InputMappings", platform, romName + ".xml"), xml);
+        WriteFile(Path.Combine("Defaults", "Platforms", platform, "ControllerOverrides", romName + ".xml"), xml);
 
     /// <summary>Sets the <c>&lt;Defaults&gt;</c> block for the platform. <paramref name="xml"/>
     /// is the inner XML of a root element (e.g. <c>&lt;InputLabels&gt;...&lt;/InputLabels&gt;</c>);
@@ -66,10 +66,10 @@ internal sealed class MockDynamicControlsFilesystem(string root)
         WriteFile(Path.Combine("User", "GlobalConfig.xml"), xml);
 
     public void WriteUserPlatform(string platform, string xml) =>
-        WriteFile(Path.Combine("User", "Controllers", platform + ".xml"), xml);
+        WriteFile(Path.Combine("User", "Platforms", platform, "Controllers.xml"), xml);
 
     public void WriteUserGameMapping(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("User", "InputMappings", platform, romName + ".xml"), xml);
+        WriteFile(Path.Combine("User", "Platforms", platform, "ControllerOverrides", romName + ".xml"), xml);
 
     /// <summary>Sets the <c>&lt;Defaults&gt;</c> block in the User-layer platform labels file.</summary>
     public void WriteUserDefaultLabels(string platform, string xml) =>
@@ -115,7 +115,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
         if (gameName != null && gameInnerXml != null)
             acc.Games[gameName] = (gameId, gameInnerXml);
 
-        string path = Path.Combine(layer, "Labels", platform + ".xml");
+        string path = Path.Combine(layer, "Platforms", platform, "Labels.xml");
         WriteFile(path, acc.ToXml());
     }
 

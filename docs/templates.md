@@ -17,7 +17,7 @@ Templates/
         {PlatformButton}.png    — controller variant-level override (highest priority)
 ```
 
-`{Platform}` must match the LaunchBox platform name exactly (e.g. `Sega Genesis`, `Super Nintendo Entertainment System`). `{ControllerVariant}` must match a `<Controller name="...">` value in `Defaults\Controllers\{Platform}.xml`.
+`{Platform}` must match the LaunchBox platform name exactly (e.g. `Sega Genesis`, `Super Nintendo Entertainment System`). `{ControllerVariant}` must match a `<Controller name="...">` value in `Defaults\Platforms\{Platform}\Controllers.xml`.
 
 ## Image resolution
 
@@ -63,10 +63,10 @@ If a platform isn't already in the template, add it in three steps:
 
 ### 1. Define the button mapping
 
-Create `User\Controllers\{Platform}.xml` (or `Defaults\Controllers\{Platform}.xml` to share it with others). This maps each platform button name to a generic input slot:
+Create `User\Platforms\{Platform}\Controllers.xml` (or `Defaults\Platforms\{Platform}\Controllers.xml` to share it with others). This maps each platform button name to a generic input slot:
 
 ```xml
-<!-- User\Controllers\Atari 7800.xml -->
+<!-- User\Platforms\Atari 7800\Controllers.xml -->
 <Controllers>
     <Controller name="Standard">
         <Mapping name="One" input="ButtonA" />
@@ -83,7 +83,7 @@ inherits from `2-Button`). A variant's own mappings override any inherited entry
 `name`. Only mappings are inherited; `analogToDigital` is read from each controller's own attribute.
 
 ```xml
-<!-- User\Controllers\NEC PC Engine.xml -->
+<!-- User\Platforms\NEC PC Engine\Controllers.xml -->
 <Controllers>
     <Controller name="2-Button">
         <Mapping name="I" input="ButtonB" />

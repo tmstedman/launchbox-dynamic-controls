@@ -6,7 +6,7 @@ namespace DynamicControls.Core.Tests.Labels;
 
 /// <summary>
 /// Unit tests for <see cref="InputLabelsLoader"/>. The loader parses a per-platform
-/// <c>Labels/{platform}.xml</c> file that combines all game entries and a <c>&lt;Defaults&gt;</c>
+/// <c>Platforms/{platform}/Labels.xml</c> file that combines all game entries and a <c>&lt;Defaults&gt;</c>
 /// block. Both the <c>Defaults\</c> and <c>User\</c> tiers are loaded and merged: User game
 /// entries override Defaults entries (by id, then by name); User <c>&lt;Defaults&gt;</c> entries
 /// override Defaults entries per button. Filesystem is a substitute; each test stubs only the
@@ -17,8 +17,8 @@ public class InputLabelsLoaderTests
     private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly IFileSystem _fs = TestFs.Create();
     private const string RootDir = @"C:\plugin";
-    private static readonly string DefaultsLabels = Path.Combine(RootDir, "Defaults", "Labels");
-    private static readonly string UserLabels = Path.Combine(RootDir, "User", "Labels");
+    private static readonly string DefaultsPlatforms = Path.Combine(RootDir, "Defaults", "Platforms");
+    private static readonly string UserPlatforms = Path.Combine(RootDir, "User", "Platforms");
     private readonly InputLabelsLoader _underTest;
 
     public InputLabelsLoaderTests()
@@ -77,7 +77,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_ReadsDefaultsPlatformFile()
     {
-        string expected = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string expected = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(expected, "<Labels />");
 
         _underTest.Load(Game("Sega Genesis", "OutRun"));
@@ -89,7 +89,7 @@ public class InputLabelsLoaderTests
     public void Load_PlatformWithInvalidChars_IsSanitized()
     {
         string safePlatform = "Sega/Genesis".SafeFileName();
-        string expected = Path.Combine(DefaultsLabels, safePlatform + ".xml");
+        string expected = Path.Combine(DefaultsPlatforms, safePlatform, "Labels.xml");
         StubXml(expected, "<Labels />");
 
         _underTest.Load(Game("Sega/Genesis", "OutRun"));
@@ -102,7 +102,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_GameEntryMatchedByName_ReturnsItsLabels()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -122,7 +122,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_NoMatchingGameEntry_ReturnsNull()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="Sonic">
@@ -139,7 +139,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_GameEntryMatchedByName_CaseInsensitive()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -159,7 +159,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_GameEntryMatchedByFuzzyName_WhenExactNameDoesNotMatch()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -178,7 +178,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_ExactNameMatchTakesPriorityOverFuzzyMatch()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -204,7 +204,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_GameEntryMatchedByFuzzyName_CaseInsensitive()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -225,7 +225,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_GameEntryMatchedById_ReturnsItsLabels()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game launchBoxId="42" romName="OutRun (USA, Europe)">
@@ -244,7 +244,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_IdMatchTakesPriorityOverNameMatch()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game launchBoxId="42" romName="OutRun">
@@ -266,7 +266,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void LoadDefaultLabels_ReturnsDefaultsBlock()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Defaults>
@@ -284,7 +284,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void LoadDefaultLabels_NoDefaultsBlock_ReturnsNull()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun"><Input name="A">Brake</Input></Game>
@@ -301,8 +301,8 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_UserFileGameEntryOverridesDefaultsEntry_ByName()
     {
-        string defaultsPath = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
-        string userPath = Path.Combine(UserLabels, "Sega Genesis.xml");
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(defaultsPath, """
             <Labels>
               <Game romName="OutRun"><Input name="A">Default Brake</Input></Game>
@@ -322,8 +322,8 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_UserFileGameEntryOverridesDefaultsEntry_ById()
     {
-        string defaultsPath = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
-        string userPath = Path.Combine(UserLabels, "Sega Genesis.xml");
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(defaultsPath, """
             <Labels>
               <Game launchBoxId="42" romName="OutRun (USA, Europe)"><Input name="A">Default</Input></Game>
@@ -343,8 +343,8 @@ public class InputLabelsLoaderTests
     [Fact]
     public void LoadDefaultLabels_UserDefaultsOverrideByButton()
     {
-        string defaultsPath = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
-        string userPath = Path.Combine(UserLabels, "Sega Genesis.xml");
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(defaultsPath, """
             <Labels>
               <Defaults><Input name="Start">Pause</Input><Input name="A">Default A</Input></Defaults>
@@ -371,7 +371,7 @@ public class InputLabelsLoaderTests
         // Defaults file absent; only the User file exists. Covers the null branch of
         // `defaultsExists ? ParseFile(...) : null`, `defaults?.Games ?? []`, and
         // `defaults?.Defaults` in MergeDefaults.
-        string userPath = Path.Combine(UserLabels, "Sega Genesis.xml");
+        string userPath = Path.Combine(UserPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(userPath, """
             <Labels>
               <Game romName="OutRun"><Input name="A">User Only</Input></Game>
@@ -391,7 +391,7 @@ public class InputLabelsLoaderTests
     {
         // A <Game launchBoxId="42"> with no name attribute is still found by launchBoxId. Covers the null
         // branch of `node.Attributes["romName"]?.Value` and the `e.Name != null` guard in Merge.
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game launchBoxId="42">
@@ -413,7 +413,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_EmptyLabelText_IsSkippedAndLogged()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -432,7 +432,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_CombinationName_IsCarriedThroughVerbatim()
     {
-        string path = Path.Combine(DefaultsLabels, "Arcade.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Arcade", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="3countb">
@@ -452,7 +452,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_UnknownElement_IsSkippedAndLogged()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">
@@ -472,7 +472,7 @@ public class InputLabelsLoaderTests
     [Fact]
     public void Load_LabelTextIsTrimmed()
     {
-        string path = Path.Combine(DefaultsLabels, "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
             <Labels>
               <Game romName="OutRun">

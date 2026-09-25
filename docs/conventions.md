@@ -150,11 +150,11 @@ Find the row for what you changed and check every file in it. Not every file wil
 
 | If you change… | Check these |
 |---|---|
-| The `Labels/{Platform}.xml` format — `<Game>`, `<Defaults>`, lookup keys | `README.md` (Labels) · `docs/architecture.md` §3 · `docs/config-layering.md` · `docs/label-import.md` · `CLAUDE.md` (Fixture structure + Labels pipeline) · `assets/User/Labels/README.txt` · `assets/README.txt` |
+| The `Platforms/{Platform}/Labels.xml` format — `<Game>`, `<Defaults>`, lookup keys | `README.md` (Labels) · `docs/architecture.md` §3 · `docs/config-layering.md` · `docs/label-import.md` · `CLAUDE.md` (Fixture structure + Labels pipeline) · `assets/User/Platforms/README.txt` · `assets/README.txt` |
 | What a label should *say* — wording, collapsing directions, which source wins | `docs/label-import.md` **(canonical)** · `README.md` (Labels) |
 | The artwork transcription — control vocabulary, what is and is not recorded | `label-sources/README.md` **(canonical)** · `docs/label-import.md` |
-| `Controllers/{Platform}.xml` — variants, `inheritFrom`, `analogToDigital`, `default` | `README.md` (Input mappings) · `docs/templates.md` · `docs/architecture.md` (Add a new platform) · `CLAUDE.md` · `assets/User/Controllers/README.txt` · `assets/README.txt` |
-| Per-game `InputMappings/` — `<GameMapping>`, `<Mapping>`, `<Unmap>` | `README.md` (Game-specific overrides) · `docs/architecture.md` §2 · `CLAUDE.md` (Input mapping) · `assets/User/InputMappings/README.txt` · `assets/README.txt` |
+| `Platforms/{Platform}/Controllers.xml` — variants, `inheritFrom`, `analogToDigital`, `default` | `README.md` (Input mappings) · `docs/templates.md` · `docs/architecture.md` (Add a new platform) · `CLAUDE.md` · `assets/User/Platforms/README.txt` · `assets/README.txt` |
+| Per-game `Platforms/{Platform}/ControllerOverrides/` — `<GameMapping>`, `<Mapping>`, `<Unmap>` | `README.md` (Game-specific overrides) · `docs/architecture.md` §2 · `CLAUDE.md` (Input mapping) · `assets/User/Platforms/README.txt` · `assets/README.txt` |
 | `Layout.xml` — any element, attribute or `showIf` mode | `docs/layout-xml-schema.md` **(canonical)** · `docs/templates.md` · `docs/architecture.md` §4–5 · `CLAUDE.md` (Layout rendering notes) |
 | How template images are resolved, or platform/variant artwork | `docs/templates.md` **(canonical)** · `docs/layout-xml-schema.md` (Image resolution) · `docs/architecture.md` §4–5 · `CLAUDE.md` · `README.md` (Platform button images) |
 | `GlobalConfig.xml` settings | `README.md` (settings table) · `docs/config-layering.md` · `docs/architecture.md` · `CLAUDE.md` · `assets/User/README.txt` |

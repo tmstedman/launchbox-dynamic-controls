@@ -8,7 +8,7 @@ namespace DynamicControls;
 /// <param name="Platform">LaunchBox platform name (e.g. "Sega Genesis").</param>
 /// <param name="RomName">ROM filename without extension, derived from
 /// <c>ApplicationPath</c>. Used as the primary filename stem when looking up per-game label
-/// and input-mapping XML files (e.g. <c>Labels/{platform}/{RomName}.xml</c>).</param>
+/// and input-mapping XML files (e.g. <c>Platforms/{platform}/ControllerOverrides/{RomName}.xml</c>).</param>
 /// <param name="CloneOf">Parent ROM name for MAME clones and similar sets. When a per-game
 /// lookup by <see cref="RomName"/> finds nothing, loaders retry with this value.</param>
 /// <param name="LaunchBoxId">LaunchBox Games Database ID for this game, if matched. Used as

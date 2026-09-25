@@ -10,7 +10,7 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// <summary>
 /// Verifies the input-labels subsystem with its real internal wiring intact:
 /// <see cref="InputLabelsLoader"/> (XML file parsing for game entries and <c>&lt;Defaults&gt;</c>
-/// blocks from the per-platform <c>Labels/{platform}.xml</c> file) and
+/// blocks from the per-platform <c>Platforms/{platform}/Labels.xml</c> file) and
 /// <see cref="Plugins.ControlsXml.MameControlsXmlSource"/> +
 /// <see cref="Plugins.ControlsXml.ControlsXmlLoader"/> (BYOAC controls.xml parsing, MAME-gated)
 /// composing through <see cref="InputLabelsPlugins"/> (enable-filtering + chain order) into
