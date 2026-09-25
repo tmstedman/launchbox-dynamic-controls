@@ -101,7 +101,7 @@
             <OneOf>
                 <Group>
                     <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                    <Stack x="312" y="291" gap="45" collapse="true" vAlign="center">
+                    <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
                         <Input name="AxisLeftStickUp" style="small-label-blur">
                             <Render height="34" width="34" />
                             <Label x="-24" y="+17" align="right" />
@@ -162,7 +162,7 @@
             <Render height="135" width="135" />
             <OneOf>
                 <Group>
-                    <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
+                    <Stack x="312" y="619.5" gap="45" collapse="true" vAlign="center">
                         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
                         <Input name="ButtonDpadUp" style="small-label-blur">
                             <Render height="34" width="34" />
