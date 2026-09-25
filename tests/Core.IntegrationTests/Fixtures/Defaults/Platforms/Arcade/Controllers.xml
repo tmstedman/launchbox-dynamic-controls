@@ -35,11 +35,11 @@
 
         <!-- Analog stick -->
         <Mapping name="P1_AD_STICK_X" input="AxisLeftStickLeft" />
-        <Mapping name="P1_AD_STICK_X" input="AxisLeftStickRight" />
+        <Mapping name="P1_AD_STICK_X_EXT" input="AxisLeftStickRight" />
         <Mapping name="P1_AD_STICK_Y" input="AxisLeftStickUp" />
-        <Mapping name="P1_AD_STICK_Y" input="AxisLeftStickDown" />
+        <Mapping name="P1_AD_STICK_Y_EXT" input="AxisLeftStickDown" />
         <Mapping name="P1_AD_STICK_Z" input="AxisRightStickUp" />
-        <Mapping name="P1_AD_STICK_Z" input="AxisRightStickDown" />
+        <Mapping name="P1_AD_STICK_Z_EXT" input="AxisRightStickDown" />
 
         <!-- Pedals -->
         <Mapping name="P1_PEDAL" input="AxisTriggerRight" />
@@ -47,33 +47,27 @@
 
         <!-- Paddle -->
         <Mapping name="P1_PADDLE" input="AxisLeftStickLeft" />
-        <Mapping name="P1_PADDLE" input="AxisLeftStickRight" />
+        <Mapping name="P1_PADDLE_EXT" input="AxisLeftStickRight" />
         <Mapping name="P1_PADDLE_V" input="AxisLeftStickUp" />
-        <Mapping name="P1_PADDLE_V" input="AxisLeftStickDown" />
+        <Mapping name="P1_PADDLE_V_EXT" input="AxisLeftStickDown" />
 
         <!-- Dial -->
         <Mapping name="P1_DIAL" input="AxisLeftStickLeft" />
-        <Mapping name="P1_DIAL" input="AxisLeftStickRight" />
+        <Mapping name="P1_DIAL_EXT" input="AxisLeftStickRight" />
         <Mapping name="P1_DIAL_V" input="AxisLeftStickUp" />
-        <Mapping name="P1_DIAL_V" input="AxisLeftStickDown" />
+        <Mapping name="P1_DIAL_V_EXT" input="AxisLeftStickDown" />
 
         <!-- Trackball -->
         <Mapping name="P1_TRACKBALL_X" input="AxisLeftStickLeft" />
-        <Mapping name="P1_TRACKBALL_X" input="AxisLeftStickRight" />
+        <Mapping name="P1_TRACKBALL_X_EXT" input="AxisLeftStickRight" />
         <Mapping name="P1_TRACKBALL_Y" input="AxisLeftStickUp" />
-        <Mapping name="P1_TRACKBALL_Y" input="AxisLeftStickDown" />
-
-        <!-- Positional -->
-        <Mapping name="P1_POSITIONAL" input="AxisLeftStickLeft" />
-        <Mapping name="P1_POSITIONAL" input="AxisLeftStickRight" />
-        <Mapping name="P1_POSITIONAL_V" input="AxisLeftStickUp" />
-        <Mapping name="P1_POSITIONAL_V" input="AxisLeftStickDown" />
+        <Mapping name="P1_TRACKBALL_Y_EXT" input="AxisLeftStickDown" />
 
         <!-- Lightgun -->
         <Mapping name="P1_LIGHTGUN_X" input="AxisRightStickLeft" />
-        <Mapping name="P1_LIGHTGUN_X" input="AxisRightStickRight" />
+        <Mapping name="P1_LIGHTGUN_X_EXT" input="AxisRightStickRight" />
         <Mapping name="P1_LIGHTGUN_Y" input="AxisRightStickUp" />
-        <Mapping name="P1_LIGHTGUN_Y" input="AxisRightStickDown" />
+        <Mapping name="P1_LIGHTGUN_Y_EXT" input="AxisRightStickDown" />
 
         <!-- System buttons -->
         <Mapping name="START" input="ButtonStart" />
