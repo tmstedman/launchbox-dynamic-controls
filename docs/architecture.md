@@ -79,9 +79,9 @@ Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` — a `*Resolv
 
 The resolution chain (highest priority wins):
 
-1. **Per-game XML** mappings under `InputMappings/{platform}/`
+1. **Per-game XML** mappings under `Platforms/{platform}/ControllerOverrides/`
 2. **Emulator-specific** — RetroArch core config + per-content overrides
-3. **Platform default** — the controller selected from `Controllers/{platform}.xml`
+3. **Platform default** — the controller selected from `Platforms/{platform}/Controllers.xml`
 
 On top of whichever source wins, the first applicable `IInputMappingTransform` runs — transforms are first-match-wins like sources, not a chain each layering onto the last. MAME is the only one today: it overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
 
@@ -89,7 +89,7 @@ On top of whichever source wins, the first applicable `IInputMappingTransform` r
 
 After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once.
 
-A transform is also where whole-input derivation happens. Emulator configs bind individual directions and have no way to name a whole control, so a button meaning "the joystick" is left behind wherever its directions were moved to. `WholeInputDeriver` follows it onto them and takes it off anything its directions have wholly left, discovering which button pairs with which from the pre-transform snapshot rather than from button names, which vary by platform. Only emulator-derived layers are treated this way: a per-game `InputMappings` file is written in the plugin's own vocabulary and can name a whole control outright, so it is taken at its word.
+A transform is also where whole-input derivation happens. Emulator configs bind individual directions and have no way to name a whole control, so a button meaning "the joystick" is left behind wherever its directions were moved to. `WholeInputDeriver` follows it onto them and takes it off anything its directions have wholly left, discovering which button pairs with which from the pre-transform snapshot rather than from button names, which vary by platform. Only emulator-derived layers are treated this way: a per-game `ControllerOverrides` file is written in the plugin's own vocabulary and can name a whole control outright, so it is taken at its word.
 
 `ResolvedMapping` carries two reverse-direction snapshots (`NaturalButtonToInput`, `NaturalInputToButton`) of the pre-game-modifier state, so the renderer can later detect when a button has been remapped and choose the right artwork.
 
@@ -101,10 +101,10 @@ Namespace: `src/Core/InputMapping/`. Entry point: `InputMappingService`. Emulato
 
 Each `IInputLabelsLoader` is tried in order. The first one with non-empty data for this ROM wins:
 
-1. **Per-game entry** in `Labels/{platform}.xml` — one file per platform holding a `<Game>` element per title. Looked up by `launchBoxId`, then by case-insensitive `romName`, then by a normalised `romName` — `RomNameUtils.NormalizeRomName` strips `(...)` and `[...]` groups from both sides, so region and revision tags don't cost a match
+1. **Per-game entry** in `Platforms/{platform}/Labels.xml` — one file per platform holding a `<Game>` element per title. Looked up by `launchBoxId`, then by case-insensitive `romName`, then by a normalised `romName` — `RomNameUtils.NormalizeRomName` strips `(...)` and `[...]` groups from both sides, so region and revision tags don't cost a match
 2. **MAME controls.xml** (only if the emulator is MAME) — has labels for thousands of arcade games
 
-If no loader has game labels, the `<Defaults>` block of `Labels/{platform}.xml` is used on its own — the pause/start labels common to the platform.
+If no loader has game labels, the `<Defaults>` block of `Platforms/{platform}/Labels.xml` is used on its own — the pause/start labels common to the platform.
 
 Every entry in that `<Defaults>` block is inheritable. When a game *does* have its own labels, defaults are merged in for any platform button the game didn't name, so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels. Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
 
@@ -254,7 +254,7 @@ Plugin data is split into two trees under the root: `Defaults/` (shipped, replac
 
 `Templates/`, `Logs/`, and the RetroArch emulator config tree live at the root and bypass layering — templates ship fixed, logs are output, and RetroArch's own configs are read from the emulator install, not the plugin data folder.
 
-Most files shadow wholesale. `GlobalConfig.xml` and `Labels/{platform}.xml` merge instead, and a couple of loaders address one layer directly rather than taking the usual resolution. Which files merge, at what granularity, and what a release zip may write are specified in [config-layering.md](config-layering.md).
+Most files shadow wholesale. `GlobalConfig.xml` and `Platforms/{platform}/Labels.xml` merge instead, and a couple of loaders address one layer directly rather than taking the usual resolution. Which files merge, at what granularity, and what a release zip may write are specified in [config-layering.md](config-layering.md).
 
 ## Extension points
 
@@ -266,7 +266,7 @@ Add a folder under `src/Core/Plugins/{Emulator}/`. Implement `IInputLabelsLoader
 
 ### Add a new platform
 
-Place a `Defaults/Controllers/{platform}.xml` with the controllers that exist for that platform. The one marked `default="true"` is used when nothing selects a variant (falling back to the first in document order if none is marked); users can override per-game via `InputMappings/{platform}/{rom}.xml`. Game labels and the platform's inheritable defaults share one file, `Labels/{platform}.xml`. A variant that extends another can `inheritFrom` it rather than restating its mappings — see [templates.md](templates.md) for the full inheritance rules. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
+Place a `Defaults/Platforms/{platform}/Controllers.xml` with the controllers that exist for that platform. The one marked `default="true"` is used when nothing selects a variant (falling back to the first in document order if none is marked); users can override per-game via `Platforms/{platform}/ControllerOverrides/{rom}.xml`. Game labels and the platform's inheritable defaults share one file, `Platforms/{platform}/Labels.xml`. A variant that extends another can `inheritFrom` it rather than restating its mappings — see [templates.md](templates.md) for the full inheritance rules. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
 
 ### Add a new template
 

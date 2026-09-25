@@ -4,8 +4,8 @@ namespace DynamicControls.InputMapping;
 
 /// <summary>
 /// Locates and parses platform-level Controllers.xml (multi-controller vocabulary) and per-game
-/// InputMappings/{Rom}.xml (single mapping list with optional controller selection) into thin
-/// DTOs. No merging is performed at this layer — callers receive the raw XML structure.
+/// ControllerOverrides/{Rom}.xml (single mapping list with optional controller selection) into
+/// thin DTOs. No merging is performed at this layer — callers receive the raw XML structure.
 /// </summary>
 public interface IInputMappingLoader
 {
@@ -44,7 +44,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     public InputMappingConfig? LoadGameMapping(GameInfo game)
     {
         string safePlatform = game.Platform.SafeFileName();
-        string? gamePath = _lfs.Resolve("InputMappings", safePlatform, game.RomName + ".xml");
+        string? gamePath = _lfs.Resolve("Platforms", safePlatform, "ControllerOverrides", game.RomName + ".xml");
         _logger.Debug($"Game input mapping path: {gamePath}");
 
         return gamePath != null ? ParseGameMapping(gamePath) : null;
@@ -54,7 +54,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     public PlatformControllersConfig? LoadPlatformMapping(string platform)
     {
         string safePlatform = platform.SafeFileName();
-        string? platformPath = _lfs.Resolve("Controllers", safePlatform + ".xml");
+        string? platformPath = _lfs.Resolve("Platforms", safePlatform, "Controllers.xml");
         _logger.Debug($"Controllers path: {platformPath}");
 
         return platformPath != null ? ParsePlatformMapping(platformPath) : null;
@@ -159,11 +159,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         string? baseName = root.Attributes["inheritFrom"]?.Value;
         if (string.IsNullOrEmpty(baseName)) return own;
 
-        string safeBaseName = baseName.SafeFileName() + ".xml";
-        string? basePath = _lfs.Resolve("Controllers", safeBaseName);
+        string safeBaseName = baseName.SafeFileName();
+        string? basePath = _lfs.Resolve("Platforms", safeBaseName, "Controllers.xml");
         if (basePath == null)
         {
-            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' names '{safeBaseName}', found in neither User\\Controllers nor Defaults\\Controllers; using own controllers only");
+            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' names 'Platforms\\{safeBaseName}\\Controllers.xml', found in neither User\\Platforms nor Defaults\\Platforms; using own controllers only");
             return own;
         }
         if (!visited.Add(baseName))

@@ -4,7 +4,7 @@ namespace DynamicControls.InputMapping;
 
 /// <summary>
 /// Highest-priority input mapping source: looks for a per-game XML at
-/// Platforms/&lt;Platform&gt;/InputMappings/&lt;RomName&gt;.xml. When present, this source resolves
+/// Platforms/&lt;Platform&gt;/ControllerOverrides/&lt;RomName&gt;.xml. When present, this source resolves
 /// the controller via the XML's `controller="..."` attribute (falling back to the platform
 /// default when the attribute is absent or names an unknown controller) and layers the XML's
 /// mappings on top of that controller's baseline. Per-game entries override the baseline by

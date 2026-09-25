@@ -1,6 +1,6 @@
 # Importing labels in bulk
 
-How the shipped `Labels/{Platform}.xml` files are produced from external sources, and the
+How the shipped `Platforms/{Platform}/Labels.xml` files are produced from external sources, and the
 rules that decide what a label says. Written during the Arcade import; the reasoning applies
 to any platform where labels come from somewhere other than a person typing them.
 

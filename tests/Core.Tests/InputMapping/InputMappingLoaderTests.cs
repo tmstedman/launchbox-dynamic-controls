@@ -5,7 +5,7 @@ using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="InputMappingLoader"/>. The loader parses per-game InputMappings XML
+/// Unit tests for <see cref="InputMappingLoader"/>. The loader parses per-game ControllerOverrides XML
 /// and platform Controllers.xml into raw DTOs without applying any merging. Filesystem is a
 /// substitute so each test supplies a literal XML string and a stubbed FileExists answer; path
 /// construction is verified by the precise path the loader probes.
@@ -52,8 +52,8 @@ public class InputMappingLoaderTests
     [Fact]
     public void LoadGameMapping_BuildsPathFromPlatformAndRomName()
     {
-        // given a per-game mapping at Config/InputMappings/{platform}/{romName}.xml
-        string expected = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        // given a per-game mapping at Platforms/{platform}/ControllerOverrides/{romName}.xml
+        string expected = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(expected, "<InputMapping />");
 
         // when the loader runs
@@ -69,7 +69,7 @@ public class InputMappingLoaderTests
     {
         // given a platform name with chars not legal in file paths
         string safePlatform = "Sega/Genesis".SafeFileName();
-        string expected = Path.Combine(DefaultsDir, "InputMappings", safePlatform, "OutRun.xml");
+        string expected = Path.Combine(DefaultsDir, "Platforms", safePlatform, "ControllerOverrides", "OutRun.xml");
         StubXml(expected, "<InputMapping />");
 
         // when the loader runs
@@ -85,7 +85,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_ParsesControllerAttribute_AndMappingEntries()
     {
         // given a per-game XML with a controller selection and two mapping entries
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, """
             <InputMapping controller='Zapper'>
               <Mapping name='Trigger' input='ButtonA' />
@@ -113,7 +113,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_AnalogToDigital_IsCaseInsensitive(string attrValue, AnalogToDigitalMode expected)
     {
         // given a per-game XML with analogToDigital in varying case
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, $"<InputMapping analogToDigital='{attrValue}' />");
 
         // when the loader runs
@@ -127,7 +127,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_InvalidAnalogToDigital_LogsErrorAndLeavesUnset()
     {
         // given a per-game XML with an unrecognized analogToDigital value
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, "<InputMapping analogToDigital='diagonal' />");
 
         // when the loader runs
@@ -143,7 +143,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_MappingEntryMissingNameOrInput_SkippedWithError()
     {
         // given a per-game XML with one valid entry, one missing name, and one missing input
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, """
             <InputMapping>
               <Mapping name='A' input='ButtonA' />
@@ -164,7 +164,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_Unmap_ParsesNameIntoUnmapsList()
     {
         // given a per-game XML with a mix of <Mapping> and <Unmap> entries
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, """
             <InputMapping>
               <Mapping name='A' input='ButtonA' />
@@ -185,7 +185,7 @@ public class InputMappingLoaderTests
     public void LoadGameMapping_UnmapMissingName_SkippedWithError()
     {
         // given a per-game XML with an <Unmap> element that has no name attribute
-        string path = Path.Combine(DefaultsDir, "InputMappings", "Sega Genesis", "OutRun.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
         StubXml(path, """
             <InputMapping>
               <Unmap name='B' />
@@ -219,9 +219,9 @@ public class InputMappingLoaderTests
     [Fact]
     public void LoadPlatformMapping_BuildsPathFromPlatform_AndSanitizes()
     {
-        // given a platform controllers file at Config/Controllers/{safePlatform}.xml
+        // given a platform controllers file at Platforms/{safePlatform}/Controllers.xml
         string safePlatform = "Sega/Genesis".SafeFileName();
-        string expected = Path.Combine(DefaultsDir, "Controllers", safePlatform + ".xml");
+        string expected = Path.Combine(DefaultsDir, "Platforms", safePlatform, "Controllers.xml");
         StubXml(expected, "<Controllers />");
 
         // when the loader runs
@@ -237,7 +237,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_ParsesControllers_WithDefaultFlagAndAnalogToDigital()
     {
         // given a Controllers.xml with two controllers — one default with analogToDigital, one not
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='Pad-3btn'>
@@ -272,7 +272,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_PrependBaseControllerMappingsBeforeOwn()
     {
         // given a Controllers.xml where 6-Button inherits from 3-Button (which appears before it)
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='3-Button'>
@@ -302,7 +302,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_SameNameInChild_ReplacesParentEntry()
     {
         // given a controller that inherits a mapping and redeclares the same button Name
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='3-Button'>
@@ -328,7 +328,7 @@ public class InputMappingLoaderTests
     {
         // given a parent controller with the same button Name declared twice, and a child that
         // redeclares that Name once
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='3-Button'>
@@ -354,7 +354,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_SameNameTwiceInChild_BothEntriesSurvive()
     {
         // given a controller that declares the same button Name twice in its own mappings
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='3-Button'>
@@ -381,7 +381,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_ForwardReference_ResolvesCorrectly()
     {
         // given a Controllers.xml where the inheriting controller appears before the base in document order
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='6-Button' inheritFrom='3-Button'>
@@ -407,7 +407,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_UnknownController_LogsErrorAndUsesOwnMappingsOnly()
     {
         // given a Controllers.xml where inheritFrom names a controller that doesn't exist
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='6-Button' inheritFrom='DoesNotExist'>
@@ -430,7 +430,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_NoInheritFrom_ControllerUnaffected()
     {
         // given a Controllers.xml with a controller that has no inheritFrom attribute
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='Pad'>
@@ -453,7 +453,7 @@ public class InputMappingLoaderTests
     {
         // given A inherits from B which inherits from C — A merges the whole chain root-first,
         // so C's own mappings come before B's, which come before A's.
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='C'>
@@ -486,7 +486,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_InheritFrom_Cycle_LogsErrorAndStopsWithoutLooping()
     {
         // given a cycle A -> B -> A in the inheritFrom chain
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='A' inheritFrom='B'>
@@ -515,8 +515,8 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_PullsInBaseFileControllers()
     {
         // given a platform file that only points at a shared base file (no own controllers)
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(platformPath, """<Controllers inheritFrom="_SharedBase" />""");
         StubXml(basePath, """
             <Controllers>
@@ -539,8 +539,8 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_OwnControllersOverrideByNameAndAppendNew()
     {
         // given a base with Pad+Extra and a platform that overrides Pad and adds a new controller
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
             <Controllers>
               <Controller name='Pad' default='true'>
@@ -578,8 +578,8 @@ public class InputMappingLoaderTests
     {
         // given a base with a default "Pad", and a platform that adds a new, unrelated controller
         // also marked default (e.g. a CD add-on introducing a controller the base platform lacks)
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "NEC PC Engine-CD.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "NEC PC Engine-CD", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
             <Controllers>
               <Controller name='Pad' default='true'>
@@ -611,8 +611,8 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_NewControllerMarkedDefault_LogsOverride()
     {
         // given the same override scenario as above
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "NEC PC Engine-CD.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "NEC PC Engine-CD", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
             <Controllers>
               <Controller name='Pad' default='true'>
@@ -639,7 +639,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_MultipleControllersMarkedDefaultInSameFile_LogsError()
     {
         // given a single file (no inheritance) with two controllers both marked default
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='3-Button' default='true'>
@@ -665,8 +665,8 @@ public class InputMappingLoaderTests
     {
         // given a base with a default "Pad", and a platform that adds a new controller with no
         // default attribute at all
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
             <Controllers>
               <Controller name='Pad' default='true'>
@@ -694,8 +694,8 @@ public class InputMappingLoaderTests
     {
         // given a base that defines 3-Button and a platform that adds 6-Button inheritFrom="3-Button".
         // The controller-level inheritFrom must resolve against the merged (base + own) set.
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string basePath = Path.Combine(DefaultsDir, "Controllers", "_SharedBase.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
             <Controllers>
               <Controller name='3-Button'>
@@ -725,9 +725,9 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_IsTransitiveAcrossFiles()
     {
         // given a platform -> _Mid -> _Root chain of files
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string midPath = Path.Combine(DefaultsDir, "Controllers", "_Mid.xml");
-        string rootPath = Path.Combine(DefaultsDir, "Controllers", "_Root.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string midPath = Path.Combine(DefaultsDir, "Platforms", "_Mid", "Controllers.xml");
+        string rootPath = Path.Combine(DefaultsDir, "Platforms", "_Root", "Controllers.xml");
         StubXml(platformPath, """<Controllers inheritFrom="_Mid" />""");
         StubXml(midPath, """<Controllers inheritFrom="_Root" />""");
         StubXml(rootPath, """
@@ -750,7 +750,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_MissingBaseFile_LogsErrorAndUsesOwn()
     {
         // given a platform file that points at a base file which does not exist
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(platformPath, """
             <Controllers inheritFrom="_DoesNotExist">
               <Controller name='Pad'>
@@ -772,8 +772,8 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_RootInheritFrom_Cycle_LogsErrorAndStopsWithoutLooping()
     {
         // given two files that inheritFrom each other
-        string platformPath = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
-        string otherPath = Path.Combine(DefaultsDir, "Controllers", "_Other.xml");
+        string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        string otherPath = Path.Combine(DefaultsDir, "Platforms", "_Other", "Controllers.xml");
         StubXml(platformPath, """
             <Controllers inheritFrom="_Other">
               <Controller name='Pad'>
@@ -801,7 +801,7 @@ public class InputMappingLoaderTests
     public void LoadPlatformMapping_ControllerMissingName_SkippedWithError()
     {
         // given a Controllers.xml with one valid controller and one missing the name attribute
-        string path = Path.Combine(DefaultsDir, "Controllers", "Sega Genesis.xml");
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
             <Controllers>
               <Controller name='Pad' />

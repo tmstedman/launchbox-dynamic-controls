@@ -12,23 +12,23 @@ public class LayeredFileSystemTests
     [Fact]
     public void Resolve_UserFileExists_ReturnsUserRelativePath()
     {
-        string userPath = Path.Combine(RootDir, "User", "Controllers", "Sega Genesis.xml");
+        string userPath = Path.Combine(RootDir, "User", "Platforms", "Sega Genesis", "Controllers.xml");
         _fs.FileExists(userPath).Returns(true);
 
-        Lfs.Resolve("Controllers", "Sega Genesis.xml")
-            .ShouldBe(Path.Combine("User", "Controllers", "Sega Genesis.xml"));
+        Lfs.Resolve("Platforms", "Sega Genesis", "Controllers.xml")
+            .ShouldBe(Path.Combine("User", "Platforms", "Sega Genesis", "Controllers.xml"));
     }
 
     [Fact]
     public void Resolve_UserFileAbsentDefaultsFileExists_ReturnsDefaultsRelativePath()
     {
-        string userPath = Path.Combine(RootDir, "User", "Controllers", "Sega Genesis.xml");
-        string defaultsPath = Path.Combine(RootDir, "Defaults", "Controllers", "Sega Genesis.xml");
+        string userPath = Path.Combine(RootDir, "User", "Platforms", "Sega Genesis", "Controllers.xml");
+        string defaultsPath = Path.Combine(RootDir, "Defaults", "Platforms", "Sega Genesis", "Controllers.xml");
         _fs.FileExists(userPath).Returns(false);
         _fs.FileExists(defaultsPath).Returns(true);
 
-        Lfs.Resolve("Controllers", "Sega Genesis.xml")
-            .ShouldBe(Path.Combine("Defaults", "Controllers", "Sega Genesis.xml"));
+        Lfs.Resolve("Platforms", "Sega Genesis", "Controllers.xml")
+            .ShouldBe(Path.Combine("Defaults", "Platforms", "Sega Genesis", "Controllers.xml"));
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class LayeredFileSystemTests
     {
         _fs.FileExists(Arg.Any<string>()).Returns(false);
 
-        Lfs.Resolve("Controllers", "Sega Genesis.xml").ShouldBeNull();
+        Lfs.Resolve("Platforms", "Sega Genesis", "Controllers.xml").ShouldBeNull();
     }
 
     [Fact]

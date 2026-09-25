@@ -5,8 +5,8 @@ namespace DynamicControls.Labels;
 
 /// <summary>
 /// Production implementation: loads labels from a per-platform
-/// <c>Labels/{platform}.xml</c> file that combines all game entries and platform defaults in one
-/// place. Both the <c>Defaults\</c> and <c>User\</c> tiers are read and merged at the entry
+/// <c>Platforms/{platform}/Labels.xml</c> file that combines all game entries and platform defaults
+/// in one place. Both the <c>Defaults\</c> and <c>User\</c> tiers are read and merged at the entry
 /// level — User entries win over Defaults entries, matched first by <c>id</c> (database ID)
 /// then by <c>name</c> (ROM name). The <c>&lt;Defaults&gt;</c> block is merged the same way:
 /// User button entries override Defaults button entries by name.
@@ -73,7 +73,7 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
             return cached;
 
         string safePlatform = platform.SafeFileName();
-        string relativePath = Path.Combine("Labels", safePlatform + ".xml");
+        string relativePath = Path.Combine("Platforms", safePlatform, "Labels.xml");
 
         bool defaultsExists = _lfs.Defaults.FileExists(relativePath);
         bool userExists = _lfs.User.FileExists(relativePath);

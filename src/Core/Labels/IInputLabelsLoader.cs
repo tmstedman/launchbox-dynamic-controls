@@ -26,7 +26,7 @@ public interface IInputLabelsLoader
 
     /// <summary>
     /// Loads the platform-default labels. For the file-based loader this comes from the
-    /// <c>&lt;Defaults&gt;</c> block of <c>Labels/{platform}.xml</c>; plugin loaders (e.g. MAME
+    /// <c>&lt;Defaults&gt;</c> block of <c>Platforms/{platform}/Labels.xml</c>; plugin loaders (e.g. MAME
     /// controls.xml) return null as they have no concept of platform defaults. All entries are
     /// merged into game-specific labels by the service, with game-specific labels taking
     /// precedence for any button defined in both.

@@ -8,8 +8,8 @@ File naming: {CoreDisplayName}.xml
 
 Each file declares which controller variants a core supports and maps
 RetroArch device-type IDs to controller variant names defined in
-Controllers/{Platform}.xml. Override a file here if a core supports a variant
-not covered by the shipped declaration.
+Platforms/{Platform}/Controllers.xml. Override a file here if a core supports
+a variant not covered by the shipped declaration.
 
 Contributing
 ------------

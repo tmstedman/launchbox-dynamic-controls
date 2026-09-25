@@ -20,7 +20,7 @@ public class SegaGenesisEndToEndTests
     [Fact]
     public void SegaGenesis_OutRun()
     {
-        // given the OutRun game on Sega Genesis (the fixture's InputMappings file picks 3-Button)
+        // given the OutRun game on Sega Genesis (the fixture's ControllerOverrides file picks 3-Button)
         var game = new GameInfo(
             Platform: "Sega Genesis",
             RomName: "OutRun (USA, Europe)",
@@ -373,7 +373,7 @@ public class SegaGenesisEndToEndTests
     {
         var game = new GameInfo(
             Platform: "Sega Genesis",
-            RomName: "OutRun (Beta)",                  // no InputMappings or Labels file
+            RomName: "OutRun (Beta)",                  // no ControllerOverrides or Labels file
             CloneOf: "OutRun (USA, Europe)",           // parent has both
             LaunchBoxId: null,
             EmulatorPath: null,

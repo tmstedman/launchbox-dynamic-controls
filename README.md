@@ -41,7 +41,7 @@ All data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two laye
 **Keep changes that are specific to your own setup in `User\`** - your emulator's button assignments, a personal label preference, a per-game remap nobody else wants. Place a copy of the shipped file at the same relative path under `User\` and it takes precedence automatically, permanently. Neither layer is quicker to work in - the only question is whether the change would help anyone but you. Two files are merged rather than replaced, because each one holds many independent settings:
 
 - **`GlobalConfig.xml`** - rather than copying the whole file, include only the settings you want to change; the rest keep their defaults.
-- **`Labels\{Platform}.xml`** - your entries are merged over the shipped ones game by game, so labelling one game doesn't cost you the shipped labels for every other game on that platform.
+- **`Platforms\{Platform}\Labels.xml`** - your entries are merged over the shipped ones game by game, so labelling one game doesn't cost you the shipped labels for every other game on that platform.
 
 ### `GlobalConfig.xml`
 
@@ -67,10 +67,10 @@ Create `User\GlobalConfig.xml` to change global settings:
 
 The plugin works in terms of **platform button names** - the names printed on the original hardware (`A`, `B`, `C` for Sega Genesis; `A`, `B`, `X`, `Y`, `L`, `R` for Super Nintendo; and so on). These are *not* the names of buttons on your Xbox or PlayStation controller.
 
-`Defaults\Controllers\{Platform}.xml` maps each platform button name to a generic input that the controller template knows about. For example, for Sega Genesis:
+`Defaults\Platforms\{Platform}\Controllers.xml` maps each platform button name to a generic input that the controller template knows about. For example, for Sega Genesis:
 
 ```xml
-<!-- Defaults\Controllers\Sega Genesis.xml (excerpt) -->
+<!-- Defaults\Platforms\Sega Genesis\Controllers.xml (excerpt) -->
 <Mapping name="A" input="ButtonX" />
 <Mapping name="B" input="ButtonA" />
 <Mapping name="C" input="ButtonB" />
@@ -78,16 +78,16 @@ The plugin works in terms of **platform button names** - the names printed on th
 
 Generic input names (`ButtonA`, `ButtonB`, `ButtonX`, `ButtonY`, `ButtonLeftShoulder`, `ButtonDpad`, `AxisLeftStick`, …) are the shared vocabulary that connects every part of the plugin. The full list is in [`docs/templates.md`](docs/templates.md#generic-input-names). Controllers.xml maps platform buttons *to* them; RetroArch and MAME integration resolves *to* them; and the controller template defines a slot *for* each one, with a corresponding button image and position. So the Genesis `B` button maps to `ButtonA`, which the template renders at the A-button position — but using the platform-specific `B.png` artwork from the `Sega Genesis` subfolder, so the player sees the original hardware button label rather than the Xbox one. If no platform-specific image exists, it falls back to the generic `ButtonA.png`. This file ships for ~50 platforms.
 
-The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the relevant `Controllers\{Platform}.xml` to `User\Controllers\` and edit it to match your configuration.
+The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the relevant `Platforms\{Platform}\Controllers.xml` to `User\Platforms\{Platform}\` and edit it to match your configuration.
 
 ### Game-specific overrides
 
 Some games remap buttons or use a different controller variant. The plugin resolves this from the following sources:
 
-1. **XML** (highest priority) - create `User\InputMappings\{Platform}\{Game}.xml` for any emulator not covered below, or to explicitly override automatic detection:
+1. **XML** (highest priority) - create `User\Platforms\{Platform}\ControllerOverrides\{Game}.xml` for any emulator not covered below, or to explicitly override automatic detection:
 
 ```xml
-<!-- User\InputMappings\Sega Genesis\Aladdin (USA).xml -->
+<!-- User\Platforms\Sega Genesis\ControllerOverrides\Aladdin (USA).xml -->
 <GameMapping controller="3-Button">
     <Mapping name="A" input="ButtonRightShoulder" />
     <Unmap name="C" />
@@ -101,10 +101,10 @@ Some games remap buttons or use a different controller variant. The plugin resol
 
 ## Labels
 
-Labels tell the plugin what each button does in a specific game. All labels for a platform live in a single file: `User\Labels\{Platform}.xml`. Each game gets a `<Game>` element; a `<Defaults>` block sets labels that apply to every game on that platform and is merged in whenever a game's own labels don't define that button.
+Labels tell the plugin what each button does in a specific game. All labels for a platform live in a single file: `User\Platforms\{Platform}\Labels.xml`. Each game gets a `<Game>` element; a `<Defaults>` block sets labels that apply to every game on that platform and is merged in whenever a game's own labels don't define that button.
 
 ```xml
-<!-- User\Labels\Sega Genesis.xml -->
+<!-- User\Platforms\Sega Genesis\Labels.xml -->
 <Labels>
     <Defaults>
         <Input name="Start">Pause</Input>
@@ -117,7 +117,7 @@ Labels tell the plugin what each button does in a specific game. All labels for 
 </Labels>
 ```
 
-The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers and InputMappings — and the element's text is what the button does.
+The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers.xml and ControllerOverrides — and the element's text is what the button does.
 
 A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. It labels whichever control your configuration binds to all of those buttons at once, and takes precedence over their individual labels there. If nothing on your controller fires them together, it simply doesn't appear.
 
@@ -142,7 +142,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 
 ## Known limitations
 
-- **Per-game input mappings match on exact ROM filename.** `InputMappings\{Platform}\{Game}.xml` is matched against the ROM filename without its extension; regional variants require their own file.
+- **Per-game input mappings match on exact ROM filename.** `Platforms\{Platform}\ControllerOverrides\{Game}.xml` is matched against the ROM filename without its extension; regional variants require their own file.
 - **DirectInput users in RetroArch do not get button swap detection.** XInput controllers get full game-level swap detection; DirectInput controllers get controller variant and remap file support but no swap detection through cfg files.
 - **DirectInput users in MAME do get button swap detection.** However, it is not reliable since DirectInput devices do not adhere to a standard layout.
 - **RetroArch button swap detection covers game-level remaps only.** Swaps configured in global, core, or core-remap files are not applied — only game-level remap files are checked. If you configure button swaps at those levels the overlay may not reflect them.
@@ -153,8 +153,8 @@ Templates support platform-specific hardware button art: when a platform subfold
 
 The data files that ship with the plugin - button mappings, labels, templates, and emulator definitions - are the most impactful area for contributions. No C# knowledge required for any of these.
 
-- **Game labels** (`Defaults\Labels\{Platform}.xml`) - what each button does in specific games, keyed by platform button name. Add a `<Game>` entry for any game that doesn't have one. Include the LaunchBox Games Database ID as the `launchBoxId` attribute so the entry is found regardless of ROM filename.
-- **Default input mappings** (`Defaults\Controllers\{Platform}.xml`) - how platform buttons map to generic controller slots. Covers ~50 platforms; corrections and new platforms welcome. When adding a new platform, follow the conventions used in the existing files.
+- **Game labels** (`Defaults\Platforms\{Platform}\Labels.xml`) - what each button does in specific games, keyed by platform button name. Add a `<Game>` entry for any game that doesn't have one. Include the LaunchBox Games Database ID as the `launchBoxId` attribute so the entry is found regardless of ROM filename.
+- **Default input mappings** (`Defaults\Platforms\{Platform}\Controllers.xml`) - how platform buttons map to generic controller slots. Covers ~50 platforms; corrections and new platforms welcome. When adding a new platform, follow the conventions used in the existing files.
 - **Platform button images** - PNGs under `Templates\Xbox Series X\{Platform}\`. Styled images for any platform not yet covered in the template, or additional controller variants for existing ones. Images must be styled consistently with the existing platform images.
 - **RetroArch device-type IDs** (`Defaults\Emulators\RetroArch\{CoreDisplayName}.xml`) - maps RetroArch's `input_libretro_device` IDs to controller variant names, so the plugin can detect which variant is active. Six cores ship today; every additional core helps.
 
