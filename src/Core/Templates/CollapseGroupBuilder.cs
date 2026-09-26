@@ -69,6 +69,12 @@ internal static class CollapseGroupBuilder
             case OneOf oneOf:
                 output.Add(oneOf);
                 break;
+            case ConditionElement condition:
+                foreach (ILayoutElement child in condition.Children)
+                {
+                    CollectSlots(child, output);
+                }
+                break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}");
         }
@@ -99,6 +105,12 @@ internal static class CollapseGroupBuilder
                 foreach (ILayoutElement alt in oneOf.Alternatives)
                 {
                     SetMetadata(alt, info, output);
+                }
+                break;
+            case ConditionElement condition:
+                foreach (ILayoutElement child in condition.Children)
+                {
+                    SetMetadata(child, info, output);
                 }
                 break;
             default:

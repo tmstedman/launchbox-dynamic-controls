@@ -58,6 +58,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         GroupNode groupXml => BuildInputGroup(groupXml, ctx),
         StackNode stackXml => BuildInputStack(stackXml, ctx),
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
+        ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -215,6 +216,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         StackNode => 1,
         OneOfNode => 1,
         GroupNode plainGroupXml => CountSlots(plainGroupXml.Children),
+        ConditionNode conditionXml => CountSlots(conditionXml.Children),
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -282,6 +284,16 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 (double sx, double sy) = ConsumeSlot(frame);
                 return BuildOneOf(oneOfXml, ctx with { OriginX = sx, OriginY = sy });
             }
+            case ConditionNode conditionXml:
+            {
+                // Transparent, like a plain Group: its children each advance the same counter.
+                var children = new List<ILayoutElement>();
+                foreach (ILayoutNode child in conditionXml.Children)
+                {
+                    children.Add(BuildNodeInStack(child, frame, ctx));
+                }
+                return BuildConditionElement(conditionXml, children);
+            }
             default:
                 throw new InvalidOperationException($"Unknown node type: {node.GetType()}");
         }
@@ -300,6 +312,48 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, ctx))]);
         _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
+    }
+
+    /// <summary>Resolves a ConditionNode DTO into a ConditionElement, recursively building each
+    /// child (Input, Group, Stack, OneOf, or nested Condition).</summary>
+    private ConditionElement BuildCondition(ConditionNode conditionXml, BuildContext ctx) =>
+        BuildConditionElement(conditionXml, [.. conditionXml.Children.Select(c => BuildNode(c, ctx))]);
+
+    /// <summary>Shared by both build paths (top-level/nested and in-stack) — parses the
+    /// mode/names/match attributes once the children are already built.</summary>
+    private ConditionElement BuildConditionElement(ConditionNode conditionXml, List<ILayoutElement> children)
+    {
+        (ConditionMode mode, string? names) = conditionXml switch
+        {
+            { All: { } all } => (ConditionMode.All, all),
+            { None: { } none } => (ConditionMode.None, none),
+            _ => (ConditionMode.Any, conditionXml.Any)
+        };
+
+        ConditionMatch match = ParseConditionMatch(conditionXml.Match);
+        var condition = new ConditionElement(
+            Mode: mode,
+            Names: names?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [],
+            Match: match,
+            Children: children);
+        _logger.Debug($"Condition: mode={mode}, names=[{string.Join(",", condition.Names)}], match={match}, children={children.Count}");
+        return condition;
+    }
+
+    private ConditionMatch ParseConditionMatch(string? value)
+    {
+        return value?.Trim().ToLowerInvariant() switch
+        {
+            null or "" or "label" => ConditionMatch.Label,
+            "mapping" => ConditionMatch.Mapped,
+            _ => LogUnknownConditionMatch(value)
+        };
+    }
+
+    private ConditionMatch LogUnknownConditionMatch(string value)
+    {
+        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping. Defaulting to label.");
+        return ConditionMatch.Label;
     }
 
     /// <summary>

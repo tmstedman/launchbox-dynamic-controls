@@ -23,6 +23,10 @@ public static class LayoutNavigation
     public static OneOf FirstOneOf(this ResolvedLayout result) =>
         result.Elements.FirstOneOf();
 
+    /// <summary>Returns the first top-level <see cref="ConditionElement"/> in document order.</summary>
+    public static ConditionElement FirstCondition(this ResolvedLayout result) =>
+        result.Elements.FirstCondition();
+
     /// <summary>Returns the first <see cref="InputDefinition"/> in the sequence — usable on any
     /// <c>Children</c> or <c>Alternatives</c> list to keep the chain reading uniformly.</summary>
     public static InputDefinition FirstInput(this IEnumerable<ILayoutElement> elements) =>
@@ -36,10 +40,15 @@ public static class LayoutNavigation
     public static OneOf FirstOneOf(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<OneOf>().First();
 
+    /// <summary>Returns the first <see cref="ConditionElement"/> in the sequence.</summary>
+    public static ConditionElement FirstCondition(this IEnumerable<ILayoutElement> elements) =>
+        elements.OfType<ConditionElement>().First();
+
     /// <summary>Depth-first walk over a layout element tree, yielding every element and recursing
-    /// through <see cref="InputGroup.Children"/>. Useful for assertions that need to reach inputs
-    /// nested inside transparent Groups (e.g. a Stack containing a Group of Inputs) without caring
-    /// about the intermediate container shape.</summary>
+    /// through <see cref="InputGroup.Children"/> and <see cref="ConditionElement.Children"/>.
+    /// Useful for assertions that need to reach inputs nested inside transparent Groups (e.g. a
+    /// Stack containing a Group of Inputs) or gated behind a Condition, without caring about the
+    /// intermediate container shape.</summary>
     public static IEnumerable<ILayoutElement> Flatten(this IEnumerable<ILayoutElement> elements)
     {
         foreach (ILayoutElement e in elements)
@@ -47,6 +56,8 @@ public static class LayoutNavigation
             yield return e;
             if (e is InputGroup g)
                 foreach (ILayoutElement c in g.Children.Flatten()) yield return c;
+            if (e is ConditionElement cond)
+                foreach (ILayoutElement c in cond.Children.Flatten()) yield return c;
         }
     }
 }

@@ -30,6 +30,7 @@ What "enclosing container's origin" means depends on context:
 | `<Input>` inside a `<Stack>` | The Stack's `x`/`y` plus `slotIndex × gap` |
 | `<Input>` inside a `<Group>` inside a `<Stack>` | The Stack's `x`/`y` plus `slotIndex × gap` (Group is transparent) |
 | `<Input>` inside a `<OneOf>` inside a `<Stack>` | The OneOf's slot origin (each alternative shares one slot) |
+| `<Input>` inside a `<Condition>` inside a `<Stack>` | The Stack's `x`/`y` plus `slotIndex × gap` (Condition is transparent, like Group) |
 
 When you don't specify an `x` or `y`, the element defaults to `+0` (the enclosing origin unchanged). The resolved layout that the renderer sees is always in absolute canvas coordinates — relativity is a compile-time concept.
 
@@ -129,7 +130,7 @@ Two distinct uses, distinguished by the presence of `name`:
 
 ### `<Body>` — display layout
 
-The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<Stack>`, and `<OneOf>`, in document order.
+The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, and `<Condition>`, in document order.
 
 ### `<Input>` — a generic input
 
@@ -157,7 +158,7 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 - `<Render>` — image render
 - `<Label>` — label text
 - `<Overlay>` — additional image
-- `<Input>`, `<Group>`, `<Stack>`, `<OneOf>` — nested layout
+- `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` — nested layout
 
 **Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's renders fan out to the child's renders for image fallback (a child input that can't find its own image uses the parent's). A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
 
@@ -240,7 +241,7 @@ A wrapper around a cluster of related inputs. Two purposes:
 </Group>
 ```
 
-No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Overlay>` in any order.
+No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
 
 A Group inside a `<Stack>` is *transparent* to slot counting — each Input in the Group consumes its own stack slot.
 
@@ -281,7 +282,7 @@ A Stack with only one slot renders identically under every `vAlign` value, since
 
 An unrecognized `vAlign` value logs an error and falls back to `top`.
 
-**Children** can be `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Overlay>` in any order.
+**Children** can be `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
 
 **How children occupy slots** — each child takes one position in the vertical list, except:
 
@@ -291,6 +292,7 @@ An unrecognized `vAlign` value logs an error and falls back to `top`.
 | `<Group>` | Transparent — its children each take their own slot as if the Group wasn't there |
 | `<Stack>` (nested) | Takes one slot as a block; the inner Stack positions its own children independently |
 | `<OneOf>` | Takes one slot; all its alternatives share that same position |
+| `<Condition>` | Transparent — like `<Group>`, its children each take their own slot |
 | `<Overlay>` | Takes no slot — positioned at its own coordinates regardless |
 
 **Collapse** (`collapse="true"`) removes the gap left by hidden children. When a child's renders are all invisible, it vacates its slot and everything below shifts up by `gap`. Without collapse, slots are always fixed — a hidden child leaves a faded image or blank space.
@@ -312,13 +314,43 @@ A container where only the first alternative whose visibility check passes is re
 </OneOf>
 ```
 
-No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>` in document order (the first-match-wins ordering is significant).
+No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant).
 
 **Visibility check per alternative**:
 - `<Input>` — "any-render-visible" (at least one of the input's renders passes its `showIf`)
 - `<Group>` — "any-member-visible" (recursively, the same check on at least one descendant)
+- `<Condition>` — its own `all`/`any`/`none` check against its named inputs (see below), ignoring what its children render
 
 If no alternative passes, the OneOf renders nothing — all alternatives are dropped.
+
+### `<Condition>` — explicit named-input gate
+
+A container whose children render only when an explicit `all`/`any`/`none` check passes against named generic inputs' label or mapping state. Where `<Group>`'s conditional inclusion is implicit — "visible when any *descendant* has a visible render" — `<Condition>` names its own inputs and checks them directly, by dictionary lookup, regardless of what its children are. This is what lets it gate a subtree on an input that isn't (or isn't only) one of that subtree's own inputs — something `<Group>`'s descendant fold-in can't express.
+
+```xml
+<Condition any="AxisLeftStick" match="label">
+    <Condition all="AxisLeftStickUp AxisLeftStickLeft AxisLeftStickRight AxisLeftStickDown" match="label">
+        <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
+            <!-- single glyph, shown only when all four directions individually agree -->
+        </Input>
+    </Condition>
+</Condition>
+```
+
+| Attribute | Type | Required | Notes |
+|---|---|---|---|
+| `any` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *at least one* named input matches |
+| `all` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *every* named input matches. An empty name list is always false, never vacuously true |
+| `none` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *no* named input matches |
+| `match` | `label` \| `mapping` | no | What "matches" means for each name — `label` checks `HasLabel`, `mapping` checks `IsMapped`. Default `label` |
+
+Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
+
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
+
+**Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
+
+If no `<Condition>` (nor any other) alternative in an enclosing `<OneOf>` passes, and there's no unconditional fallback, nothing renders — same as any other `<OneOf>` with no matching alternative.
 
 ## File-level conventions
 
@@ -335,9 +367,11 @@ The parser emits errors to the configured `ILogger` for:
 
 - Element with a missing required attribute (e.g. `<Input>` without `name`)
 - Element with an unparseable coordinate
-- Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Render>`, `<Overlay>`, `<Label>`, `<Group>`, `<Stack>`, `<OneOf>` was expected
+- Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Render>`, `<Overlay>`, `<Label>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` was expected
 - `<Input style="X">` where `X` isn't a `<Style name="X">` in `<Head>`
 - `<Render showIf="X">` where `X` isn't a known mode
+- `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
+- `<Condition match="X">` where `X` isn't `label` or `mapping` (falls back to `label`)
 
 Errors don't abort the load — the bad element is skipped (or, for coordinate problems, replaced with `+0`), the rest of the template parses normally. Check the log file after a problem template to see what was dropped.
 
@@ -359,7 +393,7 @@ A minimal template with a single button:
 </ControllerTemplate>
 ```
 
-For a full reference, see the `Templates/Xbox Series X/Layout.xml` in this repository — it exercises every concept in this document (Head with named styles, Stack with collapse, Group with shared overlay, OneOf with `Group`-or-`Input` alternatives, `useImage` for asset borrowing, all four `showIf` modes).
+For a full reference, see the `Templates/Xbox Series X/Layout.xml` in this repository — it exercises every concept in this document (Head with named styles, Stack with collapse, Group with shared overlay, OneOf with `Condition`-gated alternatives, nested `Condition` for compound AND logic, `useImage` for asset borrowing, all four `showIf` modes).
 
 ## Conventions for new templates
 

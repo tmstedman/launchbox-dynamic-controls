@@ -738,6 +738,86 @@ public class TemplateLayoutResolverTests
         positions.ShouldAllBe(p => p.X == 100 && p.Y == 200);
     }
 
+    // --- Condition ---
+
+    [Fact]
+    public void Resolve_ConditionAll_ParsesModeNamesAndMatch()
+    {
+        TestLayout config = new TestLayout()
+            .Condition(c => c.All("A B").Match("mapping").Input("A"));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        ConditionElement condition = result.Elements.FirstCondition();
+        condition.Mode.ShouldBe(ConditionMode.All);
+        condition.Names.ShouldBe(["A", "B"]);
+        condition.Match.ShouldBe(ConditionMatch.Mapped);
+        condition.Children.FirstInput().Name.ShouldBe("A");
+    }
+
+    [Fact]
+    public void Resolve_ConditionAny_ParsesMode()
+    {
+        TestLayout config = new TestLayout().Condition(c => c.Any("A").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Mode.ShouldBe(ConditionMode.Any);
+        condition.Names.ShouldBe(["A"]);
+    }
+
+    [Fact]
+    public void Resolve_ConditionNone_ParsesMode()
+    {
+        TestLayout config = new TestLayout().Condition(c => c.None("A").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Mode.ShouldBe(ConditionMode.None);
+    }
+
+    [Fact]
+    public void Resolve_ConditionMatchOmitted_DefaultsToLabel()
+    {
+        TestLayout config = new TestLayout().Condition(c => c.Any("A").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Match.ShouldBe(ConditionMatch.Label);
+    }
+
+    [Fact]
+    public void Resolve_ConditionUnknownMatch_LogsErrorAndDefaultsToLabel()
+    {
+        TestLayout config = new TestLayout().Condition(c => c.Any("A").Match("bogus").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Match.ShouldBe(ConditionMatch.Label);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("bogus") && s.Contains("Condition")));
+    }
+
+    [Fact]
+    public void Resolve_ConditionInStack_IsTransparentToSlotCounting()
+    {
+        // given a Condition wrapping two Inputs inside a Stack — exercises BuildNodeInStack's
+        // ConditionNode arm; each wrapped Input should still consume its own slot
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(100, 200).Gap(50)
+                .Condition(c => c.Any("A")
+                    .Input("A", i => i.Render(r => r.Offset(0, 0)))
+                    .Input("B", i => i.Render(r => r.Offset(0, 0)))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        ConditionElement condition = result.FirstInputGroup().Children.FirstCondition();
+        var positions = condition.Children
+            .Cast<InputDefinition>()
+            .Select(i => (i.InputImages.Single().X, i.InputImages.Single().Y))
+            .ToList();
+        positions.ShouldBe([(100, 200), (100, 250)]);
+    }
+
     // --- Overlay path resolution ---
 
     [Fact]
