@@ -224,6 +224,55 @@ public class LayoutFilterTests
         result.Inputs.ShouldBeEmpty();
     }
 
+    // ---- Condition ----
+
+    [Fact]
+    public void Filter_ConditionTrue_RendersItsChildren()
+    {
+        // given a Condition whose evaluator check passes
+        InputDefinition child = Input("AxisLeftStick");
+        var condition = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [child]);
+        Template template = TemplateOf(elements: [condition]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.Inputs.Select(i => i.Input.Name).ShouldBe(["AxisLeftStick"]);
+    }
+
+    [Fact]
+    public void Filter_ConditionFalse_DropsEverythingInside()
+    {
+        // given a Condition whose evaluator check fails (default substitute return)
+        InputDefinition child = Input("AxisLeftStick");
+        var condition = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [child]);
+        Template template = TemplateOf(elements: [condition]);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.Inputs.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Filter_OneOf_ConditionAlternativeGatesIndependentlyOfItsChildren()
+    {
+        // given a OneOf whose first alternative is a Condition (passes) wrapping mini-icons, and
+        // whose second is the all-distinct fallback — mirrors the ButtonDpad/AxisLeftStick shape
+        InputDefinition mini = Input("AxisLeftStickUp");
+        var merged = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [mini]);
+        InputDefinition fallback = Input("AxisLeftStickAllDistinct");
+        var oneOf = new OneOf(Alternatives: [merged, fallback]);
+        Template template = TemplateOf(elements: [oneOf]);
+        _evaluator.AnyVisible(merged, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AnyVisible(fallback, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the Condition alternative wins outright — the fallback never renders even though
+        // it would also pass on its own
+        result.Inputs.Select(i => i.Input.Name).ShouldBe(["AxisLeftStickUp"]);
+    }
+
     // ---- collapse adjustments ----
 
     [Fact]

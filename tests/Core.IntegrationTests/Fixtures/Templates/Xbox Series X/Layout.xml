@@ -99,6 +99,46 @@
         <Input name="AxisLeftStick" style="auto-blur" x="539" y="309">
             <Render height="124" width="124" />
             <OneOf>
+                <!-- All four directions individually agree: the stick doesn't have a per-direction
+                     glyph the way the Dpad does, so a full agreement renders the single stick icon
+                     rather than four small ones. The outer Condition (whole itself collapsed) is
+                     required alongside the inner one (all four individually labelled) — on its
+                     own, "all four individually labelled" is also true when all four genuinely
+                     disagree, which must fall through to the all-distinct alternative instead. -->
+                <Condition any="AxisLeftStick" match="label">
+                    <Condition all="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" match="label">
+                        <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
+                            <Overlay src="Line_AxisLeftStick.png" x="+79" y="+31" />
+                            <Render height="64" width="64" />
+                            <Label x="-19" y="+32" align="right" />
+                        </Input>
+                    </Condition>
+                </Condition>
+                <!-- Two or three directions share one label, the rest genuinely blank: only the
+                     present directions render, each at full brightness, with one shared label. -->
+                <Condition any="AxisLeftStick" match="label">
+                    <Group>
+                        <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                        <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+                            <Input name="AxisLeftStickUp" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="AxisLeftStickLeft" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="AxisLeftStickRight" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="AxisLeftStickDown" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                        </Stack>
+                        <Input name="AxisLeftStick" style="show-if-label" x="312" y="358.5">
+                            <Label x="-24" y="+84" align="right" />
+                        </Input>
+                    </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
                 <Group>
                     <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                     <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
@@ -120,16 +160,47 @@
                         </Input>
                     </Stack>
                 </Group>
-                <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
-                    <Overlay src="Line_AxisLeftStick.png" x="+79" y="+31" />
-                    <Render height="64" width="64" />
-                    <Label x="-19" y="+32" align="right" />
-                </Input>
             </OneOf>
         </Input>
         <Input name="AxisRightStick" style="auto-blur" x="839" y="438">
             <Render height="124" width="124" />
             <OneOf>
+                <!-- All four directions individually agree: render the single stick icon. See
+                     AxisLeftStick above for why this needs both the outer and inner Condition. -->
+                <Condition any="AxisRightStick" match="label">
+                    <Condition all="AxisRightStickUp AxisRightStickDown AxisRightStickLeft AxisRightStickRight" match="label">
+                        <Input name="AxisRightStick" style="show-if-label" x="867" y="740">
+                            <Overlay src="Line_AxisRightStick.png" x="+31" y="-170" />
+                            <Render height="64" width="64" />
+                            <Label x="+32" y="+88" align="center" />
+                        </Input>
+                    </Condition>
+                </Condition>
+                <!-- Two or three directions share one label, the rest genuinely blank: only the
+                     present directions render, each at full brightness, with one shared label. -->
+                <Condition any="AxisRightStick" match="label">
+                    <Group>
+                        <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                        <Stack x="882" y="772" gap="45" collapse="true">
+                            <Input name="AxisRightStickUp" style="small-label-blur">
+                                <Render useImage="AxisLeftStickUp" height="34" width="34" />
+                            </Input>
+                            <Input name="AxisRightStickLeft" style="small-label-blur">
+                                <Render useImage="AxisLeftStickLeft" height="34" width="34" />
+                            </Input>
+                            <Input name="AxisRightStickRight" style="small-label-blur">
+                                <Render useImage="AxisLeftStickRight" height="34" width="34" />
+                            </Input>
+                            <Input name="AxisRightStickDown" style="small-label-blur">
+                                <Render useImage="AxisLeftStickDown" height="34" width="34" />
+                            </Input>
+                        </Stack>
+                        <Input name="AxisRightStick" style="show-if-label" x="882" y="772">
+                            <Label x="+52" y="+84" />
+                        </Input>
+                    </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
                 <Group>
                     <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
                     <Stack x="882" y="772" gap="45" collapse="true">
@@ -151,18 +222,41 @@
                         </Input>
                     </Stack>
                 </Group>
-                <Input name="AxisRightStick" style="show-if-label" x="867" y="740">
-                    <Overlay src="Line_AxisRightStick.png" x="+31" y="-170" />
-                    <Render height="64" width="64" />
-                    <Label x="+32" y="+88" align="center" />
-                </Input>
             </OneOf>
         </Input>
         <Input name="ButtonDpad" style="auto-blur" x="623" y="440">
             <Render height="135" width="135" />
             <OneOf>
+                <!-- Two or more directions share one label, the rest genuinely blank: render only
+                     the directions that are actually present, each at full brightness, with one
+                     shared label rather than repeating it next to every agreeing icon. Covers a
+                     full four-way agreement too, in the same shape as a partial one. -->
+                <Condition any="ButtonDpad" match="label">
+                    <Group>
+                        <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
+                        <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
+                            <Input name="ButtonDpadUp" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="ButtonDpadLeft" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="ButtonDpadRight" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                            <Input name="ButtonDpadDown" style="small-label-blur">
+                                <Render height="34" width="34" />
+                            </Input>
+                        </Stack>
+                        <Input name="ButtonDpad" style="show-if-label" x="312" y="552">
+                            <Label x="-24" y="+84" align="right" />
+                        </Input>
+                    </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree (or nothing's labelled at all) — each
+                     direction renders its own, independent text. -->
                 <Group>
-                    <Stack x="312" y="619.5" gap="45" collapse="true" vAlign="center">
+                    <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
                         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
                         <Input name="ButtonDpadUp" style="small-label-blur">
                             <Render height="34" width="34" />
@@ -182,14 +276,6 @@
                         </Input>
                     </Stack>
                 </Group>
-                <Input name="ButtonDpad" style="show-if-label" x="312" y="552">
-                    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
-                    <Render useImage="ButtonDpadUp" height="34" width="34" />
-                    <Render useImage="ButtonDpadLeft" y="+45" height="34" width="34" />
-                    <Render useImage="ButtonDpadRight" y="+90" height="34" width="34" />
-                    <Render useImage="ButtonDpadDown" y="+135" height="34" width="34" />
-                    <Label x="-24" y="+84" align="right" />
-                </Input>
             </OneOf>
         </Input>
     </Body>

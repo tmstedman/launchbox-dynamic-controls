@@ -77,13 +77,15 @@ public class Nintendo64EndToEndTests
                 new(Input: "AxisRightStick",      Src: @"Nintendo 64\C-Any.png", W: 124, H: 124),
                 new(Input: "AxisRightStick",      Src: @"Nintendo 64\C-Any.png", W: 64,  H: 64),
                 new(Input: "AxisRightStick",      Src: "Line_AxisRightStick.png"),
-                // Dpad-Any=Move → ButtonDpad active; no directional labels → alt 2 fires (whole-pad)
+                // Dpad-Any=Move → ButtonDpad active with no per-direction breakdown; the merged
+                // Condition alternative fires, copying "Move" onto all four directions so each
+                // renders its own icon (InputName is the individual direction)
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",         W: 135, H: 135),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadUp.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",     W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",    W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",     W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"));
+                new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",       W: 34,  H: 34),
+                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",     W: 34,  H: 34),
+                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",    W: 34,  H: 34),
+                new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",     W: 34,  H: 34),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(

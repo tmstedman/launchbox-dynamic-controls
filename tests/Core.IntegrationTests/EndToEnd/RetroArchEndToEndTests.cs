@@ -152,13 +152,15 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34),  // top-level + Stack
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",          W: 44,  H: 44, Opacity: 0.3, BlurRadius: 6.0),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",          W: 34,  H: 34, Opacity: 0.3, BlurRadius: 6.0),
-                // Dpad "Move" — whole-stick label; OneOf second alt fires (no per-direction labels)
+                // Dpad "Move" — whole-stick label with no per-direction breakdown, so the label
+                // is copied onto all four directions and each renders its own icon at full
+                // brightness (the merged Condition alternative fires, not the all-distinct one)
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",          W: 135, H: 135),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadUp.png",        W: 34,  H: 34),  // useImage renders, InputName="ButtonDpad"
-                new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",     W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),                               // overlay on Input, InputName="ButtonDpad"
+                new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",        W: 34,  H: 34),
+                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",      W: 34,  H: 34),
+                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",     W: 34,  H: 34),
+                new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",      W: 34,  H: 34),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
                 // AxisLeftStick "Move" via analogToDigital; no directional mirrors; OneOf second alt fires
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",       W: 124, H: 124), // top-level auto-blur: active (hasLabel)
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",       W: 64,  H: 64),  // OneOf second alt render
@@ -184,6 +186,10 @@ public class RetroArchEndToEndTests
             new(Input: "ButtonX",        Text: "Jump"),          // A
             new(Input: "ButtonA",        Text: "Jump"),          // B
             new(Input: "ButtonB",        Text: "Jump"),          // C
+            // ButtonDpad/AxisLeftStick's per-direction data is copied down (see the images
+            // assertion above), but only the whole's own Label element renders text — the
+            // per-direction nested Inputs in the merged Condition branch have no Label of their
+            // own, so they don't produce a second, redundant rendered label each
             new(Input: "ButtonDpad",     Text: "Move"),
             new(Input: "AxisLeftStick",  Text: "Move"),          // analogToDigital mirror
             new(Input: "ButtonStart",    Text: "Pause"));        // inherited default

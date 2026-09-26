@@ -214,14 +214,15 @@ public class ArcadeEndToEndTests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 34,  H: 34),  // top-level + Stack
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 44,  H: 44),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 34,  H: 34),  // Stack
-                // ButtonDpad active (JOYSTICK→Move); second OneOf alternative fires — all images carry
-                // InputName="ButtonDpad" (not individual direction names)
+                // ButtonDpad active (JOYSTICK→Move) with no per-direction breakdown; the merged
+                // Condition alternative fires, copying "Move" onto all four directions so each
+                // renders its own icon (InputName is the individual direction, not "ButtonDpad")
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",           W: 135, H: 135),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadUp.png",         W: 34,  H: 34),  // useImage render, InputName="ButtonDpad"
-                new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),       // overlay inside Input → InputName="ButtonDpad"
+                new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",         W: 34,  H: 34),
+                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
+                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",      W: 34,  H: 34),
+                new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",       W: 34,  H: 34),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
                 // AxisLeftStick active — analogToDigital mirrors ButtonDpad→Move to AxisLeftStick (whole stick);
                 // no direction labels exist (no JOYSTICK_UP/DOWN labels), so AxisLeftStickUp etc. stay absent;
                 // OneOf second alt fires (show-if-label, has Move label): renders AxisLeftStick.png + Line_AxisLeftStick.png
@@ -304,14 +305,15 @@ public class ArcadeEndToEndTests
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",          W: 34,  H: 34),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 44,  H: 44),
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",           W: 34,  H: 34),
-                // ButtonDpad carries the whole-joystick label; no per-direction labels exist, so
-                // the OneOf's second alternative fires and every render is InputName="ButtonDpad"
+                // ButtonDpad carries the whole-joystick label with no per-direction breakdown;
+                // the merged Condition alternative fires, copying "Move" onto all four directions
+                // so each renders its own icon (InputName is the individual direction)
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",           W: 135, H: 135),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadUp.png",         W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadRight.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "ButtonDpadDown.png",       W: 34,  H: 34),
-                new(Input: "ButtonDpad",          Src: "Line_ButtonDpad_Multi.png"),
+                new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",         W: 34,  H: 34),
+                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",       W: 34,  H: 34),
+                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",      W: 34,  H: 34),
+                new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",       W: 34,  H: 34),
+                new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
                 // AxisLeftStick active for the same reason — the derived whole-joystick binding
                 // gives it the "Move" label, so its OneOf second alternative fires too
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",        W: 124, H: 124),

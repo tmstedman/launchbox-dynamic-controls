@@ -133,6 +133,10 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             case "OneOf":
                 output.Add(ParseOneOfNode(node));
                 return true;
+            case "Condition":
+                ConditionNode? condition = ParseConditionNode(node);
+                if (condition != null) output.Add(condition);
+                return true;
             default:
                 return false;
         }
@@ -270,6 +274,36 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
         _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
+    }
+
+    /// <summary>
+    /// Parses a &lt;Condition&gt; element. Exactly one of `any`/`all`/`none` must be present;
+    /// missing or having more than one is logged and the element is skipped entirely (rather than
+    /// guessing which was meant). `match` defaults to "label" when absent.
+    /// </summary>
+    private ConditionNode? ParseConditionNode(XmlElement node)
+    {
+        string? any = node.Attributes["any"]?.Value;
+        string? all = node.Attributes["all"]?.Value;
+        string? none = node.Attributes["none"]?.Value;
+
+        int specified = new[] { any, all, none }.Count(v => !string.IsNullOrEmpty(v));
+        if (specified != 1)
+        {
+            _logger.Error($"Skipping <Condition>: expected exactly one of 'any', 'all', 'none', found {specified}");
+            return null;
+        }
+
+        var condition = new ConditionNode { Any = any, All = all, None = none, Match = node.Attributes["match"]?.Value };
+
+        foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
+        {
+            if (TryParseLayoutChild(child, condition.Children)) continue;
+            _logger.Error($"Invalid element <{child.Name}> in <Condition>");
+        }
+
+        _logger.Debug($"Condition: any={any}, all={all}, none={none}, match={condition.Match}, children={condition.Children.Count}");
+        return condition;
     }
 
     /// <summary>Parses a string as a culture-invariant double.</summary>

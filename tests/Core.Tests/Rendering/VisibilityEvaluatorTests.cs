@@ -321,6 +321,137 @@ public class VisibilityEvaluatorTests
         visible.ShouldBeFalse();
     }
 
+    // ---- AnyVisible: Condition ----
+
+    [Fact]
+    public void AnyVisible_ConditionAll_TrueOnlyWhenEveryNameHasLabel()
+    {
+        VisibilityContext all = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump", ["B"] = "Jump" });
+        VisibilityContext partial = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump" });
+        var condition = new ConditionElement(ConditionMode.All, ["A", "B"], ConditionMatch.Label, []);
+
+        _underTest.AnyVisible(condition, all).ShouldBeTrue();
+        _underTest.AnyVisible(condition, partial).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionAny_TrueWhenAtLeastOneNameHasLabel()
+    {
+        VisibilityContext ctx = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump" });
+        var condition = new ConditionElement(ConditionMode.Any, ["A", "B"], ConditionMatch.Label, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionAny_FalseWhenNoNameHasLabel()
+    {
+        VisibilityContext ctx = Ctx();
+        var condition = new ConditionElement(ConditionMode.Any, ["A", "B"], ConditionMatch.Label, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionNone_TrueOnlyWhenNoNameHasLabel()
+    {
+        VisibilityContext empty = Ctx();
+        VisibilityContext oneLabelled = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump" });
+        var condition = new ConditionElement(ConditionMode.None, ["A", "B"], ConditionMatch.Label, []);
+
+        _underTest.AnyVisible(condition, empty).ShouldBeTrue();
+        _underTest.AnyVisible(condition, oneLabelled).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchMapped_ChecksMappingNotLabel()
+    {
+        // labelled but not mapped — a Label-match Condition would pass, a Mapped-match one shouldn't
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["A"] = "Jump" },
+            mapping: EmptyMapping());
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Mapped, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchMapped_TrueWhenInputToButtonHasIt()
+    {
+        VisibilityContext ctx = Ctx(mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }));
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Mapped, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionAll_EmptyNamesList_ReturnsFalse()
+    {
+        // an "all" Condition with no names would otherwise vacuously pass (LINQ All on an empty
+        // sequence is true) — guarded explicitly since a template author almost certainly meant
+        // something else if they left the list empty
+        var condition = new ConditionElement(ConditionMode.All, [], ConditionMatch.Label, []);
+
+        _underTest.AnyVisible(condition, Ctx()).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionDoesNotConsultItsOwnChildrenVisibility_OnlyTheNamedCheck()
+    {
+        // given a Condition whose named check passes but whose only child would itself be
+        // invisible (needs a mapping that isn't present) -- Condition's own AnyVisible must not
+        // fold that in, since LayoutFilter renders whatever's inside once the gate passes,
+        // dimmed or not, same as any other included subtree
+        var child = Input(name: "Unrelated", images: [Image(ShowIfCondition.Mapped)]);
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["Whole"] = "Move" },
+            descendants: Descendants((child, [])));
+        var condition = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [child]);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void AnyVisible_NestedCondition_OuterPassesButInnerFails_ReturnsFalse()
+    {
+        // given the compound-AND idiom -- an outer Condition ("the whole has a label") wrapping
+        // an inner one ("all four directions individually agree") -- where only the outer passes.
+        // A OneOf choosing between alternatives relies on AnyVisible to know whether this
+        // alternative has anything to show; if it only consulted the outer check it would pick
+        // this alternative and then render nothing once the inner check drops everything inside,
+        // stranding the slot instead of falling through to a later alternative.
+        var glyph = Input(name: "Whole", images: [Image(ShowIfCondition.Label)]);
+        var inner = new ConditionElement(ConditionMode.All, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
+        var outer = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [inner]);
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["Whole"] = "Steering", ["Left"] = "Steering", ["Right"] = "Steering" },
+            descendants: Descendants((glyph, [])));
+
+        _underTest.AnyVisible(outer, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_NestedCondition_OuterAndInnerBothPass_ReturnsTrue()
+    {
+        // the same compound-AND shape, but all four directions genuinely agree -- both checks
+        // pass, so the nested Condition alternative correctly reports itself visible
+        var glyph = Input(name: "Whole", images: [Image(ShowIfCondition.Label)]);
+        var inner = new ConditionElement(ConditionMode.All, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
+        var outer = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [inner]);
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string>
+            {
+                ["Whole"] = "Move",
+                ["Up"] = "Move",
+                ["Down"] = "Move",
+                ["Left"] = "Move",
+                ["Right"] = "Move",
+            },
+            descendants: Descendants((glyph, [])));
+
+        _underTest.AnyVisible(outer, ctx).ShouldBeTrue();
+    }
+
     [Fact]
     public void AnyVisible_UnknownElement_ReturnsFalse()
     {

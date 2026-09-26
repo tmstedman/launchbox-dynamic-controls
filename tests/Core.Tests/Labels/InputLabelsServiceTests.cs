@@ -495,10 +495,15 @@ public class InputLabelsServiceTests
         ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
 
         // the stick is Stick-Any's own binding and only a mirrored one for Dpad-Any, so it keeps
-        // its own label rather than being overwritten
+        // its own label rather than being overwritten. Neither whole has any per-direction
+        // breakdown, so each also copies its own text onto its four directions individually.
         labels.LabelText.ShouldBeDictionaryOf(
             ("AxisLeftStick", "Look"),
-            ("ButtonDpad", "Move"));
+            ("AxisLeftStickUp", "Look"), ("AxisLeftStickDown", "Look"),
+            ("AxisLeftStickLeft", "Look"), ("AxisLeftStickRight", "Look"),
+            ("ButtonDpad", "Move"),
+            ("ButtonDpadUp", "Move"), ("ButtonDpadDown", "Move"),
+            ("ButtonDpadLeft", "Move"), ("ButtonDpadRight", "Move"));
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
@@ -530,12 +535,15 @@ public class InputLabelsServiceTests
         ResolvedLabels labels = BuildTestFixture.Load(Game("3on3dunk"), WholeJoystickWithBothFamilies());
 
         // Every direction of both families agrees ("Move" broadcasts from the one JOYSTICK
-        // label), so both collapse onto their whole and none of the eight direction inputs
-        // survive individually -- that's what makes the layout pick a single render instead of
-        // four redundant per-direction ones for each control.
+        // label), so both wholes also get "Move" -- but the eight individual direction entries
+        // survive too, unchanged, so the layout's Condition can tell "all four agree" apart from
+        // a partial subset without losing each direction's own icon.
         labels.LabelText.ShouldBeDictionaryOf(
-            ("ButtonDpad", "Move"),
-            ("AxisLeftStick", "Move"));
+            ("ButtonDpad", "Move"), ("AxisLeftStick", "Move"),
+            ("ButtonDpadUp", "Move"), ("AxisLeftStickUp", "Move"),
+            ("ButtonDpadDown", "Move"), ("AxisLeftStickDown", "Move"),
+            ("ButtonDpadLeft", "Move"), ("AxisLeftStickLeft", "Move"),
+            ("ButtonDpadRight", "Move"), ("AxisLeftStickRight", "Move"));
     }
 
     [Fact]
@@ -559,16 +567,88 @@ public class InputLabelsServiceTests
         ResolvedLabels labels = BuildTestFixture.Load(Game("3on3dunk"), mapping);
 
         // BUTTON2's direct claim on ButtonDpadUp outranks JOYSTICK's derived one there, so the
-        // four Dpad directions no longer all agree -- the whole stays uncollapsed and each
-        // direction renders its own, correct text. AxisLeftStick is untouched by the swap, so it
-        // still collapses normally.
+        // four Dpad directions no longer all agree -- the merge pass leaves them alone (ButtonDpad
+        // still reads "Move", but that's JOYSTICK's own direct reach onto ButtonDpad, not a merge),
+        // and each direction keeps rendering its own, correct text. AxisLeftStick is untouched by
+        // the swap, so its four directions still agree and the merge writes "Move" onto the whole
+        // too, alongside all four individual entries.
         labels.LabelText.ShouldBeDictionaryOf(
             ("ButtonDpad", "Move"),
             ("ButtonDpadUp", "Jump"),
             ("ButtonDpadDown", "Move"),
             ("ButtonDpadLeft", "Move"),
             ("ButtonDpadRight", "Move"),
-            ("AxisLeftStick", "Move"));
+            ("AxisLeftStick", "Move"),
+            ("AxisLeftStickUp", "Move"),
+            ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Move"),
+            ("AxisLeftStickRight", "Move"));
+    }
+
+    [Fact]
+    public void Load_ThreeOfFourDirectionsAgree_FourthGenuinelyBlank_WriteSharedTextOntoWholeToo()
+    {
+        // three real, independent ports agree; the fourth (Down) has no port driving it at all --
+        // genuinely blank, not merely differently labelled
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["JOYSTICK_UP"] = ["ButtonDpadUp"],
+            ["JOYSTICK_LEFT"] = ["ButtonDpadLeft"],
+            ["JOYSTICK_RIGHT"] = ["ButtonDpadRight"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("JOYSTICK_UP", "Jump"),
+            ("JOYSTICK_LEFT", "Jump"),
+            ("JOYSTICK_RIGHT", "Jump")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("knckhead"), mapping);
+
+        // ButtonDpad also reads "Jump" -- the layout's Condition tells this apart from "all four
+        // agree" by checking whether ButtonDpadDown individually has a label too (it doesn't here)
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonDpad", "Jump"),
+            ("ButtonDpadUp", "Jump"),
+            ("ButtonDpadLeft", "Jump"),
+            ("ButtonDpadRight", "Jump"));
+    }
+
+    [Fact]
+    public void Load_WholeMappedDirectly_NoPerDirectionBreakdown_CopiesOntoAllFour()
+    {
+        // the N64 shape: Dpad-Any names the whole control directly, with no separate ports for
+        // its four directions at all -- none of them have any label or mapping of their own
+        ResolvedMapping mapping = Mapping(platform: "Nintendo 64", buttonToInput: new()
+        {
+            ["Dpad-Any"] = ["ButtonDpad"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("Dpad-Any", "Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
+
+        // each direction gets its own copy of "Move" so its icon renders at full brightness --
+        // nothing in the data ever distinguished one direction from another
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonDpad", "Move"),
+            ("ButtonDpadUp", "Move"),
+            ("ButtonDpadDown", "Move"),
+            ("ButtonDpadLeft", "Move"),
+            ("ButtonDpadRight", "Move"));
+    }
+
+    [Fact]
+    public void Load_OnlyOneDirectionLabelled_NoMerge_RendersOnItsOwn()
+    {
+        // a solo labelled direction has nothing to merge with -- left exactly as InputLabelsService
+        // already handles a single, ordinary generic input
+        ResolvedMapping mapping = Mapping(platform: "Arcade", buttonToInput: new()
+        {
+            ["JOYSTICK_UP"] = ["ButtonDpadUp"],
+        });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("JOYSTICK_UP", "Jump")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("knckhead"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonDpadUp", "Jump"));
     }
 
     [Fact]

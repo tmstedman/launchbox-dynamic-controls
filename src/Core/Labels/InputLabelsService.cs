@@ -225,26 +225,54 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().OrderBy(b => b, StringComparer.Ordinal));
 
     /// <summary>
-    /// Final pass: where all four direction inputs of a whole control (<see cref="WholeInputs.PartsOf"/>)
-    /// currently carry the same text, fold them onto the whole and drop the four -- that's what
-    /// makes the layout's OneOf pick its single-render alternative instead of four redundant
-    /// per-direction ones. Left alone whenever they disagree (or aren't all present), so a genuine
-    /// per-direction remap -- one direction swapped onto an ordinary button, say -- renders each
-    /// direction with its own, correct text instead of being smoothed over by whichever whole-level
-    /// claim <see cref="WholeInputDeriver"/> may separately have added.
+    /// Final pass over a whole control (<see cref="WholeInputs.PartsOf"/>) and its four
+    /// directions, handling two distinct shapes the layout can't tell apart from a single "does
+    /// this input have a label" check:
+    ///
+    /// <para><b>No per-direction breakdown at all</b> -- a platform button names the whole
+    /// control directly (e.g. N64's <c>Dpad-Any → ButtonDpad</c>) and none of the four directions
+    /// have any label or mapping of their own. Individually gating each direction's render on its
+    /// own (nonexistent) label would wrongly dim all four; instead the whole's text is copied onto
+    /// every direction, so each renders its own icon at full brightness -- there's no basis to
+    /// single any one out when nothing ever distinguished them.</para>
+    ///
+    /// <para><b>At least two directions agree, the rest genuinely blank</b> (never labelled at
+    /// all, not merely disagreeing) -- write that shared text onto the whole too, without
+    /// touching the individual direction entries. The layout decides what to do with both facts:
+    /// a <c>Condition</c> checking all four directions distinguishes "every direction agrees" (one
+    /// control-level render) from "some subset agrees" (only the present directions' own renders,
+    /// each keeping its own icon since its own entry survives, alongside one shared label bound to
+    /// the whole).</para>
+    ///
+    /// A solo direction (only one ever labelled, nothing on the whole) is left alone -- nothing to
+    /// merge, it already renders correctly on its own. Two directions that disagree, or where a
+    /// third has its own distinct text, are also left alone -- a genuine per-direction remap
+    /// renders each with its own, correct text instead of being smoothed over by whichever
+    /// whole-level claim <see cref="WholeInputDeriver"/> may separately have added.
     /// </summary>
     private void CollapseWholeDirections(Dictionary<string, string> labelText)
     {
         foreach ((string whole, IReadOnlyList<string> parts) in WholeInputs.PartsOf)
         {
-            if (!parts.All(labelText.ContainsKey)) continue;
+            List<string> present = [.. parts.Where(labelText.ContainsKey)];
 
-            List<string> distinct = [.. parts.Select(p => labelText[p]).Distinct()];
+            if (present.Count == 0)
+            {
+                if (labelText.TryGetValue(whole, out string? wholeText))
+                {
+                    foreach (string part in parts) labelText[part] = wholeText;
+                    _logger.Debug($"Label: {whole} has no per-direction breakdown -- '{wholeText}' copied onto {string.Join(", ", parts)}");
+                }
+                continue;
+            }
+
+            if (present.Count < 2) continue;
+
+            List<string> distinct = [.. present.Select(p => labelText[p]).Distinct()];
             if (distinct.Count != 1) continue;
 
-            foreach (string part in parts) labelText.Remove(part);
             labelText[whole] = distinct[0];
-            _logger.Debug($"Label: {string.Join(", ", parts)} agree on '{distinct[0]}' -- collapsed onto {whole}");
+            _logger.Debug($"Label: {string.Join(", ", present)} agree on '{distinct[0]}' -- also written onto {whole}");
         }
     }
 
