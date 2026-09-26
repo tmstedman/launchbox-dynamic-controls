@@ -65,16 +65,14 @@ To understand *why* the second branch only renders when the first doesn't, a rea
 `OneOf`'s rule from prose documentation ("picks first alternative where `AnyVisible` is true") —
 it's not visible in the markup itself.
 
-### Rewritten with `Div`/`Condition`
+### Rewritten with `Condition` (first attempt wrongly reached for `Div` — see below)
 
 ```xml
-<Div input="AxisLeftStick" style="auto-blur" x="539" y="309">
+<Input name="AxisLeftStick" style="auto-blur" x="539" y="309">
     <Render height="124" width="124" />
 
     <Condition any="AxisLeftStickUp AxisLeftStickLeft AxisLeftStickRight AxisLeftStickDown" match="label">
-        <Div x="386" y="370">
-            <Overlay src="Line_AxisLeftStick_Multi.png" />
-        </Div>
+        <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
         <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
             <Input name="AxisLeftStickUp" style="small-label-blur">
                 <Render height="34" width="34" />
@@ -96,24 +94,36 @@ it's not visible in the markup itself.
     </Condition>
 
     <Condition none="AxisLeftStickUp AxisLeftStickLeft AxisLeftStickRight AxisLeftStickDown" any="AxisLeftStick" match="label">
-        <Div x="307" y="339" style="show-if-label">
+        <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
             <Overlay src="Line_AxisLeftStick.png" x="+79" y="+31" />
             <Render height="64" width="64" />
             <Label x="-19" y="+32" align="right" />
-        </Div>
+        </Input>
     </Condition>
-</Div>
+</Input>
 ```
 
 ## What this actually reveals
 
-**The gain is real but narrower than it first looks.** The per-direction `<Input>` elements
-*stay* `<Input>` — they each resolve their own generic-input image/label, which `Div`'s ambient
-`input=` context was never meant to provide (it only feeds `showIf`, not image resolution). `Div`
-replaces `Group` and the second `<Input name="AxisLeftStick" style="show-if-label">`, but that
-second one only becomes a `Div` because it's a pure position+style+decoration wrapper for content
-(`Overlay`, `Render`, `Label`) that's already scoped by the outer `Div`'s ambient
-`input="AxisLeftStick"` — it no longer needs to redeclare the name.
+**First draft of this sketch put `<Render>` directly inside `<Div>`, on both branches — a bug,
+caught in review, not a stylistic choice.** `<Render>`/`<Label>` need real image/label resolution
+against a specific input's identity; an element carrying them *is* that input's render slot by
+definition, which is precisely what `<Div>`'s "no input-mapping semantics of its own" was supposed
+to rule out. Once both render-bearing elements correctly stay `<Input>` — because they both
+carry `<Render>` — **`<Div>` doesn't appear anywhere in the corrected rewrite at all.**
+`<Condition>` alone replaces `<OneOf>`'s implicit fallthrough; it doesn't need `<Div>` as
+scaffolding, because `<Group>` already had no position or input semantics of its own to begin
+with.
+
+**This means the AxisLeftStick section is the wrong place to look for `<Div>`'s payoff.** `<Div>`
+only earns its place where something needs *position and style but never render/label content* —
+a decorative background panel behind a HUD section, or a wrapper that exists purely to position
+several already-self-contained children together. Nothing in this section fits: `Group`'s only
+job here was visibility (which `Condition` now states explicitly), and every leaf either renders
+something (must stay `Input`) or already carries its own `x`/`y` (`Overlay`, `Stack`). The
+Xbox Series X template may simply not have a `<Div>`-shaped gap in it yet — worth checking a
+different template, or a hypothetical one, before assuming `<Div>` is broadly useful rather than
+narrowly.
 
 **The explicit `Condition` pair is more self-documenting than the `OneOf` fallthrough**, and it
 would generalize better if a *third* state ever needed handling (e.g. "two directions labelled,
@@ -122,16 +132,12 @@ expressible in the layout at all). But it's also more verbose — two `Condition
 near-duplicate input lists versus one `OneOf`/`Group` pair. Whether that verbosity is worth it
 probably depends on how often templates need a *third* branch, not just two.
 
-**A real, previously-invisible consequence: `Overlay` `InputName` changes.** Today,
-`Line_AxisLeftStick_Multi.png`'s `Overlay` is parented to a `<Group>`, so its `InputName` is
-`null` per the existing rule — it isn't associated with any specific input for rendering or for
-E2E `ShouldHaveImage` assertions. Under the rewrite, if that `Overlay` sits inside the outer `Div
-input="AxisLeftStick"` (even transparently, through the `Condition`), it would newly resolve to
-`InputName = "AxisLeftStick"`. That's arguably *more correct* — the line genuinely belongs to that
-input — but it's a behavior change existing E2E fixtures assert against
-(`tests/Core.IntegrationTests/EndToEnd/*Tests.cs` `ShouldHaveImages(new(Input: null, Src:
-"Line_AxisLeftStick_Multi.png"), ...)` calls would need `Input: "AxisLeftStick"` instead). Worth
-deciding deliberately rather than discovering it as an incidental side effect of a refactor.
+**The `Overlay` `InputName` question is now moot for this example.** With no `Div` in the
+rewrite, `Line_AxisLeftStick_Multi.png`'s `Overlay` is parented directly to the `Condition`
+(or whatever `Condition` desugars to) exactly as it was to `Group` before — still not parented to
+an `Input`, so `InputName` stays `null`, unchanged from today. The ambient-input-propagation
+question (transparent through `Group`/`Stack`/`OneOf`, decided earlier) only bites once `Div`
+*is* actually in the tree somewhere — it wasn't exercised by this example at all.
 
 ## Open questions this sketch surfaces
 
@@ -140,10 +146,10 @@ deciding deliberately rather than discovering it as an incidental side effect of
    Space-separated is terser and consistent with existing combination syntax, but nested elements
    would let each input carry its own `match="label"` vs `match="mapping"` if that's ever needed
    per-input rather than once per `Condition`.
-2. Should the `Overlay` `InputName` behavior change (null → resolved) ship as part of this, or
-   should ambient-context propagation explicitly *stop* at `Overlay` to preserve today's
-   behavior? This needs a decision, not a default.
-3. Is a `Condition`-pair verbose enough, for the common two-branch case, that `OneOf` should stay
+2. Is a `Condition`-pair verbose enough, for the common two-branch case, that `OneOf` should stay
    as the ergonomic shorthand and `Condition` reserved for cases `OneOf`/`Group` genuinely can't
    express (three+ branches, cross-cutting AND/NOT)? I.e. do both coexist rather than `Condition`
    replacing `OneOf` outright?
+3. `<Div>` found no use case in this particular section. Before finalizing the schema, find (or
+   construct) a template scenario that actually needs a positioned, style-bearing, render-free
+   wrapper — otherwise `<Div>` risks shipping as speculative surface area with no real consumer.
