@@ -47,6 +47,51 @@ public record InputGroup(
 public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement;
 
 /// <summary>
+/// Gates its <see cref="Children"/> on an explicit boolean check over named generic inputs'
+/// label/mapping state, evaluated directly against <see cref="Rendering.VisibilityContext"/> —
+/// unlike every other node, it never folds in structural descendants, so it can gate a subtree
+/// on a name that isn't (or isn't only) one of that subtree's own inputs. Used where
+/// <see cref="InputGroup"/>'s implicit "any descendant visible" rule can't express the needed
+/// condition, e.g. distinguishing "all four directions individually labelled" from "some
+/// subset labelled" when both leave a label on the same whole-control name.
+/// </summary>
+/// <param name="Mode">Whether <see cref="Names"/> must all match, any one, or none.</param>
+/// <param name="Names">The generic input names the condition checks — not necessarily
+/// descendants of <see cref="Children"/>.</param>
+/// <param name="Match">Whether a name "matches" by having a label or by being mapped.</param>
+/// <param name="Children">Rendered only when the condition evaluates true; dropped entirely
+/// otherwise, the same as an excluded <see cref="InputGroup"/>.</param>
+[ExcludeFromCodeCoverage]
+public record ConditionElement(
+    ConditionMode Mode,
+    IReadOnlyList<string> Names,
+    ConditionMatch Match,
+    IReadOnlyList<ILayoutElement> Children) : ILayoutElement;
+
+/// <summary>How a <see cref="ConditionElement"/> combines its <see cref="ConditionElement.Names"/>.</summary>
+public enum ConditionMode
+{
+    /// <summary>True only when every named input matches.</summary>
+    All,
+
+    /// <summary>True when at least one named input matches.</summary>
+    Any,
+
+    /// <summary>True when no named input matches.</summary>
+    None
+}
+
+/// <summary>What "matches" means for a single name in a <see cref="ConditionElement"/>.</summary>
+public enum ConditionMatch
+{
+    /// <summary>The name has non-empty label text.</summary>
+    Label,
+
+    /// <summary>The name is mapped (a platform button drives it, or its natural button still is).</summary>
+    Mapped
+}
+
+/// <summary>
 /// Fully resolved layout data for a single generic input within a Template.
 /// Built by TemplateService from InputNode; all positions are resolved at build time.
 /// Image paths are deferred to render time via InputImageResolver.
