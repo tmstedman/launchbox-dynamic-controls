@@ -121,16 +121,16 @@
                     <Group>
                         <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                         <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
-                            <Input name="AxisLeftStickUp" style="small-label-blur">
+                            <Input name="AxisLeftStickUp" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="AxisLeftStickLeft" style="small-label-blur">
+                            <Input name="AxisLeftStickLeft" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="AxisLeftStickRight" style="small-label-blur">
+                            <Input name="AxisLeftStickRight" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="AxisLeftStickDown" style="small-label-blur">
+                            <Input name="AxisLeftStickDown" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
                         </Stack>
@@ -182,17 +182,17 @@
                 <Condition any="AxisRightStick" match="label">
                     <Group>
                         <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                        <Stack x="882" y="772" gap="45" collapse="true">
-                            <Input name="AxisRightStickUp" style="small-label-blur">
+                        <Stack x="882" y="772" gap="45" collapse="true" vAlign="center">
+                            <Input name="AxisRightStickUp" style="small-label-vacate">
                                 <Render useImage="AxisLeftStickUp" height="34" width="34" />
                             </Input>
-                            <Input name="AxisRightStickLeft" style="small-label-blur">
+                            <Input name="AxisRightStickLeft" style="small-label-vacate">
                                 <Render useImage="AxisLeftStickLeft" height="34" width="34" />
                             </Input>
-                            <Input name="AxisRightStickRight" style="small-label-blur">
+                            <Input name="AxisRightStickRight" style="small-label-vacate">
                                 <Render useImage="AxisLeftStickRight" height="34" width="34" />
                             </Input>
-                            <Input name="AxisRightStickDown" style="small-label-blur">
+                            <Input name="AxisRightStickDown" style="small-label-vacate">
                                 <Render useImage="AxisLeftStickDown" height="34" width="34" />
                             </Input>
                         </Stack>
@@ -236,16 +236,16 @@
                     <Group>
                         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
                         <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
-                            <Input name="ButtonDpadUp" style="small-label-blur">
+                            <Input name="ButtonDpadUp" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="ButtonDpadLeft" style="small-label-blur">
+                            <Input name="ButtonDpadLeft" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="ButtonDpadRight" style="small-label-blur">
+                            <Input name="ButtonDpadRight" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
-                            <Input name="ButtonDpadDown" style="small-label-blur">
+                            <Input name="ButtonDpadDown" style="small-label-vacate">
                                 <Render height="34" width="34" />
                             </Input>
                         </Stack>
