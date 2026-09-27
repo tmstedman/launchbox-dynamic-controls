@@ -346,7 +346,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
-No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in any order. Unlike `<Group>`/`<Stack>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way those two do, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` (or `<Stack>`) inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
 
 **Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
 
