@@ -624,12 +624,12 @@ public class ArcadeEndToEndTests
                 new(Input: "ButtonX",             Src: "Line_ButtonX.png",                                                Opacity: 0.3, BlurRadius: 8.0),
                 // AxisLeftStick top-level active — HasLabel fans out to directional descendants
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",                        W: 124, H: 124),
-                // first OneOf alt fires — Left/Right labeled; Up/Down dim
+                // first OneOf alt fires — Left/Right each have their own distinct label; Up/Down
+                // have neither label nor mapping and now vacate their slot entirely instead of
+                // rendering dim (small-label-vacate has no MinOpacity)
                 new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
-                new(Input: "AxisLeftStickUp",     Src: "AxisLeftStickUp.png",                      W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 new(Input: "AxisLeftStickLeft",   Src: "AxisLeftStickLeft.png",                    W: 34,  H: 34),
                 new(Input: "AxisLeftStickRight",  Src: "AxisLeftStickRight.png",                   W: 34,  H: 34),
-                new(Input: "AxisLeftStickDown",   Src: "AxisLeftStickDown.png",                    W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 // disabled — not in OutRun controls
                 new(Input: "AxisRightStick",      Src: "AxisRightStick.png",                       W: 124, H: 124, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                           W: 135, H: 135, Opacity: 0.3, BlurRadius: 8.0));
