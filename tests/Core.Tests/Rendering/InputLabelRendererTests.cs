@@ -21,7 +21,7 @@ public class InputLabelRendererTests
     }
 
     private static LayoutInput Input(string name, params LabelDefinition[] labels) =>
-        new(LayoutElements.Input(name) with { Labels = labels }, YOffset: 0, Flags: VisibilityFlags.None);
+        new(LayoutElements.Input(name), YOffset: 0, Flags: VisibilityFlags.None, Labels: labels);
 
     [Theory]
     [InlineData(null)]

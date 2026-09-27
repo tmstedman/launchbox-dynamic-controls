@@ -290,7 +290,7 @@ public class LayoutFilterTests
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
         LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
-        li.ConditionalImages.ShouldBe([image]);
+        li.Images.ShouldBe([image]);
     }
 
     [Fact]
@@ -306,7 +306,7 @@ public class LayoutFilterTests
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
         LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
-        li.ConditionalLabels.ShouldBe([label]);
+        li.Labels.ShouldBe([label]);
     }
 
     [Fact]
@@ -323,7 +323,7 @@ public class LayoutFilterTests
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
         LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
-        li.ConditionalImages.ShouldBeEmpty();
+        li.Images.ShouldBeEmpty();
     }
 
     [Fact]
@@ -341,8 +341,8 @@ public class LayoutFilterTests
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
-        result.Inputs.Single(i => i.Input.Name == "Inner").ConditionalImages.ShouldBe([image]);
-        result.Inputs.Single(i => i.Input.Name == "Outer").ConditionalImages.ShouldBeEmpty();
+        result.Inputs.Single(i => i.Input.Name == "Inner").Images.ShouldBe([image]);
+        result.Inputs.Single(i => i.Input.Name == "Outer").Images.ShouldBeEmpty();
     }
 
     // ---- collapse adjustments ----
