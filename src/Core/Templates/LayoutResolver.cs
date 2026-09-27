@@ -98,7 +98,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             InheritedFontSize = inputXml.FontSize ?? namedStyle?.FontSize,
             OriginX = inputOriginX,
             OriginY = inputOriginY,
-            CurrentInputName = name
+            CurrentInputName = name,
+            // A stack member's own loose content centers against *its own* stack, if any -- not
+            // whichever outer stack this Input happened to be a member of.
+            StackAnchorY = null
         };
 
         var labels = inputXml.Labels.Select(labelXml => BuildLabelDefinition(labelXml, inputCtx)).ToList();
@@ -151,22 +154,32 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// at render time (see <see cref="Rendering.LayoutFilter"/>) against whatever slot count is
     /// actually left, using the same <see cref="StackVAlign.Shift"/> math with the vAlign this
     /// method already validated — carried through <see cref="CollapseInfo"/> so a bad value is
-    /// only ever logged once, here.</summary>
+    /// only ever logged once, here.
+    ///
+    /// <para>The declared Y (before that shift) is captured separately as
+    /// <see cref="BuildContext.StackAnchorY"/> for any loose <c>&lt;Label&gt;</c> found directly
+    /// inside this Stack (or reached through a Group/OneOf/Condition nested in it): since it
+    /// already names whatever slot <c>vAlign</c> points at — invariant to collapse, by the same
+    /// guarantee the render-time correction relies on — such a label needs no correction of its
+    /// own to stay pinned there. A <c>vAlign="center"</c> Stack is what gives a loose Label the
+    /// "half-way up the stack" position; <c>top</c>/<c>bottom</c> give whichever end instead.</para>
+    /// </summary>
     private InputGroup BuildInputStack(StackNode stackXml, BuildContext ctx)
     {
         double gap = stackXml.Gap ?? 0;
         int slotCount = CountSlots(stackXml.Children);
         string vAlign = NormalizeVAlign(stackXml.VAlign);
         double vAlignShift = StackVAlign.Shift(vAlign, slotCount, gap);
+        double declaredOriginY = stackXml.Y.Resolve(ctx.OriginY);
 
         var frame = new StackFrame
         {
             OriginX = stackXml.X.Resolve(ctx.OriginX),
-            OriginY = stackXml.Y.Resolve(ctx.OriginY) - vAlignShift,
+            OriginY = declaredOriginY - vAlignShift,
             Gap = gap,
             SlotIndex = 0,
         };
-        BuildContext stackCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY };
+        BuildContext stackCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY, StackAnchorY = declaredOriginY };
 
         var children = new List<ILayoutElement>();
         foreach (ILayoutNode child in stackXml.Children)
@@ -377,12 +390,16 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// <summary>
     /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
     /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
+    /// Y resolves against <see cref="BuildContext.StackAnchorY"/> when set (a loose Label inside a
+    /// Stack, centering — or top/bottom-aligning — against the Stack's own declared position
+    /// rather than the shifted per-slot origin its members use); <c>inputCtx</c> always resets
+    /// this to null for a genuine direct child, so this is a no-op there.
     /// </summary>
     private LabelDefinition BuildLabelDefinition(LabelNode labelXml, BuildContext ctx)
     {
         var label = new LabelDefinition(
             X: labelXml.X.Resolve(ctx.OriginX),
-            Y: labelXml.Y.Resolve(ctx.OriginY),
+            Y: labelXml.Y.Resolve(ctx.StackAnchorY ?? ctx.OriginY),
             Alignment: labelXml.Align,
             FontSize: labelXml.FontSize ?? ctx.InheritedFontSize ?? ctx.DefaultFontSize);
         _logger.Debug($"Label position: {ctx.CurrentInputName} at ({labelXml.X},{labelXml.Y}) align={labelXml.Align} fontSize={label.FontSize}");
@@ -475,6 +492,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// rediscovers the same Input during its own per-game walk, since the resolved
     /// <see cref="InputDefinition"/> a loose render belongs to doesn't exist as an object yet at
     /// the point its own children are being built.
+    /// <c>StackAnchorY</c> tracks the innermost enclosing Stack's own declared Y (before its
+    /// <c>vAlign</c> shift), for a loose <c>&lt;Label&gt;</c> to resolve against instead of the
+    /// shifted per-slot origin members use — null outside any Stack, reset (like
+    /// <c>CurrentInputName</c>) on entering a nested Input, and naturally shadowed by a nested
+    /// Stack's own value.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
@@ -487,7 +509,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double? InheritedFontSize = null,
         double OriginX = 0,
         double OriginY = 0,
-        string? CurrentInputName = null);
+        string? CurrentInputName = null,
+        double? StackAnchorY = null);
 
     /// <summary>
     /// Mutable iteration state for one stack's slot loop. SlotIndex advances as children consume

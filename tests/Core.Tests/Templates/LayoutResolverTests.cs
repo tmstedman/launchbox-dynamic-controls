@@ -902,6 +902,107 @@ public class TemplateLayoutResolverTests
         render.Image.Y.ShouldBe(60);
     }
 
+    // --- Loose Label centering against its enclosing Stack ---
+
+    [Fact]
+    public void Resolve_LooseLabelInVAlignCenterStack_ResolvesToDeclaredCenter_NotTheShiftedTopSlot()
+    {
+        // given a vAlign="center" Stack of 4 slots (gap=40) declared at y=300 -- the shifted
+        // top-slot position members actually render at is 300 - (3*40/2) = 240, but a loose
+        // Label should resolve against the Stack's own declared 300, landing "half-way up".
+        // The Stack needs an enclosing Input for the loose Label's ambient identity, same
+        // requirement as any other loose Render/Label -- unrelated to this feature.
+        TestLayout config = new TestLayout()
+            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("center")
+                .Input("A", a => a.Render())
+                .Input("B", b => b.Render())
+                .Input("C", c => c.Render())
+                .Input("D", d => d.Render())
+                .LooseLabel(l => l.Offset(0, 0))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstLabelElement();
+        label.Label.Y.ShouldBe(300);
+    }
+
+    [Fact]
+    public void Resolve_LooseLabelInVAlignBottomStack_ResolvesToDeclaredBottomSlot()
+    {
+        // vAlign="bottom" names a different slot (the last one) -- the loose Label follows
+        // whatever the Stack's own vAlign points at, not always "centered"
+        TestLayout config = new TestLayout()
+            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("bottom")
+                .Input("A", a => a.Render())
+                .Input("B", b => b.Render())
+                .LooseLabel(l => l.Offset(0, 0))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstLabelElement();
+        label.Label.Y.ShouldBe(300);
+    }
+
+    [Fact]
+    public void Resolve_LooseLabelReachedThroughGroupInsideStack_StillUsesStackAnchor()
+    {
+        // a Group between the Stack and the loose Label is transparent, same as it already is
+        // for slot counting -- the anchor threads through it unchanged
+        TestLayout config = new TestLayout()
+            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("center")
+                .Input("A", a => a.Render())
+                .Input("B", b => b.Render())
+                .Input("C", c => c.Render())
+                .Input("D", d => d.Render())
+                .Group(g => g.LooseLabel(l => l.Offset(0, 0)))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstInputGroup().Children.FirstLabelElement();
+        label.Label.Y.ShouldBe(300);
+    }
+
+    [Fact]
+    public void Resolve_DirectChildLabelOnAStackMember_UnaffectedByTheStacksAnchor()
+    {
+        // a stack member's own *direct* Label is a completely ordinary Label -- it must keep
+        // resolving against that Input's own slot position, never the enclosing Stack's anchor
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(100, 300).Gap(40).VAlign("center")
+                .Input("A", i => i.Render().Label(l => l.Offset(0, 5)))
+                .Input("B", i => i.Render())
+                .Input("C", i => i.Render())
+                .Input("D", i => i.Render()));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition a = result.FirstInputGroup().Children.FirstInput();
+        a.Labels.Single().Y.ShouldBe(a.InputImages.Single().Y + 5);
+    }
+
+    [Fact]
+    public void Resolve_LooseLabelInsideStackMembersOwnCondition_DoesNotInheritTheOuterStacksAnchor()
+    {
+        // a stack member's own loose content (reached through its own nested Condition) must
+        // resolve against *its own* slot origin -- not the outer stack it happens to be a
+        // member of. A is the first of 4 slots (vAlign=center, gap=40, declared y=300), so its
+        // own (shifted) slot position is 300 - (3*40/2) = 240 -- clearly distinct from the
+        // outer stack's own anchor (300), so the two can't be confused for one another.
+        TestLayout config = new TestLayout()
+            .Stack(s => s.At(100, 300).Gap(40).VAlign("center")
+                .Input("A", i => i.Render().ChildCondition(c => c.Any("X").LooseLabel(l => l.Offset(0, 0))))
+                .Input("B", i => i.Render())
+                .Input("C", i => i.Render())
+                .Input("D", i => i.Render()));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition a = result.FirstInputGroup().Children.FirstInput();
+        LabelElement label = a.Children.FirstCondition().Children.FirstLabelElement();
+        label.Label.Y.ShouldBe(a.InputImages.Single().Y);
+        label.Label.Y.ShouldBe(240);
+    }
+
     // --- Overlay path resolution ---
 
     [Fact]
