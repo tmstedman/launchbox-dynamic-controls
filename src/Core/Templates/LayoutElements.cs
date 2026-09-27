@@ -124,9 +124,17 @@ public record LabelElement(LabelDefinition Label) : ILayoutElement;
 /// identity, rather than as fields on this type.
 /// </summary>
 /// <param name="Name">Generic input name (e.g. "ButtonA").</param>
-/// <param name="InputImages">Positions where the button image is rendered.</param>
+/// <param name="InputImages">Positions where the button image is rendered — this Input's own
+/// static set only, exactly as declared in Layout.xml, identical for every game that uses this
+/// template. Once a render pass is underway you have a <see cref="Rendering.LayoutInput"/>, not
+/// a bare InputDefinition — prefer its own <see cref="Rendering.LayoutInput.Images"/> there
+/// instead, which additionally includes any loose Condition-gated renders that survived for the
+/// current game (see <see cref="RenderElement"/>); reading this field directly at that point
+/// would silently miss those.</param>
 /// <param name="Overlays">Overlay images associated with this input (e.g. dotted lines).</param>
-/// <param name="Labels">Positions where the label text is rendered.</param>
+/// <param name="Labels">Positions where the label text is rendered — same caveat as
+/// <paramref name="InputImages"/>: prefer <see cref="Rendering.LayoutInput.Labels"/> once you
+/// have one.</param>
 /// <param name="Children">Nested layout elements — either InputDefinitions or InputGroups in
 /// document order. Structural nesting is how parent/child relationships are expressed: a parent
 /// Input's renders fan out to every InputDefinition in its structural descendant set
