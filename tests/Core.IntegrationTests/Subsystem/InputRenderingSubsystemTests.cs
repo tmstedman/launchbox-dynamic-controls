@@ -386,6 +386,52 @@ public class InputRenderingSubsystemTests
         result.Images.Single(i => i.InputName == "AxisLeftStickUp").Opacity.ShouldBe(0.3);
     }
 
+    [Fact]
+    public void Render_LooseLabelUnderCondition_AttachesToOwningInputWithoutADuplicateStrictSelfInput()
+    {
+        // The same crusnexo-shaped scenario as above (Left/Right agree on "Steering", Up/Down have
+        // no label), but the shared label is expressed with the new capability instead of the
+        // duplicate strict-self <Input name="AxisLeftStick"> workaround: a bare LabelElement
+        // nested inside the Condition, attaching ambiently to AxisLeftStick's own top-level
+        // InputDefinition. Confirms the merged branch renders identically either way.
+        var up = Input(name: "AxisLeftStickUp", images: [new InputImageDefinition(0, 0, "AxisLeftStickUp.png", ShowIf: Label)]);
+        var down = Input(name: "AxisLeftStickDown", images: [new InputImageDefinition(0, 0, "AxisLeftStickDown.png", ShowIf: Label)]);
+        var left = Input(name: "AxisLeftStickLeft", images: [new InputImageDefinition(0, 0, "AxisLeftStickLeft.png", ShowIf: Label)]);
+        var right = Input(name: "AxisLeftStickRight", images: [new InputImageDefinition(0, 0, "AxisLeftStickRight.png", ShowIf: Label)]);
+
+        var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
+        [
+            new InputGroup(AlwaysInclude: true, Children: [up, left, right, down], Overlays: []),
+            new LabelElement(new LabelDefinition(X: 0, Y: 0, Alignment: "right")),
+        ]);
+        var axisLeftStick = new InputDefinition(
+            Name: "AxisLeftStick",
+            InputImages: [],
+            Overlays: [],
+            Labels: [],
+            Children: [mergedAlternative]);
+
+        _images.With(src: "AxisLeftStickUp.png", generic: "AxisLeftStickUp.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickDown.png", generic: "AxisLeftStickDown.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickLeft.png", generic: "AxisLeftStickLeft.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickRight.png", generic: "AxisLeftStickRight.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([axisLeftStick]);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisLeftStick", "Steering"), ("AxisLeftStickLeft", "Steering"), ("AxisLeftStickRight", "Steering"));
+
+        // when the service renders
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        // then all four direction icons render, and the shared label attached to AxisLeftStick's
+        // own identity — reached only through the Condition, with no Input of its own
+        result.Images.Select(i => i.InputName).ShouldContain("AxisLeftStickLeft");
+        result.Images.Select(i => i.InputName).ShouldContain("AxisLeftStickUp");
+        RenderedLabel label = result.Labels.Single();
+        label.InputName.ShouldBe("AxisLeftStick");
+        label.Text.ShouldBe("Steering");
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(

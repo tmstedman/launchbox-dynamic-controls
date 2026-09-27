@@ -75,6 +75,9 @@ internal static class CollapseGroupBuilder
                     CollectSlots(child, output);
                 }
                 break;
+            case RenderElement or LabelElement:
+                // Takes no slot, same as an Overlay.
+                break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}");
         }
@@ -112,6 +115,9 @@ internal static class CollapseGroupBuilder
                 {
                     SetMetadata(child, info, output);
                 }
+                break;
+            case RenderElement or LabelElement:
+                // Leaf, not an InputDefinition -- no collapse metadata to record.
                 break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");

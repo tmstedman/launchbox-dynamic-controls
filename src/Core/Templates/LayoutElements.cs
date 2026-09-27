@@ -92,6 +92,29 @@ public enum ConditionMatch
 }
 
 /// <summary>
+/// A single image render that lives outside its owning Input's own direct children — e.g. nested
+/// inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;Stack&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
+/// rather than directly inside an &lt;Input&gt;. Carries no owner reference of its own: the owning
+/// InputDefinition can't be baked in at resolve time (it's still being constructed while its own
+/// children, including this one, are being built), so <see cref="Rendering.LayoutFilter"/>
+/// discovers the owner itself during its own tree walk, the same way <see cref="Image"/>'s
+/// coordinates were resolved against an ambient origin at resolve time.
+/// </summary>
+/// <param name="Image">The resolved image, already positioned against whichever Input's origin
+/// was ambient when this render was parsed.</param>
+[ExcludeFromCodeCoverage]
+public record RenderElement(InputImageDefinition Image) : ILayoutElement;
+
+/// <summary>
+/// A single label render that lives outside its owning Input's own direct children. See
+/// <see cref="RenderElement"/> for why it carries no owner reference of its own.
+/// </summary>
+/// <param name="Label">The resolved label, already positioned against whichever Input's origin
+/// was ambient when this label was parsed.</param>
+[ExcludeFromCodeCoverage]
+public record LabelElement(LabelDefinition Label) : ILayoutElement;
+
+/// <summary>
 /// Fully resolved layout data for a single generic input within a Template.
 /// Built by TemplateService from InputNode; all positions are resolved at build time.
 /// Image paths are deferred to render time via InputImageResolver.

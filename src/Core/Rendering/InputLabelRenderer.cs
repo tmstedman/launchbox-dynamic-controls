@@ -10,11 +10,13 @@ namespace DynamicControls.Rendering;
 public interface IInputLabelRenderer
 {
     /// <summary>
-    /// Renders all label slots on <paramref name="input"/> with text
-    /// <paramref name="labelValue"/>. Each slot's alignment shifts the x-position so the
-    /// renderer downstream can position by left edge consistently.
+    /// Renders all label slots on <paramref name="li"/>'s input — its own static <c>Labels</c>
+    /// plus any that survived a Condition/Group/OneOf this render pass (<c>ConditionalLabels</c>,
+    /// see <see cref="Templates.LabelElement"/>) — with text <paramref name="labelValue"/>. Each
+    /// slot's alignment shifts the x-position so the renderer downstream can position by left
+    /// edge consistently.
     /// </summary>
-    List<RenderedLabel> Render(InputDefinition input, string? labelValue);
+    List<RenderedLabel> Render(LayoutInput li, string? labelValue);
 }
 
 /// <summary>
@@ -28,11 +30,11 @@ public class InputLabelRenderer(ILogger logger) : IInputLabelRenderer
     private readonly ILogger _logger = logger;
 
     /// <inheritdoc />
-    public List<RenderedLabel> Render(InputDefinition input, string? labelValue)
+    public List<RenderedLabel> Render(LayoutInput li, string? labelValue)
     {
         if (string.IsNullOrEmpty(labelValue)) return [];
 
-        return [.. input.Labels.Select(label =>
+        return [.. li.Input.Labels.Concat(li.ConditionalLabels).Select(label =>
         {
             (double left, string alignment) = label.Alignment switch
             {
@@ -47,7 +49,7 @@ public class InputLabelRenderer(ILogger logger) : IInputLabelRenderer
                 Text: labelValue,
                 Alignment: alignment,
                 FontSize: label.FontSize,
-                InputName: input.Name);
+                InputName: li.Input.Name);
         })];
     }
 }

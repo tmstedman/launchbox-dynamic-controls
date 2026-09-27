@@ -51,7 +51,7 @@ public class InputRenderingService(
         {
             string? labelValue = labels.LabelText.GetValueOrDefault(li.Input.Name);
             allImages.AddRange(_imageRenderer.Render(li, template, mapping, labels.IsGameSpecific));
-            allLabels.AddRange(_labelRenderer.Render(li.Input, labelValue)
+            allLabels.AddRange(_labelRenderer.Render(li, labelValue)
                 .Select(l => li.YOffset == 0 ? l : l with { Top = l.Top + li.YOffset }));
         }
 

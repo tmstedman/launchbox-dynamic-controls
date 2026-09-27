@@ -20,8 +20,8 @@ public class InputLabelRendererTests
         _underTest = new InputLabelRenderer(_logger);
     }
 
-    private static InputDefinition Input(string name, params LabelDefinition[] labels) =>
-        LayoutElements.Input(name) with { Labels = labels };
+    private static LayoutInput Input(string name, params LabelDefinition[] labels) =>
+        new(LayoutElements.Input(name) with { Labels = labels }, YOffset: 0, Flags: VisibilityFlags.None);
 
     [Theory]
     [InlineData(null)]
