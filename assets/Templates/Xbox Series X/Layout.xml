@@ -116,7 +116,12 @@
                     </Condition>
                 </Condition>
                 <!-- Two or three directions share one label, the rest genuinely blank: only the
-                     present directions render, each at full brightness, with one shared label. -->
+                     present directions render, each at full brightness, with one shared label.
+                     The label's y="+70" clears a 3-icon cluster's bottom edge (this alternative
+                     never sees all 4, since that case is always caught by the single-glyph
+                     alternative above, whose inner Condition requires all four individually
+                     labelled); unlike ButtonDpad, which has no such interception and so keeps a
+                     taller y="+84" to clear a genuine 4-icon cluster. -->
                 <Condition any="AxisLeftStick" match="label">
                     <Group>
                         <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
@@ -135,7 +140,7 @@
                             </Input>
                         </Stack>
                         <Input name="AxisLeftStick" style="show-if-label" x="312" y="358.5">
-                            <Label x="-24" y="+84" align="right" />
+                            <Label x="-24" y="+70" align="right" />
                         </Input>
                     </Group>
                 </Condition>
@@ -177,8 +182,8 @@
                         </Input>
                     </Condition>
                 </Condition>
-                <!-- Two or three directions share one label, the rest genuinely blank: only the
-                     present directions render, each at full brightness, with one shared label. -->
+                <!-- Two or three directions share one label, the rest genuinely blank; y="+70"
+                     for the same reason as AxisLeftStick above. -->
                 <Condition any="AxisRightStick" match="label">
                     <Group>
                         <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
@@ -197,7 +202,7 @@
                             </Input>
                         </Stack>
                         <Input name="AxisRightStick" style="show-if-label" x="882" y="772">
-                            <Label x="+52" y="+84" />
+                            <Label x="+52" y="+70" />
                         </Input>
                     </Group>
                 </Condition>
