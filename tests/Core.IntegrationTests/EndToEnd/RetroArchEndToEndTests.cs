@@ -352,13 +352,12 @@ public class RetroArchEndToEndTests
                 // ButtonDpad top-level active because descendants have labels (auto-blur → HasLabel
                 // fans out across the directional children)
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135),
-                // Dpad OneOf first alt fires (directional Stack visible). Up/Down active (labels remapped here),
-                // Left/Right dim (no labels). Image: Remapped lookup tries "Dpad-Down.png"/"Dpad-Up.png" in PS2
-                // folder — neither exists, so falls back to the render's own generic
+                // Dpad OneOf first alt fires (directional Stack visible). Up/Down active (labels remapped
+                // here); Left/Right have neither label nor mapping, so now vacate their slot entirely
+                // instead of rendering dim. Image: Remapped lookup tries "Dpad-Down.png"/"Dpad-Up.png" in
+                // PS2 folder — neither exists, so falls back to the render's own generic
                 new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",                 W: 34,  H: 34),
                 new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",               W: 34,  H: 34),
-                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",               W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
-                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",              W: 34,  H: 34,  Opacity: 0.3, BlurRadius: 6.0),
                 new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
                 // shoulders + triggers + face buttons + sticks all mapped but unlabeled → dim
                 new(Input: "AxisTriggerLeft",     Src: @"Sony Playstation 2\L2.png",       W: 65,  H: 65,  Opacity: 0.3, BlurRadius: 8.0),
