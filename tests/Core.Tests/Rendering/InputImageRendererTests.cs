@@ -39,7 +39,7 @@ public class InputImageRendererTests
         double yOffset = 0,
         bool hasLabel = false,
         bool isMapped = false) =>
-        new(input, yOffset, new VisibilityFlags(hasLabel, isMapped));
+        new(input, yOffset, new VisibilityFlags(hasLabel, isMapped), input.InputImages, input.Labels);
 
     // ---- tests ----
 

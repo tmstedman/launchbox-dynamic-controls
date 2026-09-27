@@ -31,16 +31,19 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     {
         var inputsToRender = new List<InputDefinition>();
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
-        var conditionalImages = new Dictionary<InputDefinition, List<InputImageDefinition>>(ReferenceEqualityComparer.Instance);
-        var conditionalLabels = new Dictionary<InputDefinition, List<LabelDefinition>>(ReferenceEqualityComparer.Instance);
+        var looseImages = new Dictionary<InputDefinition, List<InputImageDefinition>>(ReferenceEqualityComparer.Instance);
+        var looseLabels = new Dictionary<InputDefinition, List<LabelDefinition>>(ReferenceEqualityComparer.Instance);
 
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput: null, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseImages, looseLabels, currentInput: null, ctx);
         }
 
         Dictionary<InputDefinition, double> adjustments = ComputeCollapseAdjustments(inputsToRender, template, ctx);
 
+        // Merged once, here, so InputImageRenderer/InputLabelRenderer never need to know a static
+        // (InputDefinition.InputImages/Labels) and a loose (Condition-gated) source ever existed
+        // separately -- LayoutInput.Images/Labels is simply the complete set for this render pass.
         var layout = inputsToRender.Select(input =>
         {
             VisibilityFlags flags = _evaluator.GetVisibilityFlags(input, ctx);
@@ -48,8 +51,8 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 input,
                 adjustments.GetValueOrDefault(input, 0.0),
                 flags,
-                conditionalImages.GetValueOrDefault(input, []),
-                conditionalLabels.GetValueOrDefault(input, []));
+                [.. input.InputImages, .. looseImages.GetValueOrDefault(input, [])],
+                [.. input.Labels, .. looseLabels.GetValueOrDefault(input, [])]);
         }).ToList();
 
         return new FilteredLayout(Inputs: layout, GroupOverlays: includedGroupOverlays);
@@ -158,8 +161,8 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         ILayoutElement element,
         List<InputDefinition> inputsToRender,
         List<LayoutGroupOverlay> includedGroupOverlays,
-        Dictionary<InputDefinition, List<InputImageDefinition>> conditionalImages,
-        Dictionary<InputDefinition, List<LabelDefinition>> conditionalLabels,
+        Dictionary<InputDefinition, List<InputImageDefinition>> looseImages,
+        Dictionary<InputDefinition, List<LabelDefinition>> looseLabels,
         InputDefinition? currentInput,
         VisibilityContext ctx)
     {
@@ -169,13 +172,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, input, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseImages, looseLabels, input, ctx);
                 }
                 break;
             case InputGroup group when IsGroupVisible(group, ctx):
                 foreach (ILayoutElement child in group.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseImages, looseLabels, currentInput, ctx);
                 }
                 if (group.Overlays.Count > 0)
                 {
@@ -194,7 +197,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseImages, looseLabels, currentInput, ctx);
                         break;
                     }
                 }
@@ -202,19 +205,19 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseImages, looseLabels, currentInput, ctx);
                 }
                 break;
             case ConditionElement:
                 // Condition evaluated false: drop it and everything inside, same as an excluded Group.
                 break;
             case RenderElement re when currentInput != null:
-                conditionalImages.TryAdd(currentInput, []);
-                conditionalImages[currentInput].Add(re.Image);
+                looseImages.TryAdd(currentInput, []);
+                looseImages[currentInput].Add(re.Image);
                 break;
             case LabelElement le when currentInput != null:
-                conditionalLabels.TryAdd(currentInput, []);
-                conditionalLabels[currentInput].Add(le.Label);
+                looseLabels.TryAdd(currentInput, []);
+                looseLabels[currentInput].Add(le.Label);
                 break;
             case RenderElement or LabelElement:
                 // No ambient Input reached this point at all -- LayoutResolver already logged
