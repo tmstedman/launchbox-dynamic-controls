@@ -818,6 +818,90 @@ public class TemplateLayoutResolverTests
         positions.ShouldBe([(100, 200), (100, 250)]);
     }
 
+    // --- Loose Render/Label under Condition (no wrapper Input of their own) ---
+
+    [Fact]
+    public void Resolve_LooseRenderInCondition_ResolvesAgainstAmbientInput()
+    {
+        // given a bare Render nested inside a Condition inside its owning Input — no useImage,
+        // so the default ImageFile must come from the ambient Input's own name, and its
+        // coordinates must resolve against that Input's own origin
+        TestLayout config = new TestLayout()
+            .Input("AxisLeftStick", i => i.At(100, 200)
+                .ChildCondition(c => c.Any("X").LooseRender(r => r.Offset(5, 5))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        RenderElement render = result.FirstInput().Children.FirstCondition().Children.FirstRenderElement();
+        render.Image.ImageFile.ShouldBe("AxisLeftStick.png");
+        render.Image.X.ShouldBe(105);
+        render.Image.Y.ShouldBe(205);
+    }
+
+    [Fact]
+    public void Resolve_LooseLabelInCondition_ResolvesAgainstAmbientInput()
+    {
+        TestLayout config = new TestLayout()
+            .Input("ButtonDpad", i => i.At(300, 400)
+                .ChildCondition(c => c.Any("X").LooseLabel(l => l.Offset(-10, 20).Align("right"))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        LabelElement label = result.FirstInput().Children.FirstCondition().Children.FirstLabelElement();
+        label.Label.X.ShouldBe(290);
+        label.Label.Y.ShouldBe(420);
+        label.Label.Alignment.ShouldBe("right");
+    }
+
+    [Fact]
+    public void Resolve_LooseRender_InheritsAmbientInputsShowIfAndStyle()
+    {
+        // given the enclosing Input sets its own showIf directly (no named style involved) — a
+        // loose Render inside a nested Condition should inherit it exactly like a true direct
+        // child would, unless it sets its own
+        TestLayout config = new TestLayout()
+            .Input("ButtonDpad", i => i.ShowIf("mapping")
+                .ChildCondition(c => c.Any("X").LooseRender()));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        RenderElement render = result.FirstInput().Children.FirstCondition().Children.FirstRenderElement();
+        render.Image.ShowIf.ShouldBe(ShowIfCondition.Mapped);
+    }
+
+    [Fact]
+    public void Resolve_LooseRenderWithNoAmbientInput_LogsErrorAndDoesNotThrow()
+    {
+        // given a bare Render at the top level, wrapped only in a Condition — never nested
+        // inside any Input at all
+        TestLayout config = new TestLayout()
+            .Condition(c => c.Any("X").LooseRender());
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.Elements.FirstCondition().Children.FirstRenderElement().ShouldNotBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Render") && s.Contains("Input")));
+    }
+
+    [Fact]
+    public void Resolve_NestedInputResetsAmbientInputForItsOwnLooseChildren()
+    {
+        // given a nested Input inside an outer one, with its own Condition-gated loose Render —
+        // the loose Render must attach to the nested Input's identity, not the outer one's
+        TestLayout config = new TestLayout()
+            .Input("Outer", i => i.At(1, 1)
+                .Child("Inner", inner => inner.At(50, 60)
+                    .ChildCondition(c => c.Any("X").LooseRender())));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition inner = result.FirstInput().Children.FirstInput();
+        RenderElement render = inner.Children.FirstCondition().Children.FirstRenderElement();
+        render.Image.ImageFile.ShouldBe("Inner.png");
+        render.Image.X.ShouldBe(50);
+        render.Image.Y.ShouldBe(60);
+    }
+
     // --- Overlay path resolution ---
 
     [Fact]

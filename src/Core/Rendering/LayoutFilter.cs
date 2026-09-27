@@ -31,10 +31,12 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     {
         var inputsToRender = new List<InputDefinition>();
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
+        var conditionalImages = new Dictionary<InputDefinition, List<InputImageDefinition>>(ReferenceEqualityComparer.Instance);
+        var conditionalLabels = new Dictionary<InputDefinition, List<LabelDefinition>>(ReferenceEqualityComparer.Instance);
 
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput: null, ctx);
         }
 
         Dictionary<InputDefinition, double> adjustments = ComputeCollapseAdjustments(inputsToRender, template, ctx);
@@ -42,7 +44,12 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var layout = inputsToRender.Select(input =>
         {
             VisibilityFlags flags = _evaluator.GetVisibilityFlags(input, ctx);
-            return new LayoutInput(input, adjustments.GetValueOrDefault(input, 0.0), flags);
+            return new LayoutInput(
+                input,
+                adjustments.GetValueOrDefault(input, 0.0),
+                flags,
+                conditionalImages.GetValueOrDefault(input, []),
+                conditionalLabels.GetValueOrDefault(input, []));
         }).ToList();
 
         return new FilteredLayout(Inputs: layout, GroupOverlays: includedGroupOverlays);
@@ -140,11 +147,20 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// InputDefinitions always render and recurse into their Children. InputGroups are included
     /// when AlwaysInclude is set or any child has a visible render; excluded groups drop all
     /// members. OneOfs render the first alternative with a visible render and drop the rest.
+    /// <paramref name="currentInput"/> tracks whichever InputDefinition was most recently entered
+    /// (reset each time a nested one is), so a bare <see cref="RenderElement"/>/
+    /// <see cref="LabelElement"/> reached through Group/Stack/OneOf/Condition attaches to the
+    /// right owner — it can only be reached at all by having already recursed through every
+    /// wrapping Condition/Group/OneOf above it, which is what makes nested Conditions AND
+    /// together for free, with no separate "accumulate and re-check" step needed here.
     /// </summary>
     private void CollectVisibleElement(
         ILayoutElement element,
         List<InputDefinition> inputsToRender,
         List<LayoutGroupOverlay> includedGroupOverlays,
+        Dictionary<InputDefinition, List<InputImageDefinition>> conditionalImages,
+        Dictionary<InputDefinition, List<LabelDefinition>> conditionalLabels,
+        InputDefinition? currentInput,
         VisibilityContext ctx)
     {
         switch (element)
@@ -153,13 +169,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, input, ctx);
                 }
                 break;
             case InputGroup group when IsGroupVisible(group, ctx):
                 foreach (ILayoutElement child in group.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
                 }
                 if (group.Overlays.Count > 0)
                 {
@@ -178,7 +194,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
                         break;
                     }
                 }
@@ -186,11 +202,23 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, conditionalImages, conditionalLabels, currentInput, ctx);
                 }
                 break;
             case ConditionElement:
                 // Condition evaluated false: drop it and everything inside, same as an excluded Group.
+                break;
+            case RenderElement re when currentInput != null:
+                conditionalImages.TryAdd(currentInput, []);
+                conditionalImages[currentInput].Add(re.Image);
+                break;
+            case LabelElement le when currentInput != null:
+                conditionalLabels.TryAdd(currentInput, []);
+                conditionalLabels[currentInput].Add(le.Label);
+                break;
+            case RenderElement or LabelElement:
+                // No ambient Input reached this point at all -- LayoutResolver already logged
+                // this as a template error when it was parsed; nothing more to do at render time.
                 break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {element.GetType().Name}");
@@ -206,6 +234,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         InputGroup group => group.Children.SelectMany(CollectInputLeaves),
         OneOf oneOf => oneOf.Alternatives.SelectMany(CollectInputLeaves),
         ConditionElement condition => condition.Children.SelectMany(CollectInputLeaves),
+        RenderElement or LabelElement => [],
         _ => throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}")
     };
 }

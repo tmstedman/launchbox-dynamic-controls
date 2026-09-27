@@ -33,7 +33,7 @@ public class InputImageRenderer(IInputImageResolver imageResolver) : IInputImage
         ResolvedMapping mapping,
         bool isGameSpecific)
     {
-        IEnumerable<RenderedImage> images = li.Input.InputImages
+        IEnumerable<RenderedImage> images = li.Input.InputImages.Concat(li.ConditionalImages)
             .Select(image => (image, visible: li.Flags.IsVisible(image.ShowIf, isGameSpecific)))
             .Select(x => (x.image, x.visible, opacity: x.visible ? 1.0 : x.image.MinOpacity ?? template.Layout.DefaultMinOpacity))
             .Where(x => x.opacity > 0)

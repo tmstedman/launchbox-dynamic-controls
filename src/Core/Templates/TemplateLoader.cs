@@ -112,10 +112,15 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
     }
 
-    /// <summary>Parses one layout-child element (Input / Group / Stack / OneOf) and appends it
-    /// to <paramref name="output"/>. Returns true if the element name matched one of those four
-    /// (caller is responsible for handling unknown names). An Input that fails its own validation
-    /// is treated as matched but not appended.</summary>
+    /// <summary>Parses one layout-child element (Input / Group / Stack / OneOf / Condition /
+    /// Render / Label) and appends it to <paramref name="output"/>. Returns true if the element
+    /// name matched one of those (caller is responsible for handling unknown names). An Input or
+    /// Condition that fails its own validation is treated as matched but not appended.
+    /// <para>A loose Render/Label parsed here (i.e. one that isn't a direct child of its own
+    /// Input — <see cref="ParseInputNode"/> intercepts that case before ever calling this method)
+    /// has no Input of its own to attach to; it resolves against whichever Input is ambient at
+    /// this point in the tree, at build time (see <c>LayoutResolver.BuildContext.CurrentInputName</c>).</para>
+    /// </summary>
     private bool TryParseLayoutChild(XmlElement node, List<ILayoutNode> output)
     {
         switch (node.Name)
@@ -136,6 +141,12 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             case "Condition":
                 ConditionNode? condition = ParseConditionNode(node);
                 if (condition != null) output.Add(condition);
+                return true;
+            case "Render":
+                output.Add(ParseRender(node));
+                return true;
+            case "Label":
+                output.Add(ParseLabel(node));
                 return true;
             default:
                 return false;
@@ -171,24 +182,29 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
         foreach (XmlElement child in inputNode.ChildNodes.OfType<XmlElement>())
         {
-            if (TryParseLayoutChild(child, input.Children)) continue;
-
+            // Checked before TryParseLayoutChild: Render/Label are also valid loose children of
+            // Group/Stack/OneOf/Condition (see TryParseLayoutChild), but a Render/Label that's a
+            // *direct* child of its own Input always belongs on that Input's own Renders/Labels
+            // list, never the generic Children list.
             switch (child.Name)
             {
                 case "Label":
                     input.Labels.Add(ParseLabel(child));
-                    break;
+                    continue;
                 case "Render":
                     input.Renders.Add(ParseRender(child));
-                    break;
+                    continue;
                 case "Overlay":
                     OverlayNode? overlay = ParseOverlay(child);
                     if (overlay != null) input.Overlays.Add(overlay);
-                    break;
+                    continue;
                 default:
-                    _logger.Error($"Invalid element <{child.Name}> in <Input name=\"{name}\">");
                     break;
             }
+
+            if (TryParseLayoutChild(child, input.Children)) continue;
+
+            _logger.Error($"Invalid element <{child.Name}> in <Input name=\"{name}\">");
         }
 
         _logger.Debug($"Input: {input.Name}, renders={input.Renders.Count}, overlays={input.Overlays.Count}, labels={input.Labels.Count}, children={input.Children.Count}");
