@@ -416,7 +416,7 @@ public class TemplateLayoutResolverTests
         var a = (InputDefinition)outer.Children[0];
         var inner = (InputGroup)outer.Children[1];
         a.InputImages.Single().Y.ShouldBe(0);
-        inner.AlwaysInclude.ShouldBeTrue();
+        inner.IsStack.ShouldBeTrue();
         // inner stack's own inputs start at the slot origin (Y=50) with their own gap
         inner.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
@@ -642,7 +642,7 @@ public class TemplateLayoutResolverTests
     // --- Group + OneOf ---
 
     [Fact]
-    public void Resolve_Group_IsNotAlwaysInclude()
+    public void Resolve_Group_IsNotStack()
     {
         // given a top-level plain Group
         TestLayout config = new TestLayout()
@@ -651,12 +651,12 @@ public class TemplateLayoutResolverTests
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the resulting InputGroup is not flagged AlwaysInclude (Stacks are)
-        result.FirstInputGroup().AlwaysInclude.ShouldBeFalse();
+        // then the resulting InputGroup is not flagged IsStack (Stacks are)
+        result.FirstInputGroup().IsStack.ShouldBeFalse();
     }
 
     [Fact]
-    public void Resolve_GroupInsideGroup_BothAreNotAlwaysInclude()
+    public void Resolve_GroupInsideGroup_BothAreNotStack()
     {
         // given a top-level Group whose only child is another Group containing an Input
         TestLayout config = new TestLayout()
@@ -667,11 +667,11 @@ public class TemplateLayoutResolverTests
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then both Groups are resolved (neither is AlwaysInclude) and the Input is reachable
+        // then both Groups are resolved (neither is IsStack) and the Input is reachable
         var outerGroup = result.FirstInputGroup();
         var innerGroup = (InputGroup)outerGroup.Children.Single();
-        outerGroup.AlwaysInclude.ShouldBeFalse();
-        innerGroup.AlwaysInclude.ShouldBeFalse();
+        outerGroup.IsStack.ShouldBeFalse();
+        innerGroup.IsStack.ShouldBeFalse();
         innerGroup.Children.FirstInput().Name.ShouldBe("A");
     }
 

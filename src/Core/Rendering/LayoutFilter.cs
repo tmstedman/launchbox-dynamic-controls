@@ -147,9 +147,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
 
     /// <summary>
     /// Recursively collects inputs and group overlays for a single template node.
-    /// InputDefinitions always render and recurse into their Children. InputGroups are included
-    /// when AlwaysInclude is set or any child has a visible render; excluded groups drop all
-    /// members. OneOfs render the first alternative with a visible render and drop the rest.
+    /// InputDefinitions always render and recurse into their Children. InputGroups (Group and
+    /// Stack alike) are included only when any child has a visible render; excluded groups drop
+    /// all members. OneOfs render the first alternative with a visible render and drop the rest.
     /// <paramref name="currentInput"/> tracks whichever InputDefinition was most recently entered
     /// (reset each time a nested one is), so a bare <see cref="RenderElement"/>/
     /// <see cref="LabelElement"/> reached through Group/Stack/OneOf/Condition attaches to the
@@ -229,7 +229,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     }
 
     private bool IsGroupVisible(InputGroup group, VisibilityContext ctx) =>
-        group.AlwaysInclude || group.Children.Any(c => _evaluator.AnyVisible(c, ctx));
+        group.Children.Any(c => _evaluator.AnyVisible(c, ctx));
 
     private static IEnumerable<InputDefinition> CollectInputLeaves(ILayoutElement node) => node switch
     {

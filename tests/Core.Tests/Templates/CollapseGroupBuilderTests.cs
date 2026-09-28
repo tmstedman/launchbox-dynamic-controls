@@ -66,7 +66,7 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_PlainGroup_IsTransparent_ItsInputsBecomeIndividualSlots()
     {
-        // given a Stack containing a plain Group of two Inputs (Group.AlwaysInclude = false)
+        // given a Stack containing a plain Group of two Inputs (Group.IsStack = false)
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
         InputGroup group = Group(a, b);
@@ -83,7 +83,7 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_NestedStack_OccupiesOneSlotAsBlock_InputsShareThatSlot()
     {
-        // given a Stack containing another Stack (AlwaysInclude = true) of two Inputs
+        // given a Stack containing another Stack (IsStack = true) of two Inputs
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
         InputGroup innerStack = Stack(a, b);

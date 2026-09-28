@@ -24,20 +24,20 @@ public static class LayoutElements
             Children: [.. children]);
     }
 
-    /// <summary>A plain <see cref="InputGroup"/> (AlwaysInclude = false).</summary>
+    /// <summary>A plain <see cref="InputGroup"/> (IsStack = false).</summary>
     public static InputGroup Group(params ILayoutElement[] children)
     {
         return new(
-            AlwaysInclude: false,
+            IsStack: false,
             Children: [.. children],
             Overlays: []);
     }
 
-    /// <summary>A stack-style <see cref="InputGroup"/> (AlwaysInclude = true).</summary>
+    /// <summary>A stack-style <see cref="InputGroup"/> (IsStack = true).</summary>
     public static InputGroup Stack(params ILayoutElement[] children)
     {
         return new(
-            AlwaysInclude: true,
+            IsStack: true,
             Children: [.. children],
             Overlays: []);
     }
