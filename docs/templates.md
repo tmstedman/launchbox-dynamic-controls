@@ -34,7 +34,7 @@ When rendering a button the plugin picks the most-specific image that exists on 
 - Without a controller variant (or if the controller variant folder has no file): `Sega Genesis/B.png`
 - If neither exists: `ButtonA.png`
 
-One exception to "most-specific wins": when the current platform has *no* button mapped to that generic input, the generic image is used even if platform art exists — showing a Genesis `C` button on a controller slot the game can't reach would mislead. A `<Render useImage="…">` is exempt, because it is explicitly borrowing another input's artwork.
+One exception to "most-specific wins": when the current platform has *no* button mapped to that generic input, the generic image is used even if platform art exists — showing a Genesis `C` button on a controller slot the game can't reach would mislead. An `<Input useImage="…">` is exempt, because it is explicitly borrowing another input's artwork.
 
 Image files must be `.png`. Paths 1–3 are relative to the template folder; path 4 is relative to `Templates\`.
 

@@ -76,9 +76,7 @@ public class TemplateSubsystemTests
                 <Style name="dim" showIf="mapping" minOpacity="0.3" inactiveBlurRadius="8" />
               </Head>
               <Body>
-                <Input name="ButtonA" style="dim" inactiveBlurRadius="4" x="0" y="0">
-                  <Render width="64" height="64" />
-                </Input>
+                <Input name="ButtonA" style="dim" inactiveBlurRadius="4" x="0" y="0" width="64" height="64" />
               </Body>
             </ControllerTemplate>
             """);
@@ -116,40 +114,36 @@ public class TemplateSubsystemTests
     // ---- coordinate resolution ----
 
     [Fact]
-    public void Load_AbsoluteInputCoords_RenderPositionIsAbsolute()
+    public void Load_AbsoluteInputCoords_ImagePositionIsAbsolute()
     {
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonA" x="100" y="200">
-                  <Render x="+10" y="+20" width="64" height="64" />
-                </Input>
+                <Input name="ButtonA" x="100" y="200" width="64" height="64" />
               </Body>
             </ControllerTemplate>
             """);
 
-        var render = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
-        render.X.ShouldBe(110);
-        render.Y.ShouldBe(220);
+        var image = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
+        image.X.ShouldBe(100);
+        image.Y.ShouldBe(200);
     }
 
     [Fact]
-    public void Load_RelativeRenderCoords_AddedToInputOrigin()
+    public void Load_RelativeInputCoords_AddToAmbientOrigin()
     {
-        // Renders declared with +/- coords are relative to their Input's origin.
+        // A top-level Input's +/- coords are relative to the canvas origin (0,0).
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonA" x="50" y="60">
-                  <Render x="+5" y="-10" width="44" height="44" />
-                </Input>
+                <Input name="ButtonA" x="+5" y="-10" width="44" height="44" />
               </Body>
             </ControllerTemplate>
             """);
 
-        var render = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
-        render.X.ShouldBe(55);
-        render.Y.ShouldBe(50);
+        var image = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
+        image.X.ShouldBe(5);
+        image.Y.ShouldBe(-10);
     }
 
     [Fact]
@@ -160,12 +154,8 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Group x="10" y="100" gap="45">
-                  <Input name="ButtonA">
-                    <Render width="34" height="34" />
-                  </Input>
-                  <Input name="ButtonB">
-                    <Render width="34" height="34" />
-                  </Input>
+                  <Input name="ButtonA" width="34" height="34" />
+                  <Input name="ButtonB" width="34" height="34" />
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -187,12 +177,8 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Group x="10" y="100" gap="45" vAlign="bottom">
-                  <Input name="ButtonA">
-                    <Render width="34" height="34" />
-                  </Input>
-                  <Input name="ButtonB">
-                    <Render width="34" height="34" />
-                  </Input>
+                  <Input name="ButtonA" width="34" height="34" />
+                  <Input name="ButtonB" width="34" height="34" />
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -213,11 +199,8 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="AxisLeftStick" x="500" y="300">
-                  <Render width="124" height="124" />
-                  <Input name="AxisLeftStickUp">
-                    <Render x="+5" y="+10" width="34" height="34" />
-                  </Input>
+                <Input name="AxisLeftStick" x="500" y="300" width="124" height="124">
+                  <Input name="AxisLeftStickUp" x="+5" y="+10" width="34" height="34" />
                 </Input>
               </Body>
             </ControllerTemplate>
@@ -232,17 +215,15 @@ public class TemplateSubsystemTests
     // ---- image resolution via TemplateImageResolver ----
 
     [Fact]
-    public void Load_Render_ImageFileIsInputNameDotPng()
+    public void Load_Input_ImageFileIsInputNameDotPng()
     {
-        // When a <Render> carries no useImage attribute, ImageFile is set to the Input's
+        // When an Input carries no useImage attribute, ImageFile is set to the Input's
         // name + ".png". Path resolution is deferred to render time (InputImageResolver)
         // so ImageFile is a plain filename, not a resolved absolute path.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonA" x="0" y="0">
-                  <Render width="64" height="64" />
-                </Input>
+                <Input name="ButtonA" x="0" y="0" width="64" height="64" />
               </Body>
             </ControllerTemplate>
             """);
@@ -252,25 +233,23 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Load_RenderWithUseImage_BothImageFileAndUseImageFileAreUseImageDotPng()
+    public void Load_InputWithUseImage_BothImageFileAndUseImageFileAreUseImageDotPng()
     {
-        // A <Render useImage="ButtonDpadUp"> borrows another input's image. Both ImageFile
+        // An Input with useImage="ButtonDpadUp" borrows another input's image. Both ImageFile
         // and UseImageFile carry the borrowed filename so the renderer can distinguish a
-        // "borrowing" render from an "identity" render. Path resolution still happens at
+        // "borrowing" image from an "identity" one. Path resolution still happens at
         // render time, not here.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonDpad" x="0" y="0">
-                  <Render useImage="ButtonDpadUp" width="34" height="34" />
-                </Input>
+                <Input name="ButtonDpad" x="0" y="0" useImage="ButtonDpadUp" width="34" height="34" />
               </Body>
             </ControllerTemplate>
             """);
 
-        var render = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
-        render.ImageFile.ShouldBe("ButtonDpad.png");     // always the owning Input's name
-        render.UseImageFile.ShouldBe("ButtonDpadUp.png"); // the borrowed asset
+        var image = t.Layout.Elements.OfType<InputDefinition>().Single().InputImages.Single();
+        image.ImageFile.ShouldBe("ButtonDpad.png");     // always the owning Input's name
+        image.UseImageFile.ShouldBe("ButtonDpadUp.png"); // the borrowed asset
     }
 
     [Fact]
@@ -295,9 +274,8 @@ public class TemplateSubsystemTests
         var (service, images) = Build("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonA" x="0" y="0">
+                <Input name="ButtonA" x="0" y="0" width="64" height="64">
                   <Overlay src="Line_ButtonA.png" x="+50" y="+10" />
-                  <Render width="64" height="64" />
                 </Input>
               </Body>
             </ControllerTemplate>
@@ -320,8 +298,8 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Group x="0" y="0" gap="10">
-                  <Input name="ButtonA" x="0" y="0"><Render width="44" height="44" /></Input>
-                  <Input name="ButtonB" x="0" y="50"><Render width="44" height="44" /></Input>
+                  <Input name="ButtonA" x="0" y="0" width="44" height="44"></Input>
+                  <Input name="ButtonB" x="0" y="50" width="44" height="44"></Input>
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -338,15 +316,12 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonDpad" x="0" y="0">
-                  <Render width="135" height="135" />
+                <Input name="ButtonDpad" x="0" y="0" width="135" height="135">
                   <OneOf>
                     <Group>
-                      <Input name="ButtonDpadUp"><Render width="34" height="34" /></Input>
+                      <Input name="ButtonDpadUp" width="34" height="34"></Input>
                     </Group>
-                    <Input name="ButtonDpad" x="0" y="0">
-                      <Render useImage="ButtonDpadUp" width="34" height="34" />
-                    </Input>
+                    <Input name="ButtonDpad" x="0" y="0" useImage="ButtonDpadUp" width="34" height="34" />
                   </OneOf>
                 </Input>
               </Body>
@@ -372,10 +347,10 @@ public class TemplateSubsystemTests
               <Body>
                 <Group x="0" y="100" gap="50">
                   <OneOf>
-                    <Input name="ButtonDpadUp"><Render width="34" height="34" /></Input>
-                    <Input name="ButtonDpad"><Render width="34" height="34" /></Input>
+                    <Input name="ButtonDpadUp" width="34" height="34"></Input>
+                    <Input name="ButtonDpad" width="34" height="34"></Input>
                   </OneOf>
-                  <Input name="ButtonStart"><Render width="34" height="34" /></Input>
+                  <Input name="ButtonStart" width="34" height="34"></Input>
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -402,10 +377,9 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="AxisLeftStick" x="0" y="0">
-                  <Render width="124" height="124" />
-                  <Input name="AxisLeftStickUp"><Render width="34" height="34" /></Input>
-                  <Input name="AxisLeftStickDown"><Render width="34" height="34" /></Input>
+                <Input name="AxisLeftStick" x="0" y="0" width="124" height="124">
+                  <Input name="AxisLeftStickUp" width="34" height="34"></Input>
+                  <Input name="AxisLeftStickDown" width="34" height="34"></Input>
                 </Input>
               </Body>
             </ControllerTemplate>
@@ -426,13 +400,10 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Input name="ButtonDpad" x="0" y="0">
-                  <Render width="135" height="135" />
-                  <Input name="ButtonDpadUp"><Render width="34" height="34" /></Input>
+                <Input name="ButtonDpad" x="0" y="0" width="135" height="135">
+                  <Input name="ButtonDpadUp" width="34" height="34"></Input>
                 </Input>
-                <Input name="ButtonDpad" x="0" y="0">
-                  <Render width="135" height="135" />
-                </Input>
+                <Input name="ButtonDpad" x="0" y="0" width="135" height="135" />
               </Body>
             </ControllerTemplate>
             """);
@@ -457,8 +428,8 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Group x="0" y="0" gap="45" collapse="true">
-                  <Input name="ButtonA"><Render width="34" height="34" /></Input>
-                  <Input name="ButtonB"><Render width="34" height="34" /></Input>
+                  <Input name="ButtonA" width="34" height="34"></Input>
+                  <Input name="ButtonB" width="34" height="34"></Input>
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -484,10 +455,10 @@ public class TemplateSubsystemTests
             <ControllerTemplate>
               <Body>
                 <Group x="0" y="0" gap="40" collapse="true">
-                  <Input name="ButtonA"><Render width="34" height="34" /></Input>
+                  <Input name="ButtonA" width="34" height="34"></Input>
                   <Group>
-                    <Input name="ButtonB"><Render width="34" height="34" /></Input>
-                    <Input name="ButtonC"><Render width="34" height="34" /></Input>
+                    <Input name="ButtonB" width="34" height="34"></Input>
+                    <Input name="ButtonC" width="34" height="34"></Input>
                   </Group>
                 </Group>
               </Body>
@@ -520,20 +491,16 @@ public class TemplateSubsystemTests
           </Head>
           <Body>
             <Group x="100" y="200" gap="40" collapse="true">
-              <Input name="ButtonA" style="dim">
-                <Render width="34" height="34" />
+              <Input name="ButtonA" style="dim" width="34" height="34">
                 <Label x="+50" y="+5" />
               </Input>
               <Group>
-                <Input name="ButtonB" style="dim">
-                  <Render width="34" height="34" />
-                </Input>
+                <Input name="ButtonB" style="dim" width="34" height="34" />
               </Group>
               <OneOf>
-                <Input name="ButtonDpadUp"><Render width="34" height="34" /></Input>
-                <Input name="ButtonDpad">
-                  <Render width="34" height="34" />
-                  <Input name="ButtonDpadDown"><Render width="34" height="34" /></Input>
+                <Input name="ButtonDpadUp" width="34" height="34"></Input>
+                <Input name="ButtonDpad" width="34" height="34">
+                  <Input name="ButtonDpadDown" width="34" height="34"></Input>
                 </Input>
               </OneOf>
             </Group>
