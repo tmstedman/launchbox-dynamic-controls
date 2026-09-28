@@ -137,6 +137,12 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// uses its full nominal slot count: nothing ever vacates without <c>collapse="true"</c>, so
     /// nothing about the center varies by game in that case, and the formula below reduces to a
     /// fixed value.
+    ///
+    /// <para>The label's own <c>y</c> attribute (e.g. a hand-tuned <c>y="+15"</c> nudge) is
+    /// preserved as an additive offset on top of the computed center, never discarded: Phase 1
+    /// already baked it into <paramref name="entry"/>'s <c>Label.Y</c> relative to the group's
+    /// *nominal* (uncollapsed) frame origin, so subtracting that same nominal origin back out
+    /// recovers exactly the delta the author wrote, whatever it was resolved against.</para>
     /// </summary>
     private LabelDefinition ResolveLooseLabel(
         (LabelDefinition Label, InputGroup? Group) entry,
@@ -150,10 +156,16 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         int visibleCount = entry.Group.Collapse
             ? slots.Count(slot => !IsHidden(slot, template, ctx, renderSet))
             : slots.Count;
-        double y = entry.Group.DeclaredOriginY
+
+        double nominalFrameOriginY = entry.Group.DeclaredOriginY
+            - StackVAlign.Shift(entry.Group.VAlign, slots.Count, entry.Group.Gap);
+        double ownOffset = entry.Label.Y - nominalFrameOriginY;
+
+        double trueCenterY = entry.Group.DeclaredOriginY
             - StackVAlign.Shift(entry.Group.VAlign, visibleCount, entry.Group.Gap)
             + ((visibleCount - 1) * entry.Group.Gap / 2);
-        return entry.Label with { Y = y };
+
+        return entry.Label with { Y = trueCenterY + ownOffset };
     }
 
     private List<InputDefinition> SelectedLeaves(OneOf oneOf, HashSet<InputDefinition> renderSet) =>

@@ -631,10 +631,13 @@ public class LayoutFilterTests
     {
         // given a non-collapsing, vAlign="bottom" group of 2 slots (gap=40, declared y=300) with
         // a loose Label -- nothing ever vacates without collapse="true", so nothing about the
-        // center can vary by game; it always uses the full nominal slot count
+        // center can vary by game; it always uses the full nominal slot count. Y=260 is what
+        // Phase 1 actually bakes for a zero-offset loose Label here (the group's nominal frame
+        // origin: 300 - Shift("bottom", 2, 40) = 260) -- an arbitrary placeholder Y would still
+        // pass today, but would silently break the "preserve the label's own offset" fix below.
         InputDefinition slotA = Input("ButtonA");
         InputDefinition slotB = Input("ButtonB");
-        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 260));
         InputGroup group = new(
             Children: [slotA, slotB, label],
             Overlays: [],
@@ -658,12 +661,13 @@ public class LayoutFilterTests
         // given a collapsing, vAlign="center" group of 4 slots (gap=40, declared y=300) where
         // the first slot vacates -- vAlign="center" is designed so the declared Y always tracks
         // the true center of whatever survives, so this stays pinned at 300 exactly as if all
-        // four had survived (this already worked before the fix; confirms no regression)
+        // four had survived (this already worked before the fix; confirms no regression).
+        // Y=240 is Phase 1's nominal frame origin: 300 - Shift("center", 4, 40) = 240.
         InputDefinition slotA = Input("ButtonA");
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
         InputDefinition slotD = Input("ButtonD");
-        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 240));
         InputGroup group = new(
             Children: [slotA, slotB, slotC, slotD, label],
             Overlays: [],
@@ -691,10 +695,11 @@ public class LayoutFilterTests
         // first place); the actual surviving pair renders at 300 and 340 after the shift-up, so
         // the true center is 320. This is the actual bug: vAlign="top"/"bottom" never had
         // vAlign="center"'s "declared Y already tracks the survivors' center" guarantee.
+        // Y=300 is Phase 1's nominal frame origin: 300 - Shift("top", 3, 40) = 300 (top never shifts).
         InputDefinition slotA = Input("ButtonA");
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
-        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 300));
         InputGroup group = new(
             Children: [slotA, slotB, slotC, label],
             Overlays: [],
@@ -718,11 +723,12 @@ public class LayoutFilterTests
     {
         // given a collapsing, vAlign="bottom" group of 3 slots (gap=40, declared y=300) where
         // the last slot vacates -- the bottom-mode correction pins the last survivor (B) at 300
-        // and A at 260, giving a true center of 280, not the nominal 300
+        // and A at 260, giving a true center of 280, not the nominal 300.
+        // Y=220 is Phase 1's nominal frame origin: 300 - Shift("bottom", 3, 40) = 220.
         InputDefinition slotA = Input("ButtonA");
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
-        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 220));
         InputGroup group = new(
             Children: [slotA, slotB, slotC, label],
             Overlays: [],
@@ -747,10 +753,11 @@ public class LayoutFilterTests
         // given a collapsing group whose first slot is a OneOf (not a plain Input) -- exercises
         // the SelectedLeaves path IsHidden needs for a OneOf slot, confirming label-centering
         // doesn't assume every slot is a plain InputDefinition
+        // Y=300 is Phase 1's nominal frame origin: 300 - Shift("top", 2, 40) = 300.
         InputDefinition altA = Input("ButtonA");
         InputDefinition tail = Input("ButtonB");
         var oneOf = new OneOf(Alternatives: [altA]);
-        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 300));
         InputGroup group = new(
             Children: [oneOf, tail, label],
             Overlays: [],
@@ -785,6 +792,39 @@ public class LayoutFilterTests
 
         LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
         li.Labels.Single().Y.ShouldBe(42);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelWithItsOwnYOffset_PreservesThatOffsetOnTopOfTheComputedCenter()
+    {
+        // given the same collapsing, vAlign="top" scenario as
+        // Filter_LooseLabelInCollapsingTopGroup_CentersOnTheSurvivingSubset_NotTheNominalOne
+        // (true center 320), but the Label carries its own y="+15" nudge -- Phase 1 bakes that
+        // as 300 (nominal frame origin) + 15 = 315. The nudge must be preserved as an additive
+        // offset on top of the *computed* center (320 + 15 = 335), never discarded outright --
+        // exactly the regression this test would have caught: an earlier version of
+        // ResolveLooseLabel replaced Y wholesale, silently dropping every hand-tuned offset in
+        // the shipped template (e.g. AxisRightStick's y="+15", AxisLeftStick/ButtonDpad's y="+17").
+        InputDefinition slotA = Input("ButtonA");
+        InputDefinition slotB = Input("ButtonB");
+        InputDefinition slotC = Input("ButtonC");
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 315));
+        InputGroup group = new(
+            Children: [slotA, slotB, slotC, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "top",
+            Collapse: true);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(slotB, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AllImagesZeroOpacity(slotA, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(335);
     }
 
     // ---- defensive throws ----
