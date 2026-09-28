@@ -431,6 +431,72 @@ public class InputRenderingSubsystemTests
         label.Text.ShouldBe("Steering");
     }
 
+    [Fact]
+    public void Render_CollapsingGroupWithTwoOfFourDirectionsLabelled_MergedLabelCentersOnSurvivorsAndKeepsItsOwnNudge()
+    {
+        // Real production shape (Templates/Xbox Series X/Layout.xml's AxisRightStick multi-label
+        // branch): a collapsing Group with no vAlign attribute (defaults to "top"), four direction
+        // Inputs (style="small-label-vacate" -- showIf="label", MinOpacity=0, so an unlabelled
+        // direction fully vacates its slot instead of merely dimming), and a loose Label carrying
+        // its own y="+15" hand-tuned nudge. Mirrors a MAME game whose right stick has two
+        // directions sharing identical label text ("Steer" on Left and Right) with Up/Down
+        // unlabelled -- Up and Down vacate, Left and Right survive. Drives the real
+        // VisibilityEvaluator (not a mock) so both the direction icons' vacate/shift and the
+        // merged label's render-time centering come from the same per-game visibility facts.
+        var up = Input(name: "AxisRightStickUp",
+            images: [new InputImageDefinition(0, 772, "AxisRightStickUp.png", ShowIf: Label, MinOpacity: 0)]);
+        var left = Input(name: "AxisRightStickLeft",
+            images: [new InputImageDefinition(0, 817, "AxisRightStickLeft.png", ShowIf: Label)]);
+        var right = Input(name: "AxisRightStickRight",
+            images: [new InputImageDefinition(0, 862, "AxisRightStickRight.png", ShowIf: Label)]);
+        var down = Input(name: "AxisRightStickDown",
+            images: [new InputImageDefinition(0, 907, "AxisRightStickDown.png", ShowIf: Label, MinOpacity: 0)]);
+        // Y=787: what LayoutResolver bakes for a loose Label with y="+15" here -- the nominal
+        // (uncollapsed, vAlign="top" never shifts) frame origin of 772, plus the +15 nudge.
+        var looseLabel = new LabelElement(new LabelDefinition(X: 0, Y: 787, FontSize: 20));
+        var group = new InputGroup(
+            Children: [up, left, right, down, looseLabel],
+            Overlays: [],
+            DeclaredOriginY: 772,
+            Gap: 45,
+            VAlign: "top",
+            Collapse: true);
+        var axisRightStick = new InputDefinition(
+            Name: "AxisRightStick", InputImages: [], Overlays: [], Labels: [], Children: [group]);
+
+        _images.With(src: "AxisRightStickUp.png", generic: "AxisRightStickUp.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickLeft.png", generic: "AxisRightStickLeft.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickRight.png", generic: "AxisRightStickRight.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickDown.png", generic: "AxisRightStickDown.png", platform: Genesis, controller: ThreeButton);
+
+        // The icon vacate/shift mechanism (ComputeCollapseAdjustments) reads the separate
+        // CollapseInfo dictionary, not InputGroup's own fields -- both must be built here for a
+        // realistic scenario, same as the other collapsing-group tests in this file.
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>();
+        CollapseGroupBuilder.Build(group.Children, gap: 45, collapseInfo, vAlign: "top");
+        Template template = TemplateOf([axisRightStick], collapseInfo);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisRightStick", "Steer"), ("AxisRightStickLeft", "Steer"), ("AxisRightStickRight", "Steer"));
+
+        // when the service renders
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        // then Up and Down vacated (no label, MinOpacity=0) -- only Left and Right rendered, each
+        // shifted up by one gap (Up's vacancy) from their nominal Y: 817-45=772, 862-45=817
+        result.Images.Select(i => i.InputName).ShouldBe(["AxisRightStickLeft", "AxisRightStickRight"]);
+        result.Images.Single(i => i.InputName == "AxisRightStickLeft").Top.ShouldBe(772);
+        result.Images.Single(i => i.InputName == "AxisRightStickRight").Top.ShouldBe(817);
+
+        // and the merged label centers on the true midpoint of the surviving pair (772 and 817,
+        // i.e. 794.5) -- not the nominal 4-slot center (which vAlign="top" would otherwise have
+        // left it pinned to, 772) -- plus its own +15 nudge preserved on top (809.5),
+        // baseline-adjusted for FontSize=20 (Top = Y - FontSize*0.75 = 809.5 - 15 = 794.5)
+        RenderedLabel label = result.Labels.Single();
+        label.InputName.ShouldBe("AxisRightStick");
+        label.Text.ShouldBe("Steer");
+        label.Top.ShouldBe(794.5);
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(
