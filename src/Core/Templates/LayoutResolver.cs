@@ -97,10 +97,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             InheritedFontSize = inputXml.FontSize ?? namedStyle?.FontSize,
             OriginX = inputOriginX,
             OriginY = inputOriginY,
-            CurrentInputName = name,
-            // A group member's own loose content centers against *its own* enclosing group, if
-            // any -- not whichever outer group this Input happened to be a member of.
-            StackAnchorY = null
+            CurrentInputName = name
         };
 
         var labels = inputXml.Labels.Select(labelXml => BuildLabelDefinition(labelXml, inputCtx)).ToList();
@@ -143,13 +140,13 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// method already validated — carried through <see cref="CollapseInfo"/> so a bad value is
     /// only ever logged once, here.
     ///
-    /// <para>The declared Y (before that shift) is captured separately as
-    /// <see cref="BuildContext.StackAnchorY"/> for any loose <c>&lt;Label&gt;</c> found directly
-    /// inside this group (or reached through a nested Group/OneOf/Condition): since it
-    /// already names whatever slot <c>vAlign</c> points at — invariant to collapse, by the same
-    /// guarantee the render-time correction relies on — such a label needs no correction of its
-    /// own to stay pinned there. A <c>vAlign="center"</c> group is what gives a loose Label the
-    /// "half-way up the stack" position; <c>top</c>/<c>bottom</c> give whichever end instead.</para>
+    /// <para>The group's own shape — declared Y (before the shift above), Gap, VAlign, and
+    /// whether it collapses — is attached directly to the returned <see cref="InputGroup"/>
+    /// (rather than threaded through <see cref="BuildContext"/>) so <see
+    /// cref="Rendering.LayoutFilter"/> can compute where a loose <c>&lt;Label&gt;</c> placed
+    /// directly inside this group should sit: the visual center of however many of this group's
+    /// slots actually survive for the current game, which is a per-game fact this build-time
+    /// pass has no way to know — see <see cref="InputGroup"/>'s own doc comment.</para>
     /// </summary>
     private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
     {
@@ -166,7 +163,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Gap = gap,
             SlotIndex = 0,
         };
-        BuildContext groupCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY, StackAnchorY = declaredOriginY };
+        BuildContext groupCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY };
 
         var children = new List<ILayoutElement>();
         foreach (ILayoutNode child in groupXml.Children)
@@ -178,7 +175,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Children: children,
             Overlays: [.. groupXml.Overlays
                 .Where(o => o.Src != null)
-                .Select(o => BuildOverlayDefinition(o, groupCtx))]);
+                .Select(o => BuildOverlayDefinition(o, groupCtx))],
+            DeclaredOriginY: declaredOriginY,
+            Gap: gap,
+            VAlign: vAlign,
+            Collapse: groupXml.Collapse);
 
         if (groupXml.Collapse)
             CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
@@ -358,16 +359,17 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// <summary>
     /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
     /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
-    /// Y resolves against <see cref="BuildContext.StackAnchorY"/> when set (a loose Label inside a
-    /// Group, centering — or top/bottom-aligning — against the Group's own declared position
-    /// rather than the shifted per-slot origin its members use); <c>inputCtx</c> always resets
-    /// this to null for a genuine direct child, so this is a no-op there.
+    /// Y always resolves against the plain ambient origin — a loose Label centering against its
+    /// enclosing Group's declared position is a per-game fact (which of the group's slots
+    /// actually survive) this build-time pass has no way to know, so it's computed entirely by
+    /// <see cref="Rendering.LayoutFilter"/> at render time instead, from the group's own shape
+    /// (see <see cref="InputGroup"/>'s doc comment); this method never needs to special-case it.
     /// </summary>
     private LabelDefinition BuildLabelDefinition(LabelNode labelXml, BuildContext ctx)
     {
         var label = new LabelDefinition(
             X: labelXml.X.Resolve(ctx.OriginX),
-            Y: labelXml.Y.Resolve(ctx.StackAnchorY ?? ctx.OriginY),
+            Y: labelXml.Y.Resolve(ctx.OriginY),
             Alignment: labelXml.Align,
             FontSize: labelXml.FontSize ?? ctx.InheritedFontSize ?? ctx.DefaultFontSize);
         _logger.Debug($"Label position: {ctx.CurrentInputName} at ({labelXml.X},{labelXml.Y}) align={labelXml.Align} fontSize={label.FontSize}");
@@ -459,12 +461,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// filename and coordinate origin — <see cref="Rendering.LayoutFilter"/> separately
     /// rediscovers the same Input during its own per-game walk, since the resolved
     /// <see cref="InputDefinition"/> a loose render belongs to doesn't exist as an object yet at
-    /// the point its own children are being built.
-    /// <c>StackAnchorY</c> tracks the innermost enclosing Group's own declared Y (before its
-    /// <c>vAlign</c> shift), for a loose <c>&lt;Label&gt;</c> to resolve against instead of the
-    /// shifted per-slot origin members use — null outside any Group, reset (like
-    /// <c>CurrentInputName</c>) on entering a nested Input, and naturally shadowed by a nested
-    /// Group's own value.
+    /// the point its own children are being built. A loose Label's centering against its
+    /// enclosing Group is handled the same way — entirely by <see cref="Rendering.LayoutFilter"/>,
+    /// which rediscovers the enclosing <see cref="InputGroup"/> during its own walk — so this
+    /// context carries no equivalent field for it; see <see cref="InputGroup"/>'s doc comment.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
@@ -477,8 +477,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double? InheritedFontSize = null,
         double OriginX = 0,
         double OriginY = 0,
-        string? CurrentInputName = null,
-        double? StackAnchorY = null);
+        string? CurrentInputName = null);
 
     /// <summary>
     /// Mutable iteration state for one group's slot loop. SlotIndex advances as children consume
