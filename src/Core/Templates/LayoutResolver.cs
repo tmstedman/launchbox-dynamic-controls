@@ -136,7 +136,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
     {
         var group = new InputGroup(
-            AlwaysInclude: false,
+            IsStack: false,
             Children: [.. groupXml.Children.Select(c => BuildNode(c, ctx))],
             Overlays: [.. groupXml.Overlays
                 .Where(o => o.Src != null)
@@ -145,7 +145,9 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         return group;
     }
 
-    /// <summary>Resolves a StackNode DTO into an always-included InputGroup. Establishes a
+    /// <summary>Resolves a StackNode DTO into an InputGroup, included at render time under the
+    /// same any-descendant-visible rule as a plain Group — a Stack drops out entirely (itself and
+    /// any Overlay it carries) when nothing inside it is visible. Establishes a
     /// canvas origin and stacks children vertically: each Input (at any depth through transparent
     /// plain Groups) consumes one slot, advancing the y position by Gap. <c>VAlign</c> shifts
     /// that origin up front so the declared Y lands on the first, last, or middle slot rather
@@ -188,7 +190,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         }
 
         var stack = new InputGroup(
-            AlwaysInclude: true,
+            IsStack: true,
             Children: children,
             Overlays: [.. stackXml.Overlays
                 .Where(o => o.Src != null)
@@ -271,7 +273,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                     children.Add(BuildNodeInStack(child, frame, ctx));
                 }
                 var group = new InputGroup(
-                    AlwaysInclude: false,
+                    IsStack: false,
                     Children: children,
                     Overlays: [.. plainGroupXml.Overlays
                         .Where(o => o.Src != null)

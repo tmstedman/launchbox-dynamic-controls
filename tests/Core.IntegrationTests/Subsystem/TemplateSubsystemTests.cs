@@ -320,7 +320,7 @@ public class TemplateSubsystemTests
     // ---- structural elements ----
 
     [Fact]
-    public void Load_Group_AlwaysIncludeFalse_ChildrenCollected()
+    public void Load_Group_IsStackFalse_ChildrenCollected()
     {
         var t = Load("""
             <ControllerTemplate>
@@ -334,14 +334,14 @@ public class TemplateSubsystemTests
             """);
 
         var group = t.Layout.Elements.OfType<InputGroup>().Single();
-        group.AlwaysInclude.ShouldBeFalse();
+        group.IsStack.ShouldBeFalse();
         group.Children.OfType<InputDefinition>().Select(i => i.Name).ShouldBe(["ButtonA", "ButtonB"]);
     }
 
     [Fact]
-    public void Load_Stack_AlwaysIncludeTrue()
+    public void Load_Stack_IsStackTrue()
     {
-        // A <Stack> resolves to an InputGroup with AlwaysInclude=true.
+        // A <Stack> resolves to an InputGroup with IsStack=true.
         var t = Load("""
             <ControllerTemplate>
               <Body>
@@ -354,7 +354,7 @@ public class TemplateSubsystemTests
 
         // A body-level Stack lands directly as the sole InputGroup in Elements (no wrapper).
         var stack = t.Layout.Elements.OfType<InputGroup>().Single();
-        stack.AlwaysInclude.ShouldBeTrue();
+        stack.IsStack.ShouldBeTrue();
     }
 
     [Fact]
@@ -505,7 +505,7 @@ public class TemplateSubsystemTests
     {
         // CollapseGroupBuilder treats plain Groups as transparent — Inputs reached through a
         // nested <Group> get their own slot and land in CollapseInfo. Verifies the wiring
-        // between LayoutResolver (which marks the inner Group AlwaysInclude=false) and
+        // between LayoutResolver (which marks the inner Group IsStack=false) and
         // CollapseGroupBuilder's slot walk.
         var t = Load("""
             <ControllerTemplate>

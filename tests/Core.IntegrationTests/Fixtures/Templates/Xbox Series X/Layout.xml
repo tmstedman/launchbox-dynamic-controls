@@ -50,43 +50,39 @@
         <Input name="ButtonBack" style="mapped-input-blur" x="714" y="356">
             <Render height="44" width="44" />
         </Input>
-        <Group>
+        <Stack x="666" y="661" gap="45">
             <Overlay src="Line_MetaButtons.png" x="703" y="406" />
-            <Stack x="666" y="661" gap="45">
-                <Input name="ButtonStart" style="small-label-blur">
-                    <Render height="34" width="34" />
-                    <Label x="+51" y="+17" />
-                </Input>
-                <Input name="ButtonBack" style="small-label-blur">
-                    <Render height="34" width="34" />
-                    <Label x="+51" y="+17" />
-                </Input>
-            </Stack>
-        </Group>
-        <Group>
-            <Stack x="1249" y="318" gap="80">
-                <Input name="ButtonY" style="input-label">
-                    <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
-                    <Render height="44" width="44" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonB" style="input-label">
-                    <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
-                    <Render height="44" width="44" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonA" style="input-label">
-                    <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
-                    <Render height="44" width="44" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonX" style="input-label">
-                    <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
-                    <Render height="44" width="44" />
-                    <Label x="+60" y="+22" />
-                </Input>
-            </Stack>
-        </Group>
+            <Input name="ButtonStart" style="small-label-blur">
+                <Render height="34" width="34" />
+                <Label x="+51" y="+17" />
+            </Input>
+            <Input name="ButtonBack" style="small-label-blur">
+                <Render height="34" width="34" />
+                <Label x="+51" y="+17" />
+            </Input>
+        </Stack>
+        <Stack x="1249" y="318" gap="80">
+            <Input name="ButtonY" style="input-label">
+                <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                <Render height="44" width="44" />
+                <Label x="+60" y="+22" />
+            </Input>
+            <Input name="ButtonB" style="input-label">
+                <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                <Render height="44" width="44" />
+                <Label x="+60" y="+22" />
+            </Input>
+            <Input name="ButtonA" style="input-label">
+                <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                <Render height="44" width="44" />
+                <Label x="+60" y="+22" />
+            </Input>
+            <Input name="ButtonX" style="input-label">
+                <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                <Render height="44" width="44" />
+                <Label x="+60" y="+22" />
+            </Input>
+        </Stack>
         <Input name="ButtonLeftStick" style="show-if-label" x="307" y="477">
             <Overlay src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Render height="44" width="44" />
@@ -120,47 +116,43 @@
                      The label lives loose inside the Stack, so it centers against the Stack's own
                      declared vAlign="center" position with no hand-tuned offset. -->
                 <Condition any="AxisLeftStick" match="label">
-                    <Group>
-                        <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                        <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
-                            <Input name="AxisLeftStickUp" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="AxisLeftStickLeft" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="AxisLeftStickRight" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="AxisLeftStickDown" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Label x="-24" y="+17" align="right" />
-                        </Stack>
-                    </Group>
-                </Condition>
-                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
-                <Group>
-                    <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                     <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+                        <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                         <Input name="AxisLeftStickUp" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="AxisLeftStickLeft" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="AxisLeftStickRight" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="AxisLeftStickDown" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
+                        <Label x="-24" y="+17" align="right" />
                     </Stack>
-                </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
+                <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+                    <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                    <Input name="AxisLeftStickUp" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickLeft" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickRight" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickDown" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Stack>
             </OneOf>
         </Input>
         <Input name="AxisRightStick" style="auto-blur" x="839" y="438">
@@ -181,47 +173,43 @@
                      lives loose inside the Stack, so it centers against the Stack's own declared
                      vAlign="center" position with no hand-tuned offset, same as AxisLeftStick above. -->
                 <Condition any="AxisRightStick" match="label">
-                    <Group>
+                    <Stack x="882" y="772" gap="45" collapse="true">
                         <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                        <Stack x="882" y="772" gap="45" collapse="true" vAlign="center">
-                            <Input name="AxisRightStickUp" style="small-label-vacate">
-                                <Render useImage="AxisLeftStickUp" height="34" width="34" />
-                            </Input>
-                            <Input name="AxisRightStickLeft" style="small-label-vacate">
-                                <Render useImage="AxisLeftStickLeft" height="34" width="34" />
-                            </Input>
-                            <Input name="AxisRightStickRight" style="small-label-vacate">
-                                <Render useImage="AxisLeftStickRight" height="34" width="34" />
-                            </Input>
-                            <Input name="AxisRightStickDown" style="small-label-vacate">
-                                <Render useImage="AxisLeftStickDown" height="34" width="34" />
-                            </Input>
-                            <Label x="+52" y="+15" />
-                        </Stack>
-                    </Group>
-                </Condition>
-                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
-                <Group>
-                    <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                    <Stack x="882" y="772" gap="45" collapse="true" vAlign="center">
                         <Input name="AxisRightStickUp" style="small-label-vacate">
                             <Render useImage="AxisLeftStickUp" height="34" width="34" />
-                            <Label x="+52" y="+15" />
                         </Input>
                         <Input name="AxisRightStickLeft" style="small-label-vacate">
                             <Render useImage="AxisLeftStickLeft" height="34" width="34" />
-                            <Label x="+52" y="+15" />
                         </Input>
                         <Input name="AxisRightStickRight" style="small-label-vacate">
                             <Render useImage="AxisLeftStickRight" height="34" width="34" />
-                            <Label x="+52" y="+15" />
                         </Input>
                         <Input name="AxisRightStickDown" style="small-label-vacate">
                             <Render useImage="AxisLeftStickDown" height="34" width="34" />
-                            <Label x="+52" y="+15" />
                         </Input>
+                        <Label x="+52" y="+15" />
                     </Stack>
-                </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree — each renders its own, independent text. -->
+                <Stack x="882" y="772" gap="45" collapse="true">
+                    <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                    <Input name="AxisRightStickUp" style="small-label-vacate">
+                        <Render useImage="AxisLeftStickUp" height="34" width="34" />
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickLeft" style="small-label-vacate">
+                        <Render useImage="AxisLeftStickLeft" height="34" width="34" />
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickRight" style="small-label-vacate">
+                        <Render useImage="AxisLeftStickRight" height="34" width="34" />
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickDown" style="small-label-vacate">
+                        <Render useImage="AxisLeftStickDown" height="34" width="34" />
+                        <Label x="+52" y="+15" />
+                    </Input>
+                </Stack>
             </OneOf>
         </Input>
         <Input name="ButtonDpad" style="auto-blur" x="623" y="440">
@@ -232,48 +220,44 @@
                      shared label rather than repeating it next to every agreeing icon. Covers a
                      full four-way agreement too, in the same shape as a partial one. -->
                 <Condition any="ButtonDpad" match="label">
-                    <Group>
-                        <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
-                        <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
-                            <Input name="ButtonDpadUp" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="ButtonDpadLeft" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="ButtonDpadRight" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Input name="ButtonDpadDown" style="small-label-vacate">
-                                <Render height="34" width="34" />
-                            </Input>
-                            <Label x="-24" y="+17" align="right" />
-                        </Stack>
-                    </Group>
-                </Condition>
-                <!-- Fallback: no two directions agree (or nothing's labelled at all) — each
-                     direction renders its own, independent text. -->
-                <Group>
-                    <Stack x="312" y="552" gap="45" collapse="true" vAlign="center">
+                    <Stack x="312" y="619.5" gap="45" collapse="true" vAlign="center">
                         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
                         <Input name="ButtonDpadUp" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="ButtonDpadLeft" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="ButtonDpadRight" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
                         <Input name="ButtonDpadDown" style="small-label-vacate">
                             <Render height="34" width="34" />
-                            <Label x="-24" y="+17" align="right" />
                         </Input>
+                        <Label x="-24" y="+17" align="right" />
                     </Stack>
-                </Group>
+                </Condition>
+                <!-- Fallback: no two directions agree (or nothing's labelled at all) — each
+                     direction renders its own, independent text. -->
+                <Stack x="312" y="619.5" gap="45" collapse="true" vAlign="center">
+                    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
+                    <Input name="ButtonDpadUp" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadLeft" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadRight" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadDown" style="small-label-vacate">
+                        <Render height="34" width="34" />
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Stack>
             </OneOf>
         </Input>
     </Body>

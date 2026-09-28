@@ -270,9 +270,8 @@ A wrapper around a cluster of related inputs. Two purposes:
 
 ```xml
 <Group>
-    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
-    <Input name="ButtonDpadUp">...</Input>
-    <Input name="ButtonDpadDown">...</Input>
+    <Input name="ButtonStart">...</Input>
+    <Input name="ButtonBack">...</Input>
 </Group>
 ```
 
@@ -280,14 +279,17 @@ No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition
 
 A Group inside a `<Stack>` is *transparent* to slot counting — each Input in the Group consumes its own stack slot.
 
+A `<Stack>` gates on visibility the same way a Group does (see below), so wrapping a `<Group>` around a `<Stack>` just to get conditional inclusion or a shared overlay is never needed — put the `<Overlay>` directly inside the `<Stack>` instead. `<Group>` remains useful on its own for a cluster of plain `<Input>`s that don't need Stack's positioning.
+
 ### `<Stack>` — positioned cluster
 
 A vertical list of inputs, each spaced `gap` pixels below the last. Which slot sits at `y` itself depends on `vAlign`: by default (`vAlign="top"`) the first child sits at the Stack's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on.
 
-Unlike `<Group>`, a Stack is always included in the layout — it never hides itself based on whether its children are visible. Each child decides its own visibility independently.
+A Stack gates on visibility exactly like a `<Group>`: when no descendant has a visible render, the whole Stack — including any `<Overlay>` it carries — is excluded, the same "semantic exclusion" as an excluded Group. Each child still decides its own individual visibility independently when the Stack *is* included.
 
 ```xml
 <Stack x="312" y="291" gap="45" collapse="true">
+    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
     <Input name="ButtonDpadUp">...</Input>
     <Input name="ButtonDpadLeft">...</Input>
     <Input name="ButtonDpadRight">...</Input>
@@ -385,7 +387,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
-No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) — the most common reason to nest one of these directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Group>`/`<Stack>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way those two do, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` (or `<Stack>`) inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) — the most common reason to nest one of these directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Group>`/`<Stack>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way those two do, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Stack>` (or `<Group>`, if the content doesn't need Stack's positioning) inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
 
 **Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
 
@@ -433,7 +435,7 @@ A minimal template with a single button:
 </ControllerTemplate>
 ```
 
-For a full reference, see the `Templates/Xbox Series X/Layout.xml` in this repository — it exercises every concept in this document (Head with named styles, Stack with collapse, Group with shared overlay, OneOf with `Condition`-gated alternatives, nested `Condition` for compound AND logic, `useImage` for asset borrowing, all four `showIf` modes).
+For a full reference, see the `Templates/Xbox Series X/Layout.xml` in this repository — it exercises every concept in this document (Head with named styles, Stack with collapse and a shared overlay, OneOf with `Condition`-gated alternatives, nested `Condition` for compound AND logic, `useImage` for asset borrowing, all four `showIf` modes). It has no `<Group>` of its own — every cluster in it needs Stack's positioning, so there's nothing left for a wrapping Group to add (see [`<Group>`](#group--conditional-cluster)).
 
 ## Conventions for new templates
 

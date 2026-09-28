@@ -47,8 +47,8 @@ internal static class CollapseGroupBuilder
 
     /// <summary>
     /// Collects slot-level nodes into <paramref name="output"/>. Plain Groups are transparent
-    /// (their Input children each get their own slot); always-include Groups (Stacks) and
-    /// OneOfs occupy a single slot as a block.
+    /// (their Input children each get their own slot); Stacks and OneOfs occupy a single slot
+    /// as a block.
     /// </summary>
     private static void CollectSlots(ILayoutElement node, List<ILayoutElement> output)
     {
@@ -57,7 +57,7 @@ internal static class CollapseGroupBuilder
             case InputDefinition input:
                 output.Add(input);
                 break;
-            case InputGroup group when !group.AlwaysInclude:
+            case InputGroup group when !group.IsStack:
                 foreach (ILayoutElement child in group.Children)
                 {
                     CollectSlots(child, output);
