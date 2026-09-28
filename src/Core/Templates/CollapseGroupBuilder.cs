@@ -81,7 +81,7 @@ internal static class CollapseGroupBuilder
                     CollectSlots(child, output);
                 }
                 break;
-            case RenderElement or LabelElement:
+            case LabelElement:
                 // Takes no slot, same as an Overlay.
                 break;
             default:
@@ -122,7 +122,7 @@ internal static class CollapseGroupBuilder
                     SetMetadata(child, info, output);
                 }
                 break;
-            case RenderElement or LabelElement:
+            case LabelElement:
                 // Leaf, not an InputDefinition -- no collapse metadata to record.
                 break;
             default:

@@ -138,11 +138,11 @@ The internal flow is two passes:
 
 **Layout filtering** (`LayoutFilter`) walks the template's resolved element tree applying visibility rules:
 
-- `InputDefinition` → always considered; its renders are filtered by `showIf` against the label/mapping context
+- `InputDefinition` → always considered; its own image is filtered by `showIf` against the label/mapping context
 - `InputGroup` → rendered only when any descendant has a visible render; otherwise the whole group's inputs (and any Overlay it carries) are dropped from `inputsToRender`
 - `OneOf` → only the first alternative with a visible render is rendered; the rest are dropped
 - `ConditionElement` → rendered only when its explicit `all`/`any`/`none` check against named inputs' label/mapping state passes — a direct dictionary lookup, not a fold-in over its own descendants, so it can gate on a name its children never render themselves
-- `RenderElement`/`LabelElement` (a loose `<Render>`/`<Label>` found somewhere other than as a direct child of its own `<Input>`, most usefully under a `<Condition>`) → since it can only be reached by having already recursed through every wrapping `Condition`/`Group`/`OneOf` above it, no further check happens here; it's added to whichever `InputDefinition` was ambient when `LayoutFilter` reached it (tracked during its own walk — see `Templates/LayoutResolver`'s matching `BuildContext.CurrentInputName`, used to resolve the same ambient identity at template-load time, one layer earlier) and rendered on equal footing with that Input's own static `InputImages`/`Labels`
+- `LabelElement` (a loose `<Label>` found somewhere other than as a direct child of its own `<Input>`, most usefully under a `<Condition>`) → since it can only be reached by having already recursed through every wrapping `Condition`/`Group`/`OneOf` above it, no further check happens here; it's added to whichever `InputDefinition` was ambient when `LayoutFilter` reached it (tracked during its own walk — see `Templates/LayoutResolver`'s matching `BuildContext.CurrentInputName`, used to resolve the same ambient identity at template-load time, one layer earlier) and rendered on equal footing with that Input's own static `Labels`. There is no `RenderElement` — an Input's own image is described directly by its own attributes, not a separate child that could ever appear loose.
 
 `showIf` modes: `label` (show when this input has a label), `mapping` (show when a platform button drives it), `auto` (label-mode if the game contributed its own labels, else mapping-mode), or omitted (always).
 
@@ -220,7 +220,7 @@ The cache is process-scoped, not LRU — we're assuming a single LaunchBox sessi
 
 ### Visibility as a pipeline, not a flag
 
-Each render decision asks "should this be visible *now*" with explicit modes (`label`, `mapped`, `auto`, `always`) rather than mutating opacity through a single global flag. `showIf="auto"` switching its meaning based on whether the game has its own labels is the trick that lets the same template work for both a game with labels and one without — the same `<Render>` element shows the controller button shape when there's no label, and dims out (deferring to the label) when there is. It also lets `MameControlsXmlSource` act as a button mask for Arcade games: because controls.xml supplies game-specific labels, `auto` resolves to `HasLabel` — only buttons the game actually uses are active. For platforms with custom images but no per-game labels (e.g. Sega Genesis default), `auto` resolves to `IsMapped` — all mapped buttons are active.
+Each render decision asks "should this be visible *now*" with explicit modes (`label`, `mapped`, `auto`, `always`) rather than mutating opacity through a single global flag. `showIf="auto"` switching its meaning based on whether the game has its own labels is the trick that lets the same template work for both a game with labels and one without — the same `<Input>` shows the controller button shape when there's no label, and dims out (deferring to the label) when there is. It also lets `MameControlsXmlSource` act as a button mask for Arcade games: because controls.xml supplies game-specific labels, `auto` resolves to `HasLabel` — only buttons the game actually uses are active. For platforms with custom images but no per-game labels (e.g. Sega Genesis default), `auto` resolves to `IsMapped` — all mapped buttons are active.
 
 ### Collapsing stacks as opt-in
 
@@ -285,7 +285,7 @@ Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayou
 
 ### Add a new render condition
 
-Add an entry to `ShowIfCondition`, the `ParseShowIf` switch in `LayoutResolver`, and the visibility logic in `VisibilityEvaluator`. Document the new mode in the `<Render>` schema. The renderer is the only consumer.
+Add an entry to `ShowIfCondition`, the `ParseShowIf` switch in `LayoutResolver`, and the visibility logic in `VisibilityEvaluator`. Document the new mode in the `<Input>`/`showIf` schema. The renderer is the only consumer.
 
 ## What's outside the scope of this document
 
