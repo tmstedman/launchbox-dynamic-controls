@@ -4,12 +4,13 @@ using static DynamicControls.Core.TestHelpers.Templates.LayoutElements;
 namespace DynamicControls.Core.Tests.Templates;
 
 /// <summary>
-/// Unit tests for <see cref="CollapseGroupBuilder"/>. The builder walks a collapsing Stack's
-/// children to identify slot-level nodes (one slot per InputDefinition, one slot per
-/// always-include Group/OneOf, transparent for plain Groups) and then writes a
-/// <see cref="CollapseInfo"/> entry to the output dictionary for every InputDefinition leaf
-/// reachable from those slots. The shared-list identity inside CollapseInfo.Group is
-/// load-bearing — render-time collapse logic compares against that list to vacate or shift slots.
+/// Unit tests for <see cref="CollapseGroupBuilder"/>. The builder walks a collapsing group's
+/// children to identify slot-level nodes (one slot per InputDefinition, one slot per nested
+/// Group/OneOf) and then writes a <see cref="CollapseInfo"/> entry to the output dictionary for
+/// every InputDefinition leaf reachable from those slots — including leaves nested inside a
+/// Group or OneOf slot, which SetMetadata recurses through regardless. The shared-list identity
+/// inside CollapseInfo.Group is load-bearing — render-time collapse logic compares against that
+/// list to vacate or shift slots.
 /// </summary>
 public class CollapseGroupBuilderTests
 {
@@ -32,7 +33,7 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_FlatInputs_EachInputIsOwnSlot_AllShareTheSameGroup()
     {
-        // given two top-level Inputs as Stack children
+        // given two top-level Inputs as Group children
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
@@ -52,7 +53,7 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_VAlignPassedByCaller_FlowsThroughToCollapseInfo()
     {
-        // given a Stack whose LayoutResolver already validated vAlign="bottom"
+        // given a Group whose LayoutResolver already validated vAlign="bottom"
         InputDefinition a = Input("A");
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
@@ -64,43 +65,26 @@ public class CollapseGroupBuilderTests
     }
 
     [Fact]
-    public void Build_PlainGroup_IsTransparent_ItsInputsBecomeIndividualSlots()
+    public void Build_NestedGroup_OccupiesOneSlotAsBlock_InputsShareThatSlot()
     {
-        // given a Stack containing a plain Group of two Inputs (Group.IsStack = false)
+        // given a Group containing another Group of two Inputs
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
-        InputGroup group = Group(a, b);
+        InputGroup inner = Group(a, b);
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
         // when the builder runs
-        CollapseGroupBuilder.Build(children: [group], gap: 50, output);
+        CollapseGroupBuilder.Build(children: [inner], gap: 50, output);
 
-        // then the group does not appear in the slot list; A and B do, as separate slots
-        output[a].Group.ShouldBe([a, b]);
-        output[b].Group.ShouldBeSameAs(output[a].Group);
-    }
-
-    [Fact]
-    public void Build_NestedStack_OccupiesOneSlotAsBlock_InputsShareThatSlot()
-    {
-        // given a Stack containing another Stack (IsStack = true) of two Inputs
-        InputDefinition a = Input("A");
-        InputDefinition b = Input("B");
-        InputGroup innerStack = Stack(a, b);
-        Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
-
-        // when the builder runs
-        CollapseGroupBuilder.Build(children: [innerStack], gap: 50, output);
-
-        // then the inner stack is the slot; A and B both reference [innerStack] as their group
-        output[a].Group.ShouldBe([innerStack]);
+        // then the inner group is the slot; A and B both reference [inner] as their group
+        output[a].Group.ShouldBe([inner]);
         output[b].Group.ShouldBeSameAs(output[a].Group);
     }
 
     [Fact]
     public void Build_OneOf_IsOneSlot_AllAlternativeLeavesAreStamped()
     {
-        // given a Stack containing a OneOf with two alternative Inputs
+        // given a Group containing a OneOf with two alternative Inputs
         InputDefinition primary = Input("Primary");
         InputDefinition fallback = Input("Fallback");
         OneOf oneOf = OneOf(primary, fallback);
@@ -119,7 +103,7 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_MixedSlotTypes_CombineInOrder()
     {
-        // given a Stack containing: a bare Input, a plain Group (transparent), and a OneOf
+        // given a Group containing: a bare Input, a nested Group of two Inputs, and a OneOf
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
         InputDefinition c = Input("C");
@@ -132,29 +116,30 @@ public class CollapseGroupBuilderTests
         // when the builder runs
         CollapseGroupBuilder.Build(children: [a, group, oneOf], gap: 40, output);
 
-        // then the slot list is [A, B, C, OneOf] in document order — Group flattens, OneOf stays whole
-        output[a].Group.ShouldBe([a, b, c, oneOf]);
+        // then the slot list is [A, Group, OneOf] in document order — both Group and OneOf stay whole
+        output[a].Group.ShouldBe([a, group, oneOf]);
 
-        // and every reachable leaf is stamped with the same shared list and gap
+        // and every reachable leaf, including B and C nested inside the Group slot, is stamped
+        // with the same shared list and gap
         new[] { a, b, c, d, e }.ShouldAllBe(i => ReferenceEquals(output[i].Group, output[a].Group));
         new[] { a, b, c, d, e }.ShouldAllBe(i => output[i].Gap == 40);
     }
 
     [Fact]
-    public void Build_OneOfWithStackAlternative_StampsDeepLeaves()
+    public void Build_OneOfWithGroupAlternative_StampsDeepLeaves()
     {
-        // given a OneOf whose second alternative is a Stack of two Inputs
+        // given a OneOf whose second alternative is a Group of two Inputs
         InputDefinition primary = Input("Primary");
         InputDefinition fa = Input("FA");
         InputDefinition fb = Input("FB");
-        InputGroup fallbackStack = Stack(fa, fb);
-        OneOf oneOf = OneOf(primary, fallbackStack);
+        InputGroup fallbackGroup = Group(fa, fb);
+        OneOf oneOf = OneOf(primary, fallbackGroup);
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
         // when the builder runs
         CollapseGroupBuilder.Build(children: [oneOf], gap: 50, output);
 
-        // then leaves inside the Stack-alternative are stamped too (fan-out recurses through groups)
+        // then leaves inside the Group alternative are stamped too (fan-out recurses through groups)
         output[fa].Group.ShouldBe([oneOf]);
         output[fb].Group.ShouldBeSameAs(output[fa].Group);
         output[primary].Group.ShouldBeSameAs(output[fa].Group);
@@ -163,21 +148,21 @@ public class CollapseGroupBuilderTests
     [Fact]
     public void Build_UnknownChildType_Throws()
     {
-        // given a Stack child whose ILayoutElement subtype is not handled by CollectSlots
+        // given a top-level child whose ILayoutElement subtype is not handled by CollectSlots
         Should.Throw<InvalidOperationException>(() =>
             CollapseGroupBuilder.Build(children: [new UnknownElement()], gap: 50, NewOutput()))
             .Message.ShouldContain("UnknownElement");
     }
 
     [Fact]
-    public void Build_UnknownTypeInsideStack_Throws()
+    public void Build_UnknownTypeInsideGroup_Throws()
     {
-        // CollectSlots adds the Stack itself as a slot without inspecting its children;
-        // SetMetadata then recurses into the Stack's children and hits the unknown type.
-        InputGroup stack = Stack(new UnknownElement());
+        // CollectSlots adds the Group itself as a slot without inspecting its children;
+        // SetMetadata then recurses into the Group's children and hits the unknown type.
+        InputGroup group = Group(new UnknownElement());
 
         Should.Throw<InvalidOperationException>(() =>
-            CollapseGroupBuilder.Build(children: [stack], gap: 50, NewOutput()))
+            CollapseGroupBuilder.Build(children: [group], gap: 50, NewOutput()))
             .Message.ShouldContain("UnknownElement");
     }
 

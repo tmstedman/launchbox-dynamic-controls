@@ -12,18 +12,14 @@ namespace DynamicControls.Templates;
 public interface ILayoutElement;
 
 /// <summary>
-/// A wrapper around a cluster of related inputs (i.e. a &lt;Group&gt; or &lt;Stack&gt;).
-/// Included at render time only when any contained input has at least one render visible under
-/// its own ShowIf — otherwise every member (and any Overlay this group carries) is excluded from
-/// rendering entirely (semantic exclusion, not just visual fading). This applies uniformly to
-/// Group and Stack alike; a Stack's members still handle their own individual visibility via
-/// showIf, but the Stack as a whole drops out when nothing inside it is visible, same as a Group.
+/// A wrapper around a cluster of related inputs (i.e. a &lt;Group&gt;), positioned and gated on
+/// visibility. Included at render time only when any contained input has at least one render
+/// visible under its own ShowIf — otherwise every member (and any Overlay this group carries) is
+/// excluded from rendering entirely (semantic exclusion, not just visual fading). Members still
+/// handle their own individual visibility via showIf when the group itself is included; when
+/// nested inside another group, an InputGroup always occupies one slot as an opaque block (see
+/// <see cref="Templates.CollapseGroupBuilder"/>) — its own inner traversal is independent.
 /// </summary>
-/// <param name="IsStack">Set for Stack elements; false for plain Group elements. Purely a
-/// collapse-slot concern for <see cref="Templates.CollapseGroupBuilder"/>: true means this group
-/// occupies one slot as an opaque block when nested inside another Stack; false means it's
-/// transparent, and its own children each get their own slot instead. Has no bearing on
-/// visibility, which is uniform across both.</param>
 /// <param name="Children">Nested layout children — InputDefinition, InputGroup, or OneOf in
 /// document order.</param>
 /// <param name="Overlays">Overlays declared at the group level. Rendered once when the group is
@@ -32,7 +28,6 @@ public interface ILayoutElement;
 /// member.</param>
 [ExcludeFromCodeCoverage]
 public record InputGroup(
-    bool IsStack,
     IReadOnlyList<ILayoutElement> Children,
     IReadOnlyList<OverlayDefinition> Overlays) : ILayoutElement;
 

@@ -101,7 +101,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         return style;
     }
 
-    /// <summary>Routes a &lt;Body&gt;'s children (Input / Group / Stack / OneOf) into the layout's
+    /// <summary>Routes a &lt;Body&gt;'s children (Input / Group / OneOf) into the layout's
     /// Elements list.</summary>
     private void ParseBodyInto(XmlElement bodyNode, List<ILayoutNode> output)
     {
@@ -112,7 +112,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
     }
 
-    /// <summary>Parses one layout-child element (Input / Group / Stack / OneOf / Condition /
+    /// <summary>Parses one layout-child element (Input / Group / OneOf / Condition /
     /// Render / Label) and appends it to <paramref name="output"/>. Returns true if the element
     /// name matched one of those (caller is responsible for handling unknown names). An Input or
     /// Condition that fails its own validation is treated as matched but not appended.
@@ -131,9 +131,6 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 return true;
             case "Group":
                 output.Add(ParseGroupNode(node));
-                return true;
-            case "Stack":
-                output.Add(ParseStackNode(node));
                 return true;
             case "OneOf":
                 output.Add(ParseOneOfNode(node));
@@ -212,12 +209,22 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     }
 
     /// <summary>
-    /// Parses a &lt;Group&gt; wrapper and its nested layout children: Input, Group, OneOf, and
-    /// Overlay. Inputs missing a name are skipped but the rest of the group is still returned.
+    /// Parses a &lt;Group&gt; positioned layout container. Children are stacked vertically with
+    /// positions computed from the group's own origin (x, y) plus slot index times gap.
+    /// <c>vAlign</c> (top/bottom/center, default top) is validated against the origin's slot
+    /// count by the resolver, not here — an invalid value just flows through as an arbitrary
+    /// string. The group is included in the render output only when any descendant has a
+    /// visible render — its labels and its own Overlay children go with it.
     /// </summary>
     private GroupNode ParseGroupNode(XmlElement groupNode)
     {
         var group = new GroupNode();
+
+        if (ReadCoordinate(groupNode, "x", "Group") is Coordinate gx) group.X = gx;
+        if (ReadCoordinate(groupNode, "y", "Group") is Coordinate gy) group.Y = gy;
+        if (ReadDouble(groupNode, "gap") is double gap) group.Gap = gap;
+        group.VAlign = groupNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
+        if (string.Equals(groupNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) group.Collapse = true;
 
         foreach (XmlElement child in groupNode.ChildNodes.OfType<XmlElement>())
         {
@@ -234,43 +241,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             }
         }
 
-        _logger.Debug($"Group: children={group.Children.Count}, overlays={group.Overlays.Count}");
+        _logger.Debug($"Group: x={group.X}, y={group.Y}, gap={group.Gap}, vAlign={group.VAlign}, children={group.Children.Count}, overlays={group.Overlays.Count}");
         return group;
-    }
-
-    /// <summary>
-    /// Parses a &lt;Stack&gt; positioned layout container. Children are stacked vertically with
-    /// positions computed from the stack origin (x, y) plus slot index times gap. <c>vAlign</c>
-    /// (top/bottom/center, default top) is validated against the origin's slot count by the
-    /// resolver, not here — an invalid value just flows through as an arbitrary string.
-    /// </summary>
-    private StackNode ParseStackNode(XmlElement stackNode)
-    {
-        var stack = new StackNode();
-
-        if (ReadCoordinate(stackNode, "x", "Stack") is Coordinate sx) stack.X = sx;
-        if (ReadCoordinate(stackNode, "y", "Stack") is Coordinate sy) stack.Y = sy;
-        if (ReadDouble(stackNode, "gap") is double gap) stack.Gap = gap;
-        stack.VAlign = stackNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
-        if (string.Equals(stackNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) stack.Collapse = true;
-
-        foreach (XmlElement child in stackNode.ChildNodes.OfType<XmlElement>())
-        {
-            if (TryParseLayoutChild(child, stack.Children)) continue;
-
-            if (child.Name == "Overlay")
-            {
-                OverlayNode? overlay = ParseOverlay(child);
-                if (overlay != null) stack.Overlays.Add(overlay);
-            }
-            else
-            {
-                _logger.Error($"Invalid element <{child.Name}> in <Stack>");
-            }
-        }
-
-        _logger.Debug($"Stack: x={stack.X}, y={stack.Y}, gap={stack.Gap}, vAlign={stack.VAlign}, children={stack.Children.Count}, overlays={stack.Overlays.Count}");
-        return stack;
     }
 
     /// <summary>

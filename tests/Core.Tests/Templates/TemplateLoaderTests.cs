@@ -388,19 +388,17 @@ public class TemplateLoaderTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Input")));
     }
 
-    // --- Group / Stack / OneOf ---
+    // --- Group / OneOf ---
 
     [Fact]
-    public void LoadLayout_Group_CollectsInputsAndOverlays()
+    public void LoadLayout_Group_ParsesPositionGapAndCollapse()
     {
-        // given a Group containing two Inputs and an Overlay
+        // given a Group with x, y, gap, and collapse attributes
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Group x='100' y='+50' gap='40' collapse='TRUE'>
                   <Input name='A' />
-                  <Input name='B' />
-                  <Overlay src='frame.png' />
                 </Group>
               </Body>
             </ControllerTemplate>
@@ -409,10 +407,129 @@ public class TemplateLoaderTests
         // when the loader runs
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        // then both inputs and the overlay land on the GroupNode
+        // then attributes parse: absolute x, relative y, gap, case-insensitive collapse=true
         GroupNode group = result.Elements.OfType<GroupNode>().Single();
-        group.Children.OfType<InputNode>().Select(i => i.Name).ShouldBe(["A", "B"]);
-        group.Overlays.Single().Src.ShouldBe("frame.png");
+        group.X.ShouldBe(Coordinate.Absolute(100));
+        group.Y.ShouldBe(Coordinate.Relative(50));
+        group.Gap.ShouldBe(40);
+        group.Collapse.ShouldBeTrue();
+        group.Children.OfType<InputNode>().Single().Name.ShouldBe("A");
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithOverlay_CollectsOverlay()
+    {
+        // given a Group containing an Overlay child
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Group>
+                  <Input name='A' />
+                  <Overlay src='lines.png' x='+5' y='+10' />
+                </Group>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then the overlay is collected onto the group
+        GroupNode group = result.Elements.OfType<GroupNode>().Single();
+        OverlayNode overlay = group.Overlays.Single();
+        overlay.Src.ShouldBe("lines.png");
+        overlay.X.ShouldBe(Coordinate.Relative(5));
+        overlay.Y.ShouldBe(Coordinate.Relative(10));
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithInvalidChild_IsLoggedAndSkipped()
+    {
+        // given a Group containing an unrecognised element
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Group>
+                  <Input name='A' />
+                  <Bogus />
+                </Group>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then the group is returned without the unknown child, and an error is logged
+        result.Elements.OfType<GroupNode>().Single().Children.Count.ShouldBe(1);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Group")));
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithCollapseFalse_DoesNotCollapse()
+    {
+        // given a Group with collapse explicitly set to a non-"true" value — exercises the
+        // branch where the attribute is present but the string comparison evaluates to false
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Group collapse='false'><Input name='A' /></Group></Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<GroupNode>().Single().Collapse.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithoutCollapseAttribute_DefaultsToFalse()
+    {
+        // given a Group with no collapse attribute
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Group><Input name='A' /></Group></Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then Collapse defaults to false
+        result.Elements.OfType<GroupNode>().Single().Collapse.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithoutVAlignAttribute_DefaultsToTop()
+    {
+        // given a Group with no vAlign attribute
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Group><Input name='A' /></Group></Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then VAlign defaults to "top"
+        result.Elements.OfType<GroupNode>().Single().VAlign.ShouldBe("top");
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithVAlign_ParsesLowerCased()
+    {
+        // given a Group with a mixed-case vAlign attribute
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Group vAlign='Bottom'><Input name='A' /></Group></Body>
+            </ControllerTemplate>
+            """);
+
+        // when the loader runs
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        // then VAlign is lower-cased, matching the Align precedent on Label
+        result.Elements.OfType<GroupNode>().Single().VAlign.ShouldBe("bottom");
     }
 
     [Fact]
@@ -433,190 +550,6 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<GroupNode>().Single().Overlays.ShouldBeEmpty();
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
-    }
-
-    [Fact]
-    public void LoadLayout_InvalidGroupChild_IsLoggedAndSkipped()
-    {
-        // given a Group containing an element that is neither a layout child nor an Overlay
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Group>
-                  <Input name='A' />
-                  <Bogus />
-                </Group>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<GroupNode>().Single().Children.Count.ShouldBe(1);
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Group")));
-    }
-
-    [Fact]
-    public void LoadLayout_Stack_ParsesPositionGapAndCollapse()
-    {
-        // given a Stack with x, y, gap, and collapse attributes
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Stack x='100' y='+50' gap='40' collapse='TRUE'>
-                  <Input name='A' />
-                </Stack>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then attributes parse: absolute x, relative y, gap, case-insensitive collapse=true
-        StackNode stack = result.Elements.OfType<StackNode>().Single();
-        stack.X.ShouldBe(Coordinate.Absolute(100));
-        stack.Y.ShouldBe(Coordinate.Relative(50));
-        stack.Gap.ShouldBe(40);
-        stack.Collapse.ShouldBeTrue();
-        stack.Children.OfType<InputNode>().Single().Name.ShouldBe("A");
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithOverlay_CollectsOverlay()
-    {
-        // given a Stack containing an Overlay child
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Stack>
-                  <Input name='A' />
-                  <Overlay src='lines.png' x='+5' y='+10' />
-                </Stack>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then the overlay is collected onto the stack
-        StackNode stack = result.Elements.OfType<StackNode>().Single();
-        OverlayNode overlay = stack.Overlays.Single();
-        overlay.Src.ShouldBe("lines.png");
-        overlay.X.ShouldBe(Coordinate.Relative(5));
-        overlay.Y.ShouldBe(Coordinate.Relative(10));
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithInvalidChild_IsLoggedAndSkipped()
-    {
-        // given a Stack containing an unrecognised element
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Stack>
-                  <Input name='A' />
-                  <Bogus />
-                </Stack>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then the stack is returned without the unknown child, and an error is logged
-        result.Elements.OfType<StackNode>().Single().Children.Count.ShouldBe(1);
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Stack")));
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithCollapseFalse_DoesNotCollapse()
-    {
-        // given a Stack with collapse explicitly set to a non-"true" value — exercises the
-        // branch where the attribute is present but the string comparison evaluates to false
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body><Stack collapse='false'><Input name='A' /></Stack></Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<StackNode>().Single().Collapse.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithoutCollapseAttribute_DefaultsToFalse()
-    {
-        // given a Stack with no collapse attribute
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body><Stack><Input name='A' /></Stack></Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then Collapse defaults to false
-        result.Elements.OfType<StackNode>().Single().Collapse.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithoutVAlignAttribute_DefaultsToTop()
-    {
-        // given a Stack with no vAlign attribute
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body><Stack><Input name='A' /></Stack></Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then VAlign defaults to "top"
-        result.Elements.OfType<StackNode>().Single().VAlign.ShouldBe("top");
-    }
-
-    [Fact]
-    public void LoadLayout_StackWithVAlign_ParsesLowerCased()
-    {
-        // given a Stack with a mixed-case vAlign attribute
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body><Stack vAlign='Bottom'><Input name='A' /></Stack></Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then VAlign is lower-cased, matching the Align precedent on Label
-        result.Elements.OfType<StackNode>().Single().VAlign.ShouldBe("bottom");
-    }
-
-    [Fact]
-    public void LoadLayout_StackOverlayMissingSrc_IsSkippedAndLogged()
-    {
-        // given a Stack whose Overlay is missing a src attribute
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Stack>
-                  <Input name='A' />
-                  <Overlay />
-                </Stack>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<StackNode>().Single().Overlays.ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
     }
 
