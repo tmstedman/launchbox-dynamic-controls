@@ -257,25 +257,7 @@ public class LayoutFilterTests
         result.Inputs.Select(i => i.Input.Name).ShouldBe(["AxisLeftStickUp"]);
     }
 
-    // ---- loose Render/Label under Condition ----
-
-    [Fact]
-    public void Filter_RenderElementInsidePassedCondition_AttachesToAmbientInput()
-    {
-        // given an Input whose own Children include a Condition (passes) wrapping a bare
-        // RenderElement — no Input of its own
-        var image = new InputImageDefinition(X: 1, Y: 2, ImageFile: "x.png");
-        var render = new RenderElement(image);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [render]);
-        InputDefinition owner = Input("ButtonDpad", children: [condition]);
-        Template template = TemplateOf(elements: [owner]);
-        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
-
-        FilteredLayout result = _underTest.Filter(template, Ctx());
-
-        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
-        li.Images.ShouldBe([image]);
-    }
+    // ---- loose Label under Condition ----
 
     [Fact]
     public void Filter_LabelElementInsidePassedCondition_AttachesToAmbientInput()
@@ -291,42 +273,6 @@ public class LayoutFilterTests
 
         LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
         li.Labels.ShouldBe([label]);
-    }
-
-    [Fact]
-    public void Filter_RenderElementInsideFailedCondition_NeverAttaches()
-    {
-        // given the same shape, but the Condition's evaluator check fails (default substitute
-        // return) — the whole subtree, including the bare RenderElement, is dropped without
-        // ever being visited, exactly like an excluded Group
-        var render = new RenderElement(new InputImageDefinition(X: 1, Y: 2, ImageFile: "x.png"));
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [render]);
-        InputDefinition owner = Input("ButtonDpad", children: [condition]);
-        Template template = TemplateOf(elements: [owner]);
-
-        FilteredLayout result = _underTest.Filter(template, Ctx());
-
-        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
-        li.Images.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void Filter_RenderElementInsideNestedInput_AttachesToNestedInputNotOuter()
-    {
-        // given a nested Input inside an outer one, with its own Condition-gated RenderElement —
-        // it must attach to the nested Input, not the outer one it's structurally inside
-        var image = new InputImageDefinition(X: 1, Y: 2, ImageFile: "inner.png");
-        var render = new RenderElement(image);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [render]);
-        InputDefinition inner = Input("Inner", children: [condition]);
-        InputDefinition outer = Input("Outer", children: [inner]);
-        Template template = TemplateOf(elements: [outer]);
-        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
-
-        FilteredLayout result = _underTest.Filter(template, Ctx());
-
-        result.Inputs.Single(i => i.Input.Name == "Inner").Images.ShouldBe([image]);
-        result.Inputs.Single(i => i.Input.Name == "Outer").Images.ShouldBeEmpty();
     }
 
     // ---- collapse adjustments ----

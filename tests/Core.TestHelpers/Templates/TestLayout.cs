@@ -4,7 +4,7 @@ namespace DynamicControls.Core.TestHelpers.Templates;
 
 /// <summary>
 /// Fluent builder for <see cref="LayoutDocument"/> in tests. Lets a test declare a layout
-/// tree (Input/Group/OneOf with Renders/Labels/Overlays) without the verbose record-init
+/// tree (Input/Group/OneOf with Labels/Overlays) without the verbose record-init
 /// syntax of the raw DTOs. Concrete-cast at the end with <see cref="ToConfig"/>, or via the
 /// implicit conversion when a method already expects a <see cref="LayoutDocument"/>.
 /// </summary>
@@ -101,13 +101,6 @@ internal class TestLayout
         return b.Node;
     }
 
-    internal static RenderNode BuildRender(Action<RenderBuilder>? build)
-    {
-        var b = new RenderBuilder();
-        build?.Invoke(b);
-        return b.Node;
-    }
-
     internal static LabelNode BuildLabel(Action<LabelBuilder>? build)
     {
         var b = new LabelBuilder();
@@ -128,15 +121,9 @@ internal class InputBuilder(string name)
     public InputBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
     public InputBuilder At(double x, double y)              { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
     public InputBuilder Offset(double dx, double dy)        { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
+    public InputBuilder Size(double w, double h)            { Node.Width = w; Node.Height = h; return this; }
+    public InputBuilder UseImage(string name)               { Node.UseImage = name;          return this; }
     #pragma warning restore format
-
-    public InputBuilder Render(Action<RenderBuilder>? build = null)
-    {
-        var rb = new RenderBuilder();
-        build?.Invoke(rb);
-        Node.Renders.Add(rb.Node);
-        return this;
-    }
 
     public InputBuilder Label(Action<LabelBuilder>? build = null)
     {
@@ -180,7 +167,6 @@ internal class GroupBuilder
     public GroupBuilder Group(Action<GroupBuilder> build)                     { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public GroupBuilder OneOf(Action<OneOfBuilder> build)                     { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public GroupBuilder Condition(Action<ConditionBuilder> build)             { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
-    public GroupBuilder LooseRender(Action<RenderBuilder>? build = null)      { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
     public GroupBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
     #pragma warning restore format
 
@@ -202,7 +188,6 @@ internal class OneOfBuilder
     public OneOfBuilder Group(Action<GroupBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildGroup(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
     public OneOfBuilder Condition(Action<ConditionBuilder> build)              { Node.Alternatives.Add(TestLayout.BuildCondition(build));   return this; }
-    public OneOfBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Alternatives.Add(TestLayout.BuildRender(build));       return this; }
     public OneOfBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Alternatives.Add(TestLayout.BuildLabel(build));        return this; }
     #pragma warning restore format
 }
@@ -221,23 +206,7 @@ internal class ConditionBuilder
     public ConditionBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public ConditionBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public ConditionBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
-    public ConditionBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
     public ConditionBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
-    #pragma warning restore format
-}
-
-internal class RenderBuilder
-{
-    public RenderNode Node { get; } = new();
-
-    #pragma warning disable format
-    public RenderBuilder At(double x, double y)        { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
-    public RenderBuilder Offset(double dx, double dy)  { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
-    public RenderBuilder Size(double w, double h)      { Node.Width = w; Node.Height = h; return this; }
-    public RenderBuilder UseImage(string name)         { Node.UseImage = name;            return this; }
-    public RenderBuilder ShowIf(string value)          { Node.ShowIf = value;             return this; }
-    public RenderBuilder MinOpacity(double v)          { Node.MinOpacity = v;             return this; }
-    public RenderBuilder InactiveBlurRadius(double v)  { Node.InactiveBlurRadius = v;     return this; }
     #pragma warning restore format
 }
 

@@ -23,8 +23,7 @@ What "enclosing container's origin" means depends on context:
 
 | In a... | Relative coords resolve against... |
 |---|---|
-| `<Render>` inside an `<Input>` | The Input's `x`/`y` (or the Input's enclosing slot if it has none) |
-| `<Label>` inside an `<Input>` | Same |
+| `<Label>` inside an `<Input>` | The Input's `x`/`y` (or the Input's enclosing slot if it has none) |
 | `<Overlay>` inside an `<Input>` | Same |
 | `<Overlay>` inside a `<Group>` | The Group's `x`/`y` |
 | `<Input>` inside a `<Group>` | The Group's `x`/`y` plus `slotIndex × gap` |
@@ -34,9 +33,11 @@ What "enclosing container's origin" means depends on context:
 
 When you don't specify an `x` or `y`, the element defaults to `+0` (the enclosing origin unchanged). The resolved layout that the renderer sees is always in absolute canvas coordinates — relativity is a compile-time concept.
 
+An `<Input>`'s own image has no relative-coordinate row of its own: it is always drawn exactly at the Input's own `x`/`y` (or its enclosing slot, if it has none) — there is no separate offset layer for it the way `<Label>`/`<Overlay>` have.
+
 ### `showIf` modes
 
-Controls whether a `<Render>` or `<Overlay>` is at full opacity, or rendered in an inactive state instead. When a `showIf` condition is not met, the element is rendered at reduced opacity and optionally blurred rather than hidden entirely. `minOpacity` sets how faint it goes (`0` = invisible, `1` = full brightness); `inactiveBlurRadius` sets the blur radius (`0` = sharp). Both default to `0`, which hides inactive elements completely.
+Controls whether an Input's own image, or an `<Overlay>`, is at full opacity, or rendered in an inactive state instead. When a `showIf` condition is not met, the element is rendered at reduced opacity and optionally blurred rather than hidden entirely. `minOpacity` sets how faint it goes (`0` = invisible, `1` = full brightness); `inactiveBlurRadius` sets the blur radius (`0` = sharp). Both default to `0`, which hides inactive elements completely.
 
 Allowed values:
 
@@ -47,16 +48,16 @@ Allowed values:
 
 `showIf` can be set on:
 - A named `<Style>` in `<Head>` — applied to any element that references the style
-- An `<Input>` — inherited by its `<Render>` and `<Overlay>` children that don't set their own
-- A `<Render>` or `<Overlay>` — wins over inherited values
+- An `<Input>` — governs its own image, and is inherited by its `<Overlay>` children that don't set their own
+- An `<Overlay>` — wins over the inherited value
 
 ### Style cascade
 
 Each visual attribute (`fontSize`, `minOpacity`, `inactiveBlurRadius`, `showIf`) is resolved in priority order:
 
-1. **Explicit attribute on the element** — `<Render minOpacity="0.5" />`
+1. **Explicit attribute on the element** — `<Input minOpacity="0.5">`
 2. **Named style reference** — `<Input style="foo">` looks up the `<Style name="foo">` in `<Head>`
-3. **Inherited from parent** — for elements inside an `<Input>`, the Input's attribute is inherited
+3. **Inherited from parent** — for an `<Overlay>` inside an `<Input>`, the Input's attribute is inherited
 4. **Template default** — the unnamed `<Style>` in `<Head>`
 5. **Built-in default** — `fontSize=28`, `minOpacity=0`, `inactiveBlurRadius=0`
 
@@ -64,7 +65,7 @@ Explicit attributes always win. Use named styles to share visual treatment acros
 
 ### Image resolution
 
-When the renderer needs the actual file for a `<Render>` or `<Overlay>`, it resolves the filename to a **pair** of candidates rather than to a single winner:
+When the renderer needs the actual file for an Input's own image, or for an `<Overlay>`, it resolves the filename to a **pair** of candidates rather than to a single winner:
 
 ```
 styled:   Templates/{template}/{platform}/{controller}/{file}   ← controller-specific
@@ -75,7 +76,7 @@ generic:  Templates/{template}/{file}                           ← template-loc
           Templates/{file}                                      ← shared root
 ```
 
-The file name comes from `<Render useImage>` if specified, else the Input's `name` (with `.png` appended). For `<Overlay>`, it's always the `src` attribute verbatim.
+The file name comes from `<Input useImage>` if specified, else the Input's own `name` (with `.png` appended). For `<Overlay>`, it's always the `src` attribute verbatim.
 
 Which of the two is drawn depends on the input's mapping state, so styled art doesn't appear on buttons the current controller doesn't have:
 
@@ -83,7 +84,7 @@ Which of the two is drawn depends on the input's mapping state, so styled art do
 |---|---|
 | A platform button drives it, as that button's natural target | `{platformButton}.png` from the styled tiers, else the generic |
 | A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic |
-| No platform button drives it | The generic — **unless** the render sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
+| No platform button drives it | The generic — **unless** the Input sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
 
 This lets templates supply platform-aware artwork (e.g. Genesis `A`/`B`/`C` art on an Xbox chassis) without forking the template, and without a platform's art leaking onto buttons that platform doesn't have.
 
@@ -130,15 +131,14 @@ Two distinct uses, distinguished by the presence of `name`:
 
 ### `<Body>` — display layout
 
-The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Render>`/`<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose Render/Label](#loose-renderlabel)).
+The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose `<Label>`](#loose-label)).
 
 ### `<Input>` — a generic input
 
-The unit of the layout. An Input has a `name` matching a generic input identifier (`ButtonA`, `AxisLeftStickUp`, etc.) and contains the renders, labels, and overlays that visualise it. Generic input names are a system-wide vocabulary shared across Controllers.xml, the RetroArch and MAME integrations, and the template — each layer speaks in these names so they all connect without knowing about each other.
+The unit of the layout. An Input has a `name` matching a generic input identifier (`ButtonA`, `AxisLeftStickUp`, etc.), draws exactly one image described by its own attributes, and contains the labels and overlays that further visualise it. Generic input names are a system-wide vocabulary shared across Controllers.xml, the RetroArch and MAME integrations, and the template — each layer speaks in these names so they all connect without knowing about each other.
 
 ```xml
-<Input name="ButtonA" style="auto-blur" x="970" y="401">
-    <Render height="64" width="64" />
+<Input name="ButtonA" style="auto-blur" x="970" y="401" height="64" width="64">
     <Label x="+0" y="+72" />
 </Input>
 ```
@@ -147,39 +147,42 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 |---|---|---|---|
 | `name` | string | **yes** | Generic input name. Input with no name is skipped + logged |
 | `style` | string | no | Named style reference (`<Style name="...">` in `<Head>`) |
-| `showIf` | enum | no | Inherited by nested `<Render>` / `<Overlay>` |
-| `minOpacity` | double | no | Inherited |
-| `inactiveBlurRadius` | double | no | Inherited |
+| `showIf` | enum | no | Governs this Input's own image; inherited by `<Overlay>` children that don't set their own |
+| `minOpacity` | double | no | Governs this Input's own image; inherited by `<Overlay>` |
+| `inactiveBlurRadius` | double | no | Governs this Input's own image; inherited by `<Overlay>` |
 | `fontSize` | double | no | Inherited by `<Label>` |
-| `x` | coordinate | no | Origin for nested elements with relative coords. Default `+0` |
+| `x` | coordinate | no | Also the position of this Input's own image. Origin for nested elements with relative coords. Default `+0` |
 | `y` | coordinate | no | Same. Default `+0` |
+| `width` | double | no | This Input's own image render width. NaN = use the image's natural width |
+| `height` | double | no | Same, height |
+| `useImage` | string | no | Override image filename for this Input's own image (no extension; `.png` appended). Affects asset-borrowing semantics — see below |
+
+**`useImage` and asset borrowing**: When `useImage` is set, the Input is "borrowing" another input's artwork. The image resolution chain still applies, so a borrowed image gets its platform-specific variant even when the *borrowing* input isn't mapped. This is how `AxisRightStickUp` shows the same up-arrow as `AxisLeftStickUp` without copying the asset.
 
 **Children** (any combination, any order):
-- `<Render>` — image render
 - `<Label>` — label text
 - `<Overlay>` — additional image
 - `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` — nested layout
 
-**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's renders fan out to the child's renders for image fallback (a child input that can't find its own image uses the parent's). A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
+**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's own image fans out to the child's image for fallback (a child input that can't find its own image uses the parent's). A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
 
 **Strict-self render position**: A duplicate top-level `<Input>` with no nested children expresses "render the parent input's image at this position, independent of its descendants" — used by some templates to put an extra render in a different slot.
 
-### Loose `<Render>`/`<Label>`
+### Loose `<Label>`
 
-A `<Render>` or `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can also appear inside a `<Group>`, `<OneOf>`, or `<Condition>` that's itself somewhere inside that Input, most usefully nested inside a `<Condition>` to gate a single render or label independently of its Input's other renders:
+A `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can also appear inside a `<Group>`, `<OneOf>`, or `<Condition>` that's itself somewhere inside that Input, most usefully nested inside a `<Condition>` to gate a label independently of its Input's other content:
 
 ```xml
-<Input name="ButtonDpad">
-    <Render height="135" width="135" />
+<Input name="ButtonDpad" height="135" width="135">
     <Condition any="SomeOtherInput" match="label">
-        <Render height="34" width="34" />
+        <Label x="+0" y="+72" />
     </Condition>
 </Input>
 ```
 
-The loose `<Render>`/`<Label>` attaches to whichever `<Input>` is ambient at that point in the tree — here, `ButtonDpad`, even though it's several levels of `<Condition>` away — for its default image filename, exactly as if it had been written as a direct child. Entering a *nested* `<Input>` resets this ambient identity to the nested one; entering `<Group>`/`<OneOf>`/`<Condition>` does not, since none of those are a new Input's own boundary. Its coordinate origin, though, follows whatever `<Group>` it's actually inside: `<Condition>` passes the origin through completely unchanged, and `<OneOf>` shares one slot's origin across every alternative, but a `<Group>` always establishes its own frame — see below.
+The loose `<Label>` attaches to whichever `<Input>` is ambient at that point in the tree — here, `ButtonDpad`, even though it's several levels of `<Condition>` away — exactly as if it had been written as a direct child. Entering a *nested* `<Input>` resets this ambient identity to the nested one; entering `<Group>`/`<OneOf>`/`<Condition>` does not, since none of those are a new Input's own boundary. Its coordinate origin, though, follows whatever `<Group>` it's actually inside: `<Condition>` passes the origin through completely unchanged, and `<OneOf>` shares one slot's origin across every alternative, but a `<Group>` always establishes its own frame — see below.
 
-Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, loose renders included, before render-specific concerns (its own `showIf`, opacity, image-file resolution) ever come into play. A loose `<Render>`/`<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered.
+Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, the loose label included, before label-specific concerns (its own position, font size) ever come into play. A loose `<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered.
 
 **A loose `<Label>` centers itself against an enclosing `<Group>`.** Placed directly inside a `<Group>` (or reached through a `<OneOf>`/`<Condition>` nested in it), its `y` resolves to the visual center of that Group's slots — the midpoint between the first and last slot that's actually showing *for the current game* — rather than the shifted per-slot origin the Group's own members use:
 
@@ -187,10 +190,10 @@ Whether it renders at all is decided once, structurally, the same way a `<Group>
 <Input name="AxisLeftStick">
     <Condition any="AxisLeftStick" match="label">
         <Group x="312" y="358.5" gap="45" collapse="true" vAlign="center">
-            <Input name="AxisLeftStickUp" style="small-label-vacate"><Render height="34" width="34" /></Input>
-            <Input name="AxisLeftStickLeft" style="small-label-vacate"><Render height="34" width="34" /></Input>
-            <Input name="AxisLeftStickRight" style="small-label-vacate"><Render height="34" width="34" /></Input>
-            <Input name="AxisLeftStickDown" style="small-label-vacate"><Render height="34" width="34" /></Input>
+            <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
+            <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
+            <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34" />
+            <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34" />
             <Label x="-24" align="right" />
         </Group>
     </Condition>
@@ -200,30 +203,6 @@ Whether it renders at all is decided once, structurally, the same way a `<Group>
 This lands the label "half-way up the group" — and it stays there regardless of how many of the four directions are actually present this game, *for every `vAlign` value*, not only `"center"`. Which slots survive `collapse="true"` is a per-game fact (this game's mapping/labels decide it), so the center is computed at render time rather than baked in once at template load — see [`<Group>`](#group--positioned-conditional-cluster) for the group's own static shape, and the engine's `LayoutFilter.ResolveLooseLabel` for the computation itself. Without `collapse="true"`, nothing ever varies by game (slots never vacate), so the center is simply the group's full, fixed slot count every time. A direct child `<Label>` on one of the Group's own *members* is unaffected by any of this — it keeps resolving against that member's own slot position, exactly as if the Group weren't there, since a nested `<Input>` resets the ambient anchor to its own.
 
 **A *nested* `<Group>` is never transparent for this anchor**, even one with no `x`/`y`/`gap`/`vAlign` of its own: it always establishes its own frame, so a loose `<Label>` placed directly inside it centers on *that* Group's own slots — not the outer Group's. Only `<OneOf>` and `<Condition>` stay genuinely transparent for the anchor.
-
-### `<Render>` — image render position
-
-Where to draw an input image. Multiple `<Render>` children produce multiple visual copies of the input.
-
-```xml
-<Render x="+0" y="+0" height="64" width="64" />
-<Render useImage="ButtonDpadUp" x="+0" y="+45" height="34" width="34" />
-```
-
-| Attribute | Type | Required | Notes |
-|---|---|---|---|
-| `x` | coordinate | no | Relative to Input's origin. Default `+0` |
-| `y` | coordinate | no | Same. Default `+0` |
-| `width` | double | no | NaN = use image's natural width |
-| `height` | double | no | NaN = use image's natural height |
-| `useImage` | string | no | Override image filename (no extension; `.png` appended). Affects asset-borrowing semantics — see below |
-| `showIf` | enum | no | Defaults to inherited from Input |
-| `minOpacity` | double | no | Defaults to inherited |
-| `inactiveBlurRadius` | double | no | Defaults to inherited |
-
-**`useImage` and asset borrowing**: When `useImage` is set, the render is "borrowing" another input's artwork. The image resolution chain still applies, so a borrowed image gets its platform-specific variant even when the *borrowing* input isn't mapped. This is how `AxisRightStickUp` shows the same up-arrow as `AxisLeftStickUp` without copying the asset.
-
-A render with an unparseable `x` or `y` value logs an error and keeps the default (+0).
 
 ### `<Overlay>` — additional image
 
@@ -298,13 +277,13 @@ The slot count used for this is the template's fixed slot count (the same one in
 
 Combined with `collapse`, they can differ — a vacated slot means fewer are actually left than `vAlign` was anchored against. Rather than drift toward `top` as slots vacate, the anchor is corrected at render time: the same `vAlign` shift is re-derived against however many slots collapse has actually left, and the difference from the fixed-count shift is folded uniformly into every remaining child's position, on top of collapse's own per-vacancy shift. The net effect: `bottom`/`center` stay pinned to the declared `y` no matter how many children are actually showing.
 
-This is exactly what makes a loose `<Label>` placed directly in the Group useful for a single label shared across a collapsing cluster — see [Loose Render/Label](#loose-renderlabel) — its position is the declared `(x, y)` itself (never shifted), so it inherits this same no-drift guarantee for free, with no per-game recalculation of its own.
+This is exactly what makes a loose `<Label>` placed directly in the Group useful for a single label shared across a collapsing cluster — see [Loose `<Label>`](#loose-label) — its position is the declared `(x, y)` itself (never shifted), so it inherits this same no-drift guarantee for free, with no per-game recalculation of its own.
 
 A Group with only one slot renders identically under every `vAlign` value, since there's nothing to distribute around.
 
 An unrecognized `vAlign` value logs an error and falls back to `top`.
 
-**Children** can be `<Input>`, `<Group>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)).
+**Children** can be `<Input>`, `<Group>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)).
 
 **How children occupy slots** — each child takes one position in the vertical list, except:
 
@@ -315,7 +294,7 @@ An unrecognized `vAlign` value logs an error and falls back to `top`.
 | `<OneOf>` | Takes one slot; all its alternatives share that same position |
 | `<Condition>` | Transparent — its children each take their own slot as if the Condition wasn't there |
 | `<Overlay>` | Takes no slot — positioned at its own coordinates regardless |
-| `<Render>` / `<Label>` (loose) | Takes no slot, same as `<Overlay>` |
+| `<Label>` (loose) | Takes no slot, same as `<Overlay>` |
 
 **Collapse** (`collapse="true"`) removes the gap left by hidden children. When a child's renders are all invisible, it vacates its slot and everything below shifts up by `gap`. Without collapse, slots are always fixed — a hidden child leaves a faded image or blank space.
 
@@ -336,13 +315,13 @@ A container where only the first alternative whose visibility check passes is re
 </OneOf>
 ```
 
-No attributes. Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Render>`/`<Label>` parses here too (see [Loose Render/Label](#loose-renderlabel)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose render/label it carries, never for "winning" the `<OneOf>`.
+No attributes. Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Label>` parses here too (see [Loose `<Label>`](#loose-label)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose label it carries, never for "winning" the `<OneOf>`.
 
 **Visibility check per alternative**:
-- `<Input>` — "any-render-visible" (at least one of the input's renders passes its `showIf`)
+- `<Input>` — "any-render-visible" (its own image passes its `showIf`)
 - `<Group>` — "any-member-visible" (recursively, the same check on at least one descendant)
 - `<Condition>` — its own `all`/`any`/`none` check against its named inputs (see below), ignoring what its children render
-- `<Render>`/`<Label>` (loose) — always false; it isn't a visibility-bearing alternative in its own right
+- `<Label>` (loose) — always false; it isn't a visibility-bearing alternative in its own right
 
 If no alternative passes, the OneOf renders nothing — all alternatives are dropped.
 
@@ -369,7 +348,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
-No positional attributes — a `<Condition>` is transparent for coordinates and slot counting (unlike a nested `<Group>`, which never is — see the tables above). Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) — the most common reason to nest one of these directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Group>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way `<Group>` does, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting (unlike a nested `<Group>`, which never is — see the tables above). Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)) — the most common reason to nest one directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Group>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way `<Group>` does, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
 
 **Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
 
@@ -390,12 +369,12 @@ The parser emits errors to the configured `ILogger` for:
 
 - Element with a missing required attribute (e.g. `<Input>` without `name`)
 - Element with an unparseable coordinate
-- Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Render>`, `<Overlay>`, `<Label>`, `<Group>`, `<OneOf>`, `<Condition>` was expected
+- Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Overlay>`, `<Label>`, `<Group>`, `<OneOf>`, `<Condition>` was expected
 - `<Input style="X">` where `X` isn't a `<Style name="X">` in `<Head>`
-- `<Render showIf="X">` where `X` isn't a known mode
+- `<Input showIf="X">` where `X` isn't a known mode
 - `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
 - `<Condition match="X">` where `X` isn't `label` or `mapping` (falls back to `label`)
-- A loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) with no enclosing `<Input>` at all, ambient or otherwise
+- A loose `<Label>` (see [Loose `<Label>`](#loose-label)) with no enclosing `<Input>` at all, ambient or otherwise
 
 Errors don't abort the load — the bad element is skipped (or, for coordinate problems, replaced with `+0`), the rest of the template parses normally. Check the log file after a problem template to see what was dropped.
 
@@ -409,8 +388,7 @@ A minimal template with a single button:
         <Style fontSize="20" inactiveBlurRadius="6" />
     </Head>
     <Body>
-        <Input name="ButtonA" x="100" y="100">
-            <Render width="64" height="64" />
+        <Input name="ButtonA" x="100" y="100" width="64" height="64">
             <Label x="+0" y="+72" />
         </Input>
     </Body>

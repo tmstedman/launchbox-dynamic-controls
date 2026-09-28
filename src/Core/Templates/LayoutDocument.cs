@@ -44,7 +44,7 @@ public record HeadNode
 /// </summary>
 public record StyleNode
 {
-    /// <summary>Visibility condition applied to the bundle. Layered with Input/Render's own
+    /// <summary>Visibility condition applied to the bundle. Layered with Input's own
     /// `showIf` — explicit wins. Not used by the unnamed template-wide defaults form.</summary>
     public string? ShowIf { get; set; }
 
@@ -164,10 +164,13 @@ public record ConditionNode : ILayoutNode
 }
 
 /// <summary>
-/// Raw DTO for a single named input within Layout.xml (e.g. ButtonA, AxisLeftStick).
-/// Contains unparsed render, overlay, and label child elements as read from XML.
-/// Nested within LayoutDocument or GroupNode; consumed by TemplateService
-/// when building InputDefinition entries for a Template.
+/// Raw DTO for a single named input within Layout.xml (e.g. ButtonA, AxisLeftStick). Its own
+/// image is described directly by its own attributes (Width/Height/UseImage, alongside its
+/// ShowIf/MinOpacity/InactiveBlurRadius) rather than a separate child element — every Input
+/// draws exactly one image, always at its own origin, so there was never a reason for that image
+/// to be a distinct node with its own overridable position/visibility. Also contains unparsed
+/// overlay and label child elements as read from XML. Nested within LayoutDocument or GroupNode;
+/// consumed by TemplateService when building InputDefinition entries for a Template.
 /// </summary>
 public record InputNode : ILayoutNode
 {
@@ -179,17 +182,16 @@ public record InputNode : ILayoutNode
     /// the Input override the style.</summary>
     public string? Style { get; set; }
 
-    /// <summary>Default visibility condition applied to all Renders and Overlays nested in this
-    /// input that don't set their own `showIf` attribute. Inherited at build time; the domain
-    /// model carries the resolved value per render.</summary>
+    /// <summary>Visibility condition for this Input's own image, and the default for its
+    /// Overlays that don't set their own `showIf` attribute.</summary>
     public string? ShowIf { get; set; }
 
-    /// <summary>Default minOpacity applied to all Renders and Overlays in this input that don't
-    /// set their own. Inherited at build time.</summary>
+    /// <summary>MinOpacity for this Input's own image, and the default for its Overlays that
+    /// don't set their own.</summary>
     public double? MinOpacity { get; set; }
 
-    /// <summary>Default inactiveBlurRadius applied to all Renders and Overlays in this input
-    /// that don't set their own. Inherited at build time.</summary>
+    /// <summary>InactiveBlurRadius for this Input's own image, and the default for its Overlays
+    /// that don't set their own.</summary>
     public double? InactiveBlurRadius { get; set; }
 
     /// <summary>Default font size for labels in this input that don't set their own fontSize.
@@ -198,15 +200,24 @@ public record InputNode : ILayoutNode
     public double? FontSize { get; set; }
 
     /// <summary>Optional x origin for this Input as a coordinate container. The Input's own
-    /// Renders, Labels, and Overlays resolve their + / - coords against this origin, and nested
+    /// image, Labels, and Overlays resolve their + / - coords against this origin, and nested
     /// child Inputs inherit it as their base origin. Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
 
     /// <summary>Optional y origin for this Input as a coordinate container. See X. Defaults to +0.</summary>
     public Coordinate Y { get; set; } = Coordinate.Relative(0);
 
-    /// <summary>Render child elements defining where the input image is positioned.</summary>
-    public List<RenderNode> Renders { get; set; } = [];
+    /// <summary>Render width for this Input's own image. NaN means use the image's natural width.</summary>
+    public double Width { get; set; } = double.NaN;
+
+    /// <summary>Render height for this Input's own image. NaN means use the image's natural height.</summary>
+    public double Height { get; set; } = double.NaN;
+
+    /// <summary>Optional name of another input/asset whose image file this Input prefers. Affects
+    /// image resolution for this Input's own image only — does not establish a mapping
+    /// relationship. If the referenced file doesn't exist, the resolver falls back through Name
+    /// then the structural parent's Name.</summary>
+    public string? UseImage { get; set; }
 
     /// <summary>Overlay child elements for associated images (e.g. dotted lines).</summary>
     public List<OverlayNode> Overlays { get; set; } = [];
@@ -216,48 +227,11 @@ public record InputNode : ILayoutNode
 
     /// <summary>Nested layout children — either &lt;Input&gt; or &lt;Group&gt; in document order.
     /// Structural nesting is how parent/child relationships are expressed (replaces the old
-    /// `childOf` attribute): a parent Input's renders fan out to every InputNode in its
-    /// structural descendant set, and a nested input's per-render image fallback resolves
-    /// through its structural parent's Name. Strict-self renders are written as a duplicate
+    /// `childOf` attribute): a parent Input's own image fans out to every InputNode in its
+    /// structural descendant set, and a nested input's own image-fallback resolves
+    /// through its structural parent's Name. A strict-self render is written as a duplicate
     /// top-level &lt;Input&gt; with no nested children — its fan-out scope is empty.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
-}
-
-/// <summary>
-/// Raw DTO for a Render child element in Layout.xml, specifying where a button image is drawn.
-/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/
-/// OneOfNode/ConditionNode, attaching to whichever Input is ambient at that point in the tree
-/// (see LayoutResolver.BuildContext.CurrentInputName). Consumed by TemplateService, which maps it
-/// to an InputImageDefinition, wrapped in a RenderElement for the loose case.
-/// </summary>
-public record RenderNode : ILayoutNode
-{
-    /// <summary>Left position. Absolute or relative (+ / - prefix) to the enclosing container's slot origin. Defaults to +0.</summary>
-    public Coordinate X { get; set; } = Coordinate.Relative(0);
-
-    /// <summary>Top position. Absolute or relative (+ / - prefix) to the enclosing container's slot origin. Defaults to +0.</summary>
-    public Coordinate Y { get; set; } = Coordinate.Relative(0);
-
-    /// <summary>Render width. NaN means use the image's natural width.</summary>
-    public double Width { get; set; } = double.NaN;
-
-    /// <summary>Render height. NaN means use the image's natural height.</summary>
-    public double Height { get; set; } = double.NaN;
-
-    /// <summary>Optional name of another input/asset whose image file this render prefers.
-    /// Affects image resolution for this render only — does not establish a mapping relationship.
-    /// If the referenced file doesn't exist, the resolver falls back through Name then the
-    /// structural parent's Name.</summary>
-    public string? UseImage { get; set; }
-
-    /// <summary>Show condition: "label", "mapping", "auto", or null to always show.</summary>
-    public string? ShowIf { get; set; }
-
-    /// <summary>Opacity when ShowIf conditions are not met. Null means use the template default.</summary>
-    public double? MinOpacity { get; set; }
-
-    /// <summary>Blur radius when ShowIf conditions are not met. Null means use the template default.</summary>
-    public double? InactiveBlurRadius { get; set; }
 }
 
 /// <summary>
@@ -298,8 +272,9 @@ public record OverlayNode
 /// <summary>
 /// Raw DTO for a Label child element in Layout.xml, specifying label text position, alignment, and font size.
 /// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/
-/// OneOfNode/ConditionNode — see the equivalent note on <see cref="RenderNode"/>. Consumed by
-/// TemplateService, which maps it to a LabelDefinition, wrapped in a LabelElement for the loose case.
+/// OneOfNode/ConditionNode, attaching to whichever Input is ambient at that point in the tree
+/// (see LayoutResolver.BuildContext.CurrentInputName). Consumed by TemplateService, which maps it
+/// to a LabelDefinition, wrapped in a LabelElement for the loose case.
 /// </summary>
 public record LabelNode : ILayoutNode
 {

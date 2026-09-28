@@ -13,7 +13,7 @@ Types that exist as XML deserialisation targets. They mirror the on-disk schema 
 - Mutable: `public T Property { get; set; }`
 - Collection fields use mutable `List<T>` / `Dictionary<K, V>` with default empty initialisers
 - Naming suffix — set by which file the DTO comes from:
-  - **`*Node`** — a node of the `Layout.xml` parse tree. That is the one config file with a real tree, so it takes AST vocabulary: `TemplateLoader` is the parser, `LayoutDocument` is the tree it returns, `LayoutResolver` binds it. Every element in the file is a `*Node` — `InputNode`, `GroupNode`, `OneOfNode`, `ConditionNode`, `RenderNode`, `OverlayNode`, `LabelNode`, `HeadNode`, `StyleNode` — whether or not it is drawn.
+  - **`*Node`** — a node of the `Layout.xml` parse tree. That is the one config file with a real tree, so it takes AST vocabulary: `TemplateLoader` is the parser, `LayoutDocument` is the tree it returns, `LayoutResolver` binds it. Every element in the file is a `*Node` — `InputNode`, `GroupNode`, `OneOfNode`, `ConditionNode`, `OverlayNode`, `LabelNode`, `HeadNode`, `StyleNode` — whether or not it is drawn. There is no `RenderNode`: an Input's own image is described directly by attributes on `InputNode` itself (`Width`/`Height`/`UseImage`, alongside its `ShowIf`/`MinOpacity`/`InactiveBlurRadius`), not a separate child node — every Input draws exactly one image, always at its own origin, so a distinct overridable node was never earning its keep.
   - **`*Config`** — a DTO for one of the settings files, which are flat or list-shaped rather than trees: `GlobalConfig`, `PlatformControllersConfig`, `ControllerConfig`, `InputMappingConfig`, `InputLabelsConfig`.
   - **`*Entry`** — a name/value leaf: `MappingEntry`, `LabelEntry`.
 
@@ -53,7 +53,7 @@ return TranslateToGeneric(...) with { IsGameSpecific = true };
 
 **Layout element naming.** The resolved layout mirrors the parse tree type for type, so the suffix tells you which layer you are in: `LabelNode` → `LabelDefinition` → `RenderedLabel`, that is syntax → bound → output. `*Definition` marks a bound type carrying data of its own — a name, or a resolved position, size and visibility. `InputGroup` and `OneOf` take no suffix because they carry only structure: which children, and how to choose between them.
 
-**Marker interfaces mean "can nest", in both layers.** `ILayoutNode` (raw) and `ILayoutElement` (bound) are implemented only by types that can occupy a position in the tree — an input, a group or stack, a one-of. Renders, overlays and labels are owned by their parent and held in typed lists, so they carry the layer suffix without implementing the interface. This is deliberate and symmetric across the two layers; widening the interfaces would erase the distinction between what nests and what is owned.
+**Marker interfaces mean "can nest", in both layers.** `ILayoutNode` (raw) and `ILayoutElement` (bound) are implemented only by types that can occupy a position in the tree — an input, a group, a one-of. Overlays and labels are owned by their parent and held in typed lists, so they carry the layer suffix without implementing the interface. This is deliberate and symmetric across the two layers; widening the interfaces would erase the distinction between what nests and what is owned.
 
 > **Rule**: Resolved domain types are positional records, read-only collections, no setters. Use `with` to derive modified copies.
 
