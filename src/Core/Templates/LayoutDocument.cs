@@ -81,43 +81,23 @@ public readonly record struct Coordinate(bool IsRelative, double Value)
 
 /// <summary>
 /// Marker interface for anything that can appear in the parsed Layout.xml element tree —
-/// InputNode, GroupNode, StackNode, or OneOfNode. Used purely for polymorphic dispatch.
+/// InputNode, GroupNode, or OneOfNode. Used purely for polymorphic dispatch.
 /// </summary>
 public interface ILayoutNode;
 
 /// <summary>
-/// Raw DTO for a &lt;Group&gt; wrapper around a cluster of inputs. The whole cluster is included
-/// in the rendered output whenever any contained input has at least one visible render; inputs
-/// in a failing group are semantically excluded (gone from inputsToRender), not just visually
-/// faded. The group has no explicit condition attribute — "any member visible" is the rule.
+/// Raw DTO for a &lt;Group&gt; positioned layout container. The group gates on visibility: excluded
+/// entirely from the render output — itself, its Overlay children, everything — when no
+/// descendant has a visible render. Children are stacked vertically: each Input (at any depth
+/// through transparent Conditions) occupies one slot, with positions computed from the group's
+/// own origin plus the running slot index times Gap.
 /// </summary>
 public record GroupNode : ILayoutNode
 {
-    /// <summary>Nested layout children — Input, Group, Stack, or OneOf in document order. The
-    /// group is included whenever any descendant has a visible render, recursing through nested
-    /// Groups and the active branch of nested OneOfs.</summary>
-    public List<ILayoutNode> Children { get; set; } = [];
-
-    /// <summary>Overlays declared at the group level. Each renders once when the group is
-    /// included; their visibility is binary (gated by group inclusion, not by per-overlay
-    /// conditions). Used to declutter templates where the same overlay would otherwise be
-    /// repeated on every input in a cluster.</summary>
-    public List<OverlayNode> Overlays { get; set; } = [];
-}
-
-/// <summary>
-/// Raw DTO for a &lt;Stack&gt; positioned layout container. Unlike &lt;Group&gt;, a Stack is always
-/// included in the render output regardless of whether its children have visible renders —
-/// children handle their own visibility via showIf. Children are stacked vertically: each Input
-/// (at any depth through transparent plain Groups) occupies one slot, with positions computed
-/// from the stack origin plus the running slot index times Gap.
-/// </summary>
-public record StackNode : ILayoutNode
-{
-    /// <summary>Horizontal canvas origin for the stack. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
+    /// <summary>Horizontal canvas origin for the group. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
 
-    /// <summary>Vertical canvas origin for the stack. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
+    /// <summary>Vertical canvas origin for the group. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate Y { get; set; } = Coordinate.Relative(0);
 
     /// <summary>Vertical spacing between slots in pixels.</summary>
@@ -131,11 +111,15 @@ public record StackNode : ILayoutNode
     /// their slot and subsequent inputs shift up to fill the gap.</summary>
     public bool Collapse { get; set; }
 
-    /// <summary>Nested layout children — Input, Group, Stack, or OneOf in document order.</summary>
+    /// <summary>Nested layout children — Input, Group, OneOf, or Condition in document order. The
+    /// group is included whenever any descendant has a visible render, recursing through nested
+    /// Groups, Conditions, and the active branch of nested OneOfs.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
 
-    /// <summary>Overlays declared at the stack level. Rendered unconditionally whenever the
-    /// stack itself renders.</summary>
+    /// <summary>Overlays declared at the group level. Each renders once when the group is
+    /// included; their visibility is binary (gated by group inclusion, not by per-overlay
+    /// conditions). Used to declutter templates where the same overlay would otherwise be
+    /// repeated on every input in a cluster.</summary>
     public List<OverlayNode> Overlays { get; set; } = [];
 }
 
@@ -241,7 +225,7 @@ public record InputNode : ILayoutNode
 
 /// <summary>
 /// Raw DTO for a Render child element in Layout.xml, specifying where a button image is drawn.
-/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/StackNode/
+/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/
 /// OneOfNode/ConditionNode, attaching to whichever Input is ambient at that point in the tree
 /// (see LayoutResolver.BuildContext.CurrentInputName). Consumed by TemplateService, which maps it
 /// to an InputImageDefinition, wrapped in a RenderElement for the loose case.
@@ -313,7 +297,7 @@ public record OverlayNode
 
 /// <summary>
 /// Raw DTO for a Label child element in Layout.xml, specifying label text position, alignment, and font size.
-/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/StackNode/
+/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/
 /// OneOfNode/ConditionNode — see the equivalent note on <see cref="RenderNode"/>. Consumed by
 /// TemplateService, which maps it to a LabelDefinition, wrapped in a LabelElement for the loose case.
 /// </summary>

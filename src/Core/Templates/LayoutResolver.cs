@@ -56,7 +56,6 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     {
         InputNode inputXml => BuildInputDefinition(inputXml, ctx),
         GroupNode groupXml => BuildInputGroup(groupXml, ctx),
-        StackNode stackXml => BuildInputStack(stackXml, ctx),
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
         ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
         RenderNode renderXml => BuildLooseRender(renderXml, ctx),
@@ -87,7 +86,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         // Build a context carrying this input's effective inherited values and identity. Renders,
         // labels, and overlays on this input read from inputCtx; nested children also receive
         // inputCtx (rather than a fresh ctx) so a *loose* Render/Label reached through
-        // Group/Stack/OneOf/Condition can inherit it exactly like a true direct child would — a
+        // Group/OneOf/Condition can inherit it exactly like a true direct child would — a
         // nested <Input> is unaffected, since it always overrides Inherited* from its own
         // ShowIf/Style/FontSize rather than falling through to whatever's ambient.
         BuildContext inputCtx = ctx with
@@ -99,8 +98,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             OriginX = inputOriginX,
             OriginY = inputOriginY,
             CurrentInputName = name,
-            // A stack member's own loose content centers against *its own* stack, if any -- not
-            // whichever outer stack this Input happened to be a member of.
+            // A group member's own loose content centers against *its own* enclosing group, if
+            // any -- not whichever outer group this Input happened to be a member of.
             StackAnchorY = null
         };
 
@@ -131,28 +130,14 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Children: children);
     }
 
-    /// <summary>Resolves a GroupNode DTO into a conditional InputGroup. The group is included
-    /// at render time only when any descendant has a visible render.</summary>
-    private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
-    {
-        var group = new InputGroup(
-            IsStack: false,
-            Children: [.. groupXml.Children.Select(c => BuildNode(c, ctx))],
-            Overlays: [.. groupXml.Overlays
-                .Where(o => o.Src != null)
-                .Select(o => BuildOverlayDefinition(o, ctx))]);
-        _logger.Debug($"Group: children={group.Children.Count}, overlays={group.Overlays.Count}");
-        return group;
-    }
-
-    /// <summary>Resolves a StackNode DTO into an InputGroup, included at render time under the
-    /// same any-descendant-visible rule as a plain Group — a Stack drops out entirely (itself and
-    /// any Overlay it carries) when nothing inside it is visible. Establishes a
+    /// <summary>Resolves a GroupNode DTO into an InputGroup, included at render time only when
+    /// any descendant has a visible render — the group drops out entirely (itself and any
+    /// Overlay it carries) when nothing inside it is visible. Establishes a
     /// canvas origin and stacks children vertically: each Input (at any depth through transparent
-    /// plain Groups) consumes one slot, advancing the y position by Gap. <c>VAlign</c> shifts
+    /// Conditions) consumes one slot, advancing the y position by Gap. <c>VAlign</c> shifts
     /// that origin up front so the declared Y lands on the first, last, or middle slot rather
     /// than always being the first — using the template's fixed slot count, since this runs once
-    /// at template-load time. When the stack also collapses, that fixed-count shift is corrected
+    /// at template-load time. When the group also collapses, that fixed-count shift is corrected
     /// at render time (see <see cref="Rendering.LayoutFilter"/>) against whatever slot count is
     /// actually left, using the same <see cref="StackVAlign.Shift"/> math with the vAlign this
     /// method already validated — carried through <see cref="CollapseInfo"/> so a bad value is
@@ -160,53 +145,52 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     ///
     /// <para>The declared Y (before that shift) is captured separately as
     /// <see cref="BuildContext.StackAnchorY"/> for any loose <c>&lt;Label&gt;</c> found directly
-    /// inside this Stack (or reached through a Group/OneOf/Condition nested in it): since it
+    /// inside this group (or reached through a nested Group/OneOf/Condition): since it
     /// already names whatever slot <c>vAlign</c> points at — invariant to collapse, by the same
     /// guarantee the render-time correction relies on — such a label needs no correction of its
-    /// own to stay pinned there. A <c>vAlign="center"</c> Stack is what gives a loose Label the
+    /// own to stay pinned there. A <c>vAlign="center"</c> group is what gives a loose Label the
     /// "half-way up the stack" position; <c>top</c>/<c>bottom</c> give whichever end instead.</para>
     /// </summary>
-    private InputGroup BuildInputStack(StackNode stackXml, BuildContext ctx)
+    private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
     {
-        double gap = stackXml.Gap ?? 0;
-        int slotCount = CountSlots(stackXml.Children);
-        string vAlign = NormalizeVAlign(stackXml.VAlign);
+        double gap = groupXml.Gap ?? 0;
+        int slotCount = CountSlots(groupXml.Children);
+        string vAlign = NormalizeVAlign(groupXml.VAlign);
         double vAlignShift = StackVAlign.Shift(vAlign, slotCount, gap);
-        double declaredOriginY = stackXml.Y.Resolve(ctx.OriginY);
+        double declaredOriginY = groupXml.Y.Resolve(ctx.OriginY);
 
         var frame = new StackFrame
         {
-            OriginX = stackXml.X.Resolve(ctx.OriginX),
+            OriginX = groupXml.X.Resolve(ctx.OriginX),
             OriginY = declaredOriginY - vAlignShift,
             Gap = gap,
             SlotIndex = 0,
         };
-        BuildContext stackCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY, StackAnchorY = declaredOriginY };
+        BuildContext groupCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY, StackAnchorY = declaredOriginY };
 
         var children = new List<ILayoutElement>();
-        foreach (ILayoutNode child in stackXml.Children)
+        foreach (ILayoutNode child in groupXml.Children)
         {
-            children.Add(BuildNodeInStack(child, frame, stackCtx));
+            children.Add(BuildNodeInStack(child, frame, groupCtx));
         }
 
-        var stack = new InputGroup(
-            IsStack: true,
+        var group = new InputGroup(
             Children: children,
-            Overlays: [.. stackXml.Overlays
+            Overlays: [.. groupXml.Overlays
                 .Where(o => o.Src != null)
-                .Select(o => BuildOverlayDefinition(o, stackCtx))]);
+                .Select(o => BuildOverlayDefinition(o, groupCtx))]);
 
-        if (stackXml.Collapse)
+        if (groupXml.Collapse)
             CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
 
-        _logger.Debug($"Stack (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} vAlign={vAlign} collapse={stackXml.Collapse}): children={stack.Children.Count}, overlays={stack.Overlays.Count}");
-        return stack;
+        _logger.Debug($"Group (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} vAlign={vAlign} collapse={groupXml.Collapse}): children={group.Children.Count}, overlays={group.Overlays.Count}");
+        return group;
     }
 
     /// <summary>
     /// Counts the slots <paramref name="nodes"/> will consume once built, mirroring
-    /// <see cref="BuildNodeInStack"/>'s own slot rule exactly: Input/Stack/OneOf each consume
-    /// one slot, and a plain Group is transparent, contributing its children's slots instead of
+    /// <see cref="BuildNodeInStack"/>'s own slot rule exactly: Input/Group/OneOf each consume
+    /// one slot, and a Condition is transparent, contributing its children's slots instead of
     /// one of its own. Computed ahead of the build so <see cref="StackVAlign.Shift"/> can shift
     /// the origin before the first slot is actually consumed.
     /// </summary>
@@ -215,19 +199,18 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     private static int CountSlots(ILayoutNode node) => node switch
     {
         InputNode => 1,
-        StackNode => 1,
+        GroupNode => 1,
         OneOfNode => 1,
-        GroupNode plainGroupXml => CountSlots(plainGroupXml.Children),
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
         RenderNode or LabelNode => 0,
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
     /// <summary>
-    /// Validates a Stack's <c>vAlign</c> against the values <see cref="StackVAlign.Shift"/>
+    /// Validates a Group's <c>vAlign</c> against the values <see cref="StackVAlign.Shift"/>
     /// recognizes. An unrecognized value is logged and replaced with "top" — the only point in
     /// the pipeline this is ever checked, since render-time re-use of the value (for a
-    /// collapsing stack's correction) trusts whatever this method already normalized.
+    /// collapsing group's correction) trusts whatever this method already normalized.
     /// </summary>
     private string NormalizeVAlign(string vAlign) => vAlign switch
     {
@@ -243,9 +226,9 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
     /// <summary>
     /// Builds one layout node within a positioned group's slot loop. Inputs consume one slot
-    /// each and advance the frame's SlotIndex. Plain Groups are transparent — their Input
-    /// children each advance the same counter. Positioned Groups and OneOfs consume one slot as
-    /// a block and own their own inner traversal.
+    /// each and advance the frame's SlotIndex. Nested Groups and OneOfs consume one slot as a
+    /// block and own their own inner traversal; Conditions are transparent — their children each
+    /// advance the same counter.
     /// </summary>
     private ILayoutElement BuildNodeInStack(
         ILayoutNode node,
@@ -259,27 +242,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 (double sx, double sy) = ConsumeSlot(frame);
                 return BuildInputDefinition(inputXml, ctx with { OriginX = sx, OriginY = sy });
             }
-            case StackNode stackXml:
+            case GroupNode groupXml:
             {
                 (double sx, double sy) = ConsumeSlot(frame);
-                return BuildInputStack(stackXml, ctx with { OriginX = sx, OriginY = sy });
-            }
-            case GroupNode plainGroupXml:
-            {
-                // Plain nested group: transparent to slot counting; its Inputs each advance the counter.
-                var children = new List<ILayoutElement>();
-                foreach (ILayoutNode child in plainGroupXml.Children)
-                {
-                    children.Add(BuildNodeInStack(child, frame, ctx));
-                }
-                var group = new InputGroup(
-                    IsStack: false,
-                    Children: children,
-                    Overlays: [.. plainGroupXml.Overlays
-                        .Where(o => o.Src != null)
-                        .Select(o => BuildOverlayDefinition(o, ctx))]);
-                _logger.Debug($"Group (transparent in stack): children={group.Children.Count}, overlays={group.Overlays.Count}");
-                return group;
+                return BuildInputGroup(groupXml, ctx with { OriginX = sx, OriginY = sy });
             }
             case OneOfNode oneOfXml:
             {
@@ -289,7 +255,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             }
             case ConditionNode conditionXml:
             {
-                // Transparent, like a plain Group: its children each advance the same counter.
+                // Transparent: its children each advance the same counter.
                 var children = new List<ILayoutElement>();
                 foreach (ILayoutNode child in conditionXml.Children)
                 {
@@ -323,7 +289,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>Resolves a ConditionNode DTO into a ConditionElement, recursively building each
-    /// child (Input, Group, Stack, OneOf, or nested Condition).</summary>
+    /// child (Input, Group, OneOf, or nested Condition).</summary>
     private ConditionElement BuildCondition(ConditionNode conditionXml, BuildContext ctx) =>
         BuildConditionElement(conditionXml, [.. conditionXml.Children.Select(c => BuildNode(c, ctx))]);
 
@@ -393,7 +359,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
     /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
     /// Y resolves against <see cref="BuildContext.StackAnchorY"/> when set (a loose Label inside a
-    /// Stack, centering — or top/bottom-aligning — against the Stack's own declared position
+    /// Group, centering — or top/bottom-aligning — against the Group's own declared position
     /// rather than the shifted per-slot origin its members use); <c>inputCtx</c> always resets
     /// this to null for a genuine direct child, so this is a no-op there.
     /// </summary>
@@ -410,7 +376,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
     /// <summary>
     /// Resolves a &lt;Render&gt; found somewhere other than as a direct child of its own
-    /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;Stack&gt;/
+    /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/
     /// &lt;OneOf&gt;/&lt;Condition&gt;) against whichever Input is ambient in <paramref name="ctx"/>.
     /// A missing ambient Input is a template-authoring error — logged once, here, at load time,
     /// same as a missing required attribute elsewhere in this file — rather than silently
@@ -481,12 +447,12 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// across all Build* calls (ImageSource, DefaultFontSize, NamedStyles, CollapseInfo
     /// accumulator) alongside the inherited visibility values that flow from an Input down to
     /// its own renders and overlays. The CollapseInfo dictionary is a single shared reference
-    /// across all <c>with</c> clones — mutations are visible to every BuildInputStack call.
+    /// across all <c>with</c> clones — mutations are visible to every BuildInputGroup call.
     /// Use <c>with</c> to produce an inputCtx with the inherited values set; nested Inputs
     /// receive that same inputCtx too — but since a nested Input always overrides Inherited* from
     /// its own ShowIf/Style/FontSize (never falling through to whatever was ambient), it's a
     /// no-op for that case, and only ever actually matters for a bare Render/Label found while
-    /// descending through Group/Stack/OneOf/Condition on the way to one — letting a loose Render
+    /// descending through Group/OneOf/Condition on the way to one — letting a loose Render
     /// inherit exactly what a true direct child of the same Input would.
     /// <c>CurrentInputName</c> similarly tracks whichever Input is ambient at this point in the
     /// tree, reset whenever a new one is entered, for a bare Render/Label's default image
@@ -494,11 +460,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// rediscovers the same Input during its own per-game walk, since the resolved
     /// <see cref="InputDefinition"/> a loose render belongs to doesn't exist as an object yet at
     /// the point its own children are being built.
-    /// <c>StackAnchorY</c> tracks the innermost enclosing Stack's own declared Y (before its
+    /// <c>StackAnchorY</c> tracks the innermost enclosing Group's own declared Y (before its
     /// <c>vAlign</c> shift), for a loose <c>&lt;Label&gt;</c> to resolve against instead of the
-    /// shifted per-slot origin members use — null outside any Stack, reset (like
+    /// shifted per-slot origin members use — null outside any Group, reset (like
     /// <c>CurrentInputName</c>) on entering a nested Input, and naturally shadowed by a nested
-    /// Stack's own value.
+    /// Group's own value.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
@@ -515,10 +481,9 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double? StackAnchorY = null);
 
     /// <summary>
-    /// Mutable iteration state for one stack's slot loop. SlotIndex advances as children consume
-    /// slots; plain Groups share the frame with their enclosing stack so their inputs each
-    /// advance the same counter. A nested Stack creates its own frame — slot counting does not
-    /// leak across stack boundaries.
+    /// Mutable iteration state for one group's slot loop. SlotIndex advances as children consume
+    /// slots; a nested Group creates its own frame — slot counting does not leak across group
+    /// boundaries.
     /// </summary>
     private class StackFrame
     {

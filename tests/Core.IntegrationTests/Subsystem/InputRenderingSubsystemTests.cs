@@ -120,7 +120,7 @@ public class InputRenderingSubsystemTests
         var second = Input(
             name: "ButtonA",
             images: [new InputImageDefinition(X: 0, Y: 200, ImageFile: "ButtonA.png")]);
-        var stack = new InputGroup(IsStack: true, Children: [first, second], Overlays: []);
+        var stack = new InputGroup(Children: [first, second], Overlays: []);
 
         _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis, controller: ThreeButton);
@@ -154,7 +154,7 @@ public class InputRenderingSubsystemTests
         var third = Input(
             name: "ButtonB",
             images: [new InputImageDefinition(X: 0, Y: 300, ImageFile: "ButtonB.png")]);
-        var stack = new InputGroup(IsStack: true, Children: [first, second, third], Overlays: []);
+        var stack = new InputGroup(Children: [first, second, third], Overlays: []);
 
         _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis, controller: ThreeButton);
@@ -190,7 +190,6 @@ public class InputRenderingSubsystemTests
             images: [new InputImageDefinition(0, 0, "ButtonDpadDown.png")]);
         var overlay = new OverlayDefinition(X: 5, Y: 5, Source: "dpad-lines.png", ShowIf: Mapped, MinOpacity: 0.2);
         var group = new InputGroup(
-            IsStack: false,
             Children: [inputUp, inputDown],
             Overlays: [overlay]);
 
@@ -254,7 +253,7 @@ public class InputRenderingSubsystemTests
     [Fact]
     public void Render_GroupWithNoVisibleMembers_DropsGroupAndOverlay()
     {
-        // given a Group (IsStack=false) whose members both have showIf="mapping" images,
+        // given a Group whose members both have showIf="mapping" images,
         // a group-level overlay, and an empty mapping — no member satisfies IsMapped
         var inputUp = Input(
             name: "ButtonDpadUp",
@@ -263,7 +262,7 @@ public class InputRenderingSubsystemTests
             name: "ButtonDpadDown",
             images: [new InputImageDefinition(0, 0, "ButtonDpadDown.png", ShowIf: Mapped)]);
         var overlay = new OverlayDefinition(X: 0, Y: 0, Source: "dpad-lines.png");
-        var group = new InputGroup(IsStack: false, Children: [inputUp, inputDown], Overlays: [overlay]);
+        var group = new InputGroup(Children: [inputUp, inputDown], Overlays: [overlay]);
 
         _images.With(src: "ButtonDpadUp.png", generic: "ButtonDpadUp.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "ButtonDpadDown.png", generic: "ButtonDpadDown.png", platform: Genesis, controller: ThreeButton);
@@ -285,7 +284,7 @@ public class InputRenderingSubsystemTests
         // because HasLabel is true, but the overlay's IsMapped check fails
         var input = Input("ButtonA", images: [new InputImageDefinition(0, 0, "ButtonA.png", ShowIf: Label)]);
         var overlay = new OverlayDefinition(X: 5, Y: 5, Source: "highlight.png", ShowIf: Mapped, MinOpacity: 0.15);
-        var group = new InputGroup(IsStack: false, Children: [input], Overlays: [overlay]);
+        var group = new InputGroup(Children: [input], Overlays: [overlay]);
 
         _images.With(src: "ButtonA.png", generic: "ButtonA.png", platform: Genesis, controller: ThreeButton);
 
@@ -317,7 +316,7 @@ public class InputRenderingSubsystemTests
             images: [new InputImageDefinition(0, 0, "ButtonA.png")],
             overlays: [perInputOverlay]);
         var groupOverlay = new OverlayDefinition(X: 0, Y: 0, Source: "group-highlight.png");
-        var group = new InputGroup(IsStack: true, Children: [input], Overlays: [groupOverlay]);
+        var group = new InputGroup(Children: [input], Overlays: [groupOverlay]);
 
         _images.With(src: "ButtonA.png", generic: "ButtonA.png", platform: Genesis, controller: ThreeButton);
 
@@ -358,7 +357,7 @@ public class InputRenderingSubsystemTests
         ]);
         var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
         [
-            new InputGroup(IsStack: true, Children: [up, left, right, down], Overlays: [])
+            new InputGroup(Children: [up, left, right, down], Overlays: [])
         ]);
         var oneOf = new OneOf([singleGlyphAlternative, mergedAlternative]);
 
@@ -401,7 +400,7 @@ public class InputRenderingSubsystemTests
 
         var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
         [
-            new InputGroup(IsStack: true, Children: [up, left, right, down], Overlays: []),
+            new InputGroup(Children: [up, left, right, down], Overlays: []),
             new LabelElement(new LabelDefinition(X: 0, Y: 0, Alignment: "right")),
         ]);
         var axisLeftStick = new InputDefinition(

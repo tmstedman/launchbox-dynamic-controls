@@ -13,9 +13,7 @@ public static class LayoutNavigation
     public static InputDefinition FirstInput(this ResolvedLayout result) =>
         result.Elements.FirstInput();
 
-    /// <summary>Returns the first top-level <see cref="InputGroup"/> in document order. Stacks
-    /// and plain Groups both materialize as <see cref="InputGroup"/>; distinguish via
-    /// <see cref="InputGroup.IsStack"/> if needed.</summary>
+    /// <summary>Returns the first top-level <see cref="InputGroup"/> in document order.</summary>
     public static InputGroup FirstInputGroup(this ResolvedLayout result) =>
         result.Elements.FirstInputGroup();
 

@@ -370,65 +370,40 @@ public class TemplateLayoutResolverTests
         render.UseImageFile.ShouldBe("Stick.png");
     }
 
-    // --- Stack slot positioning ---
+    // --- Group slot positioning ---
 
     [Fact]
-    public void Resolve_StackPlainGroupChildren_AreTransparentToSlotCounting()
+    public void Resolve_NestedGroup_ConsumesOneSlotInParent()
     {
-        // given a stack with gap=50 containing inputs A, [Group(B, C)], D
+        // given a group with gap=50 containing an input followed by a nested group
+        // the nested group itself contains two inputs; it occupies one slot in the parent
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 0).Gap(50)
+            .Group(s => s.At(0, 0).Gap(50)
                 .Input("A", i => i.Render())
-                .Group(g => g
-                    .Input("B", i => i.Render())
-                    .Input("C", i => i.Render()))
-                .Input("D", i => i.Render()));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then B and C each advance the slot counter (plain group is transparent): Y = 0/50/100/150
-        InputGroup stack = result.FirstInputGroup();
-        var renders = stack.Children.Flatten()
-            .OfType<InputDefinition>()
-            .Select(i => i.InputImages.Single())
-            .ToList();
-        renders.Select(r => r.Y).ShouldBe([0.0, 50.0, 100.0, 150.0]);
-    }
-
-    [Fact]
-    public void Resolve_NestedStack_ConsumesOneSlotInParent()
-    {
-        // given a stack with gap=50 containing an input followed by a nested stack
-        // the nested stack itself contains two inputs; it occupies one slot in the parent
-        TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 0).Gap(50)
-                .Input("A", i => i.Render())
-                .Stack(inner => inner.Gap(10)
+                .Group(inner => inner.Gap(10)
                     .Input("B", i => i.Render())
                     .Input("C", i => i.Render())));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then A lands at slot 0 (Y=0) and the inner stack lands at slot 1 (Y=50)
+        // then A lands at slot 0 (Y=0) and the inner group lands at slot 1 (Y=50)
         InputGroup outer = result.FirstInputGroup();
         var a = (InputDefinition)outer.Children[0];
         var inner = (InputGroup)outer.Children[1];
         a.InputImages.Single().Y.ShouldBe(0);
-        inner.IsStack.ShouldBeTrue();
-        // inner stack's own inputs start at the slot origin (Y=50) with their own gap
+        // inner group's own inputs start at the slot origin (Y=50) with their own gap
         inner.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([50.0, 60.0]);
     }
 
     [Fact]
-    public void Resolve_StackVAlignTop_IsTheDefaultAndLeavesYUnshifted()
+    public void Resolve_GroupVAlignTop_IsTheDefaultAndLeavesYUnshifted()
     {
-        // given a stack with vAlign explicitly "top" -- the default
+        // given a group with vAlign explicitly "top" -- the default
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("top")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("top")
                 .Input("A", i => i.Render())
                 .Input("B", i => i.Render())
                 .Input("C", i => i.Render()));
@@ -437,18 +412,18 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the declared Y is the first slot, same as if vAlign were omitted
-        InputGroup stack = result.FirstInputGroup();
-        stack.Children.Cast<InputDefinition>()
+        InputGroup group = result.FirstInputGroup();
+        group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([100.0, 150.0, 200.0]);
     }
 
     [Fact]
-    public void Resolve_StackVAlignBottom_ShiftsOriginSoTheLastSlotLandsOnY()
+    public void Resolve_GroupVAlignBottom_ShiftsOriginSoTheLastSlotLandsOnY()
     {
-        // given a stack with vAlign="bottom" -- the declared Y should be the LAST slot
+        // given a group with vAlign="bottom" -- the declared Y should be the LAST slot
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A", i => i.Render())
                 .Input("B", i => i.Render())
                 .Input("C", i => i.Render()));
@@ -457,18 +432,18 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the origin shifts up by (slotCount-1)*gap, so slot 2 (the last) lands on Y=100
-        InputGroup stack = result.FirstInputGroup();
-        stack.Children.Cast<InputDefinition>()
+        InputGroup group = result.FirstInputGroup();
+        group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([0.0, 50.0, 100.0]);
     }
 
     [Fact]
-    public void Resolve_StackVAlignCenter_ShiftsOriginSoTheMiddleSlotLandsOnY()
+    public void Resolve_GroupVAlignCenter_ShiftsOriginSoTheMiddleSlotLandsOnY()
     {
-        // given a stack with vAlign="center" -- the declared Y should be the midpoint
+        // given a group with vAlign="center" -- the declared Y should be the midpoint
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("center")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("center")
                 .Input("A", i => i.Render())
                 .Input("B", i => i.Render())
                 .Input("C", i => i.Render()));
@@ -477,46 +452,21 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the origin shifts up by half of (slotCount-1)*gap, so slot 1 (the middle) lands on Y=100
-        InputGroup stack = result.FirstInputGroup();
-        stack.Children.Cast<InputDefinition>()
+        InputGroup group = result.FirstInputGroup();
+        group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([50.0, 100.0, 150.0]);
     }
 
     [Fact]
-    public void Resolve_StackVAlignBottom_CountsPlainGroupChildrenTransparently()
+    public void Resolve_GroupVAlignBottom_CountsANestedGroupAsOneSlot()
     {
-        // given vAlign="bottom" on a stack whose slots come from A, [Group(B, C)], D -- 4 slots
-        // total, matching Resolve_StackPlainGroupChildren_AreTransparentToSlotCounting's shape
+        // given vAlign="bottom" on an outer group with 2 slots -- A, then a nested group (which
+        // counts as one slot in the OUTER group regardless of its own inner slot count)
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 300).Gap(50).VAlign("bottom")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A", i => i.Render())
-                .Group(g => g
-                    .Input("B", i => i.Render())
-                    .Input("C", i => i.Render()))
-                .Input("D", i => i.Render()));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then the shift is (4-1)*50=150, so the last of the 4 slots lands on Y=300
-        InputGroup stack = result.FirstInputGroup();
-        var renders = stack.Children.Flatten()
-            .OfType<InputDefinition>()
-            .Select(i => i.InputImages.Single())
-            .ToList();
-        renders.Select(r => r.Y).ShouldBe([150.0, 200.0, 250.0, 300.0]);
-    }
-
-    [Fact]
-    public void Resolve_StackVAlignBottom_CountsANestedStackAsOneSlot()
-    {
-        // given vAlign="bottom" on an outer stack with 2 slots -- A, then a nested stack (which
-        // counts as one slot in the OUTER stack regardless of its own inner slot count)
-        TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
-                .Input("A", i => i.Render())
-                .Stack(inner => inner.Gap(10)
+                .Group(inner => inner.Gap(10)
                     .Input("B", i => i.Render())
                     .Input("C", i => i.Render())));
 
@@ -536,11 +486,11 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_StackVAlignUnknown_LogsError_AndDefaultsToTop()
+    public void Resolve_GroupVAlignUnknown_LogsError_AndDefaultsToTop()
     {
-        // given a stack with a vAlign value the resolver doesn't recognize
+        // given a group with a vAlign value the resolver doesn't recognize
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bogus")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bogus")
                 .Input("A", i => i.Render())
                 .Input("B", i => i.Render()));
 
@@ -548,20 +498,20 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then it behaves as "top" (no shift) and logs an error naming the value
-        InputGroup stack = result.FirstInputGroup();
-        stack.Children.Cast<InputDefinition>()
+        InputGroup group = result.FirstInputGroup();
+        group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([100.0, 150.0]);
         _logger.Received().Error(Arg.Is<string>(m => m.Contains("bogus")));
     }
 
     [Fact]
-    public void Resolve_StackVAlignBottom_SingleSlot_IsUnaffected()
+    public void Resolve_GroupVAlignBottom_SingleSlot_IsUnaffected()
     {
-        // given vAlign="bottom" on a stack with only one slot -- bottom and top coincide when
+        // given vAlign="bottom" on a group with only one slot -- bottom and top coincide when
         // there's nothing to distribute around
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom")
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A", i => i.Render()));
 
         // when the resolver runs
@@ -572,32 +522,32 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_StackCollapse_RecordsCollapseInfoForInputs()
+    public void Resolve_GroupCollapse_RecordsCollapseInfoForInputs()
     {
-        // given a stack with collapse="true" containing two inputs
+        // given a group with collapse="true" containing two inputs
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 0).Gap(50).Collapse()
+            .Group(s => s.At(0, 0).Gap(50).Collapse()
                 .Input("A", i => i.Render())
                 .Input("B", i => i.Render()));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then each member input has an entry in ResolvedLayout.CollapseInfo with the stack's gap
-        InputGroup stack = result.FirstInputGroup();
-        InputDefinition[] inputs = [.. stack.Children.Cast<InputDefinition>()];
+        // then each member input has an entry in ResolvedLayout.CollapseInfo with the group's gap
+        InputGroup group = result.FirstInputGroup();
+        InputDefinition[] inputs = [.. group.Children.Cast<InputDefinition>()];
         result.CollapseInfo.Keys.ShouldBe(inputs, ignoreOrder: true);
         foreach (InputDefinition input in inputs)
             result.CollapseInfo[input].Gap.ShouldBe(50);
     }
 
     [Fact]
-    public void Resolve_StackCollapseWithVAlign_CarriesTheValueIntoCollapseInfo()
+    public void Resolve_GroupCollapseWithVAlign_CarriesTheValueIntoCollapseInfo()
     {
-        // given a collapsing stack with vAlign="bottom" -- LayoutFilter needs this at render time
+        // given a collapsing group with vAlign="bottom" -- LayoutFilter needs this at render time
         // to correct its own shift for whatever slots collapse actually leaves visible
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
                 .Input("A", i => i.Render()));
 
         // when the resolver runs
@@ -608,13 +558,13 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_StackCollapseWithUnknownVAlign_CollapseInfoCarriesTheNormalizedDefault()
+    public void Resolve_GroupCollapseWithUnknownVAlign_CollapseInfoCarriesTheNormalizedDefault()
     {
-        // given a collapsing stack with a vAlign value the resolver doesn't recognize -- it's
+        // given a collapsing group with a vAlign value the resolver doesn't recognize -- it's
         // validated (and logged) exactly once, here; CollapseInfo must carry the normalized
         // "top", not the raw invalid string, since nothing downstream re-validates it
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
+            .Group(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
                 .Input("A", i => i.Render()));
 
         // when the resolver runs
@@ -625,11 +575,11 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_StackWithoutCollapse_OmitsCollapseInfoEntry()
+    public void Resolve_GroupWithoutCollapse_OmitsCollapseInfoEntry()
     {
-        // given a stack with collapse omitted
+        // given a group with collapse omitted
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(0, 0).Gap(50).Input("A", i => i.Render()));
+            .Group(s => s.At(0, 0).Gap(50).Input("A", i => i.Render()));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -642,21 +592,7 @@ public class TemplateLayoutResolverTests
     // --- Group + OneOf ---
 
     [Fact]
-    public void Resolve_Group_IsNotStack()
-    {
-        // given a top-level plain Group
-        TestLayout config = new TestLayout()
-            .Group(g => g.Input("A", i => i.Render()));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then the resulting InputGroup is not flagged IsStack (Stacks are)
-        result.FirstInputGroup().IsStack.ShouldBeFalse();
-    }
-
-    [Fact]
-    public void Resolve_GroupInsideGroup_BothAreNotStack()
+    public void Resolve_NestedGroup_IsReachableAsAnInputGroup()
     {
         // given a top-level Group whose only child is another Group containing an Input
         TestLayout config = new TestLayout()
@@ -667,18 +603,16 @@ public class TemplateLayoutResolverTests
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then both Groups are resolved (neither is IsStack) and the Input is reachable
+        // then both Groups are resolved, the inner reachable as the outer's sole child
         var outerGroup = result.FirstInputGroup();
         var innerGroup = (InputGroup)outerGroup.Children.Single();
-        outerGroup.IsStack.ShouldBeFalse();
-        innerGroup.IsStack.ShouldBeFalse();
         innerGroup.Children.FirstInput().Name.ShouldBe("A");
     }
 
     [Fact]
     public void Resolve_TopLevelOneOf_IsBuiltAsOneOf()
     {
-        // given a top-level OneOf (not inside a Stack) — exercises BuildNode's OneOfNode arm
+        // given a top-level OneOf (not inside a Group) — exercises BuildNode's OneOfNode arm
         TestLayout config = new TestLayout()
             .OneOf(o => o
                 .Input("A", i => i.Render())
@@ -705,11 +639,11 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_UnknownNodeTypeInStack_Throws()
+    public void Resolve_UnknownNodeTypeInGroup_Throws()
     {
-        // given a stack containing an ILayoutNode subtype that BuildNodeInStack doesn't handle
+        // given a group containing an ILayoutNode subtype that BuildNodeInStack doesn't handle
         var config = new LayoutDocument();
-        config.Elements.Add(new StackNode { Children = [new UnknownNode()] });
+        config.Elements.Add(new GroupNode { Children = [new UnknownNode()] });
 
         // when the resolver runs
         // then an InvalidOperationException is thrown
@@ -719,9 +653,9 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_OneOfAlternatives_AllBuiltWithSharedOrigin()
     {
-        // given a OneOf in a stack slot with two relative-positioned alternatives
+        // given a OneOf in a group slot with two relative-positioned alternatives
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(100, 200).Gap(50)
+            .Group(s => s.At(100, 200).Gap(50)
                 .OneOf(o => o
                     .Input("A", i => i.Render(r => r.Offset(0, 0)))
                     .Input("B", i => i.Render(r => r.Offset(0, 0)))));
@@ -798,12 +732,12 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_ConditionInStack_IsTransparentToSlotCounting()
+    public void Resolve_ConditionInGroup_IsTransparentToSlotCounting()
     {
-        // given a Condition wrapping two Inputs inside a Stack — exercises BuildNodeInStack's
+        // given a Condition wrapping two Inputs inside a Group — exercises BuildNodeInStack's
         // ConditionNode arm; each wrapped Input should still consume its own slot
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(100, 200).Gap(50)
+            .Group(s => s.At(100, 200).Gap(50)
                 .Condition(c => c.Any("A")
                     .Input("A", i => i.Render(r => r.Offset(0, 0)))
                     .Input("B", i => i.Render(r => r.Offset(0, 0)))));
@@ -902,18 +836,18 @@ public class TemplateLayoutResolverTests
         render.Image.Y.ShouldBe(60);
     }
 
-    // --- Loose Label centering against its enclosing Stack ---
+    // --- Loose Label centering against its enclosing Group ---
 
     [Fact]
-    public void Resolve_LooseLabelInVAlignCenterStack_ResolvesToDeclaredCenter_NotTheShiftedTopSlot()
+    public void Resolve_LooseLabelInVAlignCenterGroup_ResolvesToDeclaredCenter_NotTheShiftedTopSlot()
     {
-        // given a vAlign="center" Stack of 4 slots (gap=40) declared at y=300 -- the shifted
+        // given a vAlign="center" Group of 4 slots (gap=40) declared at y=300 -- the shifted
         // top-slot position members actually render at is 300 - (3*40/2) = 240, but a loose
-        // Label should resolve against the Stack's own declared 300, landing "half-way up".
-        // The Stack needs an enclosing Input for the loose Label's ambient identity, same
+        // Label should resolve against the Group's own declared 300, landing "half-way up".
+        // The Group needs an enclosing Input for the loose Label's ambient identity, same
         // requirement as any other loose Render/Label -- unrelated to this feature.
         TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", a => a.Render())
                 .Input("B", b => b.Render())
                 .Input("C", c => c.Render())
@@ -927,12 +861,12 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_LooseLabelInVAlignBottomStack_ResolvesToDeclaredBottomSlot()
+    public void Resolve_LooseLabelInVAlignBottomGroup_ResolvesToDeclaredBottomSlot()
     {
         // vAlign="bottom" names a different slot (the last one) -- the loose Label follows
-        // whatever the Stack's own vAlign points at, not always "centered"
+        // whatever the Group's own vAlign points at, not always "centered"
         TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("bottom")
+            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("bottom")
                 .Input("A", a => a.Render())
                 .Input("B", b => b.Render())
                 .LooseLabel(l => l.Offset(0, 0))));
@@ -944,12 +878,15 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_LooseLabelReachedThroughGroupInsideStack_StillUsesStackAnchor()
+    public void Resolve_LooseLabelReachedThroughNestedGroup_UsesTheNestedGroupsOwnAnchor()
     {
-        // a Group between the Stack and the loose Label is transparent, same as it already is
-        // for slot counting -- the anchor threads through it unchanged
+        // unlike OneOf/Condition, a nested Group is never transparent — it always establishes
+        // its own frame with its own declared position, so a loose Label directly inside it
+        // anchors to THAT Group's position (its own slot in the outer Group, y=380: outer's
+        // vAlign="center" shift for 5 slots is (5-1)*40/2=80, so slot 4 lands at
+        // 300-80+4*40=380), shadowing the outer Group's own anchor (300) entirely
         TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildStack(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", a => a.Render())
                 .Input("B", b => b.Render())
                 .Input("C", c => c.Render())
@@ -959,16 +896,16 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstInputGroup().Children.FirstLabelElement();
-        label.Label.Y.ShouldBe(300);
+        label.Label.Y.ShouldBe(380);
     }
 
     [Fact]
-    public void Resolve_DirectChildLabelOnAStackMember_UnaffectedByTheStacksAnchor()
+    public void Resolve_DirectChildLabelOnAGroupMember_UnaffectedByTheGroupsAnchor()
     {
-        // a stack member's own *direct* Label is a completely ordinary Label -- it must keep
-        // resolving against that Input's own slot position, never the enclosing Stack's anchor
+        // a group member's own *direct* Label is a completely ordinary Label -- it must keep
+        // resolving against that Input's own slot position, never the enclosing Group's anchor
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Group(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", i => i.Render().Label(l => l.Offset(0, 5)))
                 .Input("B", i => i.Render())
                 .Input("C", i => i.Render())
@@ -981,15 +918,15 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_LooseLabelInsideStackMembersOwnCondition_DoesNotInheritTheOuterStacksAnchor()
+    public void Resolve_LooseLabelInsideGroupMembersOwnCondition_DoesNotInheritTheOuterGroupsAnchor()
     {
-        // a stack member's own loose content (reached through its own nested Condition) must
-        // resolve against *its own* slot origin -- not the outer stack it happens to be a
+        // a group member's own loose content (reached through its own nested Condition) must
+        // resolve against *its own* slot origin -- not the outer group it happens to be a
         // member of. A is the first of 4 slots (vAlign=center, gap=40, declared y=300), so its
         // own (shifted) slot position is 300 - (3*40/2) = 240 -- clearly distinct from the
-        // outer stack's own anchor (300), so the two can't be confused for one another.
+        // outer group's own anchor (300), so the two can't be confused for one another.
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Group(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", i => i.Render().ChildCondition(c => c.Any("X").LooseLabel(l => l.Offset(0, 0))))
                 .Input("B", i => i.Render())
                 .Input("C", i => i.Render())
@@ -1044,17 +981,17 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_GroupOverlay_RelativeCoords_ResolveAgainstStackOrigin()
+    public void Resolve_GroupOverlay_RelativeCoords_ResolveAgainstGroupOrigin()
     {
-        // given a stack-level overlay declared with relative (+5,+10) coordinates
+        // given a group-level overlay declared with relative (+5,+10) coordinates
         TestLayout config = new TestLayout()
-            .Stack(s => s.At(100, 200)
+            .Group(s => s.At(100, 200)
                 .Overlay("frame.png", o => o.Offset(5, 10)));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the overlay's position is the stack origin plus its offset
+        // then the overlay's position is the group origin plus its offset
         OverlayDefinition overlay = result.FirstInputGroup().Overlays.Single();
         overlay.X.ShouldBe(105);
         overlay.Y.ShouldBe(210);
@@ -1089,25 +1026,11 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_StackOverlay_NullSrc_IsSkipped()
+    public void Resolve_NestedGroupOverlay_NullSrc_IsSkipped()
     {
-        // given a stack with an overlay that has no src attribute in XML
+        // given a group nested inside another group, with an overlay that has no src attribute in XML
         var config = new LayoutDocument();
-        config.Elements.Add(new StackNode { Overlays = [new OverlayNode { Src = null }] });
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then no overlays appear on the resolved stack
-        result.FirstInputGroup().Overlays.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void Resolve_GroupInStack_Overlay_NullSrc_IsSkipped()
-    {
-        // given a plain group nested inside a stack, with an overlay that has no src attribute in XML
-        var config = new LayoutDocument();
-        config.Elements.Add(new StackNode
+        config.Elements.Add(new GroupNode
         {
             Children = [new GroupNode { Overlays = [new OverlayNode { Src = null }] }]
         });

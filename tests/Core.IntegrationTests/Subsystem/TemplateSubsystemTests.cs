@@ -153,69 +153,63 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Load_StackChildren_PositionedFromStackOriginWithGap()
+    public void Load_GroupChildren_PositionedFromGroupOriginWithGap()
     {
-        // A Stack at (10,100) with gap=45 places its first child at y=100 and second at y=145.
+        // A Group at (10,100) with gap=45 places its first child at y=100 and second at y=145.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group>
-                  <Stack x="10" y="100" gap="45">
-                    <Input name="ButtonA">
-                      <Render width="34" height="34" />
-                    </Input>
-                    <Input name="ButtonB">
-                      <Render width="34" height="34" />
-                    </Input>
-                  </Stack>
+                <Group x="10" y="100" gap="45">
+                  <Input name="ButtonA">
+                    <Render width="34" height="34" />
+                  </Input>
+                  <Input name="ButtonB">
+                    <Render width="34" height="34" />
+                  </Input>
                 </Group>
               </Body>
             </ControllerTemplate>
             """);
 
         var group = t.Layout.Elements.OfType<InputGroup>().Single();
-        var stack = group.Children.OfType<InputGroup>().Single();
-        var inputs = stack.Children.OfType<InputDefinition>().ToList();
+        var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         inputs[0].InputImages.Single().Y.ShouldBe(100);
         inputs[1].InputImages.Single().Y.ShouldBe(145);
     }
 
     [Fact]
-    public void Load_StackVAlignBottom_DeclaredYIsTheLastChildNotTheFirst()
+    public void Load_GroupVAlignBottom_DeclaredYIsTheLastChildNotTheFirst()
     {
-        // A Stack at (10,100) with gap=45 and vAlign="bottom": with the last of two children on
+        // A Group at (10,100) with gap=45 and vAlign="bottom": with the last of two children on
         // y=100, the first lands 45 above it at y=55.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group>
-                  <Stack x="10" y="100" gap="45" vAlign="bottom">
-                    <Input name="ButtonA">
-                      <Render width="34" height="34" />
-                    </Input>
-                    <Input name="ButtonB">
-                      <Render width="34" height="34" />
-                    </Input>
-                  </Stack>
+                <Group x="10" y="100" gap="45" vAlign="bottom">
+                  <Input name="ButtonA">
+                    <Render width="34" height="34" />
+                  </Input>
+                  <Input name="ButtonB">
+                    <Render width="34" height="34" />
+                  </Input>
                 </Group>
               </Body>
             </ControllerTemplate>
             """);
 
         var group = t.Layout.Elements.OfType<InputGroup>().Single();
-        var stack = group.Children.OfType<InputGroup>().Single();
-        var inputs = stack.Children.OfType<InputDefinition>().ToList();
+        var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         inputs[0].InputImages.Single().Y.ShouldBe(55);
         inputs[1].InputImages.Single().Y.ShouldBe(100);
     }
 
     [Fact]
-    public void Load_NestedInput_InheritsParentOriginNotStackOrigin()
+    public void Load_NestedInput_InheritsParentOriginNotAGroupsCumulativeOffset()
     {
         // Children of an Input start a new coord context from that Input's origin — they do NOT
-        // continue the Stack's cumulative offset.
+        // continue an enclosing Group's cumulative slot offset.
         var t = Load("""
             <ControllerTemplate>
               <Body>
@@ -320,12 +314,12 @@ public class TemplateSubsystemTests
     // ---- structural elements ----
 
     [Fact]
-    public void Load_Group_IsStackFalse_ChildrenCollected()
+    public void Load_Group_ChildrenCollected()
     {
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Group x="0" y="0" gap="10">
                   <Input name="ButtonA" x="0" y="0"><Render width="44" height="44" /></Input>
                   <Input name="ButtonB" x="0" y="50"><Render width="44" height="44" /></Input>
                 </Group>
@@ -333,28 +327,9 @@ public class TemplateSubsystemTests
             </ControllerTemplate>
             """);
 
+        // A body-level Group lands directly as the sole InputGroup in Elements (no wrapper).
         var group = t.Layout.Elements.OfType<InputGroup>().Single();
-        group.IsStack.ShouldBeFalse();
         group.Children.OfType<InputDefinition>().Select(i => i.Name).ShouldBe(["ButtonA", "ButtonB"]);
-    }
-
-    [Fact]
-    public void Load_Stack_IsStackTrue()
-    {
-        // A <Stack> resolves to an InputGroup with IsStack=true.
-        var t = Load("""
-            <ControllerTemplate>
-              <Body>
-                <Stack x="0" y="0" gap="10">
-                  <Input name="ButtonA"><Render width="34" height="34" /></Input>
-                </Stack>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        // A body-level Stack lands directly as the sole InputGroup in Elements (no wrapper).
-        var stack = t.Layout.Elements.OfType<InputGroup>().Single();
-        stack.IsStack.ShouldBeTrue();
     }
 
     [Fact]
@@ -386,34 +361,34 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Load_OneOfInsideStack_ConsumesOneSlot()
+    public void Load_OneOfInsideGroup_ConsumesOneSlot()
     {
-        // OneOf inside a Stack consumes a single slot — all alternatives share that slot's
+        // OneOf inside a Group consumes a single slot — all alternatives share that slot's
         // origin. The Input after the OneOf advances by exactly one gap. This is the canonical
         // directional-Dpad authoring pattern (per CLAUDE.md): per-direction labels vs. a single
-        // whole-input render expressed as OneOf alternatives at one stack position.
+        // whole-input render expressed as OneOf alternatives at one group position.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Stack x="0" y="100" gap="50">
+                <Group x="0" y="100" gap="50">
                   <OneOf>
                     <Input name="ButtonDpadUp"><Render width="34" height="34" /></Input>
                     <Input name="ButtonDpad"><Render width="34" height="34" /></Input>
                   </OneOf>
                   <Input name="ButtonStart"><Render width="34" height="34" /></Input>
-                </Stack>
+                </Group>
               </Body>
             </ControllerTemplate>
             """);
 
-        var stack = t.Layout.Elements.OfType<InputGroup>().Single();
-        var oneOf = stack.Children.OfType<OneOf>().Single();
+        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var oneOf = group.Children.OfType<OneOf>().Single();
         var altAbsoluteYs = oneOf.Alternatives
             .OfType<InputDefinition>()
             .Select(a => a.InputImages.Single().Y);
         altAbsoluteYs.ShouldAllBe(y => y == 100);
 
-        var trailing = stack.Children.OfType<InputDefinition>().Single(i => i.Name == "ButtonStart");
+        var trailing = group.Children.OfType<InputDefinition>().Single(i => i.Name == "ButtonStart");
         trailing.InputImages.Single().Y.ShouldBe(150);
     }
 
@@ -474,26 +449,23 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Load_CollapsingStack_CollapseInfoBuiltForChildren()
+    public void Load_CollapsingGroup_CollapseInfoBuiltForChildren()
     {
-        // A Stack with collapse="true" registers its children in CollapseInfo so the rendering
+        // A Group with collapse="true" registers its children in CollapseInfo so the rendering
         // pipeline can vacate empty slots and shift subsequent entries up.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group>
-                  <Stack x="0" y="0" gap="45" collapse="true">
-                    <Input name="ButtonA"><Render width="34" height="34" /></Input>
-                    <Input name="ButtonB"><Render width="34" height="34" /></Input>
-                  </Stack>
+                <Group x="0" y="0" gap="45" collapse="true">
+                  <Input name="ButtonA"><Render width="34" height="34" /></Input>
+                  <Input name="ButtonB"><Render width="34" height="34" /></Input>
                 </Group>
               </Body>
             </ControllerTemplate>
             """);
 
-        var stack = t.Layout.Elements.OfType<InputGroup>().Single()
-            .Children.OfType<InputGroup>().Single();
-        var inputs = stack.Children.OfType<InputDefinition>().ToList();
+        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         t.Layout.CollapseInfo.Keys.ShouldContain(inputs[0], ReferenceEqualityComparer.Instance);
         t.Layout.CollapseInfo.Keys.ShouldContain(inputs[1], ReferenceEqualityComparer.Instance);
@@ -501,29 +473,30 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Load_CollapsingStack_RegistersInputsNestedInPlainGroup()
+    public void Load_CollapsingGroup_RegistersInputsNestedInAnotherGroup()
     {
-        // CollapseGroupBuilder treats plain Groups as transparent — Inputs reached through a
-        // nested <Group> get their own slot and land in CollapseInfo. Verifies the wiring
-        // between LayoutResolver (which marks the inner Group IsStack=false) and
-        // CollapseGroupBuilder's slot walk.
+        // A nested <Group> occupies one opaque slot in the outer group's slot list, but
+        // CollapseGroupBuilder's SetMetadata still recurses through its children — every leaf
+        // Input reachable from a slot is stamped with that slot's CollapseInfo (same gap, same
+        // shared slot list), regardless of whether the slot is itself an Input, a nested Group,
+        // or a OneOf's alternatives.
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Stack x="0" y="0" gap="40" collapse="true">
+                <Group x="0" y="0" gap="40" collapse="true">
                   <Input name="ButtonA"><Render width="34" height="34" /></Input>
                   <Group>
                     <Input name="ButtonB"><Render width="34" height="34" /></Input>
                     <Input name="ButtonC"><Render width="34" height="34" /></Input>
                   </Group>
-                </Stack>
+                </Group>
               </Body>
             </ControllerTemplate>
             """);
 
-        var stack = t.Layout.Elements.OfType<InputGroup>().Single();
-        var inner = stack.Children.OfType<InputGroup>().Single();
-        InputDefinition a = stack.Children.OfType<InputDefinition>().Single();
+        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var inner = group.Children.OfType<InputGroup>().Single();
+        InputDefinition a = group.Children.OfType<InputDefinition>().Single();
         var nested = inner.Children.OfType<InputDefinition>().ToList();
 
         t.Layout.CollapseInfo.Keys.ShouldContain(a, ReferenceEqualityComparer.Instance);
@@ -535,7 +508,7 @@ public class TemplateSubsystemTests
     // ---- interaction scenarios ----
     // A handful of tests run against a single richer fixture that resembles a slice of a real
     // template. The goal is to probe behaviors that only emerge when multiple features compose
-    // (named style + Stack slot + collapse + OneOf + nested Inputs all at once) — interaction
+    // (named style + Group slot + collapse + OneOf + nested Inputs all at once) — interaction
     // bugs that minimal single-feature stubs miss but that E2E tests can only catch by accident.
     // Keep this list small; if a new test fits a minimal stub, prefer that.
 
@@ -546,7 +519,7 @@ public class TemplateSubsystemTests
             <Style name="dim" showIf="mapping" minOpacity="0.4" />
           </Head>
           <Body>
-            <Stack x="100" y="200" gap="40" collapse="true">
+            <Group x="100" y="200" gap="40" collapse="true">
               <Input name="ButtonA" style="dim">
                 <Render width="34" height="34" />
                 <Label x="+50" y="+5" />
@@ -563,21 +536,21 @@ public class TemplateSubsystemTests
                   <Input name="ButtonDpadDown"><Render width="34" height="34" /></Input>
                 </Input>
               </OneOf>
-            </Stack>
+            </Group>
           </Body>
         </ControllerTemplate>
         """;
 
     [Fact]
-    public void Scenario_StyleCascade_MeetsStackSlotPositioning()
+    public void Scenario_StyleCascade_MeetsGroupSlotPositioning()
     {
-        // ButtonA sits in slot 0 of the Stack at (100, 200). Its render inherits minOpacity=0.4
+        // ButtonA sits in slot 0 of the Group at (100, 200). Its render inherits minOpacity=0.4
         // and showIf=Mapped from the named "dim" style; its label inherits fontSize=20 from the
         // unnamed Head Style. All four cascades fire together.
         var t = Load(ScenarioXml);
 
-        var stack = t.Layout.Elements.OfType<InputGroup>().Single();
-        InputDefinition buttonA = stack.Children.OfType<InputDefinition>().Single(i => i.Name == "ButtonA");
+        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        InputDefinition buttonA = group.Children.OfType<InputDefinition>().Single(i => i.Name == "ButtonA");
 
         InputImageDefinition render = buttonA.InputImages.Single();
         render.Y.ShouldBe(200);
@@ -591,9 +564,10 @@ public class TemplateSubsystemTests
     public void Scenario_CollapseInfo_SpansInputGroupAndOneOfSlots()
     {
         // CollapseGroupBuilder must register every Input reachable as a slot leaf: ButtonA
-        // (direct child), ButtonB (through the transparent Group), and both OneOf alternatives.
-        // ButtonDpadDown is nested inside the ButtonDpad alternative — it collapses with its
-        // parent as a unit and does NOT get its own CollapseInfo entry.
+        // (direct child), ButtonB (nested one level inside its own single-child Group, which
+        // SetMetadata still recurses through), and both OneOf alternatives. ButtonDpadDown is
+        // nested inside the ButtonDpad alternative — it collapses with its parent as a unit and
+        // does NOT get its own CollapseInfo entry.
         var t = Load(ScenarioXml);
 
         var byName = AllInputs(t.Layout.Elements).ToDictionary(i => i.Name);

@@ -203,7 +203,6 @@ public class VisibilityEvaluatorTests
             name: "ButtonY",
             images: [Image(ShowIfCondition.Always)]);
         var group = new InputGroup(
-            IsStack: false,
             Children: [hidden, shown],
             Overlays: []);
         VisibilityContext ctx = Ctx(descendants: Descendants(
@@ -251,7 +250,6 @@ public class VisibilityEvaluatorTests
             name: "ButtonB",
             images: [Image(ShowIfCondition.Mapped)]);
         var group = new InputGroup(
-            IsStack: false,
             Children: [a, b],
             Overlays: []);
         VisibilityContext ctx = Ctx(descendants: Descendants(
@@ -472,7 +470,7 @@ public class VisibilityEvaluatorTests
     {
         // given a group whose only child has a label
         var child = Input(name: "ButtonA");
-        var group = new InputGroup(IsStack: false, Children: [child], Overlays: []);
+        var group = new InputGroup(Children: [child], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonA"] = "Punch" },
             descendants: Descendants((child, [])));
@@ -489,7 +487,7 @@ public class VisibilityEvaluatorTests
         // given a group with one labelled child and one mapped child
         var labelled = Input(name: "ButtonA");
         var mapped = Input(name: "ButtonB");
-        var group = new InputGroup(IsStack: false, Children: [labelled, mapped], Overlays: []);
+        var group = new InputGroup(Children: [labelled, mapped], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonA"] = "Punch" },
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["ButtonB"] = "X" }),
@@ -508,7 +506,7 @@ public class VisibilityEvaluatorTests
         // Walk must recurse into the parent's Children list to collect the grandchild's flags
         var grandchild = Input(name: "AxisLeft");
         var parent = Input(name: "LeftStick", children: [grandchild]);
-        var group = new InputGroup(IsStack: false, Children: [parent], Overlays: []);
+        var group = new InputGroup(Children: [parent], Overlays: []);
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["AxisLeft"] = "Left" }),
             descendants: Descendants((parent, []), (grandchild, [])));
@@ -526,7 +524,7 @@ public class VisibilityEvaluatorTests
         var invisible = Input(name: "ButtonX");  // no images → AnyRenderVisible false
         var visible = Input(name: "ButtonY", images: [Image(ShowIfCondition.Always)]);
         var oneOf = new OneOf(Alternatives: [invisible, visible]);
-        var group = new InputGroup(IsStack: false, Children: [oneOf], Overlays: []);
+        var group = new InputGroup(Children: [oneOf], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonY"] = "Jump" },
             descendants: Descendants((invisible, []), (visible, [])));
@@ -545,7 +543,7 @@ public class VisibilityEvaluatorTests
         var a = Input(name: "ButtonA");
         var b = Input(name: "ButtonB");
         var oneOf = new OneOf(Alternatives: [a, b]);
-        var group = new InputGroup(IsStack: false, Children: [oneOf], Overlays: []);
+        var group = new InputGroup(Children: [oneOf], Overlays: []);
         VisibilityContext ctx = Ctx(descendants: Descendants((a, []), (b, [])));
 
         VisibilityFlags result = _underTest.AggregateFlags(group, ctx);

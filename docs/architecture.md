@@ -120,9 +120,9 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 `TemplateService` leans on three pieces:
 
-1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`, `ConditionNode`. Pure XML deserialisation.
+1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `OneOfNode`, `ConditionNode`. Pure XML deserialisation.
 
-2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, a Stack's `vAlign` shifting its origin by its own fixed slot count before slots are laid out, collapsing-Stack metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
+2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, a Group's `vAlign` shifting its origin by its own fixed slot count before slots are laid out, collapsing-Group metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
 
 3. **`TemplateImageResolver`** finds the base image (`BaseImage.png`) and resolves each image filename to a *pair* of candidates: a **styled** path (`Templates/{template}/{platform}/{controller}/{file}`, else `Templates/{template}/{platform}/{file}`, else none) and a **generic** path (`Templates/{template}/{file}`, else the shared `Templates/{file}`). It doesn't pick between them — that is a render-time decision taken from the input's mapping state, see [Rendering](#5-rendering).
 
@@ -139,14 +139,14 @@ The internal flow is two passes:
 **Layout filtering** (`LayoutFilter`) walks the template's resolved element tree applying visibility rules:
 
 - `InputDefinition` → always considered; its renders are filtered by `showIf` against the label/mapping context
-- `InputGroup` (Group and Stack alike) → rendered only when any descendant has a visible render; otherwise the whole group's inputs (and any Overlay it carries) are dropped from `inputsToRender`. `IsStack` distinguishes a Stack from a plain Group, but only for `CollapseGroupBuilder`'s slot math (opaque single-slot block vs. transparent pass-through) — it has no bearing on this visibility check
+- `InputGroup` → rendered only when any descendant has a visible render; otherwise the whole group's inputs (and any Overlay it carries) are dropped from `inputsToRender`
 - `OneOf` → only the first alternative with a visible render is rendered; the rest are dropped
 - `ConditionElement` → rendered only when its explicit `all`/`any`/`none` check against named inputs' label/mapping state passes — a direct dictionary lookup, not a fold-in over its own descendants, so it can gate on a name its children never render themselves
 - `RenderElement`/`LabelElement` (a loose `<Render>`/`<Label>` found somewhere other than as a direct child of its own `<Input>`, most usefully under a `<Condition>`) → since it can only be reached by having already recursed through every wrapping `Condition`/`Group`/`OneOf` above it, no further check happens here; it's added to whichever `InputDefinition` was ambient when `LayoutFilter` reached it (tracked during its own walk — see `Templates/LayoutResolver`'s matching `BuildContext.CurrentInputName`, used to resolve the same ambient identity at template-load time, one layer earlier) and rendered on equal footing with that Input's own static `InputImages`/`Labels`
 
 `showIf` modes: `label` (show when this input has a label), `mapping` (show when a platform button drives it), `auto` (label-mode if the game contributed its own labels, else mapping-mode), or omitted (always).
 
-Then the filter computes per-input Y-offset adjustments for collapsing Stacks: members whose images are all zero-opacity vacate their slot, shifting subsequent members up by the stack's gap. The collapse-info dictionary (built by `CollapseGroupBuilder`) keys this lookup by reference identity, deduplicating per-stack. If the stack's `vAlign` isn't `top`, every member also gets a uniform correction here: `LayoutResolver` anchored `bottom`/`center` against the stack's *fixed* slot count when the template was resolved, but a vacated slot means fewer are actually left, so the same `vAlign` shift is re-derived against the count that's actually left and the difference folded into the running offset before the vacate adjustments are added on top — keeping the anchor pinned to the declared `y` regardless of how many slots collapse away.
+Then the filter computes per-input Y-offset adjustments for collapsing Groups: members whose images are all zero-opacity vacate their slot, shifting subsequent members up by the group's gap. The collapse-info dictionary (built by `CollapseGroupBuilder`) keys this lookup by reference identity, deduplicating per-group. If the group's `vAlign` isn't `top`, every member also gets a uniform correction here: `LayoutResolver` anchored `bottom`/`center` against the group's *fixed* slot count when the template was resolved, but a vacated slot means fewer are actually left, so the same `vAlign` shift is re-derived against the count that's actually left and the difference folded into the running offset before the vacate adjustments are added on top — keeping the anchor pinned to the declared `y` regardless of how many slots collapse away.
 
 **Image and label rendering** (`InputImageRenderer`, `InputLabelRenderer`) then walks the filtered layout per input, resolves image paths through the mapping-aware `InputImageResolver`, and emits the final `RenderedImage` / `RenderedLabel` records carrying positions, sources, opacity, and the input name. The `InputName` metadata lets end-to-end tests assert that the right label landed on the right input slot.
 
@@ -224,7 +224,7 @@ Each render decision asks "should this be visible *now*" with explicit modes (`l
 
 ### Collapsing stacks as opt-in
 
-`<Stack>` is normally a vertical layout of always-visible elements. Adding `collapse="true"` switches it into a mode where invisible (zero-opacity) members vacate their slot and subsequent members shift up. This produces a clean look when only some inputs from a cluster (e.g. arcade buttons) have labels — instead of seeing five labelled spots interspersed with empty space, you see the labelled spots tightly stacked. The data structure for this (`CollapseInfo`) is keyed by reference identity to handle the case where the same `OneOf` slot contains multiple `InputDefinition` alternatives.
+`<Group>` is normally a vertical layout of always-visible elements. Adding `collapse="true"` switches it into a mode where invisible (zero-opacity) members vacate their slot and subsequent members shift up. This produces a clean look when only some inputs from a cluster (e.g. arcade buttons) have labels — instead of seeing five labelled spots interspersed with empty space, you see the labelled spots tightly stacked. The data structure for this (`CollapseInfo`) is keyed by reference identity to handle the case where the same `OneOf` slot contains multiple `InputDefinition` alternatives.
 
 ### Explicit conditions over implicit descendant fold-in
 
@@ -281,7 +281,7 @@ Make a folder under `Templates/{templateName}/`. Drop a `BaseImage.png` for the 
 
 ### Add a new layout container
 
-Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutElements.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter`, `VisibilityEvaluator`, `InputDescendantsBuilder`, and `CollapseGroupBuilder` to handle the new type. The existing `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` types are good templates for the pattern.
+Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutElements.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter`, `VisibilityEvaluator`, `InputDescendantsBuilder`, and `CollapseGroupBuilder` to handle the new type. The existing `<Group>`, `<OneOf>`, `<Condition>` types are good templates for the pattern.
 
 ### Add a new render condition
 

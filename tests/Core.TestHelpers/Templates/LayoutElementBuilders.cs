@@ -24,20 +24,10 @@ public static class LayoutElements
             Children: [.. children]);
     }
 
-    /// <summary>A plain <see cref="InputGroup"/> (IsStack = false).</summary>
+    /// <summary>An <see cref="InputGroup"/> with the given children; Overlays defaults to empty.</summary>
     public static InputGroup Group(params ILayoutElement[] children)
     {
         return new(
-            IsStack: false,
-            Children: [.. children],
-            Overlays: []);
-    }
-
-    /// <summary>A stack-style <see cref="InputGroup"/> (IsStack = true).</summary>
-    public static InputGroup Stack(params ILayoutElement[] children)
-    {
-        return new(
-            IsStack: true,
             Children: [.. children],
             Overlays: []);
     }
