@@ -120,24 +120,24 @@ public class TemplateLayoutResolverTests
         result.FirstInput().Labels.Single().FontSize.ShouldBe(10);
     }
 
-    // --- Named-style ShowIf/MinOpacity/InactiveBlurRadius inheritance onto Renders ---
+    // --- Named-style ShowIf/MinOpacity/InactiveBlurRadius inheritance onto an Input's own image ---
 
     [Fact]
-    public void Resolve_InputWithoutStyle_RenderInheritsNamedStyleValues()
+    public void Resolve_InputWithoutStyle_ImageInheritsNamedStyleValues()
     {
         // given an input that references a named style but sets none of its own attributes
         TestLayout config = new TestLayout()
             .NamedStyle("s", showIf: "label", minOpacity: 0.1, inactiveBlurRadius: 6)
-            .Input("ButtonA", i => i.Style("s").Render());
+            .Input("ButtonA", i => i.Style("s"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render inherits showIf/minOpacity/inactiveBlurRadius from the named style
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.ShowIf.ShouldBe(ShowIfCondition.Label);
-        render.MinOpacity.ShouldBe(0.1);
-        render.InactiveBlurRadius.ShouldBe(6);
+        // then the image inherits showIf/minOpacity/inactiveBlurRadius from the named style
+        InputImageDefinition image = result.FirstInput().InputImages.Single();
+        image.ShowIf.ShouldBe(ShowIfCondition.Label);
+        image.MinOpacity.ShouldBe(0.1);
+        image.InactiveBlurRadius.ShouldBe(6);
     }
 
     [Fact]
@@ -146,15 +146,15 @@ public class TemplateLayoutResolverTests
         // given an input that references a named style AND sets its own attributes
         TestLayout config = new TestLayout()
             .NamedStyle("s", showIf: "label", minOpacity: 0.1)
-            .Input("ButtonA", i => i.Style("s").ShowIf("mapping").MinOpacity(0.7).Render());
+            .Input("ButtonA", i => i.Style("s").ShowIf("mapping").MinOpacity(0.7));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the input's explicit attributes win over the named-style values
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.ShowIf.ShouldBe(ShowIfCondition.Mapped);
-        render.MinOpacity.ShouldBe(0.7);
+        InputImageDefinition image = result.FirstInput().InputImages.Single();
+        image.ShowIf.ShouldBe(ShowIfCondition.Mapped);
+        image.MinOpacity.ShouldBe(0.7);
     }
 
     [Fact]
@@ -163,7 +163,7 @@ public class TemplateLayoutResolverTests
         // given an input that sets its own InactiveBlurRadius alongside a named style that also has one
         TestLayout config = new TestLayout()
             .NamedStyle("s", inactiveBlurRadius: 6)
-            .Input("ButtonA", i => i.Style("s").InactiveBlurRadius(12).Render());
+            .Input("ButtonA", i => i.Style("s").InactiveBlurRadius(12));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -173,48 +173,16 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_RenderAttribute_WinsOverInherited()
-    {
-        // given an input that sets attributes AND a render under it that overrides them
-        TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.ShowIf("label").MinOpacity(0.1)
-                .Render(r => r.ShowIf("mapping").MinOpacity(0.5)));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then the render's explicit attributes win over the inherited input values
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.ShowIf.ShouldBe(ShowIfCondition.Mapped);
-        render.MinOpacity.ShouldBe(0.5);
-    }
-
-    [Fact]
-    public void Resolve_RenderInactiveBlurRadius_WinsOverInherited()
-    {
-        // given an input that sets InactiveBlurRadius AND a render that sets its own
-        TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.InactiveBlurRadius(10)
-                .Render(r => r.InactiveBlurRadius(5)));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then the render's own InactiveBlurRadius wins over the inherited input value
-        result.FirstInput().InputImages.Single().InactiveBlurRadius.ShouldBe(5);
-    }
-
-    [Fact]
     public void Resolve_UnknownNamedStyle_LogsError_AndDoesNotInherit()
     {
         // given an input that references a style that isn't declared in <Head>
         TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.Style("missing").Render());
+            .Input("ButtonA", i => i.Style("missing"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render inherits nothing and the configurer logs an error naming the style
+        // then the image inherits nothing and the configurer logs an error naming the style
         result.FirstInput().InputImages.Single().MinOpacity.ShouldBeNull();
         _logger.Received().Error(Arg.Is<string>(m => m.Contains("missing")));
     }
@@ -227,11 +195,11 @@ public class TemplateLayoutResolverTests
     [InlineData("auto", ShowIfCondition.Auto)]
     [InlineData("LABEL", ShowIfCondition.Label)]
     [InlineData("  auto  ", ShowIfCondition.Auto)]
-    public void Resolve_RenderShowIf_ParsesValue(string showIf, ShowIfCondition expected)
+    public void Resolve_InputShowIf_ParsesValue(string showIf, ShowIfCondition expected)
     {
-        // given a render with the supplied showIf attribute
+        // given an input with the supplied showIf attribute
         TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.Render(r => r.ShowIf(showIf)));
+            .Input("ButtonA", i => i.ShowIf(showIf));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -241,83 +209,67 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_RenderShowIfUnknown_LogsError_AndDefaultsToAlways()
+    public void Resolve_InputShowIfUnknown_LogsError_AndDefaultsToAlways()
     {
-        // given a render with a showIf value the parser doesn't recognize
+        // given an input with a showIf value the parser doesn't recognize
         TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.Render(r => r.ShowIf("bogus")));
+            .Input("ButtonA", i => i.ShowIf("bogus"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render defaults to Always and the configurer logs an error naming the value
+        // then the image defaults to Always and the configurer logs an error naming the value
         result.FirstInput().InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Always);
         _logger.Received().Error(Arg.Is<string>(m => m.Contains("bogus")));
     }
 
     [Fact]
-    public void Resolve_RenderShowIfAbsent_DefaultsToAlways()
+    public void Resolve_InputShowIfAbsent_DefaultsToAlways()
     {
-        // given a render with no showIf attribute at all
-        TestLayout config = new TestLayout().Input("ButtonA", i => i.Render());
+        // given an input with no showIf attribute at all
+        TestLayout config = new TestLayout().Input("ButtonA");
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render is unconditionally Always
+        // then the image is unconditionally Always
         result.FirstInput().InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Always);
     }
 
     // --- Coordinate origin propagation ---
 
     [Fact]
-    public void Resolve_RelativeRenderCoords_AddToInputOrigin()
+    public void Resolve_InputCoords_ResolveToTheirOwnImage()
     {
-        // given an input at (100,200) with a render using relative (+5,+10) coordinates
+        // given an input at (100,200) — its own coordinate origin doubles as its image's position
         TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.At(100, 200).Render(r => r.Offset(5, 10)));
+            .Input("ButtonA", i => i.At(100, 200));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render's resolved canvas position is the sum of input origin and offset
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.X.ShouldBe(105);
-        render.Y.ShouldBe(210);
-    }
-
-    [Fact]
-    public void Resolve_AbsoluteRenderCoords_IgnoreInputOrigin()
-    {
-        // given an input at (100,200) with a render using absolute (5,10) coordinates
-        TestLayout config = new TestLayout()
-            .Input("ButtonA", i => i.At(100, 200).Render(r => r.At(5, 10)));
-
-        // when the resolver runs
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        // then the render's position is its absolute value, unaffected by the input origin
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.X.ShouldBe(5);
-        render.Y.ShouldBe(10);
+        // then the image's resolved canvas position is exactly the input's own origin
+        InputImageDefinition image = result.FirstInput().InputImages.Single();
+        image.X.ShouldBe(100);
+        image.Y.ShouldBe(200);
     }
 
     [Fact]
     public void Resolve_NestedChildInput_InheritsParentOrigin()
     {
-        // given a parent input at (100,200) and a child input whose render uses (+5,+10)
+        // given a parent input at (100,200) and a child input using relative (+5,+10) coordinates
         TestLayout config = new TestLayout()
             .Input("Parent", p => p.At(100, 200)
-                .Child("Child", c => c.Render(r => r.Offset(5, 10))));
+                .Child("Child", c => c.Offset(5, 10)));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the child's render resolves against the parent's origin
+        // then the child's own image resolves against the parent's origin
         InputDefinition child = result.FirstInput().Children.FirstInput();
-        InputImageDefinition render = child.InputImages.Single();
-        render.X.ShouldBe(105);
-        render.Y.ShouldBe(210);
+        InputImageDefinition image = child.InputImages.Single();
+        image.X.ShouldBe(105);
+        image.Y.ShouldBe(210);
     }
 
     [Fact]
@@ -327,47 +279,47 @@ public class TemplateLayoutResolverTests
         // The cascade is intentionally broken at structural boundaries — child inputs start fresh.
         TestLayout config = new TestLayout()
             .Input("Parent", p => p.ShowIf("label")
-                .Child("Child", c => c.Render()));
+                .Child("Child"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the child's render is Always — it does not inherit the parent's showIf
+        // then the child's image is Always — it does not inherit the parent's showIf
         InputDefinition child = result.FirstInput().Children.FirstInput();
         child.InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Always);
     }
 
-    // --- Render image filename derivation ---
+    // --- Image filename derivation ---
 
     [Fact]
-    public void Resolve_Render_DefaultImageFileIsInputNameDotPng()
+    public void Resolve_Input_DefaultImageFileIsInputNameDotPng()
     {
-        // given an input named "ButtonStart" with a plain render (no useImage)
-        TestLayout config = new TestLayout().Input("ButtonStart", i => i.Render());
+        // given an input named "ButtonStart" with no useImage
+        TestLayout config = new TestLayout().Input("ButtonStart");
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the render's ImageFile is derived from the input name, UseImageFile is null
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.ImageFile.ShouldBe("ButtonStart.png");
-        render.UseImageFile.ShouldBeNull();
+        // then the image's ImageFile is derived from the input name, UseImageFile is null
+        InputImageDefinition image = result.FirstInput().InputImages.Single();
+        image.ImageFile.ShouldBe("ButtonStart.png");
+        image.UseImageFile.ShouldBeNull();
     }
 
     [Fact]
-    public void Resolve_RenderWithUseImage_SetsUseImageFileWithPngSuffix()
+    public void Resolve_InputWithUseImage_SetsUseImageFileWithPngSuffix()
     {
-        // given an input "AxisLeftStickUp" with a render that borrows the "Stick" asset
+        // given an input "AxisLeftStickUp" that borrows the "Stick" asset
         TestLayout config = new TestLayout()
-            .Input("AxisLeftStickUp", i => i.Render(r => r.UseImage("Stick")));
+            .Input("AxisLeftStickUp", i => i.UseImage("Stick"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then ImageFile still comes from the input name; UseImageFile carries the borrowed asset
-        InputImageDefinition render = result.FirstInput().InputImages.Single();
-        render.ImageFile.ShouldBe("AxisLeftStickUp.png");
-        render.UseImageFile.ShouldBe("Stick.png");
+        InputImageDefinition image = result.FirstInput().InputImages.Single();
+        image.ImageFile.ShouldBe("AxisLeftStickUp.png");
+        image.UseImageFile.ShouldBe("Stick.png");
     }
 
     // --- Group slot positioning ---
@@ -379,10 +331,10 @@ public class TemplateLayoutResolverTests
         // the nested group itself contains two inputs; it occupies one slot in the parent
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 0).Gap(50)
-                .Input("A", i => i.Render())
+                .Input("A")
                 .Group(inner => inner.Gap(10)
-                    .Input("B", i => i.Render())
-                    .Input("C", i => i.Render())));
+                    .Input("B")
+                    .Input("C")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -404,9 +356,9 @@ public class TemplateLayoutResolverTests
         // given a group with vAlign explicitly "top" -- the default
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("top")
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render())
-                .Input("C", i => i.Render()));
+                .Input("A")
+                .Input("B")
+                .Input("C"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -424,9 +376,9 @@ public class TemplateLayoutResolverTests
         // given a group with vAlign="bottom" -- the declared Y should be the LAST slot
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render())
-                .Input("C", i => i.Render()));
+                .Input("A")
+                .Input("B")
+                .Input("C"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -444,9 +396,9 @@ public class TemplateLayoutResolverTests
         // given a group with vAlign="center" -- the declared Y should be the midpoint
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("center")
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render())
-                .Input("C", i => i.Render()));
+                .Input("A")
+                .Input("B")
+                .Input("C"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -465,10 +417,10 @@ public class TemplateLayoutResolverTests
         // counts as one slot in the OUTER group regardless of its own inner slot count)
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
-                .Input("A", i => i.Render())
+                .Input("A")
                 .Group(inner => inner.Gap(10)
-                    .Input("B", i => i.Render())
-                    .Input("C", i => i.Render())));
+                    .Input("B")
+                    .Input("C")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -491,8 +443,8 @@ public class TemplateLayoutResolverTests
         // given a group with a vAlign value the resolver doesn't recognize
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bogus")
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render()));
+                .Input("A")
+                .Input("B"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -512,7 +464,7 @@ public class TemplateLayoutResolverTests
         // there's nothing to distribute around
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
-                .Input("A", i => i.Render()));
+                .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -527,8 +479,8 @@ public class TemplateLayoutResolverTests
         // given a group with collapse="true" containing two inputs
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 0).Gap(50).Collapse()
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render()));
+                .Input("A")
+                .Input("B"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -548,7 +500,7 @@ public class TemplateLayoutResolverTests
         // to correct its own shift for whatever slots collapse actually leaves visible
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
-                .Input("A", i => i.Render()));
+                .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -565,7 +517,7 @@ public class TemplateLayoutResolverTests
         // "top", not the raw invalid string, since nothing downstream re-validates it
         TestLayout config = new TestLayout()
             .Group(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
-                .Input("A", i => i.Render()));
+                .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -579,7 +531,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with collapse omitted
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 0).Gap(50).Input("A", i => i.Render()));
+            .Group(s => s.At(0, 0).Gap(50).Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -598,7 +550,7 @@ public class TemplateLayoutResolverTests
         TestLayout config = new TestLayout()
             .Group(outer => outer
                 .Group(inner => inner
-                    .Input("A", i => i.Render())));
+                    .Input("A")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -615,8 +567,8 @@ public class TemplateLayoutResolverTests
         // given a top-level OneOf (not inside a Group) — exercises BuildNode's OneOfNode arm
         TestLayout config = new TestLayout()
             .OneOf(o => o
-                .Input("A", i => i.Render())
-                .Input("B", i => i.Render()));
+                .Input("A")
+                .Input("B"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -657,8 +609,8 @@ public class TemplateLayoutResolverTests
         TestLayout config = new TestLayout()
             .Group(s => s.At(100, 200).Gap(50)
                 .OneOf(o => o
-                    .Input("A", i => i.Render(r => r.Offset(0, 0)))
-                    .Input("B", i => i.Render(r => r.Offset(0, 0)))));
+                    .Input("A")
+                    .Input("B")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -739,8 +691,8 @@ public class TemplateLayoutResolverTests
         TestLayout config = new TestLayout()
             .Group(s => s.At(100, 200).Gap(50)
                 .Condition(c => c.Any("A")
-                    .Input("A", i => i.Render(r => r.Offset(0, 0)))
-                    .Input("B", i => i.Render(r => r.Offset(0, 0)))));
+                    .Input("A")
+                    .Input("B")));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
@@ -752,25 +704,7 @@ public class TemplateLayoutResolverTests
         positions.ShouldBe([(100, 200), (100, 250)]);
     }
 
-    // --- Loose Render/Label under Condition (no wrapper Input of their own) ---
-
-    [Fact]
-    public void Resolve_LooseRenderInCondition_ResolvesAgainstAmbientInput()
-    {
-        // given a bare Render nested inside a Condition inside its owning Input — no useImage,
-        // so the default ImageFile must come from the ambient Input's own name, and its
-        // coordinates must resolve against that Input's own origin
-        TestLayout config = new TestLayout()
-            .Input("AxisLeftStick", i => i.At(100, 200)
-                .ChildCondition(c => c.Any("X").LooseRender(r => r.Offset(5, 5))));
-
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        RenderElement render = result.FirstInput().Children.FirstCondition().Children.FirstRenderElement();
-        render.Image.ImageFile.ShouldBe("AxisLeftStick.png");
-        render.Image.X.ShouldBe(105);
-        render.Image.Y.ShouldBe(205);
-    }
+    // --- Loose Label under Condition (no wrapper Input of its own) ---
 
     [Fact]
     public void Resolve_LooseLabelInCondition_ResolvesAgainstAmbientInput()
@@ -788,52 +722,51 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_LooseRender_InheritsAmbientInputsShowIfAndStyle()
+    public void Resolve_LooseLabel_InheritsAmbientInputsFontSize()
     {
-        // given the enclosing Input sets its own showIf directly (no named style involved) — a
-        // loose Render inside a nested Condition should inherit it exactly like a true direct
+        // given the enclosing Input sets its own fontSize directly (no named style involved) — a
+        // loose Label inside a nested Condition should inherit it exactly like a true direct
         // child would, unless it sets its own
         TestLayout config = new TestLayout()
-            .Input("ButtonDpad", i => i.ShowIf("mapping")
-                .ChildCondition(c => c.Any("X").LooseRender()));
+            .Input("ButtonDpad", i => i.FontSize(22)
+                .ChildCondition(c => c.Any("X").LooseLabel()));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        RenderElement render = result.FirstInput().Children.FirstCondition().Children.FirstRenderElement();
-        render.Image.ShowIf.ShouldBe(ShowIfCondition.Mapped);
+        LabelElement label = result.FirstInput().Children.FirstCondition().Children.FirstLabelElement();
+        label.Label.FontSize.ShouldBe(22);
     }
 
     [Fact]
-    public void Resolve_LooseRenderWithNoAmbientInput_LogsErrorAndDoesNotThrow()
+    public void Resolve_LooseLabelWithNoAmbientInput_LogsErrorAndDoesNotThrow()
     {
-        // given a bare Render at the top level, wrapped only in a Condition — never nested
+        // given a bare Label at the top level, wrapped only in a Condition — never nested
         // inside any Input at all
         TestLayout config = new TestLayout()
-            .Condition(c => c.Any("X").LooseRender());
+            .Condition(c => c.Any("X").LooseLabel());
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        result.Elements.FirstCondition().Children.FirstRenderElement().ShouldNotBeNull();
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Render") && s.Contains("Input")));
+        result.Elements.FirstCondition().Children.FirstLabelElement().ShouldNotBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Label") && s.Contains("Input")));
     }
 
     [Fact]
     public void Resolve_NestedInputResetsAmbientInputForItsOwnLooseChildren()
     {
-        // given a nested Input inside an outer one, with its own Condition-gated loose Render —
-        // the loose Render must attach to the nested Input's identity, not the outer one's
+        // given a nested Input inside an outer one, with its own Condition-gated loose Label —
+        // the loose Label must attach to the nested Input's identity, not the outer one's
         TestLayout config = new TestLayout()
             .Input("Outer", i => i.At(1, 1)
                 .Child("Inner", inner => inner.At(50, 60)
-                    .ChildCondition(c => c.Any("X").LooseRender())));
+                    .ChildCondition(c => c.Any("X").LooseLabel())));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         InputDefinition inner = result.FirstInput().Children.FirstInput();
-        RenderElement render = inner.Children.FirstCondition().Children.FirstRenderElement();
-        render.Image.ImageFile.ShouldBe("Inner.png");
-        render.Image.X.ShouldBe(50);
-        render.Image.Y.ShouldBe(60);
+        LabelElement label = inner.Children.FirstCondition().Children.FirstLabelElement();
+        label.Label.X.ShouldBe(50);
+        label.Label.Y.ShouldBe(60);
     }
 
     // --- Loose Label origin resolution ---
@@ -854,10 +787,10 @@ public class TemplateLayoutResolverTests
         // resolves against that plain origin, unaffected by the fact it's inside a Group.
         TestLayout config = new TestLayout()
             .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
-                .Input("A", a => a.Render())
-                .Input("B", b => b.Render())
-                .Input("C", c => c.Render())
-                .Input("D", d => d.Render())
+                .Input("A")
+                .Input("B")
+                .Input("C")
+                .Input("D")
                 .LooseLabel(l => l.Offset(0, 0))));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
@@ -873,10 +806,10 @@ public class TemplateLayoutResolverTests
         // resolving against that Input's own slot position, never the enclosing Group's anchor
         TestLayout config = new TestLayout()
             .Group(s => s.At(100, 300).Gap(40).VAlign("center")
-                .Input("A", i => i.Render().Label(l => l.Offset(0, 5)))
-                .Input("B", i => i.Render())
-                .Input("C", i => i.Render())
-                .Input("D", i => i.Render()));
+                .Input("A", i => i.Label(l => l.Offset(0, 5)))
+                .Input("B")
+                .Input("C")
+                .Input("D"));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 

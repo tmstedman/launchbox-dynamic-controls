@@ -58,13 +58,12 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         GroupNode groupXml => BuildInputGroup(groupXml, ctx),
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
         ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
-        RenderNode renderXml => BuildLooseRender(renderXml, ctx),
         LabelNode labelXml => BuildLooseLabel(labelXml, ctx),
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
     /// <summary>
-    /// Resolves an InputNode DTO into a fully-built InputDefinition: labels, renders,
+    /// Resolves an InputNode DTO into a fully-built InputDefinition: its own image, labels,
     /// overlays, and nested children are all resolved against the template's coordinate origin.
     /// </summary>
     private InputDefinition BuildInputDefinition(InputNode inputXml, BuildContext ctx)
@@ -78,22 +77,25 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             _logger.Error($"Input '{name}' references unknown style '{inputXml.Style}'");
 
         // Resolve this Input's own optional x/y — if present they establish a new coordinate
-        // origin for all of its Renders, Labels, Overlays, and nested Children. Absent = inherit
+        // origin for its own image, Labels, Overlays, and nested Children. Absent = inherit
         // ctx.OriginX/Y (which may be a stack slot position or the canvas origin).
         double inputOriginX = inputXml.X.Resolve(ctx.OriginX);
         double inputOriginY = inputXml.Y.Resolve(ctx.OriginY);
 
-        // Build a context carrying this input's effective inherited values and identity. Renders,
-        // labels, and overlays on this input read from inputCtx; nested children also receive
-        // inputCtx (rather than a fresh ctx) so a *loose* Render/Label reached through
-        // Group/OneOf/Condition can inherit it exactly like a true direct child would — a
-        // nested <Input> is unaffected, since it always overrides Inherited* from its own
-        // ShowIf/Style/FontSize rather than falling through to whatever's ambient.
+        // Build a context carrying this input's effective inherited values and identity. Labels
+        // and overlays on this input read from inputCtx; nested children also receive inputCtx
+        // (rather than a fresh ctx) so a *loose* Label reached through Group/OneOf/Condition can
+        // inherit it exactly like a true direct child would — a nested <Input> is unaffected,
+        // since it always overrides Inherited* from its own ShowIf/Style/FontSize rather than
+        // falling through to whatever's ambient.
+        ShowIfCondition showIf = ParseShowIf(inputXml.ShowIf ?? namedStyle?.ShowIf);
+        double? minOpacity = inputXml.MinOpacity ?? namedStyle?.MinOpacity;
+        double? inactiveBlurRadius = inputXml.InactiveBlurRadius ?? namedStyle?.InactiveBlurRadius;
         BuildContext inputCtx = ctx with
         {
             InheritedShowIf = inputXml.ShowIf ?? namedStyle?.ShowIf,
-            InheritedMinOpacity = inputXml.MinOpacity ?? namedStyle?.MinOpacity,
-            InheritedInactiveBlurRadius = inputXml.InactiveBlurRadius ?? namedStyle?.InactiveBlurRadius,
+            InheritedMinOpacity = minOpacity,
+            InheritedInactiveBlurRadius = inactiveBlurRadius,
             InheritedFontSize = inputXml.FontSize ?? namedStyle?.FontSize,
             OriginX = inputOriginX,
             OriginY = inputOriginY,
@@ -102,11 +104,17 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
         var labels = inputXml.Labels.Select(labelXml => BuildLabelDefinition(labelXml, inputCtx)).ToList();
 
-        var images = new List<InputImageDefinition>();
-        foreach (RenderNode renderXml in inputXml.Renders)
-        {
-            images.Add(BuildImageDefinition(renderXml, name, inputCtx));
-        }
+        var image = new InputImageDefinition(
+            X: inputOriginX,
+            Y: inputOriginY,
+            ImageFile: $"{name}.png",
+            Width: inputXml.Width,
+            Height: inputXml.Height,
+            UseImageFile: inputXml.UseImage != null ? $"{inputXml.UseImage}.png" : null,
+            ShowIf: showIf,
+            MinOpacity: minOpacity,
+            InactiveBlurRadius: inactiveBlurRadius);
+        _logger.Debug($"Input image: {name} at ({inputOriginX},{inputOriginY}) showIf={showIf}");
 
         var overlays = new List<OverlayDefinition>();
         foreach (OverlayNode overlayXml in inputXml.Overlays)
@@ -121,7 +129,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
         return new InputDefinition(
             Name: name,
-            InputImages: images,
+            InputImages: [image],
             Overlays: overlays,
             Labels: labels,
             Children: children);
@@ -203,7 +211,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         GroupNode => 1,
         OneOfNode => 1,
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
-        RenderNode or LabelNode => 0,
+        LabelNode => 0,
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -264,10 +272,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 }
                 return BuildConditionElement(conditionXml, children);
             }
-            case RenderNode renderXml:
-                // Takes no slot, same as an Overlay.
-                return BuildLooseRender(renderXml, ctx);
             case LabelNode labelXml:
+                // Takes no slot, same as an Overlay.
                 return BuildLooseLabel(labelXml, ctx);
             default:
                 throw new InvalidOperationException($"Unknown node type: {node.GetType()}");
@@ -332,31 +338,6 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
-    /// Resolves a RenderNode DTO into an InputImageDefinition, resolving coordinates against
-    /// <paramref name="ctx"/>'s origin and inheriting showIf/opacity/blur from it. Shared by
-    /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseRender"/>
-    /// — <paramref name="ownerName"/> is <c>ctx.CurrentInputName</c> in the loose case, and the
-    /// same Input's own name (redundantly, since <c>inputCtx.CurrentInputName</c> is already set
-    /// to it) in the direct-child case.
-    /// </summary>
-    private InputImageDefinition BuildImageDefinition(RenderNode renderXml, string ownerName, BuildContext ctx)
-    {
-        ShowIfCondition showIf = ParseShowIf(renderXml.ShowIf ?? ctx.InheritedShowIf);
-        var image = new InputImageDefinition(
-            X: renderXml.X.Resolve(ctx.OriginX),
-            Y: renderXml.Y.Resolve(ctx.OriginY),
-            ImageFile: $"{ownerName}.png",
-            Width: renderXml.Width,
-            Height: renderXml.Height,
-            UseImageFile: renderXml.UseImage != null ? $"{renderXml.UseImage}.png" : null,
-            ShowIf: showIf,
-            MinOpacity: renderXml.MinOpacity ?? ctx.InheritedMinOpacity,
-            InactiveBlurRadius: renderXml.InactiveBlurRadius ?? ctx.InheritedInactiveBlurRadius);
-        _logger.Debug($"Render position: ({renderXml.X},{renderXml.Y}) showIf={showIf}");
-        return image;
-    }
-
-    /// <summary>
     /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
     /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
     /// Y always resolves against the plain ambient origin — a loose Label centering against its
@@ -377,24 +358,13 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
-    /// Resolves a &lt;Render&gt; found somewhere other than as a direct child of its own
+    /// Resolves a &lt;Label&gt; found somewhere other than as a direct child of its own
     /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/
     /// &lt;OneOf&gt;/&lt;Condition&gt;) against whichever Input is ambient in <paramref name="ctx"/>.
     /// A missing ambient Input is a template-authoring error — logged once, here, at load time,
     /// same as a missing required attribute elsewhere in this file — rather than silently
     /// rendering nothing or throwing.
     /// </summary>
-    private RenderElement BuildLooseRender(RenderNode renderXml, BuildContext ctx)
-    {
-        if (ctx.CurrentInputName is null)
-        {
-            _logger.Error("Skipping <Render>: not nested inside any <Input>, directly or ambiently");
-            return new RenderElement(new InputImageDefinition(X: 0, Y: 0, ImageFile: "", MinOpacity: 0));
-        }
-        return new RenderElement(BuildImageDefinition(renderXml, ctx.CurrentInputName, ctx));
-    }
-
-    /// <summary>See <see cref="BuildLooseRender"/> — same reasoning, for &lt;Label&gt;.</summary>
     private LabelElement BuildLooseLabel(LabelNode labelXml, BuildContext ctx)
     {
         if (ctx.CurrentInputName is null)
@@ -448,23 +418,23 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// Context for the template tree walk. Carries the per-build inputs that are constant
     /// across all Build* calls (ImageSource, DefaultFontSize, NamedStyles, CollapseInfo
     /// accumulator) alongside the inherited visibility values that flow from an Input down to
-    /// its own renders and overlays. The CollapseInfo dictionary is a single shared reference
+    /// its own overlays. The CollapseInfo dictionary is a single shared reference
     /// across all <c>with</c> clones — mutations are visible to every BuildInputGroup call.
     /// Use <c>with</c> to produce an inputCtx with the inherited values set; nested Inputs
     /// receive that same inputCtx too — but since a nested Input always overrides Inherited* from
     /// its own ShowIf/Style/FontSize (never falling through to whatever was ambient), it's a
-    /// no-op for that case, and only ever actually matters for a bare Render/Label found while
-    /// descending through Group/OneOf/Condition on the way to one — letting a loose Render
+    /// no-op for that case, and only ever actually matters for a bare Label found while
+    /// descending through Group/OneOf/Condition on the way to one — letting a loose Label
     /// inherit exactly what a true direct child of the same Input would.
     /// <c>CurrentInputName</c> similarly tracks whichever Input is ambient at this point in the
-    /// tree, reset whenever a new one is entered, for a bare Render/Label's default image
-    /// filename and coordinate origin — <see cref="Rendering.LayoutFilter"/> separately
-    /// rediscovers the same Input during its own per-game walk, since the resolved
-    /// <see cref="InputDefinition"/> a loose render belongs to doesn't exist as an object yet at
-    /// the point its own children are being built. A loose Label's centering against its
-    /// enclosing Group is handled the same way — entirely by <see cref="Rendering.LayoutFilter"/>,
-    /// which rediscovers the enclosing <see cref="InputGroup"/> during its own walk — so this
-    /// context carries no equivalent field for it; see <see cref="InputGroup"/>'s doc comment.
+    /// tree, reset whenever a new one is entered, for a bare Label's default coordinate origin —
+    /// <see cref="Rendering.LayoutFilter"/> separately rediscovers the same Input during its own
+    /// per-game walk, since the resolved <see cref="InputDefinition"/> a loose label belongs to
+    /// doesn't exist as an object yet at the point its own children are being built. A loose
+    /// Label's centering against its enclosing Group is handled the same way — entirely by
+    /// <see cref="Rendering.LayoutFilter"/>, which rediscovers the enclosing
+    /// <see cref="InputGroup"/> during its own walk — so this context carries no equivalent field
+    /// for it; see <see cref="InputGroup"/>'s doc comment.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,

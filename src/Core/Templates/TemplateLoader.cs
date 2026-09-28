@@ -112,14 +112,14 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
     }
 
-    /// <summary>Parses one layout-child element (Input / Group / OneOf / Condition /
-    /// Render / Label) and appends it to <paramref name="output"/>. Returns true if the element
-    /// name matched one of those (caller is responsible for handling unknown names). An Input or
-    /// Condition that fails its own validation is treated as matched but not appended.
-    /// <para>A loose Render/Label parsed here (i.e. one that isn't a direct child of its own
-    /// Input — <see cref="ParseInputNode"/> intercepts that case before ever calling this method)
-    /// has no Input of its own to attach to; it resolves against whichever Input is ambient at
-    /// this point in the tree, at build time (see <c>LayoutResolver.BuildContext.CurrentInputName</c>).</para>
+    /// <summary>Parses one layout-child element (Input / Group / OneOf / Condition / Label) and
+    /// appends it to <paramref name="output"/>. Returns true if the element name matched one of
+    /// those (caller is responsible for handling unknown names). An Input or Condition that
+    /// fails its own validation is treated as matched but not appended.
+    /// <para>A loose Label parsed here (i.e. one that isn't a direct child of its own Input —
+    /// <see cref="ParseInputNode"/> intercepts that case before ever calling this method) has no
+    /// Input of its own to attach to; it resolves against whichever Input is ambient at this
+    /// point in the tree, at build time (see <c>LayoutResolver.BuildContext.CurrentInputName</c>).</para>
     /// </summary>
     private bool TryParseLayoutChild(XmlElement node, List<ILayoutNode> output)
     {
@@ -139,9 +139,6 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 ConditionNode? condition = ParseConditionNode(node);
                 if (condition != null) output.Add(condition);
                 return true;
-            case "Render":
-                output.Add(ParseRender(node));
-                return true;
             case "Label":
                 output.Add(ParseLabel(node));
                 return true;
@@ -151,9 +148,9 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     }
 
     /// <summary>
-    /// Parses an &lt;Input&gt; element and its Label, Render, Overlay, and nested Input/Group children.
-    /// Returns null if the element is missing its required `name` attribute (whether top-level or
-    /// nested — nested Inputs need explicit names too).
+    /// Parses an &lt;Input&gt; element — its own image attributes, its Label/Overlay children,
+    /// and its nested Input/Group children. Returns null if the element is missing its required
+    /// `name` attribute (whether top-level or nested — nested Inputs need explicit names too).
     /// </summary>
     private InputNode? ParseInputNode(XmlElement inputNode)
     {
@@ -168,7 +165,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         {
             Name = name,
             Style = inputNode.Attributes["style"]?.Value,
-            ShowIf = inputNode.Attributes["showIf"]?.Value
+            ShowIf = inputNode.Attributes["showIf"]?.Value,
+            UseImage = inputNode.Attributes["useImage"]?.Value
         };
 
         if (ReadDouble(inputNode, "minOpacity") is double minOpacity) input.MinOpacity = minOpacity;
@@ -176,20 +174,19 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         if (ReadDouble(inputNode, "fontSize") is double fontSize) input.FontSize = fontSize;
         if (ReadCoordinate(inputNode, "x", $"Input '{name}'") is Coordinate ix) input.X = ix;
         if (ReadCoordinate(inputNode, "y", $"Input '{name}'") is Coordinate iy) input.Y = iy;
+        if (ReadDouble(inputNode, "width") is double width) input.Width = width;
+        if (ReadDouble(inputNode, "height") is double height) input.Height = height;
 
         foreach (XmlElement child in inputNode.ChildNodes.OfType<XmlElement>())
         {
-            // Checked before TryParseLayoutChild: Render/Label are also valid loose children of
-            // Group/Stack/OneOf/Condition (see TryParseLayoutChild), but a Render/Label that's a
-            // *direct* child of its own Input always belongs on that Input's own Renders/Labels
-            // list, never the generic Children list.
+            // Checked before TryParseLayoutChild: Label is also a valid loose child of
+            // Group/OneOf/Condition (see TryParseLayoutChild), but a Label that's a *direct*
+            // child of its own Input always belongs on that Input's own Labels list, never the
+            // generic Children list.
             switch (child.Name)
             {
                 case "Label":
                     input.Labels.Add(ParseLabel(child));
-                    continue;
-                case "Render":
-                    input.Renders.Add(ParseRender(child));
                     continue;
                 case "Overlay":
                     OverlayNode? overlay = ParseOverlay(child);
@@ -204,7 +201,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             _logger.Error($"Invalid element <{child.Name}> in <Input name=\"{name}\">");
         }
 
-        _logger.Debug($"Input: {input.Name}, renders={input.Renders.Count}, overlays={input.Overlays.Count}, labels={input.Labels.Count}, children={input.Children.Count}");
+        _logger.Debug($"Input: {input.Name}, overlays={input.Overlays.Count}, labels={input.Labels.Count}, children={input.Children.Count}");
         return input;
     }
 
@@ -345,24 +342,6 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         if (ReadCoordinate(node, "y", "Label") is Coordinate y) label.Y = y;
         if (ReadDouble(node, "fontSize") is double fs) label.FontSize = fs;
         return label;
-    }
-
-    /// <summary>
-    /// Parses a Render XML node. Invalid coordinates are logged and replaced with the default
-    /// (+0); the render is still returned so its other attributes survive.
-    /// </summary>
-    private RenderNode ParseRender(XmlElement node)
-    {
-        var render = new RenderNode();
-        if (ReadCoordinate(node, "x", "Render") is Coordinate x) render.X = x;
-        if (ReadCoordinate(node, "y", "Render") is Coordinate y) render.Y = y;
-        if (ReadDouble(node, "width") is double w) render.Width = w;
-        if (ReadDouble(node, "height") is double h) render.Height = h;
-        render.UseImage = node.Attributes["useImage"]?.Value;
-        render.ShowIf = node.Attributes["showIf"]?.Value;
-        if (ReadDouble(node, "minOpacity") is double minOpacity) render.MinOpacity = minOpacity;
-        if (ReadDouble(node, "inactiveBlurRadius") is double blur) render.InactiveBlurRadius = blur;
-        return render;
     }
 
     /// <summary>
