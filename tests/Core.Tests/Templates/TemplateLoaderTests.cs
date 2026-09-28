@@ -213,14 +213,13 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_InputWithLabelRenderOverlay_CollectsAllChildren()
+    public void LoadLayout_InputWithOwnImageAttributesLabelAndOverlay_CollectsAllChildren()
     {
-        // given an Input with one of each leaf type as a child
+        // given an Input with its own image attributes plus an Overlay and Label child
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Input name='ButtonA' x='100' y='200'>
-                  <Render x='+0' y='+0' useImage='Stick.png' showIf='label' minOpacity='0.5' inactiveBlurRadius='2' />
+                <Input name='ButtonA' x='100' y='200' useImage='Stick.png' showIf='label' minOpacity='0.5' inactiveBlurRadius='2'>
                   <Overlay src='dpad.png' x='+5' y='-5' />
                   <Label x='+10' y='+20' align='CENTER' fontSize='16' />
                 </Input>
@@ -231,17 +230,14 @@ public class TemplateLoaderTests
         // when the loader runs
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        // then each child lands in its respective list with attributes parsed
+        // then the Input's own attributes and each child land with attributes parsed
         InputNode input = result.Elements.OfType<InputNode>().Single();
         input.X.ShouldBe(Coordinate.Absolute(100));
         input.Y.ShouldBe(Coordinate.Absolute(200));
-
-        RenderNode render = input.Renders.Single();
-        render.X.ShouldBe(Coordinate.Relative(0));
-        render.UseImage.ShouldBe("Stick.png");
-        render.ShowIf.ShouldBe("label");
-        render.MinOpacity.ShouldBe(0.5);
-        render.InactiveBlurRadius.ShouldBe(2);
+        input.UseImage.ShouldBe("Stick.png");
+        input.ShowIf.ShouldBe("label");
+        input.MinOpacity.ShouldBe(0.5);
+        input.InactiveBlurRadius.ShouldBe(2);
 
         OverlayNode overlay = input.Overlays.Single();
         overlay.Src.ShouldBe("dpad.png");
@@ -323,24 +319,22 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_RenderWithWidthAndHeight_ParsesDimensions()
+    public void LoadLayout_InputWithWidthAndHeight_ParsesDimensions()
     {
-        // given a Render with explicit width and height — exercises the true branches skipped by other render tests
+        // given an Input with explicit width and height — exercises the true branches skipped by other tests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Input name='A'>
-                  <Render width='80' height='60' />
-                </Input>
+                <Input name='A' width='80' height='60' />
               </Body>
             </ControllerTemplate>
             """);
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        RenderNode render = result.Elements.OfType<InputNode>().Single().Renders.Single();
-        render.Width.ShouldBe(80);
-        render.Height.ShouldBe(60);
+        InputNode input = result.Elements.OfType<InputNode>().Single();
+        input.Width.ShouldBe(80);
+        input.Height.ShouldBe(60);
     }
 
     [Fact]
@@ -701,14 +695,13 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_Condition_BareRenderAndLabel_ParseAsLooseChildren()
+    public void LoadLayout_Condition_BareLabel_ParsesAsLooseChild()
     {
-        // given a Condition wrapping a bare Render and Label — no enclosing Input of their own
+        // given a Condition wrapping a bare Label — no enclosing Input of its own
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
                 <Condition any='A'>
-                  <Render useImage='Stick.png' x='+1' y='+2' />
                   <Label x='+3' y='+4' align='right' />
                 </Condition>
               </Body>
@@ -718,27 +711,22 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         ConditionNode condition = result.Elements.OfType<ConditionNode>().Single();
-        RenderNode render = condition.Children.OfType<RenderNode>().Single();
-        render.UseImage.ShouldBe("Stick.png");
-        render.X.ShouldBe(Coordinate.Relative(1));
-
         LabelNode label = condition.Children.OfType<LabelNode>().Single();
         label.Align.ShouldBe("right");
         label.Y.ShouldBe(Coordinate.Relative(4));
     }
 
     [Fact]
-    public void LoadLayout_Input_DirectChildRenderAndLabel_DoNotAlsoLeakIntoChildren()
+    public void LoadLayout_Input_DirectChildLabel_DoesNotAlsoLeakIntoChildren()
     {
-        // Regression guard: now that Render/Label are also valid loose children of Condition (and
-        // therefore route through the same TryParseLayoutChild Group/Stack/OneOf/Condition use),
-        // a Render/Label that's a *direct* child of its own Input must still land exclusively on
-        // that Input's own Renders/Labels lists, never on the generic Children list too.
+        // Regression guard: now that Label is also a valid loose child of Group/OneOf/Condition
+        // (and therefore routes through the same TryParseLayoutChild use), a Label that's a
+        // *direct* child of its own Input must still land exclusively on that Input's own Labels
+        // list, never on the generic Children list too.
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
                 <Input name='ButtonA'>
-                  <Render />
                   <Label />
                 </Input>
               </Body>
@@ -747,7 +735,6 @@ public class TemplateLoaderTests
 
         InputNode input = _underTest.LoadLayout("x")!.Elements.OfType<InputNode>().Single();
 
-        input.Renders.Count.ShouldBe(1);
         input.Labels.Count.ShouldBe(1);
         input.Children.ShouldBeEmpty();
     }
@@ -795,30 +782,6 @@ public class TemplateLoaderTests
         input.X.ShouldBe(Coordinate.Relative(0));
         input.Y.ShouldBe(Coordinate.Absolute(50));
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("oops")));
-    }
-
-    [Fact]
-    public void LoadLayout_RenderWithInvalidCoordinate_KeepsRenderWithDefaultAndLogs()
-    {
-        // given a Render whose y attribute can't be parsed
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Input name='A'>
-                  <Render x='0' y='bad' />
-                </Input>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        // when the loader runs
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        // then the render is kept with the default y, valid x preserved, and the error is logged
-        RenderNode render = result.Elements.OfType<InputNode>().Single().Renders.Single();
-        render.X.ShouldBe(Coordinate.Absolute(0));
-        render.Y.ShouldBe(Coordinate.Relative(0));
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Render") && s.Contains("bad")));
     }
 
     [Fact]

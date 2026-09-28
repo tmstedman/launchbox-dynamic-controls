@@ -19,14 +19,16 @@ public record FilteredLayout(
 /// collapsing stack where one or more earlier slots vacated — either an InputDefinition with
 /// all zero-opacity images, or a OneOf with no visible alternative. Flags are pre-computed
 /// here so downstream stages don't recompute them per image.
-/// <para><see cref="Images"/>/<see cref="Labels"/> are already the full set for this render
-/// pass — <see cref="Input"/>'s own static <c>InputImages</c>/<c>Labels</c> concatenated with
-/// whatever bare Render/Label elements survived a wrapping Condition/Group/OneOf this game (see
-/// <see cref="Templates.RenderElement"/>/<see cref="Templates.LabelElement"/>), merged once here
-/// by <see cref="LayoutFilter"/> so renderers never need to know two sources existed. A
-/// surrounding Condition only ever decided whether one of the latter exists at all this game —
-/// each still carries its own ShowIf governing its own opacity, exactly as if it had been a
-/// direct child.</para>
+/// <para><see cref="Images"/> is always identical to <see cref="Input"/>'s own static
+/// <c>InputImages</c> — there is no longer a separate Render concept, so an Input's image can't
+/// vary by game. <see cref="Labels"/> is <see cref="Input"/>'s own static <c>Labels</c>
+/// concatenated with whatever bare Label elements survived a wrapping Condition/Group/OneOf this
+/// game (see <see cref="Templates.LabelElement"/>), merged once here by <see cref="LayoutFilter"/>
+/// so <see cref="InputLabelRenderer"/> never needs to know two sources existed. Both fields are
+/// kept for shape symmetry between the two renderers even though only Labels ever actually
+/// differs from its InputDefinition source. A surrounding Condition only ever decided whether a
+/// loose label exists at all this game — it still carries its own ShowIf governing its own
+/// opacity, exactly as if it had been a direct child.</para>
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record LayoutInput(

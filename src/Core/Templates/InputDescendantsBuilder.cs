@@ -61,7 +61,7 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                     PopulateDescendants(child, descendants);
                 }
                 break;
-            case RenderElement or LabelElement:
+            case LabelElement:
                 // Leaf, not an InputDefinition -- nothing to register or descend into.
                 break;
             case InputDefinition def:
@@ -116,7 +116,7 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                     CollectDescendants(child, output);
                 }
                 break;
-            case RenderElement or LabelElement:
+            case LabelElement:
                 // Leaf, not an InputDefinition -- doesn't count as a descendant.
                 break;
             default:

@@ -42,12 +42,8 @@ public static class LayoutNavigation
     public static ConditionElement FirstCondition(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<ConditionElement>().First();
 
-    /// <summary>Returns the first bare <see cref="RenderElement"/> in the sequence (one found
+    /// <summary>Returns the first bare <see cref="LabelElement"/> in the sequence (one found
     /// somewhere other than as a direct child of its own Input).</summary>
-    public static RenderElement FirstRenderElement(this IEnumerable<ILayoutElement> elements) =>
-        elements.OfType<RenderElement>().First();
-
-    /// <summary>Returns the first bare <see cref="LabelElement"/> in the sequence.</summary>
     public static LabelElement FirstLabelElement(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<LabelElement>().First();
 
