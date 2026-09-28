@@ -26,10 +26,32 @@ public interface ILayoutElement;
 /// included; no per-overlay visibility — the group's inclusion does the gating. Lets a cluster
 /// declare shared overlay artwork (e.g. dpad lines) once rather than repeating it on every
 /// member.</param>
+/// <param name="DeclaredOriginY">The group's own declared Y, before any <paramref name="VAlign"/>
+/// shift — i.e. the value a bare `y` attribute resolved to. Together with <paramref
+/// name="Gap"/>/<paramref name="VAlign"/>/<paramref name="Collapse"/>, this is everything
+/// <see cref="Rendering.LayoutFilter"/> needs to compute where a loose <c>&lt;Label&gt;</c>
+/// placed directly inside this group should sit — the visual center of however many of this
+/// group's slots actually survive for the current game, which can only be known at render time
+/// (see <see cref="Rendering.LayoutFilter"/>'s label-centering logic). Kept as plain fields
+/// directly on this record, rather than sharing the per-Input <see cref="CollapseInfo"/>
+/// instance member Inputs are keyed by, so each type stays a single, self-contained concept: this
+/// record fully describes itself; <see cref="CollapseInfo"/> stays purely "how does an arbitrary
+/// Input find its way back to its enclosing group's shape."</param>
+/// <param name="Gap">Vertical spacing between this group's slots. Meaningless unless the group
+/// actually has slotted children; defaults to 0.</param>
+/// <param name="VAlign">Which slot <paramref name="DeclaredOriginY"/> refers to — "top" (default),
+/// "bottom", or "center". Already validated/normalized by <see cref="Templates.LayoutResolver"/>.</param>
+/// <param name="Collapse">Whether this group's slots vacate when hidden. When false, a loose
+/// label's center always uses the full nominal slot count — nothing varies by game, since without
+/// collapse slots never vacate, hidden or not.</param>
 [ExcludeFromCodeCoverage]
 public record InputGroup(
     IReadOnlyList<ILayoutElement> Children,
-    IReadOnlyList<OverlayDefinition> Overlays) : ILayoutElement;
+    IReadOnlyList<OverlayDefinition> Overlays,
+    double DeclaredOriginY = 0,
+    double Gap = 0,
+    string VAlign = "top",
+    bool Collapse = false) : ILayoutElement;
 
 /// <summary>
 /// A mutually-exclusive container: at render time, alternatives are evaluated in document order
@@ -90,7 +112,7 @@ public enum ConditionMatch
 
 /// <summary>
 /// A single image render that lives outside its owning Input's own direct children — e.g. nested
-/// inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;Stack&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
+/// inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
 /// rather than directly inside an &lt;Input&gt;. Carries no owner reference of its own: the owning
 /// InputDefinition can't be baked in at resolve time (it's still being constructed while its own
 /// children, including this one, are being built), so <see cref="Rendering.LayoutFilter"/>

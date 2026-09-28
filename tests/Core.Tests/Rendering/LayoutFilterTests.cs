@@ -619,6 +619,174 @@ public class LayoutFilterTests
             .ShouldBe([("Leaf", 0.0), ("Tail", 0.0)]);
     }
 
+    // ---- loose Label centering ----
+    //
+    // A loose Label placed directly inside a Group centers on the visual midpoint of however
+    // many of that group's slots actually survive for this game -- computed here, in Phase 2,
+    // since which slots survive collapse is a per-game fact Phase 1 (LayoutResolver) has no way
+    // to know. See InputGroup's and ResolveLooseLabel's doc comments for the full rationale.
+
+    [Fact]
+    public void Filter_LooseLabelInNonCollapsingGroup_CentersOnTheFullNominalSlotCount()
+    {
+        // given a non-collapsing, vAlign="bottom" group of 2 slots (gap=40, declared y=300) with
+        // a loose Label -- nothing ever vacates without collapse="true", so nothing about the
+        // center can vary by game; it always uses the full nominal slot count
+        InputDefinition slotA = Input("ButtonA");
+        InputDefinition slotB = Input("ButtonB");
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        InputGroup group = new(
+            Children: [slotA, slotB, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "bottom",
+            Collapse: false);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(slotA, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(280);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelInCollapsingCenterGroup_StaysAtDeclaredY_RegardlessOfWhichSlotVacates()
+    {
+        // given a collapsing, vAlign="center" group of 4 slots (gap=40, declared y=300) where
+        // the first slot vacates -- vAlign="center" is designed so the declared Y always tracks
+        // the true center of whatever survives, so this stays pinned at 300 exactly as if all
+        // four had survived (this already worked before the fix; confirms no regression)
+        InputDefinition slotA = Input("ButtonA");
+        InputDefinition slotB = Input("ButtonB");
+        InputDefinition slotC = Input("ButtonC");
+        InputDefinition slotD = Input("ButtonD");
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        InputGroup group = new(
+            Children: [slotA, slotB, slotC, slotD, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "center",
+            Collapse: true);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(slotB, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AllImagesZeroOpacity(slotA, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(300);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelInCollapsingTopGroup_CentersOnTheSurvivingSubset_NotTheNominalOne()
+    {
+        // given a collapsing, vAlign="top" group of 3 slots (gap=40, declared y=300) where the
+        // first slot vacates, leaving two survivors -- previously this always sat at 300 (the
+        // top edge of the *nominal* 3-slot span, since vAlign="top" never shifted it in the
+        // first place); the actual surviving pair renders at 300 and 340 after the shift-up, so
+        // the true center is 320. This is the actual bug: vAlign="top"/"bottom" never had
+        // vAlign="center"'s "declared Y already tracks the survivors' center" guarantee.
+        InputDefinition slotA = Input("ButtonA");
+        InputDefinition slotB = Input("ButtonB");
+        InputDefinition slotC = Input("ButtonC");
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        InputGroup group = new(
+            Children: [slotA, slotB, slotC, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "top",
+            Collapse: true);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(slotB, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AllImagesZeroOpacity(slotA, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(320);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelInCollapsingBottomGroup_CentersOnTheSurvivingSubset_NotTheNominalOne()
+    {
+        // given a collapsing, vAlign="bottom" group of 3 slots (gap=40, declared y=300) where
+        // the last slot vacates -- the bottom-mode correction pins the last survivor (B) at 300
+        // and A at 260, giving a true center of 280, not the nominal 300
+        InputDefinition slotA = Input("ButtonA");
+        InputDefinition slotB = Input("ButtonB");
+        InputDefinition slotC = Input("ButtonC");
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        InputGroup group = new(
+            Children: [slotA, slotB, slotC, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "bottom",
+            Collapse: true);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(slotA, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AllImagesZeroOpacity(slotC, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(280);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelInCollapsingGroupWithOneOfSlot_CountsTheOneOfAsOneSurvivingSlot()
+    {
+        // given a collapsing group whose first slot is a OneOf (not a plain Input) -- exercises
+        // the SelectedLeaves path IsHidden needs for a OneOf slot, confirming label-centering
+        // doesn't assume every slot is a plain InputDefinition
+        InputDefinition altA = Input("ButtonA");
+        InputDefinition tail = Input("ButtonB");
+        var oneOf = new OneOf(Alternatives: [altA]);
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        InputGroup group = new(
+            Children: [oneOf, tail, label],
+            Overlays: [],
+            DeclaredOriginY: 300,
+            Gap: 40,
+            VAlign: "top",
+            Collapse: true);
+        InputDefinition owner = Input("Whole", children: [group]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(tail, Arg.Any<VisibilityContext>()).Returns(true); // group inclusion
+        _evaluator.AnyVisible(altA, Arg.Any<VisibilityContext>()).Returns(true); // OneOf's own selection
+        // AllImagesZeroOpacity defaults false -- altA stays visible, the OneOf slot does not vacate
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "Whole");
+        li.Labels.Single().Y.ShouldBe(320);
+    }
+
+    [Fact]
+    public void Filter_LooseLabelWithNoEnclosingGroup_KeepsItsBuildTimeValueUnchanged()
+    {
+        // given a loose Label reached only through a Condition, no Group anywhere above it --
+        // there is nothing to center against, so its build-time value passes through untouched
+        var label = new LabelElement(new LabelDefinition(X: 0, Y: 42));
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [label]);
+        InputDefinition owner = Input("ButtonDpad", children: [condition]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
+        li.Labels.Single().Y.ShouldBe(42);
+    }
+
     // ---- defensive throws ----
 
     [Fact]
