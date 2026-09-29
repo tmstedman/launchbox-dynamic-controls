@@ -172,12 +172,12 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 
 ```xml
 <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
-<OneOf for="AxisLeftStick">
+<OneOf>
     <!-- direction alternatives, each its own top-level Input -->
 </OneOf>
 ```
 
-See [`<OneOf>`'s `for=`](#oneof--mutually-exclusive-alternatives) for how a loose `<Label>` inside still finds its whole with no enclosing Input to supply it ambiently.
+See [`<Group>`'s `for=`](#group--positioned-conditional-cluster) for how a loose `<Label>` inside still finds its whole with no enclosing Input to supply it ambiently.
 
 **Strict-self render position**: A duplicate top-level `<Input>` with no nested children expresses "render the parent input's image at this position, independent of its descendants" — used by some templates to put an extra render in a different slot.
 
@@ -195,15 +195,15 @@ A `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can 
 
 The loose `<Label>` attaches to whichever `<Input>` is ambient at that point in the tree — here, `ButtonDpad`, even though it's several levels of `<Condition>` away — exactly as if it had been written as a direct child. Entering a *nested* `<Input>` resets this ambient identity to the nested one; entering `<Group>`/`<OneOf>`/`<Condition>` does not, since none of those are a new Input's own boundary. Its coordinate origin, though, follows whatever `<Group>` it's actually inside: `<Condition>` passes the origin through completely unchanged, and `<OneOf>` shares one slot's origin across every alternative, but a `<Group>` always establishes its own frame — see below.
 
-Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, the loose label included, before label-specific concerns (its own position, font size) ever come into play. A loose `<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered — **unless** the nearest enclosing `<OneOf>` sets `for="SomeInput"`, which supplies the ambient identity explicitly for exactly this case: no enclosing `<Input>` to have supplied it the ordinary way. See [`<OneOf>`](#oneof--mutually-exclusive-alternatives).
+Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, the loose label included, before label-specific concerns (its own position, font size) ever come into play. A loose `<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered — **unless** the nearest enclosing `<Group>` sets `for="SomeInput"`, which supplies the ambient identity explicitly for exactly this case: no enclosing `<Input>` to have supplied it the ordinary way. Deliberately not an attribute on `<OneOf>`/`<Condition>` — those are pure control-flow, unrelated to identity; `<Group>` already carries the rest of an Input's structural attributes. See [`<Group>`](#group--positioned-conditional-cluster).
 
 **A loose `<Label>` centers itself against an enclosing `<Group>`.** Placed directly inside a `<Group>` (or reached through a `<OneOf>`/`<Condition>` nested in it), its `y` resolves to the visual center of that Group's slots — the midpoint between the first and last slot that's actually showing *for the current game* — rather than the shifted per-slot origin the Group's own members use:
 
 ```xml
 <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
-<OneOf for="AxisLeftStick">
+<OneOf>
     <Condition any="AxisLeftStick" match="label">
-        <Group x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+        <Group for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
             <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34" />
@@ -214,7 +214,7 @@ Whether it renders at all is decided once, structurally, the same way a `<Group>
 </OneOf>
 ```
 
-The `<OneOf>`'s `for="AxisLeftStick"` is what makes this work with no enclosing `<Input>` at all — it supplies the ambient identity the loose `<Label>` attaches to, exactly as if it had been written as `AxisLeftStick`'s own direct child.
+The `<Group>`'s `for="AxisLeftStick"` is what makes this work with no enclosing `<Input>` at all — it supplies the ambient identity the loose `<Label>` attaches to, exactly as if it had been written as `AxisLeftStick`'s own direct child.
 
 This lands the label "half-way up the group" — and it stays there regardless of how many of the four directions are actually present this game, *for every `vAlign` value*, not only `"center"`. Which slots survive `collapse="true"` is a per-game fact (this game's mapping/labels decide it), so the center is computed at render time rather than baked in once at template load — see [`<Group>`](#group--positioned-conditional-cluster) for the group's own static shape, and the engine's `LayoutFilter.ResolveLooseLabel` for the computation itself. Without `collapse="true"`, nothing ever varies by game (slots never vacate), so the center is simply the group's full, fixed slot count every time. A direct child `<Label>` on one of the Group's own *members* is unaffected by any of this — it keeps resolving against that member's own slot position, exactly as if the Group weren't there, since a nested `<Input>` resets the ambient anchor to its own.
 
@@ -290,6 +290,7 @@ A vertical list of inputs, each spaced `gap` pixels below the last. Which slot s
 | `minOpacity` | double | no | Same |
 | `inactiveBlurRadius` | double | no | Same |
 | `fontSize` | double | no | Same |
+| `for` | string | no | Names the Input this Group builds on behalf of, when it has no enclosing `<Input>` of its own — e.g. a top-level Group inside a `<OneOf>` sibling of the whole it describes (see [Nested Input semantics](#input--a-generic-input)). Supplies the ambient identity a loose `<Label>` placed directly inside would otherwise have needed an enclosing `<Input>` for; unnecessary (and should be left unset) when the Group is already reached through one. Unrelated to `style`/`showIf`/etc. above — those cascade visual defaults, this carries identity |
 
 **`vAlign`** shifts the group's whole origin *before* slots are laid out, so it changes where every child ends up, not just one of them:
 
@@ -339,11 +340,7 @@ A container where only the first alternative whose visibility check passes is re
 </OneOf>
 ```
 
-| Attribute | Type | Required | Notes |
-|---|---|---|---|
-| `for` | string | no | Names the Input this `<OneOf>` builds on behalf of, when it has no enclosing `<Input>` of its own — e.g. a top-level `<OneOf>` sibling of the whole it describes (see [Nested Input semantics](#input--a-generic-input)). Supplies the ambient identity a loose `<Label>` reached inside would otherwise have needed an enclosing `<Input>` for; unnecessary (and should be left unset) when the `<OneOf>` is already reached through one. |
-
-Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Label>` parses here too (see [Loose `<Label>`](#loose-label)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose label it carries, never for "winning" the `<OneOf>`.
+No attributes — a `<OneOf>` is pure control-flow (alternative selection), unrelated to identity or position. Children: `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Label>` parses here too (see [Loose `<Label>`](#loose-label)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose label it carries, never for "winning" the `<OneOf>`.
 
 **Visibility check per alternative**:
 - `<Input>` — "any-render-visible" (its own image passes its `showIf`)

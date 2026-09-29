@@ -214,14 +214,16 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// visible render — its labels and its own Overlay children go with it. Its style attributes
     /// (style/showIf/minOpacity/inactiveBlurRadius/fontSize) are the same shape as an Input's own
     /// — see <see cref="IStyledNode"/> — and cascade to its member Inputs and Overlay children
-    /// the same way an Input's own attributes cascade to its Labels and Overlays.
+    /// the same way an Input's own attributes cascade to its Labels and Overlays. <c>for</c> is
+    /// unrelated to any of that — see <see cref="GroupNode.For"/>.
     /// </summary>
     private GroupNode ParseGroupNode(XmlElement groupNode)
     {
         var group = new GroupNode
         {
             Style = groupNode.Attributes["style"]?.Value,
-            ShowIf = groupNode.Attributes["showIf"]?.Value
+            ShowIf = groupNode.Attributes["showIf"]?.Value,
+            For = groupNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
         };
 
         if (ReadCoordinate(groupNode, "x", "Group") is Coordinate gx) group.X = gx;
@@ -248,7 +250,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             }
         }
 
-        _logger.Debug($"Group: x={group.X}, y={group.Y}, gap={group.Gap}, vAlign={group.VAlign}, children={group.Children.Count}, overlays={group.Overlays.Count}");
+        _logger.Debug($"Group: x={group.X}, y={group.Y}, gap={group.Gap}, vAlign={group.VAlign}, for={group.For}, children={group.Children.Count}, overlays={group.Overlays.Count}");
         return group;
     }
 
@@ -259,10 +261,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// </summary>
     private OneOfNode ParseOneOfNode(XmlElement oneOfNode)
     {
-        var oneOf = new OneOfNode
-        {
-            For = oneOfNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
-        };
+        var oneOf = new OneOfNode();
 
         foreach (XmlElement child in oneOfNode.ChildNodes.OfType<XmlElement>())
         {
@@ -270,7 +269,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 _logger.Error($"Invalid element <{child.Name}> in <OneOf>");
         }
 
-        _logger.Debug($"OneOf: for={oneOf.For}, alternatives={oneOf.Alternatives.Count}");
+        _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
     }
 

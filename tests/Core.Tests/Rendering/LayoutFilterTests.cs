@@ -276,18 +276,18 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_LabelElementInsideTopLevelOneOfWithForInputName_AttachesToTheNamedTopLevelInput()
+    public void Filter_LabelElementInsideTopLevelGroupWithForInputName_AttachesToTheNamedTopLevelInput()
     {
-        // given a top-level OneOf naming "ButtonDpad" via ForInputName -- it has no enclosing
+        // given a top-level Group naming "ButtonDpad" via ForInputName -- it has no enclosing
         // Input of its own, so this is how LayoutFilter learns which InputDefinition a loose
-        // Label reached inside it belongs to (the flattened whole-control cluster's own case)
+        // Label placed directly inside it belongs to (the flattened whole-control cluster's own
+        // case)
         var label = new LabelDefinition(X: 1, Y: 2);
         var labelElement = new LabelElement(label);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [labelElement]);
-        var oneOf = new OneOf(Alternatives: [condition], ForInputName: "ButtonDpad");
+        var group = new InputGroup(Children: [labelElement], Overlays: [], ForInputName: "ButtonDpad");
         InputDefinition dpad = Input("ButtonDpad");
-        Template template = TemplateOf(elements: [dpad, oneOf]);
-        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+        Template template = TemplateOf(elements: [dpad, group]);
+        _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
@@ -296,18 +296,17 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_LabelElementInsideTopLevelOneOfWithUnresolvableForInputName_AttachesNowhere()
+    public void Filter_LabelElementInsideTopLevelGroupWithUnresolvableForInputName_AttachesNowhere()
     {
-        // given a OneOf whose ForInputName doesn't match any top-level Input (e.g. a template
+        // given a Group whose ForInputName doesn't match any top-level Input (e.g. a template
         // authoring typo) -- degrades gracefully by dropping the label, the same as a loose
         // Label with no ambient Input at all
         var label = new LabelDefinition(X: 1, Y: 2);
         var labelElement = new LabelElement(label);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [labelElement]);
-        var oneOf = new OneOf(Alternatives: [condition], ForInputName: "NoSuchInput");
+        var group = new InputGroup(Children: [labelElement], Overlays: [], ForInputName: "NoSuchInput");
         InputDefinition dpad = Input("ButtonDpad");
-        Template template = TemplateOf(elements: [dpad, oneOf]);
-        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+        Template template = TemplateOf(elements: [dpad, group]);
+        _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
 

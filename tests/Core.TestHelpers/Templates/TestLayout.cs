@@ -167,6 +167,7 @@ internal class GroupBuilder
     public GroupBuilder FontSize(double v)                  { Node.FontSize = v;             return this; }
     public GroupBuilder MinOpacity(double v)                { Node.MinOpacity = v;           return this; }
     public GroupBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
+    public GroupBuilder For(string name)                    { Node.For = name;               return this; }
 
     public GroupBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
     public GroupBuilder Group(Action<GroupBuilder> build)                     { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
@@ -189,7 +190,6 @@ internal class OneOfBuilder
     public OneOfNode Node { get; } = new();
 
     #pragma warning disable format
-    public OneOfBuilder For(string name)                                     { Node.For = name;                                          return this; }
     public OneOfBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Alternatives.Add(TestLayout.BuildInput(name, build)); return this; }
     public OneOfBuilder Group(Action<GroupBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildGroup(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
