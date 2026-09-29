@@ -348,13 +348,14 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         {
             null or "" or "label" => ConditionMatch.Label,
             "mapping" => ConditionMatch.Mapped,
+            "auto" => ConditionMatch.Auto,
             _ => LogUnknownConditionMatch(value)
         };
     }
 
     private ConditionMatch LogUnknownConditionMatch(string value)
     {
-        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping. Defaulting to label.");
+        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping, auto. Defaulting to label.");
         return ConditionMatch.Label;
     }
 
