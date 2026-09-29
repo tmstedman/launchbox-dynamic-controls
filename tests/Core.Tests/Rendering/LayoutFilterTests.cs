@@ -275,6 +275,46 @@ public class LayoutFilterTests
         li.Labels.ShouldBe([label]);
     }
 
+    [Fact]
+    public void Filter_LabelElementInsideTopLevelOneOfWithForInputName_AttachesToTheNamedTopLevelInput()
+    {
+        // given a top-level OneOf naming "ButtonDpad" via ForInputName -- it has no enclosing
+        // Input of its own, so this is how LayoutFilter learns which InputDefinition a loose
+        // Label reached inside it belongs to (the flattened whole-control cluster's own case)
+        var label = new LabelDefinition(X: 1, Y: 2);
+        var labelElement = new LabelElement(label);
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [labelElement]);
+        var oneOf = new OneOf(Alternatives: [condition], ForInputName: "ButtonDpad");
+        InputDefinition dpad = Input("ButtonDpad");
+        Template template = TemplateOf(elements: [dpad, oneOf]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
+        li.Labels.ShouldBe([label]);
+    }
+
+    [Fact]
+    public void Filter_LabelElementInsideTopLevelOneOfWithUnresolvableForInputName_AttachesNowhere()
+    {
+        // given a OneOf whose ForInputName doesn't match any top-level Input (e.g. a template
+        // authoring typo) -- degrades gracefully by dropping the label, the same as a loose
+        // Label with no ambient Input at all
+        var label = new LabelDefinition(X: 1, Y: 2);
+        var labelElement = new LabelElement(label);
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [labelElement]);
+        var oneOf = new OneOf(Alternatives: [condition], ForInputName: "NoSuchInput");
+        InputDefinition dpad = Input("ButtonDpad");
+        Template template = TemplateOf(elements: [dpad, oneOf]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
+        li.Labels.ShouldBeEmpty();
+    }
+
     // ---- collapse adjustments ----
 
     [Fact]
@@ -781,7 +821,7 @@ public class LayoutFilterTests
         // given a template whose element list contains an ILayoutElement subtype that
         // CollectVisibleElement has no case for
         Template template = TemplateOf(elements: [new UnknownElement()],
-            inputDescendants: new Dictionary<InputDefinition, IReadOnlyList<InputDefinition>>());
+            inputDescendants: new Dictionary<InputDefinition, IReadOnlyList<string>>());
 
         // when filtering
         // then the defensive default in CollectVisibleElement throws
