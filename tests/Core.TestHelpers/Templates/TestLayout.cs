@@ -162,6 +162,11 @@ internal class GroupBuilder
     public GroupBuilder Gap(double v)                { Node.Gap = v;       return this; }
     public GroupBuilder Collapse()                   { Node.Collapse = true; return this; }
     public GroupBuilder VAlign(string v)             { Node.VAlign = v;    return this; }
+    public GroupBuilder Style(string name)                  { Node.Style = name;             return this; }
+    public GroupBuilder ShowIf(string value)                { Node.ShowIf = value;           return this; }
+    public GroupBuilder FontSize(double v)                  { Node.FontSize = v;             return this; }
+    public GroupBuilder MinOpacity(double v)                { Node.MinOpacity = v;           return this; }
+    public GroupBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
 
     public GroupBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
     public GroupBuilder Group(Action<GroupBuilder> build)                     { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
@@ -218,6 +223,7 @@ internal class OverlayBuilder(string src)
     public OverlayBuilder At(double x, double y)       { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
     public OverlayBuilder Offset(double dx, double dy) { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
     public OverlayBuilder Size(double w, double h)     { Node.Width = w; Node.Height = h; return this; }
+    public OverlayBuilder Style(string name)           { Node.Style = name;               return this; }
     public OverlayBuilder ShowIf(string value)         { Node.ShowIf = value;             return this; }
     public OverlayBuilder MinOpacity(double v)         { Node.MinOpacity = v;             return this; }
     public OverlayBuilder InactiveBlurRadius(double v) { Node.InactiveBlurRadius = v;     return this; }
@@ -232,6 +238,7 @@ internal class LabelBuilder
     public LabelBuilder At(double x, double y)       { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
     public LabelBuilder Offset(double dx, double dy) { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
     public LabelBuilder Align(string align)          { Node.Align = align;              return this; }
+    public LabelBuilder Style(string name)           { Node.Style = name;               return this; }
     public LabelBuilder FontSize(double v)           { Node.FontSize = v;               return this; }
     #pragma warning restore format
 }

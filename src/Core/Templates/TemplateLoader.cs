@@ -211,17 +211,27 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// <c>vAlign</c> (top/bottom/center, default top) is validated against the origin's slot
     /// count by the resolver, not here — an invalid value just flows through as an arbitrary
     /// string. The group is included in the render output only when any descendant has a
-    /// visible render — its labels and its own Overlay children go with it.
+    /// visible render — its labels and its own Overlay children go with it. Its style attributes
+    /// (style/showIf/minOpacity/inactiveBlurRadius/fontSize) are the same shape as an Input's own
+    /// — see <see cref="IStyledNode"/> — and cascade to its member Inputs and Overlay children
+    /// the same way an Input's own attributes cascade to its Labels and Overlays.
     /// </summary>
     private GroupNode ParseGroupNode(XmlElement groupNode)
     {
-        var group = new GroupNode();
+        var group = new GroupNode
+        {
+            Style = groupNode.Attributes["style"]?.Value,
+            ShowIf = groupNode.Attributes["showIf"]?.Value
+        };
 
         if (ReadCoordinate(groupNode, "x", "Group") is Coordinate gx) group.X = gx;
         if (ReadCoordinate(groupNode, "y", "Group") is Coordinate gy) group.Y = gy;
         if (ReadDouble(groupNode, "gap") is double gap) group.Gap = gap;
         group.VAlign = groupNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
         if (string.Equals(groupNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) group.Collapse = true;
+        if (ReadDouble(groupNode, "minOpacity") is double minOpacity) group.MinOpacity = minOpacity;
+        if (ReadDouble(groupNode, "inactiveBlurRadius") is double blur) group.InactiveBlurRadius = blur;
+        if (ReadDouble(groupNode, "fontSize") is double fontSize) group.FontSize = fontSize;
 
         foreach (XmlElement child in groupNode.ChildNodes.OfType<XmlElement>())
         {
@@ -336,7 +346,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     {
         var label = new LabelNode
         {
-            Align = node.Attributes["align"]?.Value.ToLowerInvariant() ?? "left"
+            Align = node.Attributes["align"]?.Value.ToLowerInvariant() ?? "left",
+            Style = node.Attributes["style"]?.Value
         };
         if (ReadCoordinate(node, "x", "Label") is Coordinate x) label.X = x;
         if (ReadCoordinate(node, "y", "Label") is Coordinate y) label.Y = y;
@@ -356,7 +367,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             return null;
         }
 
-        var overlay = new OverlayNode { Src = src };
+        var overlay = new OverlayNode { Src = src, Style = node.Attributes["style"]?.Value };
         if (ReadCoordinate(node, "x", $"Overlay src=\"{src}\"") is Coordinate x) overlay.X = x;
         if (ReadCoordinate(node, "y", $"Overlay src=\"{src}\"") is Coordinate y) overlay.Y = y;
         if (ReadDouble(node, "width") is double w) overlay.Width = w;

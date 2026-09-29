@@ -38,9 +38,9 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance);
         var ctx = new BuildContext(
             ImageSource: imageSource,
-            DefaultFontSize: defaultFontSize,
             NamedStyles: config.Head.NamedStyles,
-            CollapseInfo: collapseInfo);
+            CollapseInfo: collapseInfo,
+            Style: new ComputedStyle(ShowIf: null, MinOpacity: null, InactiveBlurRadius: null, FontSize: defaultFontSize));
 
         var elements = config.Elements.Select(e => BuildNode(e, ctx)).ToList();
         return new ResolvedLayout(
@@ -70,11 +70,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     {
         string name = inputXml.Name;
 
-        // Resolve the Input's referenced style (if any). Explicit Input attributes win over
-        // the named style's values; absent attributes inherit from the style.
-        StyleNode? namedStyle = null;
-        if (inputXml.Style != null && !ctx.NamedStyles.TryGetValue(inputXml.Style, out namedStyle))
-            _logger.Error($"Input '{name}' references unknown style '{inputXml.Style}'");
+        // Merges the Input's own style attributes over its named style (if any) over whatever
+        // was already ambient — see ResolveStyle. An Input's own attributes always win; absent
+        // ones fall through the same chain a Label/Overlay reachable from it would.
+        ComputedStyle computed = Resolve(inputXml, ctx, $"Input '{name}'");
 
         // Resolve this Input's own optional x/y — if present they establish a new coordinate
         // origin for its own image, Labels, Overlays, and nested Children. Absent = inherit
@@ -82,21 +81,15 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double inputOriginX = inputXml.X.Resolve(ctx.OriginX);
         double inputOriginY = inputXml.Y.Resolve(ctx.OriginY);
 
-        // Build a context carrying this input's effective inherited values and identity. Labels
-        // and overlays on this input read from inputCtx; nested children also receive inputCtx
-        // (rather than a fresh ctx) so a *loose* Label reached through Group/OneOf/Condition can
-        // inherit it exactly like a true direct child would — a nested <Input> is unaffected,
-        // since it always overrides Inherited* from its own ShowIf/Style/FontSize rather than
-        // falling through to whatever's ambient.
-        ShowIfCondition showIf = ParseShowIf(inputXml.ShowIf ?? namedStyle?.ShowIf);
-        double? minOpacity = inputXml.MinOpacity ?? namedStyle?.MinOpacity;
-        double? inactiveBlurRadius = inputXml.InactiveBlurRadius ?? namedStyle?.InactiveBlurRadius;
+        // Build a context carrying this input's computed style and identity. Labels and overlays
+        // on this input read from inputCtx; nested children also receive inputCtx (rather than a
+        // fresh ctx) so a *loose* Label reached through Group/OneOf/Condition can inherit it
+        // exactly like a true direct child would — a nested <Input> is unaffected, since it
+        // always overrides Style from its own ShowIf/Style/FontSize rather than falling through
+        // to whatever's ambient.
         BuildContext inputCtx = ctx with
         {
-            InheritedShowIf = inputXml.ShowIf ?? namedStyle?.ShowIf,
-            InheritedMinOpacity = minOpacity,
-            InheritedInactiveBlurRadius = inactiveBlurRadius,
-            InheritedFontSize = inputXml.FontSize ?? namedStyle?.FontSize,
+            Style = computed,
             OriginX = inputOriginX,
             OriginY = inputOriginY,
             CurrentInputName = name
@@ -104,6 +97,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
         var labels = inputXml.Labels.Select(labelXml => BuildLabelDefinition(labelXml, inputCtx)).ToList();
 
+        ShowIfCondition showIf = ParseShowIf(computed.ShowIf);
         var image = new InputImageDefinition(
             X: inputOriginX,
             Y: inputOriginY,
@@ -112,8 +106,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Height: inputXml.Height,
             UseImageFile: inputXml.UseImage != null ? $"{inputXml.UseImage}.png" : null,
             ShowIf: showIf,
-            MinOpacity: minOpacity,
-            InactiveBlurRadius: inactiveBlurRadius);
+            MinOpacity: computed.MinOpacity,
+            InactiveBlurRadius: computed.InactiveBlurRadius);
         _logger.Debug($"Input image: {name} at ({inputOriginX},{inputOriginY}) showIf={showIf}");
 
         var overlays = new List<OverlayDefinition>();
@@ -164,6 +158,13 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double vAlignShift = StackVAlign.Shift(vAlign, slotCount, gap);
         double declaredOriginY = groupXml.Y.Resolve(ctx.OriginY);
 
+        // Merges the Group's own style attributes the same way an Input's do (see ResolveStyle),
+        // so a cluster can declare style="…" once instead of repeating it on every member Input —
+        // but cascadeAmbient: false, so an empty Group doesn't pass a wrapping Input's own
+        // showIf/minOpacity/inactiveBlurRadius through to members several levels inside it (see
+        // ResolveStyle's own doc comment for why this is the Group-specific exception, not Input's).
+        ComputedStyle computed = Resolve(groupXml, ctx, "Group", cascadeAmbient: false);
+
         var frame = new StackFrame
         {
             OriginX = groupXml.X.Resolve(ctx.OriginX),
@@ -171,7 +172,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Gap = gap,
             SlotIndex = 0,
         };
-        BuildContext groupCtx = ctx with { OriginX = frame.OriginX, OriginY = frame.OriginY };
+        BuildContext groupCtx = ctx with { Style = computed, OriginX = frame.OriginX, OriginY = frame.OriginY };
 
         var children = new List<ILayoutElement>();
         foreach (ILayoutNode child in groupXml.Children)
@@ -348,11 +349,18 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// </summary>
     private LabelDefinition BuildLabelDefinition(LabelNode labelXml, BuildContext ctx)
     {
+        // A leaf: reached only through its own concretely-typed caller, never generic dispatch,
+        // so it calls the shared merge directly with its own fields rather than implementing
+        // IStyledNode — it has no showIf/minOpacity/inactiveBlurRadius of its own (see
+        // IStyledNode's doc comment for why), only style (for fontSize) and fontSize itself.
+        ComputedStyle computed = ResolveStyle(
+            labelXml.Style, showIf: null, minOpacity: null, inactiveBlurRadius: null, labelXml.FontSize,
+            ctx, "Label");
         var label = new LabelDefinition(
             X: labelXml.X.Resolve(ctx.OriginX),
             Y: labelXml.Y.Resolve(ctx.OriginY),
             Alignment: labelXml.Align,
-            FontSize: labelXml.FontSize ?? ctx.InheritedFontSize ?? ctx.DefaultFontSize);
+            FontSize: computed.FontSize);
         _logger.Debug($"Label position: {ctx.CurrentInputName} at ({labelXml.X},{labelXml.Y}) align={labelXml.Align} fontSize={label.FontSize}");
         return label;
     }
@@ -376,14 +384,22 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
-    /// Resolves an OverlayNode DTO into an OverlayDefinition. Inherited showIf/opacity/blur
-    /// values flow in via ctx — input-level overlays pass inputCtx (with inherited values set);
-    /// group-level overlays pass ctx (inherited values null).
+    /// Resolves an OverlayNode DTO into an OverlayDefinition. Style values flow in via
+    /// <paramref name="ctx"/> — an input-level overlay's caller passes inputCtx (whose Style is
+    /// that Input's own computed style); a group-level overlay's caller passes groupCtx (whose
+    /// Style is the Group's own) — both now genuinely populated, not always null the way a
+    /// group-level overlay's used to be before Group could originate its own style.
     /// </summary>
     private OverlayDefinition BuildOverlayDefinition(OverlayNode overlayXml, BuildContext ctx)
     {
         (string resolvedPath, _) = ctx.ImageSource.Resolve(overlayXml.Src!, platform: null);
-        ShowIfCondition showIf = ParseShowIf(overlayXml.ShowIf ?? ctx.InheritedShowIf);
+
+        // A leaf, like Label — calls the shared merge directly rather than implementing
+        // IStyledNode, since it has no fontSize of its own (it never renders text).
+        ComputedStyle computed = ResolveStyle(
+            overlayXml.Style, overlayXml.ShowIf, overlayXml.MinOpacity, overlayXml.InactiveBlurRadius,
+            fontSize: null, ctx, $"Overlay src=\"{overlayXml.Src}\"");
+        ShowIfCondition showIf = ParseShowIf(computed.ShowIf);
         _logger.Debug($"Overlay: {overlayXml.Src} at ({overlayXml.X},{overlayXml.Y}) showIf={showIf}");
         return new OverlayDefinition(
             X: overlayXml.X.Resolve(ctx.OriginX),
@@ -392,8 +408,72 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Width: overlayXml.Width,
             Height: overlayXml.Height,
             ShowIf: showIf,
-            MinOpacity: overlayXml.MinOpacity ?? ctx.InheritedMinOpacity,
-            InactiveBlurRadius: overlayXml.InactiveBlurRadius ?? ctx.InheritedInactiveBlurRadius);
+            MinOpacity: computed.MinOpacity,
+            InactiveBlurRadius: computed.InactiveBlurRadius);
+    }
+
+    /// <summary>
+    /// Merges an <see cref="IStyledNode"/>'s own style attributes over its named style (if any)
+    /// over whatever <see cref="ComputedStyle"/> is already ambient in <paramref name="ctx"/> —
+    /// the shared implementation <see cref="ResolveStyle"/> uses for every element. Only
+    /// <see cref="InputNode"/> and <see cref="GroupNode"/> ever need this overload, since only
+    /// they're ever treated polymorphically as a cascade origin (see <see cref="IStyledNode"/>'s
+    /// doc comment); a leaf calls <see cref="ResolveStyle"/> directly with its own fields.
+    /// </summary>
+    private ComputedStyle Resolve(IStyledNode node, BuildContext ctx, string errorContext, bool cascadeAmbient = true) =>
+        ResolveStyle(node.Style, node.ShowIf, node.MinOpacity, node.InactiveBlurRadius, node.FontSize, ctx, errorContext, cascadeAmbient);
+
+    /// <summary>
+    /// Resolves the named style reference (if any), logging once if it names a style that isn't
+    /// declared in &lt;Head&gt;, then merges each attribute in precedence order: this element's
+    /// own explicit value, then the named style's, then — for <c>showIf</c>/<c>minOpacity</c>/
+    /// <c>inactiveBlurRadius</c>, only when <paramref name="cascadeAmbient"/> is true — whatever
+    /// was already ambient in <paramref name="ctx"/>.
+    ///
+    /// <para><paramref name="cascadeAmbient"/> is false only for <see cref="GroupNode"/>
+    /// (see <see cref="BuildInputGroup"/>). A Group exists specifically so a cluster can declare
+    /// style once for its own members — <see cref="BuildInputDefinition"/> passes true (the
+    /// default) for an Input's own resolution, so a member Input that sets nothing of its own
+    /// still sees the Group's own explicit value via <c>ctx.Style</c>. But an Input like
+    /// <c>AxisLeftStick</c> that wraps such a Group *itself* has real visual attributes (its own
+    /// <c>auto-blur</c>, say) that are only meant to govern its own glyph, not this Group's
+    /// members several levels inside it. If the Group's own resolution let that ambient value
+    /// flow through unchanged whenever the Group itself set nothing, a style like
+    /// <c>small-label-vacate</c> — meant to vacate to the built-in default (opacity 0) when
+    /// inactive — would instead inherit the wrapping Input's own <c>minOpacity</c>, fading
+    /// instead of vanishing. Stopping the cascade at an empty Group (rather than letting it
+    /// reach through to whatever's further out) fixes that without touching Input's own
+    /// resolution at all: a Group's *explicit* value still reaches its members exactly as
+    /// intended; only a Group with nothing of its own stops being a pass-through for someone
+    /// else's ambient value.</para>
+    ///
+    /// <para><c>ShowIf</c> stays a raw string through this chain (like <see cref="StyleNode"/>'s
+    /// own field) rather than a parsed <see cref="ShowIfCondition"/>, so an absent value can keep
+    /// falling through without needing a sentinel distinct from a real parsed value — callers
+    /// parse it via <see cref="ParseShowIf"/> once they have the final merged string.
+    /// <c>MinOpacity</c>/<c>InactiveBlurRadius</c> stay nullable all the way through for the same
+    /// reason they always have: null reaching <see cref="InputImageDefinition"/>/
+    /// <see cref="OverlayDefinition"/> means "nothing in the tree set this," resolved against the
+    /// template default later, at evaluation time, not baked in here. <c>FontSize</c> is the one
+    /// exception to both of the above — it always falls through regardless of
+    /// <paramref name="cascadeAmbient"/> (a Group's own members still need to reach a template-
+    /// wide font size default through an empty Group), and its template-default tier is already
+    /// baked into the root <see cref="BuildContext.Style"/>, set once at the top of the outer
+    /// <c>Resolve</c> method, so it's always non-null by the time anything reads it.</para>
+    /// </summary>
+    private ComputedStyle ResolveStyle(
+        string? style, string? showIf, double? minOpacity, double? inactiveBlurRadius, double? fontSize,
+        BuildContext ctx, string errorContext, bool cascadeAmbient = true)
+    {
+        StyleNode? namedStyle = null;
+        if (style != null && !ctx.NamedStyles.TryGetValue(style, out namedStyle))
+            _logger.Error($"{errorContext} references unknown style '{style}'");
+
+        return new ComputedStyle(
+            ShowIf: showIf ?? namedStyle?.ShowIf ?? (cascadeAmbient ? ctx.Style.ShowIf : null),
+            MinOpacity: minOpacity ?? namedStyle?.MinOpacity ?? (cascadeAmbient ? ctx.Style.MinOpacity : null),
+            InactiveBlurRadius: inactiveBlurRadius ?? namedStyle?.InactiveBlurRadius ?? (cascadeAmbient ? ctx.Style.InactiveBlurRadius : null),
+            FontSize: fontSize ?? namedStyle?.FontSize ?? ctx.Style.FontSize);
     }
 
     private ShowIfCondition ParseShowIf(string? value)
@@ -415,17 +495,18 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
-    /// Context for the template tree walk. Carries the per-build inputs that are constant
-    /// across all Build* calls (ImageSource, DefaultFontSize, NamedStyles, CollapseInfo
-    /// accumulator) alongside the inherited visibility values that flow from an Input down to
-    /// its own overlays. The CollapseInfo dictionary is a single shared reference
-    /// across all <c>with</c> clones — mutations are visible to every BuildInputGroup call.
-    /// Use <c>with</c> to produce an inputCtx with the inherited values set; nested Inputs
-    /// receive that same inputCtx too — but since a nested Input always overrides Inherited* from
-    /// its own ShowIf/Style/FontSize (never falling through to whatever was ambient), it's a
-    /// no-op for that case, and only ever actually matters for a bare Label found while
-    /// descending through Group/OneOf/Condition on the way to one — letting a loose Label
-    /// inherit exactly what a true direct child of the same Input would.
+    /// Context for the template tree walk. Carries the per-build inputs that are constant across
+    /// all Build* calls (ImageSource, NamedStyles, CollapseInfo accumulator) alongside the
+    /// <see cref="ComputedStyle"/> currently ambient — the style cascade's whole state at this
+    /// point in the tree. The CollapseInfo dictionary is a single shared reference across all
+    /// <c>with</c> clones — mutations are visible to every BuildInputGroup call.
+    /// Use <c>with</c> to produce an inputCtx/groupCtx with <see cref="Style"/> set to that
+    /// element's own <see cref="ComputedStyle"/>; nested Inputs receive that same context too —
+    /// but since a nested Input always overrides <see cref="Style"/> from its own
+    /// ShowIf/Style/FontSize (never falling through to whatever was ambient) via its own call to
+    /// <c>Resolve</c>, this only ever actually matters for a bare Label found while descending
+    /// through Group/OneOf/Condition on the way to one — letting a loose Label inherit exactly
+    /// what a true direct child of the same Input (or Group) would.
     /// <c>CurrentInputName</c> similarly tracks whichever Input is ambient at this point in the
     /// tree, reset whenever a new one is entered, for a bare Label's default coordinate origin —
     /// <see cref="Rendering.LayoutFilter"/> separately rediscovers the same Input during its own
@@ -438,16 +519,31 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
-        double DefaultFontSize,
         Dictionary<string, StyleNode> NamedStyles,
         Dictionary<InputDefinition, CollapseInfo> CollapseInfo,
-        string? InheritedShowIf = null,
-        double? InheritedMinOpacity = null,
-        double? InheritedInactiveBlurRadius = null,
-        double? InheritedFontSize = null,
+        ComputedStyle Style,
         double OriginX = 0,
         double OriginY = 0,
         string? CurrentInputName = null);
+
+    /// <summary>
+    /// The style cascade's state at one point in the tree — the fully-merged result of every
+    /// <see cref="IStyledNode"/> (or leaf) ancestor's own attributes, each explicit value winning
+    /// over whatever was already ambient. See <see cref="ResolveStyle"/> for how one more level
+    /// gets folded in. <see cref="ShowIf"/> stays a raw, unparsed string (like
+    /// <see cref="StyleNode.ShowIf"/>) so an absent value can keep falling through the chain;
+    /// <see cref="MinOpacity"/>/<see cref="InactiveBlurRadius"/> stay nullable all the way through
+    /// for the same reason <see cref="InputImageDefinition"/>/<see cref="OverlayDefinition"/>
+    /// themselves do — null means "nothing in the tree set this," resolved against the template
+    /// default later, at evaluation time. <see cref="FontSize"/> is the one field guaranteed
+    /// non-null: its template-default tier is baked into the root context's <c>Style</c> up
+    /// front, the same guarantee <c>BuildContext.DefaultFontSize</c> used to provide directly.
+    /// </summary>
+    private record ComputedStyle(
+        string? ShowIf,
+        double? MinOpacity,
+        double? InactiveBlurRadius,
+        double FontSize);
 
     /// <summary>
     /// Mutable iteration state for one group's slot loop. SlotIndex advances as children consume
