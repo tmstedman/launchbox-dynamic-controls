@@ -811,8 +811,7 @@ public class LayoutFilterTests
     {
         // given a template whose element list contains an ILayoutElement subtype that
         // CollectVisibleElement has no case for
-        Template template = TemplateOf(elements: [new UnknownElement()],
-            inputDescendants: new Dictionary<InputDefinition, IReadOnlyList<string>>());
+        Template template = TemplateOf(elements: [new UnknownElement()]);
 
         // when filtering
         // then the defensive default in CollectVisibleElement throws

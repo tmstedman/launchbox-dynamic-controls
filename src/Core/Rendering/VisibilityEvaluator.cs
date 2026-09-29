@@ -19,9 +19,9 @@ public interface IVisibilityEvaluator
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
     /// <summary>
-    /// Returns the visibility flags for an input, fanning out across the names in
-    /// <see cref="VisibilityContext.InputDescendants"/> (a whole control's direction names, per
-    /// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>). A whole is considered
+    /// Returns the visibility flags for an input, fanning out across its whole-control part
+    /// names (per <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>, looked up by
+    /// the input's own name — empty for an input that isn't a whole). A whole is considered
     /// active when any of its direction names has a label or mapping — that's what makes a stick
     /// or Dpad light up as a unit even though the whole itself is never directly mapped.
     /// </summary>
@@ -94,7 +94,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)
     {
-        IEnumerable<string> names = ctx.InputDescendants[input].Prepend(input.Name);
+        IEnumerable<string> names = WholeInputs.PartsOf.GetValueOrDefault(input.Name, []).Prepend(input.Name);
         bool hasLabel = names.Any(n => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(n)));
         bool isMapped = names.Any(n => IsMapped(ctx.Mapping, n));
         return new VisibilityFlags(hasLabel, isMapped);
@@ -183,12 +183,12 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 
 /// <summary>
 /// Pipeline input assembled once per render pass and threaded through LayoutFilter,
-/// InputImageRenderer, and VisibilityEvaluator. Holds the mapping, label text, game-specific
-/// flag, and the whole-control fan-out names for the current template.
+/// InputImageRenderer, and VisibilityEvaluator. Holds the mapping, label text, and game-specific
+/// flag for the current template; whole-control fan-out is read directly from
+/// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>, needing no per-template state.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record VisibilityContext(
     ResolvedMapping Mapping,
     IReadOnlyDictionary<string, string> LabelText,
-    bool IsGameSpecific,
-    IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>> InputDescendants);
+    bool IsGameSpecific);
