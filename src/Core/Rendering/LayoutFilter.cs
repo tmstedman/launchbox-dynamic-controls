@@ -3,14 +3,14 @@ using DynamicControls.Templates;
 namespace DynamicControls.Rendering;
 
 /// <summary>
-/// Applies group visibility rules and collapse-stack adjustments to a template, producing the
+/// Applies OneOf/Condition selection and collapse-stack adjustments to a template, producing the
 /// ordered list of inputs that should appear in the render output (paired with their y-offsets
-/// and aggregate visibility flags) and the group-level overlays that survived filtering.
+/// and aggregate visibility flags) and the container-level overlays that survived filtering.
 /// </summary>
 public interface ILayoutFilter
 {
     /// <summary>
-    /// Walks <paramref name="template"/>'s layout elements, applies group visibility and
+    /// Walks <paramref name="template"/>'s layout elements, applies OneOf/Condition selection and
     /// collapse-stack rules under <paramref name="ctx"/>, and returns the inputs/overlays for
     /// this render pass.
     /// </summary>
@@ -31,11 +31,11 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     {
         var inputsToRender = new List<InputDefinition>();
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
-        var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, InputGroup? Group)>>(ReferenceEqualityComparer.Instance);
+        var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>>(ReferenceEqualityComparer.Instance);
 
-        // A top-level Group naming an Input via ForInputName has no enclosing Input of its own to
-        // learn "current input" from by actually entering one -- this resolves that name against
-        // the template's own top-level Inputs, once per render pass.
+        // A top-level Container naming an Input via ForInputName has no enclosing Input of its
+        // own to learn "current input" from by actually entering one -- this resolves that name
+        // against the template's own top-level Inputs, once per render pass.
         var topLevelInputsByName = template.Layout.Elements
             .OfType<InputDefinition>()
             .GroupBy(i => i.Name)
@@ -43,7 +43,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
 
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, currentInput: null, currentGroup: null, topLevelInputsByName, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, currentInput: null, currentContainer: null, topLevelInputsByName, ctx);
         }
 
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
@@ -70,9 +70,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     }
 
     /// <summary>
-    /// Computes per-input Y offsets for members of collapsing groups. Members whose images are
-    /// all zero-opacity vacate their slot; subsequent members shift up by the group's collapse
-    /// gap. Each collapse group is processed once — the shared <see cref="CollapseInfo.Group"/>
+    /// Computes per-input Y offsets for members of collapsing containers. Members whose images
+    /// are all zero-opacity vacate their slot; subsequent members shift up by the collapse gap.
+    /// Each collapse group is processed once — the shared <see cref="CollapseInfo.Group"/>
     /// reference serves as the dedup key. OneOf slots vacate when no alternative rendered or all
     /// rendered inputs are zero-opacity.
     ///
@@ -122,7 +122,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                         if (IsHidden(oneOf, template, ctx, renderSet))
                             cumulativeOffset -= gap;
                         break;
-                    case InputGroup:
+                    case Container:
                     case ConditionElement:
                         // Stack-as-slot: collapse adjustments not currently computed for these.
                         break;
@@ -136,43 +136,43 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     }
 
     /// <summary>
-    /// Resolves a loose Label's final Y. Unchanged if it has no enclosing Group (nothing to
-    /// center against). Otherwise, the visual center of however many of that group's slots
+    /// Resolves a loose Label's final Y. Unchanged if it has no enclosing Container (nothing to
+    /// center against). Otherwise, the visual center of however many of that container's slots
     /// actually survive for this game — reusing the exact same slot-flattening
     /// (<see cref="CollapseGroupBuilder.Flatten"/>) and hidden-check this class already uses for
-    /// member Inputs' own Y offsets, applied instead to the group's own shape (declared Y, gap,
-    /// vAlign — see <see cref="InputGroup"/>'s doc comment for why these live directly on the
-    /// group rather than being threaded through the resolver). A non-collapsing group always
-    /// uses its full nominal slot count: nothing ever vacates without <c>collapse="true"</c>, so
-    /// nothing about the center varies by game in that case, and the formula below reduces to a
-    /// fixed value.
+    /// member Inputs' own Y offsets, applied instead to the container's own shape (declared Y,
+    /// gap, vAlign — see <see cref="Container"/>'s doc comment for why these live directly on the
+    /// container rather than being threaded through the resolver). A non-collapsing container
+    /// always uses its full nominal slot count: nothing ever vacates without
+    /// <c>collapse="true"</c>, so nothing about the center varies by game in that case, and the
+    /// formula below reduces to a fixed value.
     ///
     /// <para>The label's own <c>y</c> attribute (e.g. a hand-tuned <c>y="+15"</c> nudge) is
     /// preserved as an additive offset on top of the computed center, never discarded: Phase 1
-    /// already baked it into <paramref name="entry"/>'s <c>Label.Y</c> relative to the group's
-    /// *nominal* (uncollapsed) frame origin, so subtracting that same nominal origin back out
-    /// recovers exactly the delta the author wrote, whatever it was resolved against.</para>
+    /// already baked it into <paramref name="entry"/>'s <c>Label.Y</c> relative to the
+    /// container's *nominal* (uncollapsed) frame origin, so subtracting that same nominal origin
+    /// back out recovers exactly the delta the author wrote, whatever it was resolved against.</para>
     /// </summary>
     private LabelDefinition ResolveLooseLabel(
-        (LabelDefinition Label, InputGroup? Group) entry,
+        (LabelDefinition Label, Container? Container) entry,
         Template template,
         VisibilityContext ctx,
         HashSet<InputDefinition> renderSet)
     {
-        if (entry.Group is null) return entry.Label;
+        if (entry.Container is null) return entry.Label;
 
-        List<ILayoutElement> slots = CollapseGroupBuilder.Flatten(entry.Group.Children);
-        int visibleCount = entry.Group.Collapse
+        List<ILayoutElement> slots = CollapseGroupBuilder.Flatten(entry.Container.Children);
+        int visibleCount = entry.Container.Collapse
             ? slots.Count(slot => !IsHidden(slot, template, ctx, renderSet))
             : slots.Count;
 
-        double nominalFrameOriginY = entry.Group.DeclaredOriginY
-            - StackVAlign.Shift(entry.Group.VAlign, slots.Count, entry.Group.Gap);
+        double nominalFrameOriginY = entry.Container.DeclaredOriginY
+            - StackVAlign.Shift(entry.Container.VAlign, slots.Count, entry.Container.Gap);
         double ownOffset = entry.Label.Y - nominalFrameOriginY;
 
-        double trueCenterY = entry.Group.DeclaredOriginY
-            - StackVAlign.Shift(entry.Group.VAlign, visibleCount, entry.Group.Gap)
-            + ((visibleCount - 1) * entry.Group.Gap / 2);
+        double trueCenterY = entry.Container.DeclaredOriginY
+            - StackVAlign.Shift(entry.Container.VAlign, visibleCount, entry.Container.Gap)
+            + ((visibleCount - 1) * entry.Container.Gap / 2);
 
         return entry.Label with { Y = trueCenterY + ownOffset };
     }
@@ -190,7 +190,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 List<InputDefinition> selected = SelectedLeaves(oneOf, renderSet);
                 return selected.Count == 0
                     || selected.All(leaf => _evaluator.AllImagesZeroOpacity(leaf, template.Layout.DefaultMinOpacity, ctx));
-            case InputGroup:
+            case Container:
             case ConditionElement:
                 return false; // Stack-as-slot: never considered hidden, so it never vacates.
             default:
@@ -199,31 +199,33 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     }
 
     /// <summary>
-    /// Recursively collects inputs and group overlays for a single template node.
-    /// InputDefinitions always render and recurse into their Children. InputGroups are included
-    /// only when any child has a visible render; excluded groups drop all members. OneOfs render
-    /// the first alternative with a visible render and drop the rest.
+    /// Recursively collects inputs and container overlays for a single template node.
+    /// InputDefinitions always render and recurse into their Children. Containers are always
+    /// included once reached — unlike the &lt;Group&gt; they replaced, they never decide their
+    /// own visibility; whatever wraps one (typically an explicit Condition) already decided that
+    /// before reaching it here. OneOfs render the first alternative with a visible render and
+    /// drop the rest.
     /// <paramref name="currentInput"/> tracks whichever InputDefinition was most recently entered
     /// (reset each time a nested one is), so a bare <see cref="LabelElement"/> reached through
-    /// Group/OneOf/Condition attaches to the right owner — it can only be reached at all by
-    /// having already recursed through every wrapping Condition/Group/OneOf above it, which is
-    /// what makes nested Conditions AND together for free, with no separate "accumulate and
-    /// re-check" step needed here. A top-level <see cref="InputGroup.ForInputName"/> overrides it
-    /// outright via <paramref name="topLevelInputsByName"/>, for a Group reached with no
+    /// Container/OneOf/Condition attaches to the right owner — it can only be reached at all by
+    /// having already recursed through every wrapping Condition/Container/OneOf above it, which
+    /// is what makes nested Conditions AND together for free, with no separate "accumulate and
+    /// re-check" step needed here. A top-level <see cref="Container.ForInputName"/> overrides it
+    /// outright via <paramref name="topLevelInputsByName"/>, for a Container reached with no
     /// enclosing Input at all to have supplied one the ordinary way.
-    /// <paramref name="currentGroup"/> tracks whichever InputGroup was most recently entered, the
-    /// same way — reset on entering a nested InputDefinition or overwritten on entering a nested
-    /// InputGroup (never transparent), unaffected by OneOf/Condition — so a loose Label knows
-    /// which group's shape to center against (see <see cref="ResolveLooseLabel"/>); a label with
-    /// no enclosing group at all just keeps its build-time value unchanged.
+    /// <paramref name="currentContainer"/> tracks whichever Container was most recently entered,
+    /// the same way — reset on entering a nested InputDefinition or overwritten on entering a
+    /// nested Container (never transparent), unaffected by OneOf/Condition — so a loose Label
+    /// knows which container's shape to center against (see <see cref="ResolveLooseLabel"/>); a
+    /// label with no enclosing container at all just keeps its build-time value unchanged.
     /// </summary>
     private void CollectVisibleElement(
         ILayoutElement element,
         List<InputDefinition> inputsToRender,
         List<LayoutGroupOverlay> includedGroupOverlays,
-        Dictionary<InputDefinition, List<(LabelDefinition Label, InputGroup? Group)>> looseLabels,
+        Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>> looseLabels,
         InputDefinition? currentInput,
-        InputGroup? currentGroup,
+        Container? currentContainer,
         Dictionary<string, InputDefinition> topLevelInputsByName,
         VisibilityContext ctx)
     {
@@ -233,38 +235,35 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, input, currentGroup: null, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, input, currentContainer: null, topLevelInputsByName, ctx);
                 }
                 break;
-            case InputGroup group when IsGroupVisible(group, ctx):
+            case Container container:
                 // ForInputName overrides currentInput unconditionally when set -- it's only ever
-                // set when this Group has no enclosing Input of its own to have supplied one.
-                InputDefinition? groupCurrentInput = group.ForInputName != null
-                    && topLevelInputsByName.TryGetValue(group.ForInputName, out InputDefinition? forInput)
+                // set when this Container has no enclosing Input of its own to have supplied one.
+                InputDefinition? containerCurrentInput = container.ForInputName != null
+                    && topLevelInputsByName.TryGetValue(container.ForInputName, out InputDefinition? forInput)
                         ? forInput
                         : currentInput;
-                foreach (ILayoutElement child in group.Children)
+                foreach (ILayoutElement child in container.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, groupCurrentInput, currentGroup: group, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, containerCurrentInput, currentContainer: container, topLevelInputsByName, ctx);
                 }
-                if (group.Overlays.Count > 0)
+                if (container.Overlays.Count > 0)
                 {
-                    VisibilityFlags groupFlags = _evaluator.AggregateFlags(group, ctx);
-                    foreach (OverlayDefinition overlay in group.Overlays)
+                    VisibilityFlags containerFlags = _evaluator.AggregateFlags(container, ctx);
+                    foreach (OverlayDefinition overlay in container.Overlays)
                     {
-                        includedGroupOverlays.Add(new LayoutGroupOverlay(overlay, groupFlags));
+                        includedGroupOverlays.Add(new LayoutGroupOverlay(overlay, containerFlags));
                     }
                 }
-                break;
-            case InputGroup:
-                // Invisible group: drop the group and all its members.
                 break;
             case OneOf oneOf:
                 foreach (ILayoutElement alt in oneOf.Alternatives)
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup, topLevelInputsByName, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentContainer, topLevelInputsByName, ctx);
                         break;
                     }
                 }
@@ -272,15 +271,16 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentContainer, topLevelInputsByName, ctx);
                 }
                 break;
             case ConditionElement:
-                // Condition evaluated false: drop it and everything inside, same as an excluded Group.
+                // Condition evaluated false: drop it and everything inside -- the only way
+                // anything (including a Container) is ever excluded now.
                 break;
             case LabelElement le when currentInput != null:
                 looseLabels.TryAdd(currentInput, []);
-                looseLabels[currentInput].Add((le.Label, currentGroup));
+                looseLabels[currentInput].Add((le.Label, currentContainer));
                 break;
             case LabelElement:
                 // No ambient Input reached this point at all -- LayoutResolver already logged
@@ -291,13 +291,10 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         }
     }
 
-    private bool IsGroupVisible(InputGroup group, VisibilityContext ctx) =>
-        group.Children.Any(c => _evaluator.AnyVisible(c, ctx));
-
     private static IEnumerable<InputDefinition> CollectInputLeaves(ILayoutElement node) => node switch
     {
         InputDefinition input => [input],
-        InputGroup group => group.Children.SelectMany(CollectInputLeaves),
+        Container container => container.Children.SelectMany(CollectInputLeaves),
         OneOf oneOf => oneOf.Alternatives.SelectMany(CollectInputLeaves),
         ConditionElement condition => condition.Children.SelectMany(CollectInputLeaves),
         LabelElement => [],

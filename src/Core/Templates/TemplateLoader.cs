@@ -60,8 +60,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
 
         int topLevelInputCount = result.Elements.OfType<InputNode>().Count();
-        int groupCount = result.Elements.OfType<GroupNode>().Count();
-        _logger.Debug($"Template layout: {topLevelInputCount} top-level inputs, {groupCount} top-level groups");
+        int containerCount = result.Elements.OfType<ContainerNode>().Count();
+        _logger.Debug($"Template layout: {topLevelInputCount} top-level inputs, {containerCount} top-level containers");
         return result;
     }
 
@@ -101,7 +101,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         return style;
     }
 
-    /// <summary>Routes a &lt;Body&gt;'s children (Input / Group / OneOf) into the layout's
+    /// <summary>Routes a &lt;Body&gt;'s children (Input / Container / OneOf) into the layout's
     /// Elements list.</summary>
     private void ParseBodyInto(XmlElement bodyNode, List<ILayoutNode> output)
     {
@@ -112,7 +112,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
     }
 
-    /// <summary>Parses one layout-child element (Input / Group / OneOf / Condition / Label) and
+    /// <summary>Parses one layout-child element (Input / Container / OneOf / Condition / Label) and
     /// appends it to <paramref name="output"/>. Returns true if the element name matched one of
     /// those (caller is responsible for handling unknown names). An Input or Condition that
     /// fails its own validation is treated as matched but not appended.
@@ -129,8 +129,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 InputNode? input = ParseInputNode(node);
                 if (input != null) output.Add(input);
                 return true;
-            case "Group":
-                output.Add(ParseGroupNode(node));
+            case "Container":
+                output.Add(ParseContainerNode(node));
                 return true;
             case "OneOf":
                 output.Add(ParseOneOfNode(node));
@@ -149,8 +149,9 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
     /// <summary>
     /// Parses an &lt;Input&gt; element — its own image attributes, its Label/Overlay children,
-    /// and its nested Input/Group children. Returns null if the element is missing its required
-    /// `name` attribute (whether top-level or nested — nested Inputs need explicit names too).
+    /// and any nested Container/OneOf/Condition children. Returns null if the element is missing
+    /// its required `name` attribute (whether top-level or nested — nested Inputs need explicit
+    /// names too).
     /// </summary>
     private InputNode? ParseInputNode(XmlElement inputNode)
     {
@@ -180,7 +181,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         foreach (XmlElement child in inputNode.ChildNodes.OfType<XmlElement>())
         {
             // Checked before TryParseLayoutChild: Label is also a valid loose child of
-            // Group/OneOf/Condition (see TryParseLayoutChild), but a Label that's a *direct*
+            // Container/OneOf/Condition (see TryParseLayoutChild), but a Label that's a *direct*
             // child of its own Input always belongs on that Input's own Labels list, never the
             // generic Children list.
             switch (child.Name)
@@ -206,56 +207,57 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     }
 
     /// <summary>
-    /// Parses a &lt;Group&gt; positioned layout container. Children are stacked vertically with
-    /// positions computed from the group's own origin (x, y) plus slot index times gap.
+    /// Parses a &lt;Container&gt; positioned layout container. Children are stacked vertically
+    /// with positions computed from the container's own origin (x, y) plus slot index times gap.
     /// <c>vAlign</c> (top/bottom/center, default top) is validated against the origin's slot
     /// count by the resolver, not here — an invalid value just flows through as an arbitrary
-    /// string. The group is included in the render output only when any descendant has a
-    /// visible render — its labels and its own Overlay children go with it. Its style attributes
-    /// (style/showIf/minOpacity/inactiveBlurRadius/fontSize) are the same shape as an Input's own
-    /// — see <see cref="IStyledNode"/> — and cascade to its member Inputs and Overlay children
-    /// the same way an Input's own attributes cascade to its Labels and Overlays. <c>for</c> is
-    /// unrelated to any of that — see <see cref="GroupNode.For"/>.
+    /// string. Unlike the old &lt;Group&gt; it replaced, a Container never decides its own
+    /// inclusion — it's always rendered once reached; wrap it in an explicit &lt;Condition&gt;
+    /// when gating is wanted. Its style attributes (style/showIf/minOpacity/inactiveBlurRadius/
+    /// fontSize) are the same shape as an Input's own — see <see cref="IStyledNode"/> — and
+    /// cascade to its member Inputs and Overlay children the same way an Input's own attributes
+    /// cascade to its Labels and Overlays. <c>for</c> is unrelated to any of that — see
+    /// <see cref="ContainerNode.For"/>.
     /// </summary>
-    private GroupNode ParseGroupNode(XmlElement groupNode)
+    private ContainerNode ParseContainerNode(XmlElement containerNode)
     {
-        var group = new GroupNode
+        var container = new ContainerNode
         {
-            Style = groupNode.Attributes["style"]?.Value,
-            ShowIf = groupNode.Attributes["showIf"]?.Value,
-            For = groupNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
+            Style = containerNode.Attributes["style"]?.Value,
+            ShowIf = containerNode.Attributes["showIf"]?.Value,
+            For = containerNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
         };
 
-        if (ReadCoordinate(groupNode, "x", "Group") is Coordinate gx) group.X = gx;
-        if (ReadCoordinate(groupNode, "y", "Group") is Coordinate gy) group.Y = gy;
-        if (ReadDouble(groupNode, "gap") is double gap) group.Gap = gap;
-        group.VAlign = groupNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
-        if (string.Equals(groupNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) group.Collapse = true;
-        if (ReadDouble(groupNode, "minOpacity") is double minOpacity) group.MinOpacity = minOpacity;
-        if (ReadDouble(groupNode, "inactiveBlurRadius") is double blur) group.InactiveBlurRadius = blur;
-        if (ReadDouble(groupNode, "fontSize") is double fontSize) group.FontSize = fontSize;
+        if (ReadCoordinate(containerNode, "x", "Container") is Coordinate cx) container.X = cx;
+        if (ReadCoordinate(containerNode, "y", "Container") is Coordinate cy) container.Y = cy;
+        if (ReadDouble(containerNode, "gap") is double gap) container.Gap = gap;
+        container.VAlign = containerNode.Attributes["vAlign"]?.Value.ToLowerInvariant() ?? "top";
+        if (string.Equals(containerNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) container.Collapse = true;
+        if (ReadDouble(containerNode, "minOpacity") is double minOpacity) container.MinOpacity = minOpacity;
+        if (ReadDouble(containerNode, "inactiveBlurRadius") is double blur) container.InactiveBlurRadius = blur;
+        if (ReadDouble(containerNode, "fontSize") is double fontSize) container.FontSize = fontSize;
 
-        foreach (XmlElement child in groupNode.ChildNodes.OfType<XmlElement>())
+        foreach (XmlElement child in containerNode.ChildNodes.OfType<XmlElement>())
         {
-            if (TryParseLayoutChild(child, group.Children)) continue;
+            if (TryParseLayoutChild(child, container.Children)) continue;
 
             if (child.Name == "Overlay")
             {
                 OverlayNode? overlay = ParseOverlay(child);
-                if (overlay != null) group.Overlays.Add(overlay);
+                if (overlay != null) container.Overlays.Add(overlay);
             }
             else
             {
-                _logger.Error($"Invalid element <{child.Name}> in <Group>");
+                _logger.Error($"Invalid element <{child.Name}> in <Container>");
             }
         }
 
-        _logger.Debug($"Group: x={group.X}, y={group.Y}, gap={group.Gap}, vAlign={group.VAlign}, for={group.For}, children={group.Children.Count}, overlays={group.Overlays.Count}");
-        return group;
+        _logger.Debug($"Container: x={container.X}, y={container.Y}, gap={container.Gap}, vAlign={container.VAlign}, for={container.For}, children={container.Children.Count}, overlays={container.Overlays.Count}");
+        return container;
     }
 
     /// <summary>
-    /// Parses a &lt;OneOf&gt; alternatives container. Each child (Input, Group, or nested OneOf)
+    /// Parses a &lt;OneOf&gt; alternatives container. Each child (Input, Condition, or nested OneOf)
     /// is an alternative branch evaluated in document order; the first whose visibility passes
     /// is rendered.
     /// </summary>

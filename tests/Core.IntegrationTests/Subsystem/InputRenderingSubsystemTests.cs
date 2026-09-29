@@ -120,7 +120,7 @@ public class InputRenderingSubsystemTests
         var second = Input(
             name: "ButtonA",
             images: [new InputImageDefinition(X: 0, Y: 200, ImageFile: "ButtonA.png")]);
-        var stack = new InputGroup(Children: [first, second], Overlays: []);
+        var stack = new Container(Children: [first, second], Overlays: []);
 
         _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis, controller: ThreeButton);
@@ -154,7 +154,7 @@ public class InputRenderingSubsystemTests
         var third = Input(
             name: "ButtonB",
             images: [new InputImageDefinition(X: 0, Y: 300, ImageFile: "ButtonB.png")]);
-        var stack = new InputGroup(Children: [first, second, third], Overlays: []);
+        var stack = new Container(Children: [first, second, third], Overlays: []);
 
         _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis, controller: ThreeButton);
@@ -177,7 +177,7 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
-    public void Render_GroupOverlayWithShowIfMapped_VisibilityAggregatedAcrossMembers()
+    public void Render_ContainerOverlayWithShowIfMapped_VisibilityAggregatedAcrossMembers()
     {
         // given a Group with two inputs and a single group-level overlay (showIf=Mapped). Only
         // one of the two members is mapped — but because the overlay's visibility is OR-reduced
@@ -189,7 +189,7 @@ public class InputRenderingSubsystemTests
             name: "ButtonDpadDown",
             images: [new InputImageDefinition(0, 0, "ButtonDpadDown.png")]);
         var overlay = new OverlayDefinition(X: 5, Y: 5, Source: "dpad-lines.png", ShowIf: Mapped, MinOpacity: 0.2);
-        var group = new InputGroup(
+        var group = new Container(
             Children: [inputUp, inputDown],
             Overlays: [overlay]);
 
@@ -251,10 +251,12 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
-    public void Render_GroupWithNoVisibleMembers_DropsGroupAndOverlay()
+    public void Render_ContainerWithNoVisibleMembers_StillRendersMembersFadedAndOverlayAtFullOpacity()
     {
-        // given a Group whose members both have showIf="mapping" images,
-        // a group-level overlay, and an empty mapping — no member satisfies IsMapped
+        // given a Container whose members both have showIf="mapping" images, a container-level
+        // overlay with no showIf of its own (defaults to Always), and an empty mapping — no
+        // member satisfies IsMapped. Unlike the old <Group> this replaced, nothing here gates the
+        // Container's own inclusion any more -- only an explicit wrapping Condition would.
         var inputUp = Input(
             name: "ButtonDpadUp",
             images: [new InputImageDefinition(0, 0, "ButtonDpadUp.png", ShowIf: Mapped)]);
@@ -262,29 +264,33 @@ public class InputRenderingSubsystemTests
             name: "ButtonDpadDown",
             images: [new InputImageDefinition(0, 0, "ButtonDpadDown.png", ShowIf: Mapped)]);
         var overlay = new OverlayDefinition(X: 0, Y: 0, Source: "dpad-lines.png");
-        var group = new InputGroup(Children: [inputUp, inputDown], Overlays: [overlay]);
+        var container = new Container(Children: [inputUp, inputDown], Overlays: [overlay]);
 
         _images.With(src: "ButtonDpadUp.png", generic: "ButtonDpadUp.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "ButtonDpadDown.png", generic: "ButtonDpadDown.png", platform: Genesis, controller: ThreeButton);
 
-        Template template = TemplateOf([group]);
+        Template template = TemplateOf([container]);
 
         // when the service renders
         RenderResult result = _service.Render(template, MappingOf(), LabelsOf());
 
-        // then the group is dropped entirely — no member images and no overlay
-        result.Images.ShouldBeEmpty();
+        // then both members still render, faded to the template's default MinOpacity (0.3) since
+        // their own showIf=mapping isn't satisfied, and the overlay renders at full opacity —
+        // its own showIf=Always is never affected by the members' mapping state
+        result.Images.Single(i => i.InputName == "ButtonDpadUp").Opacity.ShouldBe(0.3);
+        result.Images.Single(i => i.InputName == "ButtonDpadDown").Opacity.ShouldBe(0.3);
+        result.Images.Single(i => i.Source == "dpad-lines.png").Opacity.ShouldBe(1.0);
     }
 
     [Fact]
-    public void Render_GroupOverlayWhoseConditionNotMet_RendersAtMinOpacity()
+    public void Render_ContainerOverlayWhoseConditionNotMet_RendersAtMinOpacity()
     {
         // given a Group with a labelled member (showIf="label") making the group visible,
         // but no mapped members, and a group overlay showIf="mapping" — the group is included
         // because HasLabel is true, but the overlay's IsMapped check fails
         var input = Input("ButtonA", images: [new InputImageDefinition(0, 0, "ButtonA.png", ShowIf: Label)]);
         var overlay = new OverlayDefinition(X: 5, Y: 5, Source: "highlight.png", ShowIf: Mapped, MinOpacity: 0.15);
-        var group = new InputGroup(Children: [input], Overlays: [overlay]);
+        var group = new Container(Children: [input], Overlays: [overlay]);
 
         _images.With(src: "ButtonA.png", generic: "ButtonA.png", platform: Genesis, controller: ThreeButton);
 
@@ -316,7 +322,7 @@ public class InputRenderingSubsystemTests
             images: [new InputImageDefinition(0, 0, "ButtonA.png")],
             overlays: [perInputOverlay]);
         var groupOverlay = new OverlayDefinition(X: 0, Y: 0, Source: "group-highlight.png");
-        var group = new InputGroup(Children: [input], Overlays: [groupOverlay]);
+        var group = new Container(Children: [input], Overlays: [groupOverlay]);
 
         _images.With(src: "ButtonA.png", generic: "ButtonA.png", platform: Genesis, controller: ThreeButton);
 
@@ -357,7 +363,7 @@ public class InputRenderingSubsystemTests
         ]);
         var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
         [
-            new InputGroup(Children: [up, left, right, down], Overlays: [])
+            new Container(Children: [up, left, right, down], Overlays: [])
         ]);
         var oneOf = new OneOf([singleGlyphAlternative, mergedAlternative]);
 
@@ -400,7 +406,7 @@ public class InputRenderingSubsystemTests
 
         var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
         [
-            new InputGroup(Children: [up, left, right, down], Overlays: []),
+            new Container(Children: [up, left, right, down], Overlays: []),
             new LabelElement(new LabelDefinition(X: 0, Y: 0, Alignment: "right")),
         ]);
         var axisLeftStick = new InputDefinition(
@@ -432,7 +438,7 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
-    public void Render_CollapsingGroupWithTwoOfFourDirectionsLabelled_MergedLabelCentersOnSurvivorsAndKeepsItsOwnNudge()
+    public void Render_CollapsingContainerWithTwoOfFourDirectionsLabelled_MergedLabelCentersOnSurvivorsAndKeepsItsOwnNudge()
     {
         // Real production shape (Templates/Xbox Series X/Layout.xml's AxisRightStick multi-label
         // branch): a collapsing Group with no vAlign attribute (defaults to "top"), four direction
@@ -454,7 +460,7 @@ public class InputRenderingSubsystemTests
         // Y=787: what LayoutResolver bakes for a loose Label with y="+15" here -- the nominal
         // (uncollapsed, vAlign="top" never shifts) frame origin of 772, plus the +15 nudge.
         var looseLabel = new LabelElement(new LabelDefinition(X: 0, Y: 787, FontSize: 20));
-        var group = new InputGroup(
+        var group = new Container(
             Children: [up, left, right, down, looseLabel],
             Overlays: [],
             DeclaredOriginY: 772,
@@ -470,7 +476,7 @@ public class InputRenderingSubsystemTests
         _images.With(src: "AxisRightStickDown.png", generic: "AxisRightStickDown.png", platform: Genesis, controller: ThreeButton);
 
         // The icon vacate/shift mechanism (ComputeCollapseAdjustments) reads the separate
-        // CollapseInfo dictionary, not InputGroup's own fields -- both must be built here for a
+        // CollapseInfo dictionary, not Container's own fields -- both must be built here for a
         // realistic scenario, same as the other collapsing-group tests in this file.
         var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>();
         CollapseGroupBuilder.Build(group.Children, gap: 45, collapseInfo, vAlign: "top");

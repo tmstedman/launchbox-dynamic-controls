@@ -382,18 +382,18 @@ public class TemplateLoaderTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Input")));
     }
 
-    // --- Group / OneOf ---
+    // --- Container / OneOf ---
 
     [Fact]
-    public void LoadLayout_Group_ParsesPositionGapAndCollapse()
+    public void LoadLayout_Container_ParsesPositionGapAndCollapse()
     {
-        // given a Group with x, y, gap, and collapse attributes
+        // given a Container with x, y, gap, and collapse attributes
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group x='100' y='+50' gap='40' collapse='TRUE'>
+                <Container x='100' y='+50' gap='40' collapse='TRUE'>
                   <Input name='A' />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
@@ -402,7 +402,7 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then attributes parse: absolute x, relative y, gap, case-insensitive collapse=true
-        GroupNode group = result.Elements.OfType<GroupNode>().Single();
+        ContainerNode group = result.Elements.OfType<ContainerNode>().Single();
         group.X.ShouldBe(Coordinate.Absolute(100));
         group.Y.ShouldBe(Coordinate.Relative(50));
         group.Gap.ShouldBe(40);
@@ -411,16 +411,16 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_GroupWithOverlay_CollectsOverlay()
+    public void LoadLayout_ContainerWithOverlay_CollectsOverlay()
     {
-        // given a Group containing an Overlay child
+        // given a Container containing an Overlay child
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Container>
                   <Input name='A' />
                   <Overlay src='lines.png' x='+5' y='+10' />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
@@ -428,8 +428,8 @@ public class TemplateLoaderTests
         // when the loader runs
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        // then the overlay is collected onto the group
-        GroupNode group = result.Elements.OfType<GroupNode>().Single();
+        // then the overlay is collected onto the container
+        ContainerNode group = result.Elements.OfType<ContainerNode>().Single();
         OverlayNode overlay = group.Overlays.Single();
         overlay.Src.ShouldBe("lines.png");
         overlay.X.ShouldBe(Coordinate.Relative(5));
@@ -437,16 +437,16 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_GroupWithInvalidChild_IsLoggedAndSkipped()
+    public void LoadLayout_ContainerWithInvalidChild_IsLoggedAndSkipped()
     {
-        // given a Group containing an unrecognised element
+        // given a Container containing an unrecognised element
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Container>
                   <Input name='A' />
                   <Bogus />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
@@ -454,34 +454,34 @@ public class TemplateLoaderTests
         // when the loader runs
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        // then the group is returned without the unknown child, and an error is logged
-        result.Elements.OfType<GroupNode>().Single().Children.Count.ShouldBe(1);
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Group")));
+        // then the container is returned without the unknown child, and an error is logged
+        result.Elements.OfType<ContainerNode>().Single().Children.Count.ShouldBe(1);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Container")));
     }
 
     [Fact]
-    public void LoadLayout_GroupWithCollapseFalse_DoesNotCollapse()
+    public void LoadLayout_ContainerWithCollapseFalse_DoesNotCollapse()
     {
-        // given a Group with collapse explicitly set to a non-"true" value — exercises the
+        // given a Container with collapse explicitly set to a non-"true" value — exercises the
         // branch where the attribute is present but the string comparison evaluates to false
         StubLayoutXml("""
             <ControllerTemplate>
-              <Body><Group collapse='false'><Input name='A' /></Group></Body>
+              <Body><Container collapse='false'><Input name='A' /></Container></Body>
             </ControllerTemplate>
             """);
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        result.Elements.OfType<GroupNode>().Single().Collapse.ShouldBeFalse();
+        result.Elements.OfType<ContainerNode>().Single().Collapse.ShouldBeFalse();
     }
 
     [Fact]
-    public void LoadLayout_GroupWithoutCollapseAttribute_DefaultsToFalse()
+    public void LoadLayout_ContainerWithoutCollapseAttribute_DefaultsToFalse()
     {
-        // given a Group with no collapse attribute
+        // given a Container with no collapse attribute
         StubLayoutXml("""
             <ControllerTemplate>
-              <Body><Group><Input name='A' /></Group></Body>
+              <Body><Container><Input name='A' /></Container></Body>
             </ControllerTemplate>
             """);
 
@@ -489,16 +489,16 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then Collapse defaults to false
-        result.Elements.OfType<GroupNode>().Single().Collapse.ShouldBeFalse();
+        result.Elements.OfType<ContainerNode>().Single().Collapse.ShouldBeFalse();
     }
 
     [Fact]
-    public void LoadLayout_GroupWithoutVAlignAttribute_DefaultsToTop()
+    public void LoadLayout_ContainerWithoutVAlignAttribute_DefaultsToTop()
     {
-        // given a Group with no vAlign attribute
+        // given a Container with no vAlign attribute
         StubLayoutXml("""
             <ControllerTemplate>
-              <Body><Group><Input name='A' /></Group></Body>
+              <Body><Container><Input name='A' /></Container></Body>
             </ControllerTemplate>
             """);
 
@@ -506,16 +506,16 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then VAlign defaults to "top"
-        result.Elements.OfType<GroupNode>().Single().VAlign.ShouldBe("top");
+        result.Elements.OfType<ContainerNode>().Single().VAlign.ShouldBe("top");
     }
 
     [Fact]
-    public void LoadLayout_GroupWithVAlign_ParsesLowerCased()
+    public void LoadLayout_ContainerWithVAlign_ParsesLowerCased()
     {
-        // given a Group with a mixed-case vAlign attribute
+        // given a Container with a mixed-case vAlign attribute
         StubLayoutXml("""
             <ControllerTemplate>
-              <Body><Group vAlign='Bottom'><Input name='A' /></Group></Body>
+              <Body><Container vAlign='Bottom'><Input name='A' /></Container></Body>
             </ControllerTemplate>
             """);
 
@@ -523,66 +523,66 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         // then VAlign is lower-cased, matching the Align precedent on Label
-        result.Elements.OfType<GroupNode>().Single().VAlign.ShouldBe("bottom");
+        result.Elements.OfType<ContainerNode>().Single().VAlign.ShouldBe("bottom");
     }
 
     [Fact]
-    public void LoadLayout_GroupFor_ParsedOntoNode()
+    public void LoadLayout_ContainerFor_ParsedOntoNode()
     {
-        // given a top-level Group naming the Input it builds on behalf of
+        // given a top-level Container naming the Input it builds on behalf of
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group for='ButtonDpad'>
+                <Container for='ButtonDpad'>
                   <Input name='A' />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        result.Elements.OfType<GroupNode>().Single().For.ShouldBe("ButtonDpad");
+        result.Elements.OfType<ContainerNode>().Single().For.ShouldBe("ButtonDpad");
     }
 
     [Fact]
-    public void LoadLayout_GroupWithoutFor_LeavesItNull()
+    public void LoadLayout_ContainerWithoutFor_LeavesItNull()
     {
-        // given an ordinary Group with no for= attribute -- the common case, reached through an
+        // given an ordinary Container with no for= attribute -- the common case, reached through an
         // enclosing Input that supplies CurrentInputName the ordinary way
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Container>
                   <Input name='A' />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        result.Elements.OfType<GroupNode>().Single().For.ShouldBeNull();
+        result.Elements.OfType<ContainerNode>().Single().For.ShouldBeNull();
     }
 
     [Fact]
-    public void LoadLayout_GroupOverlayMissingSrc_IsSkippedAndLogged()
+    public void LoadLayout_ContainerOverlayMissingSrc_IsSkippedAndLogged()
     {
-        // given a Group whose Overlay is missing a src attribute
+        // given a Container whose Overlay is missing a src attribute
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Group>
+                <Container>
                   <Input name='A' />
                   <Overlay />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        result.Elements.OfType<GroupNode>().Single().Overlays.ShouldBeEmpty();
+        result.Elements.OfType<ContainerNode>().Single().Overlays.ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
     }
 
