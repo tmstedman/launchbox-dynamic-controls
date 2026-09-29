@@ -49,20 +49,20 @@
         </Condition>
         <!-- Same reasoning as the meta-buttons cluster above. -->
         <Condition any="ButtonY ButtonB ButtonA ButtonX" match="label">
-            <Container x="1249" y="318" gap="80">
-                <Input name="ButtonY" style="input-label" height="44" width="44">
+            <Container x="1249" y="318" gap="80" style="input-label">
+                <Input name="ButtonY" height="44" width="44">
                     <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
                     <Label x="+60" y="+22" />
                 </Input>
-                <Input name="ButtonB" style="input-label" height="44" width="44">
+                <Input name="ButtonB" height="44" width="44">
                     <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
                     <Label x="+60" y="+22" />
                 </Input>
-                <Input name="ButtonA" style="input-label" height="44" width="44">
+                <Input name="ButtonA" height="44" width="44">
                     <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
                     <Label x="+60" y="+22" />
                 </Input>
-                <Input name="ButtonX" style="input-label" height="44" width="44">
+                <Input name="ButtonX" height="44" width="44">
                     <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
                     <Label x="+60" y="+22" />
                 </Input>
