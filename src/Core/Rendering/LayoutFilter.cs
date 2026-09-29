@@ -33,9 +33,17 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
         var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, InputGroup? Group)>>(ReferenceEqualityComparer.Instance);
 
+        // A top-level OneOf naming a Input via ForInputName has no enclosing Input of its own to
+        // learn "current input" from by actually entering one -- this resolves that name against
+        // the template's own top-level Inputs, once per render pass.
+        var topLevelInputsByName = template.Layout.Elements
+            .OfType<InputDefinition>()
+            .GroupBy(i => i.Name)
+            .ToDictionary(g => g.Key, g => g.Last());
+
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, currentInput: null, currentGroup: null, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, currentInput: null, currentGroup: null, topLevelInputsByName, ctx);
         }
 
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
@@ -200,7 +208,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// Group/OneOf/Condition attaches to the right owner — it can only be reached at all by
     /// having already recursed through every wrapping Condition/Group/OneOf above it, which is
     /// what makes nested Conditions AND together for free, with no separate "accumulate and
-    /// re-check" step needed here.
+    /// re-check" step needed here. A top-level <see cref="OneOf.ForInputName"/> overrides it
+    /// outright via <paramref name="topLevelInputsByName"/>, for a OneOf reached with no
+    /// enclosing Input at all to have supplied one the ordinary way.
     /// <paramref name="currentGroup"/> tracks whichever InputGroup was most recently entered, the
     /// same way — reset on entering a nested InputDefinition or overwritten on entering a nested
     /// InputGroup (never transparent), unaffected by OneOf/Condition — so a loose Label knows
@@ -214,6 +224,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         Dictionary<InputDefinition, List<(LabelDefinition Label, InputGroup? Group)>> looseLabels,
         InputDefinition? currentInput,
         InputGroup? currentGroup,
+        Dictionary<string, InputDefinition> topLevelInputsByName,
         VisibilityContext ctx)
     {
         switch (element)
@@ -222,13 +233,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, input, currentGroup: null, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, input, currentGroup: null, topLevelInputsByName, ctx);
                 }
                 break;
             case InputGroup group when IsGroupVisible(group, ctx):
                 foreach (ILayoutElement child in group.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup: group, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup: group, topLevelInputsByName, ctx);
                 }
                 if (group.Overlays.Count > 0)
                 {
@@ -243,11 +254,17 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 // Invisible group: drop the group and all its members.
                 break;
             case OneOf oneOf:
+                // ForInputName overrides currentInput unconditionally when set -- it's only ever
+                // set when this OneOf has no enclosing Input of its own to have supplied one.
+                InputDefinition? oneOfCurrentInput = oneOf.ForInputName != null
+                    && topLevelInputsByName.TryGetValue(oneOf.ForInputName, out InputDefinition? forInput)
+                        ? forInput
+                        : currentInput;
                 foreach (ILayoutElement alt in oneOf.Alternatives)
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, oneOfCurrentInput, currentGroup, topLevelInputsByName, ctx);
                         break;
                     }
                 }
@@ -255,7 +272,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentGroup, topLevelInputsByName, ctx);
                 }
                 break;
             case ConditionElement:

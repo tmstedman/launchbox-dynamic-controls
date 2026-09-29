@@ -189,6 +189,7 @@ internal class OneOfBuilder
     public OneOfNode Node { get; } = new();
 
     #pragma warning disable format
+    public OneOfBuilder For(string name)                                     { Node.For = name;                                          return this; }
     public OneOfBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Alternatives.Add(TestLayout.BuildInput(name, build)); return this; }
     public OneOfBuilder Group(Action<GroupBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildGroup(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }

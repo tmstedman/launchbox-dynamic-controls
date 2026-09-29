@@ -8,12 +8,14 @@ namespace DynamicControls.Core.Tests.Rendering;
 
 /// <summary>
 /// Unit tests for <see cref="VisibilityEvaluator"/>. Pins three things:
-/// (1) flag fan-out — a parent input's HasLabel/IsMapped flags OR-reduce across its structural
-/// descendants, including the IsMapped fallback through NaturalInputToButton that lets remapped
-/// inputs still count as mapped; (2) AnyVisible dispatch — InputDefinitions resolve via their
-/// own renders or their descendants, InputGroups OR across children, OneOfs OR across
-/// alternatives; (3) AllImagesZeroOpacity — the gate the collapse-stack logic uses to decide
-/// whether a slot vacates, honouring per-image MinOpacity over the template default.
+/// (1) flag fan-out — a parent input's HasLabel/IsMapped flags OR-reduce across the descendant
+/// names supplied via VisibilityContext.InputDescendants (a whole control's direction names in
+/// production, an arbitrary override here), including the IsMapped fallback through
+/// NaturalInputToButton that lets remapped inputs still count as mapped; (2) AnyVisible dispatch
+/// — InputDefinitions resolve via their own renders or their structural Children, InputGroups OR
+/// across children, OneOfs OR across alternatives; (3) AllImagesZeroOpacity — the gate the
+/// collapse-stack logic uses to decide whether a slot vacates, honouring per-image MinOpacity
+/// over the template default.
 /// </summary>
 public class VisibilityEvaluatorTests
 {
@@ -87,7 +89,7 @@ public class VisibilityEvaluatorTests
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["AxisLeftStickUp"] = "Steer" },
             descendants: Descendants(
-                (stick, [stickUp]),
+                (stick, ["AxisLeftStickUp"]),
                 (stickUp, [])));
 
         // when flags are evaluated for the parent
@@ -182,7 +184,7 @@ public class VisibilityEvaluatorTests
             mapping: MappingOf(
                 inputToButton: new Dictionary<string, string> { ["AxisLeftStickUp"] = "Up" }),
             descendants: Descendants(
-                (parent, [child]),
+                (parent, ["AxisLeftStickUp"]),
                 (child, [])));
 
         // when AnyVisible runs on the parent

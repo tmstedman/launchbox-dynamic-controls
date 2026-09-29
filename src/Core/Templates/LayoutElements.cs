@@ -62,8 +62,13 @@ public record InputGroup(
 /// </summary>
 /// <param name="Alternatives">The alternative branches in document order. Each is an
 /// InputDefinition or InputGroup; the first whose visibility check passes is rendered.</param>
+/// <param name="ForInputName">Name of the Input this OneOf builds on behalf of, when it has no
+/// enclosing Input of its own (see <see cref="Templates.OneOfNode.For"/>) — lets
+/// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label inside
+/// should attach to, since the render-time walk otherwise only learns "current input" by
+/// actually entering one.</param>
 [ExcludeFromCodeCoverage]
-public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement;
+public record OneOf(IReadOnlyList<ILayoutElement> Alternatives, string? ForInputName = null) : ILayoutElement;
 
 /// <summary>
 /// Gates its <see cref="Children"/> on an explicit boolean check over named generic inputs'

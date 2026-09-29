@@ -17,22 +17,25 @@ public static class RenderingFixtures
         ResolvedMapping? mapping = null,
         IReadOnlyDictionary<string, string>? labelText = null,
         bool isGameSpecific = false,
-        IReadOnlyDictionary<InputDefinition, IReadOnlyList<InputDefinition>>? descendants = null)
+        IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>>? descendants = null)
     {
         return new(
             Mapping: mapping ?? EmptyMapping(),
             LabelText: labelText ?? new Dictionary<string, string>(),
             IsGameSpecific: isGameSpecific,
-            InputDescendants: descendants ?? new Dictionary<InputDefinition, IReadOnlyList<InputDefinition>>());
+            InputDescendants: descendants ?? new Dictionary<InputDefinition, IReadOnlyList<string>>());
     }
 
-    public static IReadOnlyDictionary<InputDefinition, IReadOnlyList<InputDefinition>> Descendants(
-        params (InputDefinition Parent, InputDefinition[] Children)[] entries)
+    /// <summary>Maps each given Input to the descendant *names* GetVisibilityFlags should fold in
+    /// for it (a whole control's direction names in production, per WholeInputs.PartsOf — an
+    /// arbitrary override here, since these are unit tests of VisibilityEvaluator itself).</summary>
+    public static IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>> Descendants(
+        params (InputDefinition Input, string[] Names)[] entries)
     {
-        var dict = new Dictionary<InputDefinition, IReadOnlyList<InputDefinition>>(
+        var dict = new Dictionary<InputDefinition, IReadOnlyList<string>>(
             ReferenceEqualityComparer.Instance);
-        foreach ((InputDefinition parent, InputDefinition[] children) in entries)
-            dict[parent] = children;
+        foreach ((InputDefinition input, string[] names) in entries)
+            dict[input] = names;
         return dict;
     }
 }

@@ -370,10 +370,13 @@ public class TemplateSubsystemTests
     // ---- InputDescendants index ----
 
     [Fact]
-    public void Load_InputDescendants_ContainsDirectAndTransitiveChildren()
+    public void Load_InputNamedForAWhole_DescendantsAreItsPartNamesRegardlessOfNesting()
     {
         // InputDescendants is computed once at load time and used by the rendering pipeline to
-        // fan out visibility (an ancestor is visible if any descendant has a label/mapping).
+        // fan out visibility (a whole is visible if any of its direction names has a
+        // label/mapping) — sourced from WholeInputs.PartsOf by name, not from the tree's own
+        // nesting. This template only nests two of the four directions under the stick; all four
+        // still show up, and an unrelated Input nested the same way gets nothing.
         var t = Load("""
             <ControllerTemplate>
               <Body>
@@ -381,22 +384,30 @@ public class TemplateSubsystemTests
                   <Input name="AxisLeftStickUp" width="34" height="34"></Input>
                   <Input name="AxisLeftStickDown" width="34" height="34"></Input>
                 </Input>
+                <Input name="ButtonA" x="0" y="0" width="64" height="64">
+                  <Input name="ButtonB" width="34" height="34"></Input>
+                </Input>
               </Body>
             </ControllerTemplate>
             """);
 
-        var stick = t.Layout.Elements.OfType<InputDefinition>().Single();
-        var descendants = t.Layout.InputDescendants[stick];
-        descendants.Select(d => d.Name).ShouldBe(["AxisLeftStickUp", "AxisLeftStickDown"], ignoreOrder: true);
+        var stick = t.Layout.Elements.OfType<InputDefinition>().Single(i => i.Name == "AxisLeftStick");
+        t.Layout.InputDescendants[stick].ShouldBe(
+            ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"]);
+
+        var buttonA = t.Layout.Elements.OfType<InputDefinition>().Single(i => i.Name == "ButtonA");
+        t.Layout.InputDescendants[buttonA].ShouldBeEmpty();
     }
 
     [Fact]
-    public void Load_DuplicateTopLevelInput_KeyedByReferenceInInputDescendants()
+    public void Load_DuplicateTopLevelInput_BothInstancesResolveTheSamePartNamesByReference()
     {
         // The layout schema permits duplicate top-level <Input> entries — the directional pattern
         // uses one nested-children variant for per-direction labels and a separate "strict-self"
         // variant with no children. Both must survive as distinct InputDefinitions, and
-        // InputDescendants — keyed by reference — must hold an entry for each instance.
+        // InputDescendants — keyed by reference — must hold an entry for each instance, resolving
+        // the same part names from the shared name regardless of which one happens to nest a
+        // (now irrelevant) child.
         var t = Load("""
             <ControllerTemplate>
               <Body>
@@ -415,8 +426,9 @@ public class TemplateSubsystemTests
 
         InputDefinition withChild = dpads.Single(d => d.Children.Count > 0);
         InputDefinition strictSelf = dpads.Single(d => d.Children.Count == 0);
-        t.Layout.InputDescendants[withChild].Select(d => d.Name).ShouldBe(["ButtonDpadUp"]);
-        t.Layout.InputDescendants[strictSelf].ShouldBeEmpty();
+        t.Layout.InputDescendants[withChild].ShouldBe(
+            ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"]);
+        t.Layout.InputDescendants[strictSelf].ShouldBe(t.Layout.InputDescendants[withChild]);
     }
 
     [Fact]
