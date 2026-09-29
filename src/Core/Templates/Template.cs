@@ -14,7 +14,7 @@ namespace DynamicControls.Templates;
 /// back to <see cref="RenderingDefaults.CanvasWidth"/> / <see cref="RenderingDefaults.CanvasHeight"/>
 /// for the canvas size in that case.</param>
 /// <param name="Layout">The resolved layout tree, template-wide style defaults, and the
-/// precomputed InputDescendants index — the output of <see cref="LayoutResolver"/>.</param>
+/// precomputed CollapseInfo index — the output of <see cref="LayoutResolver"/>.</param>
 /// <param name="ImageSource">Resolves image filenames to their generic and styled paths within this
 /// template's directory. Set by TemplateService at build time.</param>
 [ExcludeFromCodeCoverage]

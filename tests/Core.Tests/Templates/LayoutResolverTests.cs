@@ -21,7 +21,7 @@ public class TemplateLayoutResolverTests
         _imageSource
             .Resolve(Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<string?>())
             .Returns(ci => new ResolvedImagePaths(Generic: (string)ci[0], Styled: null));
-        _underTest = new LayoutResolver(_logger, new InputDescendantsBuilder());
+        _underTest = new LayoutResolver(_logger);
     }
 
     // --- Style defaults from <Head><Style> ---

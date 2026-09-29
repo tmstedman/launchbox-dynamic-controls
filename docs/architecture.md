@@ -120,9 +120,9 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 `TemplateService` leans on three pieces:
 
-1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `OneOfNode`, `ConditionNode`. Pure XML deserialisation.
+1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `ContainerNode`, `OneOfNode`, `ConditionNode`. Pure XML deserialisation.
 
-2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, a Group's `vAlign` shifting its origin by its own fixed slot count before slots are laid out, collapsing-Group metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
+2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, a Container's `vAlign` shifting its origin by its own fixed slot count before slots are laid out, collapsing-Container metadata stamped. It also precomputes a lookup table off the resolved tree (`CollapseInfo`, for render-time slot adjustments) so the renderer can run without re-walking the tree for that. Whole-control visibility fan-out is read directly from `WholeInputs.PartsOf` at render time instead — a static, name-keyed lookup with nothing per-template to precompute.
 
 3. **`TemplateImageResolver`** finds the base image (`BaseImage.png`) and resolves each image filename to a *pair* of candidates: a **styled** path (`Templates/{template}/{platform}/{controller}/{file}`, else `Templates/{template}/{platform}/{file}`, else none) and a **generic** path (`Templates/{template}/{file}`, else the shared `Templates/{file}`). It doesn't pick between them — that is a render-time decision taken from the input's mapping state, see [Rendering](#5-rendering).
 
@@ -210,7 +210,7 @@ Raw config DTOs → resolved domain types → built domain types. Each layer is 
 
 ### Cache once, read forever
 
-Templates are loaded once per process and cached per template name. `ResolvedMapping` is constructed per game launch but reused across the render pass. `InputDescendants` and `CollapseInfo` are precomputed at template-load time and reused on every render. The result: a game launch's overlay costs about as much as rendering, not loading.
+Templates are loaded once per process and cached per template name. `ResolvedMapping` is constructed per game launch but reused across the render pass. `CollapseInfo` is precomputed at template-load time and reused on every render; whole-control visibility fan-out has no per-template state to precompute at all, since it's a direct name lookup into `WholeInputs.PartsOf`. The result: a game launch's overlay costs about as much as rendering, not loading.
 
 The cache is process-scoped, not LRU — we're assuming a single LaunchBox session uses a small handful of templates. Template edits require restarting LaunchBox; we don't watch the filesystem.
 
@@ -281,7 +281,7 @@ Make a folder under `Templates/{templateName}/`. Drop a `BaseImage.png` for the 
 
 ### Add a new layout container
 
-Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutElements.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter`, `VisibilityEvaluator`, `InputDescendantsBuilder`, and `CollapseGroupBuilder` to handle the new type. The existing `<Group>`, `<OneOf>`, `<Condition>` types are good templates for the pattern.
+Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutElements.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter`, `VisibilityEvaluator`, and `CollapseGroupBuilder` to handle the new type. The existing `<Container>`, `<OneOf>`, `<Condition>` types are good templates for the pattern.
 
 ### Add a new render condition
 
