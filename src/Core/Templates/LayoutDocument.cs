@@ -86,13 +86,50 @@ public readonly record struct Coordinate(bool IsRelative, double Value)
 public interface ILayoutNode;
 
 /// <summary>
+/// A raw node that can originate a style cascade for its own content and any children —
+/// implemented by <see cref="InputNode"/> and <see cref="GroupNode"/> only. Every element with
+/// visual attributes participates in the cascade (see <c>LayoutResolver.ResolveStyle</c>), but
+/// only these two ever need to be treated polymorphically as a cascade *origin* whose result
+/// flows down to descendants — a leaf like <see cref="OverlayNode"/>/<see cref="LabelNode"/> is
+/// always reached through its own concretely-typed Build method, never generic dispatch, so it
+/// calls the same merge logic directly with its own fields instead. That also avoids giving a
+/// leaf members it could never populate — <see cref="OverlayNode"/> has no <c>fontSize</c>
+/// attribute (it never renders text), and <see cref="LabelNode"/> has no
+/// <c>minOpacity</c>/<c>inactiveBlurRadius</c> (proved dead: under every <c>showIf</c> mode,
+/// inactive already implies no label text — see docs/layout-xml-schema.md's Style cascade
+/// section).
+/// </summary>
+public interface IStyledNode
+{
+    /// <summary>Optional reference to a named &lt;Style&gt; in &lt;Head&gt;. Each missing
+    /// attribute below falls back to the named style's value.</summary>
+    string? Style { get; }
+
+    /// <summary>Visibility condition for this element's own image, and the default its
+    /// children/Overlays inherit if they don't set their own.</summary>
+    string? ShowIf { get; }
+
+    /// <summary>MinOpacity for this element's own image, and the default its children/Overlays
+    /// inherit if they don't set their own.</summary>
+    double? MinOpacity { get; }
+
+    /// <summary>InactiveBlurRadius for this element's own image, and the default its
+    /// children/Overlays inherit if they don't set their own.</summary>
+    double? InactiveBlurRadius { get; }
+
+    /// <summary>Default font size for labels reachable from this element that don't set their
+    /// own fontSize.</summary>
+    double? FontSize { get; }
+}
+
+/// <summary>
 /// Raw DTO for a &lt;Group&gt; positioned layout container. The group gates on visibility: excluded
 /// entirely from the render output — itself, its Overlay children, everything — when no
 /// descendant has a visible render. Children are stacked vertically: each Input (at any depth
 /// through transparent Conditions) occupies one slot, with positions computed from the group's
 /// own origin plus the running slot index times Gap.
 /// </summary>
-public record GroupNode : ILayoutNode
+public record GroupNode : ILayoutNode, IStyledNode
 {
     /// <summary>Horizontal canvas origin for the group. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
@@ -110,6 +147,21 @@ public record GroupNode : ILayoutNode
     /// <summary>When true, inputs that are fully hidden (all renders have opacity=0) vacate
     /// their slot and subsequent inputs shift up to fill the gap.</summary>
     public bool Collapse { get; set; }
+
+    /// <inheritdoc />
+    public string? Style { get; set; }
+
+    /// <inheritdoc />
+    public string? ShowIf { get; set; }
+
+    /// <inheritdoc />
+    public double? MinOpacity { get; set; }
+
+    /// <inheritdoc />
+    public double? InactiveBlurRadius { get; set; }
+
+    /// <inheritdoc />
+    public double? FontSize { get; set; }
 
     /// <summary>Nested layout children — Input, Group, OneOf, or Condition in document order. The
     /// group is included whenever any descendant has a visible render, recursing through nested
@@ -172,7 +224,7 @@ public record ConditionNode : ILayoutNode
 /// overlay and label child elements as read from XML. Nested within LayoutDocument or GroupNode;
 /// consumed by TemplateService when building InputDefinition entries for a Template.
 /// </summary>
-public record InputNode : ILayoutNode
+public record InputNode : ILayoutNode, IStyledNode
 {
     /// <summary>Generic input name (e.g. "ButtonA"). Required.</summary>
     public string Name { get; set; } = null!;
@@ -247,6 +299,10 @@ public record OverlayNode
     /// </summary>
     public string? Src { get; set; }
 
+    /// <summary>Optional reference to a named &lt;Style&gt; in &lt;Head&gt;. Each missing
+    /// attribute below falls back to the named style's value, then whatever's ambient.</summary>
+    public string? Style { get; set; }
+
     /// <summary>Left position. Absolute or relative (+ / - prefix) to the enclosing container's slot origin. Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
 
@@ -287,6 +343,11 @@ public record LabelNode : ILayoutNode
     /// <summary>Text alignment ("left", "center", "right"). Defaults to "left".</summary>
     public string Align { get; set; } = "left";
 
-    /// <summary>Font size for this label. Null means use the template default.</summary>
+    /// <summary>Optional reference to a named &lt;Style&gt; in &lt;Head&gt;, for its fontSize
+    /// only — a Label has no minOpacity/inactiveBlurRadius of its own to inherit.</summary>
+    public string? Style { get; set; }
+
+    /// <summary>Font size for this label. Null means fall through the cascade — named style,
+    /// then whatever's ambient, then the template default.</summary>
     public double? FontSize { get; set; }
 }
