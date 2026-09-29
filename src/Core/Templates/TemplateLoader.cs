@@ -259,7 +259,10 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// </summary>
     private OneOfNode ParseOneOfNode(XmlElement oneOfNode)
     {
-        var oneOf = new OneOfNode();
+        var oneOf = new OneOfNode
+        {
+            For = oneOfNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
+        };
 
         foreach (XmlElement child in oneOfNode.ChildNodes.OfType<XmlElement>())
         {
@@ -267,7 +270,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 _logger.Error($"Invalid element <{child.Name}> in <OneOf>");
         }
 
-        _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
+        _logger.Debug($"OneOf: for={oneOf.For}, alternatives={oneOf.Alternatives.Count}");
         return oneOf;
     }
 
