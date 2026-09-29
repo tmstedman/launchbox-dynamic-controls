@@ -8,10 +8,8 @@
   <Mapping joycode="JOYCODE_1_BUTTON4" input="ButtonY" />
   <Mapping joycode="JOYCODE_1_BUTTON5" input="ButtonLeftShoulder" />
   <Mapping joycode="JOYCODE_1_BUTTON6" input="ButtonRightShoulder" />
-  <Mapping joycode="JOYCODE_1_BUTTON7" input="AxisTriggerLeft" />
-  <Mapping joycode="JOYCODE_1_BUTTON8" input="AxisTriggerRight" />
-  <Mapping joycode="JOYCODE_1_BUTTON9" input="ButtonLeftStick" />
-  <Mapping joycode="JOYCODE_1_BUTTON10" input="ButtonRightStick" />
+  <Mapping joycode="JOYCODE_1_BUTTON7" input="ButtonLeftStick" />
+  <Mapping joycode="JOYCODE_1_BUTTON8" input="ButtonRightStick" />
 
   <!-- D-pad (POV hat). On modern XInput controllers, the d-pad reports as HAT1. -->
   <Mapping joycode="JOYCODE_1_HAT1UP" input="ButtonDpadUp" />
