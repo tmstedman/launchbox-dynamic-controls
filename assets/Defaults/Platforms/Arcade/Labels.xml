@@ -19122,6 +19122,7 @@
     </Game>
     <Game romName="searchar">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate</Input>
         <Input name="P1_BUTTON1">Shoot / (Hold) Charge</Input>
         <Input name="P1_BUTTON2">Dive / Dodge</Input>
         <Input name="START">Start</Input>
