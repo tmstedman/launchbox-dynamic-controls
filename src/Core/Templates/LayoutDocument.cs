@@ -14,7 +14,7 @@ public record LayoutDocument
     public HeadNode Head { get; set; } = new();
 
     /// <summary>The body — display layout elements in document order. Polymorphic — entries are
-    /// InputNode, GroupNode, or OneOfNode. When the file uses the flat schema (no
+    /// InputNode, ContainerNode, or OneOfNode. When the file uses the flat schema (no
     /// &lt;Body&gt; wrapper), root-level layout children are collected here for compatibility.</summary>
     public List<ILayoutNode> Elements { get; set; } = [];
 }
@@ -81,13 +81,13 @@ public readonly record struct Coordinate(bool IsRelative, double Value)
 
 /// <summary>
 /// Marker interface for anything that can appear in the parsed Layout.xml element tree —
-/// InputNode, GroupNode, or OneOfNode. Used purely for polymorphic dispatch.
+/// InputNode, ContainerNode, or OneOfNode. Used purely for polymorphic dispatch.
 /// </summary>
 public interface ILayoutNode;
 
 /// <summary>
 /// A raw node that can originate a style cascade for its own content and any children —
-/// implemented by <see cref="InputNode"/> and <see cref="GroupNode"/> only. Every element with
+/// implemented by <see cref="InputNode"/> and <see cref="ContainerNode"/> only. Every element with
 /// visual attributes participates in the cascade (see <c>LayoutResolver.ResolveStyle</c>), but
 /// only these two ever need to be treated polymorphically as a cascade *origin* whose result
 /// flows down to descendants — a leaf like <see cref="OverlayNode"/>/<see cref="LabelNode"/> is
@@ -123,18 +123,18 @@ public interface IStyledNode
 }
 
 /// <summary>
-/// Raw DTO for a &lt;Group&gt; positioned layout container. The group gates on visibility: excluded
-/// entirely from the render output — itself, its Overlay children, everything — when no
-/// descendant has a visible render. Children are stacked vertically: each Input (at any depth
-/// through transparent Conditions) occupies one slot, with positions computed from the group's
-/// own origin plus the running slot index times Gap.
+/// Raw DTO for a &lt;Container&gt; positioned layout container. Unlike the &lt;Group&gt; it
+/// replaced, a Container never decides its own inclusion — it's always rendered once reached;
+/// gating (when wanted) is an explicit wrapping &lt;Condition&gt;'s job. Children are stacked
+/// vertically: each Input (at any depth through transparent Conditions) occupies one slot, with
+/// positions computed from the container's own origin plus the running slot index times Gap.
 /// </summary>
-public record GroupNode : ILayoutNode, IStyledNode
+public record ContainerNode : ILayoutNode, IStyledNode
 {
-    /// <summary>Horizontal canvas origin for the group. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
+    /// <summary>Horizontal canvas origin for the container. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
 
-    /// <summary>Vertical canvas origin for the group. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
+    /// <summary>Vertical canvas origin for the container. Absolute or relative (+ / - prefix). Defaults to +0.</summary>
     public Coordinate Y { get; set; } = Coordinate.Relative(0);
 
     /// <summary>Vertical spacing between slots in pixels.</summary>
@@ -163,22 +163,23 @@ public record GroupNode : ILayoutNode, IStyledNode
     /// <inheritdoc />
     public double? FontSize { get; set; }
 
-    /// <summary>Optional generic input name this Group builds on behalf of, when it has no
-    /// enclosing &lt;Input&gt; of its own (e.g. a top-level Group inside a &lt;OneOf&gt; sibling
-    /// of the whole it describes). Sets the ambient <c>CurrentInputName</c> for everything
-    /// inside — in particular, a loose &lt;Label&gt; placed directly in this Group still needs to
-    /// know which Input's Labels list to merge into. Unset when the Group is already reached
-    /// through an enclosing Input, which supplies this ambiently on its own.</summary>
+    /// <summary>Optional generic input name this Container builds on behalf of, when it has no
+    /// enclosing &lt;Input&gt; of its own (e.g. a top-level Container inside a &lt;OneOf&gt;
+    /// sibling of the whole it describes). Sets the ambient <c>CurrentInputName</c> for
+    /// everything inside — in particular, a loose &lt;Label&gt; placed directly in this
+    /// Container still needs to know which Input's Labels list to merge into. Unset when the
+    /// Container is already reached through an enclosing Input, which supplies this ambiently on
+    /// its own.</summary>
     public string? For { get; set; }
 
-    /// <summary>Nested layout children — Input, Group, OneOf, or Condition in document order. The
-    /// group is included whenever any descendant has a visible render, recursing through nested
-    /// Groups, Conditions, and the active branch of nested OneOfs.</summary>
+    /// <summary>Nested layout children — Input, Container, OneOf, or Condition in document
+    /// order.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
 
-    /// <summary>Overlays declared at the group level. Each renders once when the group is
-    /// included; their visibility is binary (gated by group inclusion, not by per-overlay
-    /// conditions). Used to declutter templates where the same overlay would otherwise be
+    /// <summary>Overlays declared at the container level. Each renders once whenever the
+    /// container itself is reached; no per-overlay visibility of its own — an enclosing
+    /// &lt;Condition&gt; decides whether the container (and so these overlays) exists at all
+    /// this game. Used to declutter templates where the same overlay would otherwise be
     /// repeated on every input in a cluster.</summary>
     public List<OverlayNode> Overlays { get; set; } = [];
 }
@@ -186,15 +187,15 @@ public record GroupNode : ILayoutNode, IStyledNode
 /// <summary>
 /// Raw DTO for a &lt;OneOf&gt; mutually-exclusive alternatives container. The children are
 /// evaluated in document order; the first child whose own visibility check passes (any-render-
-/// visible for an Input, any-member-visible for a Group) is rendered, and the rest are dropped
-/// entirely. Used to express "render X, OR render Y, but not both" without per-element opt-out
-/// flags. Can appear anywhere a ILayoutNode can: top-level, inside &lt;Input&gt;.Children,
-/// or inside &lt;Group&gt; alongside its Inputs.
+/// visible for an Input, its own explicit check for a Condition) is rendered, and the rest are
+/// dropped entirely. Used to express "render X, OR render Y, but not both" without per-element
+/// opt-out flags. Can appear anywhere a ILayoutNode can: top-level, inside &lt;Input&gt;.Children,
+/// or inside &lt;Container&gt; alongside its Inputs.
 /// </summary>
 public record OneOfNode : ILayoutNode
 {
     /// <summary>The alternative branches in document order — each is an InputNode or
-    /// GroupNode. Only the first whose visibility check passes is rendered.</summary>
+    /// ContainerNode. Only the first whose visibility check passes is rendered.</summary>
     public List<ILayoutNode> Alternatives { get; set; } = [];
 }
 
@@ -203,6 +204,9 @@ public record OneOfNode : ILayoutNode
 /// generic inputs, evaluated directly rather than by folding in structural descendants. Exactly
 /// one of <see cref="Any"/>, <see cref="All"/>, <see cref="None"/> is set, each a space-separated
 /// list of generic input names (the same convention as a combination &lt;Input name="A B"&gt;).
+/// This is the schema's only inclusion-deciding mechanism for a &lt;Container&gt; — a Container
+/// has no implicit visibility check of its own, so anything that needs one wraps it in a
+/// Condition (see <see cref="ContainerNode"/>).
 /// </summary>
 public record ConditionNode : ILayoutNode
 {
@@ -218,7 +222,7 @@ public record ConditionNode : ILayoutNode
     /// <summary>"label" or "mapping" — what "matches" means for each name. Defaults to "label".</summary>
     public string? Match { get; set; }
 
-    /// <summary>Nested layout children — Input, Group, Stack, OneOf, or another Condition in
+    /// <summary>Nested layout children — Input, Container, OneOf, or another Condition in
     /// document order. Rendered only when the condition evaluates true.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
 }
@@ -229,8 +233,9 @@ public record ConditionNode : ILayoutNode
 /// ShowIf/MinOpacity/InactiveBlurRadius) rather than a separate child element — every Input
 /// draws exactly one image, always at its own origin, so there was never a reason for that image
 /// to be a distinct node with its own overridable position/visibility. Also contains unparsed
-/// overlay and label child elements as read from XML. Nested within LayoutDocument or GroupNode;
-/// consumed by TemplateService when building InputDefinition entries for a Template.
+/// overlay and label child elements as read from XML. Nested within LayoutDocument or
+/// ContainerNode; consumed by TemplateService when building InputDefinition entries for a
+/// Template.
 /// </summary>
 public record InputNode : ILayoutNode, IStyledNode
 {
@@ -275,8 +280,7 @@ public record InputNode : ILayoutNode, IStyledNode
 
     /// <summary>Optional name of another input/asset whose image file this Input prefers. Affects
     /// image resolution for this Input's own image only — does not establish a mapping
-    /// relationship. If the referenced file doesn't exist, the resolver falls back through Name
-    /// then the structural parent's Name.</summary>
+    /// relationship.</summary>
     public string? UseImage { get; set; }
 
     /// <summary>Overlay child elements for associated images (e.g. dotted lines).</summary>
@@ -285,12 +289,11 @@ public record InputNode : ILayoutNode, IStyledNode
     /// <summary>Label child elements defining where label text is positioned.</summary>
     public List<LabelNode> Labels { get; set; } = [];
 
-    /// <summary>Nested layout children — either &lt;Input&gt; or &lt;Group&gt; in document order.
-    /// Structural nesting is how parent/child relationships are expressed (replaces the old
-    /// `childOf` attribute): a parent Input's own image fans out to every InputNode in its
-    /// structural descendant set, and a nested input's own image-fallback resolves
-    /// through its structural parent's Name. A strict-self render is written as a duplicate
-    /// top-level &lt;Input&gt; with no nested children — its fan-out scope is empty.</summary>
+    /// <summary>Nested layout children — Container, OneOf, or Condition in document order
+    /// (nesting another &lt;Input&gt; directly is unusual — see the style-cascade fallthrough
+    /// this still enables — and the shipped template no longer does it at all). A whole
+    /// control's own <c>showIf="auto"</c> fan-out does <b>not</b> come from here any more — see
+    /// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
 }
 
@@ -335,7 +338,7 @@ public record OverlayNode
 
 /// <summary>
 /// Raw DTO for a Label child element in Layout.xml, specifying label text position, alignment, and font size.
-/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/
+/// Usually nested directly within InputNode; may also appear "loose" inside a ContainerNode/
 /// OneOfNode/ConditionNode, attaching to whichever Input is ambient at that point in the tree
 /// (see LayoutResolver.BuildContext.CurrentInputName). Consumed by TemplateService, which maps it
 /// to a LabelDefinition, wrapped in a LabelElement for the loose case.

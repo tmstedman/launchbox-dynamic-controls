@@ -20,7 +20,7 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
 {
     /// <summary>
     /// Walks <paramref name="elements"/> and returns a map from every <see cref="InputDefinition"/>
-    /// in the tree to its whole-control part names, if any. InputGroups, OneOfs, and Conditions are
+    /// in the tree to its whole-control part names, if any. Containers, OneOfs, and Conditions are
     /// transparent — they contribute their children to the traversal but do not appear as keys.
     /// Uses reference equality so structurally identical but distinct instances are tracked
     /// separately. Result is exposed as read-only.
@@ -38,8 +38,9 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
     /// <summary>
     /// Registers every <see cref="InputDefinition"/> reachable from <paramref name="element"/> as a
     /// key, keyed to its whole-control part names (empty if it isn't one). Still recurses into an
-    /// Input's own <see cref="InputDefinition.Children"/> so a nested Input (kept for image-fallback
-    /// or coordinate-origin reasons, independent of fan-out) still gets its own entry.
+    /// Input's own <see cref="InputDefinition.Children"/> so a nested Input (unusual — the shipped
+    /// template no longer does it at all — but still valid for the style-cascade fallthrough it
+    /// enables) still gets its own entry.
     /// </summary>
     private static void Collect(ILayoutElement element, Dictionary<InputDefinition, IReadOnlyList<string>> descendants)
     {
@@ -52,8 +53,8 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                     Collect(child, descendants);
                 }
                 break;
-            case InputGroup group:
-                foreach (ILayoutElement child in group.Children)
+            case Container container:
+                foreach (ILayoutElement child in container.Children)
                 {
                     Collect(child, descendants);
                 }

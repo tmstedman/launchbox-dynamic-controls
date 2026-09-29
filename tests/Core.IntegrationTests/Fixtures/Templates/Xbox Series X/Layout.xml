@@ -32,33 +32,42 @@
         <Input name="ButtonB" style="auto-blur" x="1026" y="350" height="64" width="64" />
         <Input name="ButtonStart" style="mapped-input-blur" x="832" y="356" height="44" width="44" />
         <Input name="ButtonBack" style="mapped-input-blur" x="714" y="356" height="44" width="44" />
-        <Group x="666" y="661" gap="45">
-            <Overlay src="Line_MetaButtons.png" x="703" y="406" />
-            <Input name="ButtonStart" style="small-label-blur" height="34" width="34">
-                <Label x="+51" y="+17" />
-            </Input>
-            <Input name="ButtonBack" style="small-label-blur" height="34" width="34">
-                <Label x="+51" y="+17" />
-            </Input>
-        </Group>
-        <Group x="1249" y="318" gap="80">
-            <Input name="ButtonY" style="input-label" height="44" width="44">
-                <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
-                <Label x="+60" y="+22" />
-            </Input>
-            <Input name="ButtonB" style="input-label" height="44" width="44">
-                <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
-                <Label x="+60" y="+22" />
-            </Input>
-            <Input name="ButtonA" style="input-label" height="44" width="44">
-                <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
-                <Label x="+60" y="+22" />
-            </Input>
-            <Input name="ButtonX" style="input-label" height="44" width="44">
-                <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
-                <Label x="+60" y="+22" />
-            </Input>
-        </Group>
+        <!-- A Container never decides its own inclusion, so this explicit Condition is what
+             replaces the old Group's implicit "any member visible" check: without it, this
+             cluster would fade to the template default instead of disappearing entirely when
+             neither button has a label. -->
+        <Condition any="ButtonStart ButtonBack" match="label">
+            <Container x="666" y="661" gap="45">
+                <Overlay src="Line_MetaButtons.png" x="703" y="406" />
+                <Input name="ButtonStart" style="small-label-blur" height="34" width="34">
+                    <Label x="+51" y="+17" />
+                </Input>
+                <Input name="ButtonBack" style="small-label-blur" height="34" width="34">
+                    <Label x="+51" y="+17" />
+                </Input>
+            </Container>
+        </Condition>
+        <!-- Same reasoning as the meta-buttons cluster above. -->
+        <Condition any="ButtonY ButtonB ButtonA ButtonX" match="label">
+            <Container x="1249" y="318" gap="80">
+                <Input name="ButtonY" style="input-label" height="44" width="44">
+                    <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonB" style="input-label" height="44" width="44">
+                    <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonA" style="input-label" height="44" width="44">
+                    <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                    <Label x="+60" y="+22" />
+                </Input>
+                <Input name="ButtonX" style="input-label" height="44" width="44">
+                    <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                    <Label x="+60" y="+22" />
+                </Input>
+            </Container>
+        </Condition>
         <Input name="ButtonLeftStick" style="show-if-label" x="307" y="477" height="44" width="44">
             <Overlay src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Label x="-19" y="+22" align="right" />
@@ -89,31 +98,37 @@
                  directions actually survive this game, for any vAlign — the y="+17" below is
                  a small manual nudge on top of that computed center, not a replacement for it. -->
             <Condition any="AxisLeftStick" match="label">
-                <Group for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+                <Container for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
                     <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                     <Label x="-24" y="+17" align="right" />
                     <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
                     <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
                     <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34" />
                     <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34" />
-                </Group>
+                </Container>
             </Condition>
-            <!-- Fallback: no two directions agree — each renders its own, independent text. -->
-            <Group x="312" y="358.5" gap="45" collapse="true" vAlign="center">
-                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-            </Group>
+            <!-- Fallback: no two directions agree — each renders its own, independent text.
+                 A Container never decides its own inclusion, so this explicit Condition is what
+                 replaces the old Group's implicit "any member visible" check: without it, the
+                 OneOf could never select this alternative at all, having no other way to ask
+                 whether it has anything to show. -->
+            <Condition any="AxisLeftStickUp AxisLeftStickLeft AxisLeftStickRight AxisLeftStickDown" match="label">
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+                    <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                    <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Container>
+            </Condition>
         </OneOf>
         <Input name="AxisRightStick" style="auto-blur" x="839" y="438" height="124" width="124" />
         <OneOf>
@@ -131,31 +146,34 @@
                  mechanism as AxisLeftStick above, but this Group has no vAlign (defaults to
                  "top"), and its y="+15" is its own manual nudge on top of the computed center. -->
             <Condition any="AxisRightStick" match="label">
-                <Group for="AxisRightStick" x="882" y="772" gap="45" collapse="true">
+                <Container for="AxisRightStick" x="882" y="772" gap="45" collapse="true">
                     <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
                     <Label x="+52" y="+15" />
                     <Input name="AxisRightStickUp" style="small-label-vacate" useImage="AxisLeftStickUp" height="34" width="34" />
                     <Input name="AxisRightStickLeft" style="small-label-vacate" useImage="AxisLeftStickLeft" height="34" width="34" />
                     <Input name="AxisRightStickRight" style="small-label-vacate" useImage="AxisLeftStickRight" height="34" width="34" />
                     <Input name="AxisRightStickDown" style="small-label-vacate" useImage="AxisLeftStickDown" height="34" width="34" />
-                </Group>
+                </Container>
             </Condition>
-            <!-- Fallback: no two directions agree — each renders its own, independent text. -->
-            <Group x="882" y="772" gap="45" collapse="true">
-                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Input name="AxisRightStickUp" style="small-label-vacate" useImage="AxisLeftStickUp" height="34" width="34">
-                    <Label x="+52" y="+15" />
-                </Input>
-                <Input name="AxisRightStickLeft" style="small-label-vacate" useImage="AxisLeftStickLeft" height="34" width="34">
-                    <Label x="+52" y="+15" />
-                </Input>
-                <Input name="AxisRightStickRight" style="small-label-vacate" useImage="AxisLeftStickRight" height="34" width="34">
-                    <Label x="+52" y="+15" />
-                </Input>
-                <Input name="AxisRightStickDown" style="small-label-vacate" useImage="AxisLeftStickDown" height="34" width="34">
-                    <Label x="+52" y="+15" />
-                </Input>
-            </Group>
+            <!-- Fallback: no two directions agree — each renders its own, independent text.
+                 See AxisLeftStick above for why this needs an explicit Condition now. -->
+            <Condition any="AxisRightStickUp AxisRightStickLeft AxisRightStickRight AxisRightStickDown" match="label">
+                <Container x="882" y="772" gap="45" collapse="true">
+                    <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                    <Input name="AxisRightStickUp" style="small-label-vacate" useImage="AxisLeftStickUp" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickLeft" style="small-label-vacate" useImage="AxisLeftStickLeft" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickRight" style="small-label-vacate" useImage="AxisLeftStickRight" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickDown" style="small-label-vacate" useImage="AxisLeftStickDown" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                </Container>
+            </Condition>
         </OneOf>
         <Input name="ButtonDpad" style="auto-blur" x="623" y="440" height="135" width="135" />
         <OneOf>
@@ -164,32 +182,35 @@
                  shared label rather than repeating it next to every agreeing icon. Covers a
                  full four-way agreement too, in the same shape as a partial one. -->
             <Condition any="ButtonDpad" match="label">
-                <Group for="ButtonDpad" x="312" y="619.5" gap="45" collapse="true" vAlign="center">
+                <Container for="ButtonDpad" x="312" y="619.5" gap="45" collapse="true" vAlign="center">
                     <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
                     <Label x="-24" y="+17" align="right" />
                     <Input name="ButtonDpadUp" style="small-label-vacate" height="34" width="34" />
                     <Input name="ButtonDpadLeft" style="small-label-vacate" height="34" width="34" />
                     <Input name="ButtonDpadRight" style="small-label-vacate" height="34" width="34" />
                     <Input name="ButtonDpadDown" style="small-label-vacate" height="34" width="34" />
-                </Group>
+                </Container>
             </Condition>
             <!-- Fallback: no two directions agree (or nothing's labelled at all) — each
-                 direction renders its own, independent text. -->
-            <Group x="312" y="619.5" gap="45" collapse="true" vAlign="center">
-                <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
-                <Input name="ButtonDpadUp" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="ButtonDpadLeft" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="ButtonDpadRight" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-                <Input name="ButtonDpadDown" style="small-label-vacate" height="34" width="34">
-                    <Label x="-24" y="+17" align="right" />
-                </Input>
-            </Group>
+                 direction renders its own, independent text. See AxisLeftStick above for why
+                 this needs an explicit Condition now. -->
+            <Condition any="ButtonDpadUp ButtonDpadLeft ButtonDpadRight ButtonDpadDown" match="label">
+                <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center">
+                    <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
+                    <Input name="ButtonDpadUp" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadLeft" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadRight" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="ButtonDpadDown" style="small-label-vacate" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Container>
+            </Condition>
         </OneOf>
     </Body>
 </ControllerTemplate>

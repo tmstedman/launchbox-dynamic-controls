@@ -10,13 +10,14 @@ namespace DynamicControls.Core.Tests.Rendering;
 /// Unit tests for <see cref="LayoutFilter"/>. <see cref="IVisibilityEvaluator"/> is a substitute
 /// — each scenario states its visibility decisions directly on the evaluator stub rather than
 /// encoding them as image ShowIf + MinOpacity values that the reader would have to translate
-/// back into "this slot is visible / vacates." The filter's own work (group inclusion, OneOf
-/// selection, collapse-offset accumulation) is what's being verified; the evaluator's behavior
+/// back into "this slot is visible / vacates." The filter's own work (OneOf selection, container
+/// traversal, collapse-offset accumulation) is what's being verified; the evaluator's behavior
 /// is covered by <see cref="VisibilityEvaluatorTests"/>, and their integration by
 /// <c>InputRenderingSubsystemTests</c>. Pins three things: (1) structural selection — top-level
-/// InputDefinitions and their structural Children always render, InputGroups gate on
-/// any-child-visible, OneOfs pick the first visible alternative;
-/// (2) group overlays — included only when the group is included, tagged with the group's
+/// InputDefinitions and their structural Children always render, Containers are always included
+/// once reached (they never decide their own visibility — an explicit Condition does, if wanted),
+/// OneOfs pick the first visible alternative;
+/// (2) container overlays — rendered whenever the container itself is reached, tagged with its
 /// aggregated visibility flags; (3) collapse adjustments — zero-opacity slots vacate and shift
 /// later slots up by the stack's gap, including the OneOf-no-visible case.
 /// </summary>
@@ -43,7 +44,7 @@ public class LayoutFilterTests
             Labels: [],
             Children: children ?? []);
 
-    private static InputGroup Group(
+    private static Container Container(
         IReadOnlyList<ILayoutElement> children,
         IReadOnlyList<OverlayDefinition>? overlays = null) =>
         new(Children: children, Overlays: overlays ?? []);
@@ -100,51 +101,41 @@ public class LayoutFilterTests
         result.Inputs.Select(i => i.Input.Name).ShouldBe(["LeftStick", "AxisLeftStickUp"]);
     }
 
-    // ---- groups ----
+    // ---- containers ----
+    //
+    // Unlike the <Group> a Container replaced, it never decides its own visibility -- it's
+    // always included once CollectVisibleElement reaches it at all. These tests deliberately
+    // stub every AnyVisible call to its default (false), to prove inclusion never once consults
+    // it -- excluding a Container is now exclusively an enclosing Condition's job (see the
+    // "---- Condition ----" tests below).
 
     [Fact]
-    public void Filter_GroupWithNoVisibleChildren_DropsGroupAndMembers()
+    public void Filter_Container_IncludesAllMembers_EvenWhenNoneAreIndividuallyVisible()
     {
-        // given a plain group whose only child is invisible (default substitute return)
-        InputDefinition gated = Input("ButtonA");
-        InputGroup group = Group(children: [gated]);
-        Template template = TemplateOf(elements: [group]);
+        // given a bare container whose members would all report AnyVisible=false (the default)
+        InputDefinition a = Input("ButtonA");
+        InputDefinition b = Input("ButtonB");
+        Container container = Container(children: [a, b]);
+        Template template = TemplateOf(elements: [container]);
 
         // when filtering
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
-        // then the group drops and its members never enter the render list
-        result.Inputs.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void Filter_GroupWithOneVisibleChild_IncludesGroupAndAllMembers()
-    {
-        // given a plain group with one visible and one invisible member
-        InputDefinition visible = Input("ButtonA");
-        InputDefinition gated = Input("ButtonB");
-        InputGroup group = Group(children: [visible, gated]);
-        Template template = TemplateOf(elements: [group]);
-        _evaluator.AnyVisible(visible, Arg.Any<VisibilityContext>()).Returns(true);
-
-        // when filtering
-        FilteredLayout result = _underTest.Filter(template, Ctx());
-
-        // then the group's any-visible test passes and every member renders (the gated one
-        // included — gating happens later via opacity, not here)
+        // then both members still render -- the container never gated on this
         result.Inputs.Select(i => i.Input.Name).ShouldBe(["ButtonA", "ButtonB"]);
     }
 
     [Fact]
-    public void Filter_GroupOverlays_IncludedWhenGroupVisibleWithAggregatedFlags()
+    public void Filter_ContainerOverlays_IncludedWheneverTheContainerIsReached_WithAggregatedFlags()
     {
-        // given a group with one mapped child and a group-level overlay
-        InputDefinition mapped = Input("ButtonA");
+        // given a container with one member and a container-level overlay, and nothing at all
+        // individually visible -- the old <Group> would have dropped both the members and this
+        // overlay; a Container renders them regardless
+        InputDefinition member = Input("ButtonA");
         OverlayDefinition overlay = Overlay("dpad-lines.png");
-        InputGroup group = Group(children: [mapped], overlays: [overlay]);
-        Template template = TemplateOf(elements: [group]);
-        _evaluator.AnyVisible(mapped, Arg.Any<VisibilityContext>()).Returns(true);
-        _evaluator.AggregateFlags(group, Arg.Any<VisibilityContext>())
+        Container container = Container(children: [member], overlays: [overlay]);
+        Template template = TemplateOf(elements: [container]);
+        _evaluator.AggregateFlags(container, Arg.Any<VisibilityContext>())
             .Returns(new VisibilityFlags(HasLabel: false, IsMapped: true));
 
         // when filtering
@@ -156,17 +147,18 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_GroupOverlays_DroppedWhenGroupExcluded()
+    public void Filter_ContainerWithNoOverlaysOfItsOwn_ContributesNoGroupOverlaysButStillRendersMembers()
     {
-        // given an invisible group with a group-level overlay
-        InputDefinition gated = Input("ButtonA");
-        InputGroup group = Group(children: [gated], overlays: [Overlay()]);
-        Template template = TemplateOf(elements: [group]);
+        // given a container with members but no container-level overlay of its own
+        InputDefinition member = Input("ButtonA");
+        Container container = Container(children: [member]);
+        Template template = TemplateOf(elements: [container]);
 
         // when filtering
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
-        // then the overlay drops with the group
+        // then the member still renders, and there's nothing to aggregate flags for
+        result.Inputs.Select(i => i.Input.Name).ShouldBe(["ButtonA"]);
         result.GroupOverlays.ShouldBeEmpty();
     }
 
@@ -284,7 +276,7 @@ public class LayoutFilterTests
         // case)
         var label = new LabelDefinition(X: 1, Y: 2);
         var labelElement = new LabelElement(label);
-        var group = new InputGroup(Children: [labelElement], Overlays: [], ForInputName: "ButtonDpad");
+        var group = new Container(Children: [labelElement], Overlays: [], ForInputName: "ButtonDpad");
         InputDefinition dpad = Input("ButtonDpad");
         Template template = TemplateOf(elements: [dpad, group]);
         _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
@@ -303,7 +295,7 @@ public class LayoutFilterTests
         // Label with no ambient Input at all
         var label = new LabelDefinition(X: 1, Y: 2);
         var labelElement = new LabelElement(label);
-        var group = new InputGroup(Children: [labelElement], Overlays: [], ForInputName: "NoSuchInput");
+        var group = new Container(Children: [labelElement], Overlays: [], ForInputName: "NoSuchInput");
         InputDefinition dpad = Input("ButtonDpad");
         Template template = TemplateOf(elements: [dpad, group]);
         _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
@@ -494,12 +486,12 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_CollapseStack_InputGroupSlot_IsSkippedAndAdjacentSlotsUnaffected()
+    public void Filter_CollapseStack_ContainerSlot_IsSkippedAndAdjacentSlotsUnaffected()
     {
-        // given a collapsing stack whose first slot is an InputGroup (Stack-as-slot — a known
+        // given a collapsing stack whose first slot is an Container (Stack-as-slot — a known
         // gap: adjustments for these are not yet computed), followed by a plain slot
         InputDefinition child = Input("ButtonA");
-        InputGroup inputGroupSlot = Group(children: [child]);
+        Container inputGroupSlot = Container(children: [child]);
         InputDefinition plain = Input("ButtonB");
         ILayoutElement[] group = [inputGroupSlot, plain];
         var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
@@ -512,7 +504,7 @@ public class LayoutFilterTests
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
-        // the InputGroup slot is skipped without throwing; the cumulative offset is never
+        // the Container slot is skipped without throwing; the cumulative offset is never
         // modified, so the plain slot following it stays at zero
         result.Inputs.Select(i => (i.Input.Name, i.YOffset))
             .ShouldBe([("ButtonA", 0.0), ("ButtonB", 0.0)]);
@@ -546,13 +538,13 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_CollapseStack_OneOfSlotWithInputGroupAlternative_CollectsLeavesFromGroup()
+    public void Filter_CollapseStack_OneOfSlotWithContainerAlternative_CollectsLeavesFromGroup()
     {
         // given a collapse group whose first slot is a OneOf whose only alternative is an
-        // InputGroup — CollectInputLeaves must recurse into the InputGroup to find the leaf
-        // InputDefinitions (the InputGroup arm of CollectInputLeaves)
+        // Container — CollectInputLeaves must recurse into the Container to find the leaf
+        // InputDefinitions (the Container arm of CollectInputLeaves)
         InputDefinition inner = Input("Inner");
-        InputGroup groupAlt = Group(children: [inner]);
+        Container groupAlt = Container(children: [inner]);
         var oneOf = new OneOf(Alternatives: [groupAlt]);
         InputDefinition tail = Input("Tail");
         ILayoutElement[] collapseGroup = [oneOf, tail];
@@ -569,7 +561,7 @@ public class LayoutFilterTests
         // when filtering
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
-        // then inner (leaf inside the InputGroup alternative) is found and assigned offset 0;
+        // then inner (leaf inside the Container alternative) is found and assigned offset 0;
         // slot does not vacate so tail is also at 0
         result.Inputs.Select(i => (i.Input.Name, i.YOffset))
             .ShouldBe([("Inner", 0.0), ("Tail", 0.0)]);
@@ -609,7 +601,7 @@ public class LayoutFilterTests
     // A loose Label placed directly inside a Group centers on the visual midpoint of however
     // many of that group's slots actually survive for this game -- computed here, in Phase 2,
     // since which slots survive collapse is a per-game fact Phase 1 (LayoutResolver) has no way
-    // to know. See InputGroup's and ResolveLooseLabel's doc comments for the full rationale.
+    // to know. See Container's and ResolveLooseLabel's doc comments for the full rationale.
 
     [Fact]
     public void Filter_LooseLabelInNonCollapsingGroup_CentersOnTheFullNominalSlotCount()
@@ -623,7 +615,7 @@ public class LayoutFilterTests
         InputDefinition slotA = Input("ButtonA");
         InputDefinition slotB = Input("ButtonB");
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 260));
-        InputGroup group = new(
+        Container group = new(
             Children: [slotA, slotB, label],
             Overlays: [],
             DeclaredOriginY: 300,
@@ -653,7 +645,7 @@ public class LayoutFilterTests
         InputDefinition slotC = Input("ButtonC");
         InputDefinition slotD = Input("ButtonD");
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 240));
-        InputGroup group = new(
+        Container group = new(
             Children: [slotA, slotB, slotC, slotD, label],
             Overlays: [],
             DeclaredOriginY: 300,
@@ -685,7 +677,7 @@ public class LayoutFilterTests
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 300));
-        InputGroup group = new(
+        Container group = new(
             Children: [slotA, slotB, slotC, label],
             Overlays: [],
             DeclaredOriginY: 300,
@@ -714,7 +706,7 @@ public class LayoutFilterTests
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 220));
-        InputGroup group = new(
+        Container group = new(
             Children: [slotA, slotB, slotC, label],
             Overlays: [],
             DeclaredOriginY: 300,
@@ -743,7 +735,7 @@ public class LayoutFilterTests
         InputDefinition tail = Input("ButtonB");
         var oneOf = new OneOf(Alternatives: [altA]);
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 300));
-        InputGroup group = new(
+        Container group = new(
             Children: [oneOf, tail, label],
             Overlays: [],
             DeclaredOriginY: 300,
@@ -794,7 +786,7 @@ public class LayoutFilterTests
         InputDefinition slotB = Input("ButtonB");
         InputDefinition slotC = Input("ButtonC");
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 315));
-        InputGroup group = new(
+        Container group = new(
             Children: [slotA, slotB, slotC, label],
             Overlays: [],
             DeclaredOriginY: 300,

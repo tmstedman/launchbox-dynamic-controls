@@ -316,13 +316,13 @@ public class TemplateLayoutResolverTests
         // would instead fade, exactly the real small-label-vacate regression this guards against
         TestLayout config = new TestLayout()
             .Input("AxisLeftStick", i => i.MinOpacity(0.3)
-                .ChildGroup(g => g.Input("AxisLeftStickUp")));
+                .ChildContainer(g => g.Input("AxisLeftStickUp")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the member's own MinOpacity is null -- it never saw the wrapping Input's 0.3
-        InputDefinition member = result.FirstInput().Children.FirstInputGroup().Children.FirstInput();
+        InputDefinition member = result.FirstInput().Children.FirstContainer().Children.FirstInput();
         member.InputImages.Single().MinOpacity.ShouldBeNull();
     }
 
@@ -333,13 +333,13 @@ public class TemplateLayoutResolverTests
         // blocks an ambient value passing *through* an empty Group; the Group's own explicit
         // value must still reach members that set nothing themselves
         TestLayout config = new TestLayout()
-            .Group(g => g.MinOpacity(0.5).Input("ButtonA"));
+            .Container(g => g.MinOpacity(0.5).Input("ButtonA"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the member inherits the Group's own explicit value
-        InputDefinition member = result.FirstInputGroup().Children.FirstInput();
+        InputDefinition member = result.FirstContainer().Children.FirstInput();
         member.InputImages.Single().MinOpacity.ShouldBe(0.5);
     }
 
@@ -384,9 +384,9 @@ public class TemplateLayoutResolverTests
         // given a group with gap=50 containing an input followed by a nested group
         // the nested group itself contains two inputs; it occupies one slot in the parent
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 0).Gap(50)
+            .Container(s => s.At(0, 0).Gap(50)
                 .Input("A")
-                .Group(inner => inner.Gap(10)
+                .Container(inner => inner.Gap(10)
                     .Input("B")
                     .Input("C")));
 
@@ -394,9 +394,9 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then A lands at slot 0 (Y=0) and the inner group lands at slot 1 (Y=50)
-        InputGroup outer = result.FirstInputGroup();
+        Container outer = result.FirstContainer();
         var a = (InputDefinition)outer.Children[0];
-        var inner = (InputGroup)outer.Children[1];
+        var inner = (Container)outer.Children[1];
         a.InputImages.Single().Y.ShouldBe(0);
         // inner group's own inputs start at the slot origin (Y=50) with their own gap
         inner.Children.Cast<InputDefinition>()
@@ -409,7 +409,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with vAlign explicitly "top" -- the default
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("top")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("top")
                 .Input("A")
                 .Input("B")
                 .Input("C"));
@@ -418,7 +418,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the declared Y is the first slot, same as if vAlign were omitted
-        InputGroup group = result.FirstInputGroup();
+        Container group = result.FirstContainer();
         group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([100.0, 150.0, 200.0]);
@@ -429,7 +429,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with vAlign="bottom" -- the declared Y should be the LAST slot
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A")
                 .Input("B")
                 .Input("C"));
@@ -438,7 +438,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the origin shifts up by (slotCount-1)*gap, so slot 2 (the last) lands on Y=100
-        InputGroup group = result.FirstInputGroup();
+        Container group = result.FirstContainer();
         group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([0.0, 50.0, 100.0]);
@@ -449,7 +449,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with vAlign="center" -- the declared Y should be the midpoint
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("center")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("center")
                 .Input("A")
                 .Input("B")
                 .Input("C"));
@@ -458,7 +458,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the origin shifts up by half of (slotCount-1)*gap, so slot 1 (the middle) lands on Y=100
-        InputGroup group = result.FirstInputGroup();
+        Container group = result.FirstContainer();
         group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([50.0, 100.0, 150.0]);
@@ -470,9 +470,9 @@ public class TemplateLayoutResolverTests
         // given vAlign="bottom" on an outer group with 2 slots -- A, then a nested group (which
         // counts as one slot in the OUTER group regardless of its own inner slot count)
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A")
-                .Group(inner => inner.Gap(10)
+                .Container(inner => inner.Gap(10)
                     .Input("B")
                     .Input("C")));
 
@@ -482,9 +482,9 @@ public class TemplateLayoutResolverTests
         // then the outer shift is (2-1)*50=50: A lands at Y=50, the nested stack's own origin
         // (its one slot) lands at Y=100 -- unaffected by vAlign, since only the OUTER declared
         // it -- and its own children stack from there with their own gap.
-        InputGroup outer = result.FirstInputGroup();
+        Container outer = result.FirstContainer();
         var a = (InputDefinition)outer.Children[0];
-        var inner = (InputGroup)outer.Children[1];
+        var inner = (Container)outer.Children[1];
         a.InputImages.Single().Y.ShouldBe(50);
         inner.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
@@ -496,7 +496,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with a vAlign value the resolver doesn't recognize
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bogus")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bogus")
                 .Input("A")
                 .Input("B"));
 
@@ -504,7 +504,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then it behaves as "top" (no shift) and logs an error naming the value
-        InputGroup group = result.FirstInputGroup();
+        Container group = result.FirstContainer();
         group.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
             .ShouldBe([100.0, 150.0]);
@@ -517,14 +517,14 @@ public class TemplateLayoutResolverTests
         // given vAlign="bottom" on a group with only one slot -- bottom and top coincide when
         // there's nothing to distribute around
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom")
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then A still lands exactly on the declared Y
-        result.FirstInputGroup().Children.FirstInput().InputImages.Single().Y.ShouldBe(100);
+        result.FirstContainer().Children.FirstInput().InputImages.Single().Y.ShouldBe(100);
     }
 
     [Fact]
@@ -532,7 +532,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group with collapse="true" containing two inputs
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 0).Gap(50).Collapse()
+            .Container(s => s.At(0, 0).Gap(50).Collapse()
                 .Input("A")
                 .Input("B"));
 
@@ -540,7 +540,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then each member input has an entry in ResolvedLayout.CollapseInfo with the group's gap
-        InputGroup group = result.FirstInputGroup();
+        Container group = result.FirstContainer();
         InputDefinition[] inputs = [.. group.Children.Cast<InputDefinition>()];
         result.CollapseInfo.Keys.ShouldBe(inputs, ignoreOrder: true);
         foreach (InputDefinition input in inputs)
@@ -553,13 +553,13 @@ public class TemplateLayoutResolverTests
         // given a collapsing group with vAlign="bottom" -- LayoutFilter needs this at render time
         // to correct its own shift for whatever slots collapse actually leaves visible
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bottom").Collapse()
                 .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        InputDefinition input = result.FirstInputGroup().Children.FirstInput();
+        InputDefinition input = result.FirstContainer().Children.FirstInput();
         result.CollapseInfo[input].VAlign.ShouldBe("bottom");
     }
 
@@ -570,13 +570,13 @@ public class TemplateLayoutResolverTests
         // validated (and logged) exactly once, here; CollapseInfo must carry the normalized
         // "top", not the raw invalid string, since nothing downstream re-validates it
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
+            .Container(s => s.At(0, 100).Gap(50).VAlign("bogus").Collapse()
                 .Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        InputDefinition input = result.FirstInputGroup().Children.FirstInput();
+        InputDefinition input = result.FirstContainer().Children.FirstInput();
         result.CollapseInfo[input].VAlign.ShouldBe("top");
     }
 
@@ -585,33 +585,33 @@ public class TemplateLayoutResolverTests
     {
         // given a group with collapse omitted
         TestLayout config = new TestLayout()
-            .Group(s => s.At(0, 0).Gap(50).Input("A"));
+            .Container(s => s.At(0, 0).Gap(50).Input("A"));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then no CollapseInfo entry is recorded for the member input
-        InputDefinition input = result.FirstInputGroup().Children.FirstInput();
+        InputDefinition input = result.FirstContainer().Children.FirstInput();
         result.CollapseInfo.Keys.ShouldNotContain(input);
     }
 
     // --- Group + OneOf ---
 
     [Fact]
-    public void Resolve_NestedGroup_IsReachableAsAnInputGroup()
+    public void Resolve_NestedGroup_IsReachableAsAnContainer()
     {
         // given a top-level Group whose only child is another Group containing an Input
         TestLayout config = new TestLayout()
-            .Group(outer => outer
-                .Group(inner => inner
+            .Container(outer => outer
+                .Container(inner => inner
                     .Input("A")));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then both Groups are resolved, the inner reachable as the outer's sole child
-        var outerGroup = result.FirstInputGroup();
-        var innerGroup = (InputGroup)outerGroup.Children.Single();
+        var outerGroup = result.FirstContainer();
+        var innerGroup = (Container)outerGroup.Children.Single();
         innerGroup.Children.FirstInput().Name.ShouldBe("A");
     }
 
@@ -639,11 +639,11 @@ public class TemplateLayoutResolverTests
         // Input of its own -- LayoutFilter needs this at render time to know which Input a loose
         // Label placed directly inside should attach to
         TestLayout config = new TestLayout()
-            .Group(g => g.For("ButtonDpad").Input("A"));
+            .Container(g => g.For("ButtonDpad").Input("A"));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        result.FirstInputGroup().ForInputName.ShouldBe("ButtonDpad");
+        result.FirstContainer().ForInputName.ShouldBe("ButtonDpad");
     }
 
     [Fact]
@@ -653,11 +653,11 @@ public class TemplateLayoutResolverTests
         // placed directly inside it should attach to -- the mechanism that lets a whole control's
         // merged-label cluster live as a sibling of its own bare Input rather than nested inside it
         TestLayout config = new TestLayout()
-            .Group(g => g.For("ButtonDpad").LooseLabel(l => l.Offset(-10, 20)));
+            .Container(g => g.For("ButtonDpad").LooseLabel(l => l.Offset(-10, 20)));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        LabelElement label = result.FirstInputGroup().Children.FirstLabelElement();
+        LabelElement label = result.FirstContainer().Children.FirstLabelElement();
         label.Label.X.ShouldBe(-10);
         label.Label.Y.ShouldBe(20);
     }
@@ -679,7 +679,7 @@ public class TemplateLayoutResolverTests
     {
         // given a group containing an ILayoutNode subtype that BuildNodeInStack doesn't handle
         var config = new LayoutDocument();
-        config.Elements.Add(new GroupNode { Children = [new UnknownNode()] });
+        config.Elements.Add(new ContainerNode { Children = [new UnknownNode()] });
 
         // when the resolver runs
         // then an InvalidOperationException is thrown
@@ -691,7 +691,7 @@ public class TemplateLayoutResolverTests
     {
         // given a OneOf in a group slot with two relative-positioned alternatives
         TestLayout config = new TestLayout()
-            .Group(s => s.At(100, 200).Gap(50)
+            .Container(s => s.At(100, 200).Gap(50)
                 .OneOf(o => o
                     .Input("A")
                     .Input("B")));
@@ -700,7 +700,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then both alternatives resolve against the same slot origin (100,200)
-        OneOf oneOf = result.FirstInputGroup().Children.FirstOneOf();
+        OneOf oneOf = result.FirstContainer().Children.FirstOneOf();
         var positions = oneOf.Alternatives
             .Cast<InputDefinition>()
             .Select(i => (i.InputImages.Single().X, i.InputImages.Single().Y))
@@ -773,14 +773,14 @@ public class TemplateLayoutResolverTests
         // given a Condition wrapping two Inputs inside a Group — exercises BuildNodeInStack's
         // ConditionNode arm; each wrapped Input should still consume its own slot
         TestLayout config = new TestLayout()
-            .Group(s => s.At(100, 200).Gap(50)
+            .Container(s => s.At(100, 200).Gap(50)
                 .Condition(c => c.Any("A")
                     .Input("A")
                     .Input("B")));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        ConditionElement condition = result.FirstInputGroup().Children.FirstCondition();
+        ConditionElement condition = result.FirstContainer().Children.FirstCondition();
         var positions = condition.Children
             .Cast<InputDefinition>()
             .Select(i => (i.InputImages.Single().X, i.InputImages.Single().Y))
@@ -859,7 +859,7 @@ public class TemplateLayoutResolverTests
     // Label -- which of a Group's slots actually survive collapse is a per-game fact this
     // build-time pass has no way to know, so centering is computed entirely by LayoutFilter at
     // render time instead (see LayoutFilterTests's "loose Label centering" section, and
-    // InputGroup's/LayoutFilter.ResolveLooseLabel's doc comments). A loose Label here just
+    // Container's/LayoutFilter.ResolveLooseLabel's doc comments). A loose Label here just
     // resolves against whatever plain origin is ambient, the same as if it weren't inside a
     // Group at all.
 
@@ -870,7 +870,7 @@ public class TemplateLayoutResolverTests
         // origin members actually render from is 300 - (3*40/2) = 240. A loose Label just
         // resolves against that plain origin, unaffected by the fact it's inside a Group.
         TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Input("Whole", i => i.ChildContainer(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A")
                 .Input("B")
                 .Input("C")
@@ -879,7 +879,7 @@ public class TemplateLayoutResolverTests
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstLabelElement();
+        LabelElement label = result.FirstInput().Children.FirstContainer().Children.FirstLabelElement();
         label.Label.Y.ShouldBe(240);
     }
 
@@ -889,7 +889,7 @@ public class TemplateLayoutResolverTests
         // a group member's own *direct* Label is a completely ordinary Label -- it must keep
         // resolving against that Input's own slot position, never the enclosing Group's anchor
         TestLayout config = new TestLayout()
-            .Group(s => s.At(100, 300).Gap(40).VAlign("center")
+            .Container(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", i => i.Label(l => l.Offset(0, 5)))
                 .Input("B")
                 .Input("C")
@@ -897,7 +897,7 @@ public class TemplateLayoutResolverTests
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        InputDefinition a = result.FirstInputGroup().Children.FirstInput();
+        InputDefinition a = result.FirstContainer().Children.FirstInput();
         a.Labels.Single().Y.ShouldBe(a.InputImages.Single().Y + 5);
     }
 
@@ -946,14 +946,14 @@ public class TemplateLayoutResolverTests
     {
         // given a group-level overlay declared with relative (+5,+10) coordinates
         TestLayout config = new TestLayout()
-            .Group(s => s.At(100, 200)
+            .Container(s => s.At(100, 200)
                 .Overlay("frame.png", o => o.Offset(5, 10)));
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then the overlay's position is the group origin plus its offset
-        OverlayDefinition overlay = result.FirstInputGroup().Overlays.Single();
+        OverlayDefinition overlay = result.FirstContainer().Overlays.Single();
         overlay.X.ShouldBe(105);
         overlay.Y.ShouldBe(210);
     }
@@ -977,13 +977,13 @@ public class TemplateLayoutResolverTests
     {
         // given a group with an overlay that has no src attribute in XML
         var config = new LayoutDocument();
-        config.Elements.Add(new GroupNode { Overlays = [new OverlayNode { Src = null }] });
+        config.Elements.Add(new ContainerNode { Overlays = [new OverlayNode { Src = null }] });
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then no overlays appear on the resolved group
-        result.FirstInputGroup().Overlays.ShouldBeEmpty();
+        result.FirstContainer().Overlays.ShouldBeEmpty();
     }
 
     [Fact]
@@ -991,16 +991,16 @@ public class TemplateLayoutResolverTests
     {
         // given a group nested inside another group, with an overlay that has no src attribute in XML
         var config = new LayoutDocument();
-        config.Elements.Add(new GroupNode
+        config.Elements.Add(new ContainerNode
         {
-            Children = [new GroupNode { Overlays = [new OverlayNode { Src = null }] }]
+            Children = [new ContainerNode { Overlays = [new OverlayNode { Src = null }] }]
         });
 
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         // then no overlays appear on the nested group
-        var nestedGroup = (InputGroup)result.FirstInputGroup().Children.Single();
+        var nestedGroup = (Container)result.FirstContainer().Children.Single();
         nestedGroup.Overlays.ShouldBeEmpty();
     }
 

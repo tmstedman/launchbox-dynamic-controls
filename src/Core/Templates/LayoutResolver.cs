@@ -55,7 +55,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     private ILayoutElement BuildNode(ILayoutNode node, BuildContext ctx) => node switch
     {
         InputNode inputXml => BuildInputDefinition(inputXml, ctx),
-        GroupNode groupXml => BuildInputGroup(groupXml, ctx),
+        ContainerNode containerXml => BuildContainer(containerXml, ctx),
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
         ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
         LabelNode labelXml => BuildLooseLabel(labelXml, ctx),
@@ -83,7 +83,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
         // Build a context carrying this input's computed style and identity. Labels and overlays
         // on this input read from inputCtx; nested children also receive inputCtx (rather than a
-        // fresh ctx) so a *loose* Label reached through Group/OneOf/Condition can inherit it
+        // fresh ctx) so a *loose* Label reached through Container/OneOf/Condition can inherit it
         // exactly like a true direct child would — a nested <Input> is unaffected, since it
         // always overrides Style from its own ShowIf/Style/FontSize rather than falling through
         // to whatever's ambient.
@@ -129,93 +129,95 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Children: children);
     }
 
-    /// <summary>Resolves a GroupNode DTO into an InputGroup, included at render time only when
-    /// any descendant has a visible render — the group drops out entirely (itself and any
-    /// Overlay it carries) when nothing inside it is visible. Establishes a
+    /// <summary>Resolves a ContainerNode DTO into a Container. Unlike the old &lt;Group&gt; it
+    /// replaced, a Container never decides its own inclusion at render time — it's always
+    /// rendered once <see cref="Rendering.LayoutFilter"/> reaches it; an explicit wrapping
+    /// &lt;Condition&gt; is how a template author gates it now. This method only establishes a
     /// canvas origin and stacks children vertically: each Input (at any depth through transparent
     /// Conditions) consumes one slot, advancing the y position by Gap. <c>VAlign</c> shifts
     /// that origin up front so the declared Y lands on the first, last, or middle slot rather
     /// than always being the first — using the template's fixed slot count, since this runs once
-    /// at template-load time. When the group also collapses, that fixed-count shift is corrected
-    /// at render time (see <see cref="Rendering.LayoutFilter"/>) against whatever slot count is
-    /// actually left, using the same <see cref="StackVAlign.Shift"/> math with the vAlign this
-    /// method already validated — carried through <see cref="CollapseInfo"/> so a bad value is
-    /// only ever logged once, here.
+    /// at template-load time. When the container also collapses, that fixed-count shift is
+    /// corrected at render time (see <see cref="Rendering.LayoutFilter"/>) against whatever slot
+    /// count is actually left, using the same <see cref="StackVAlign.Shift"/> math with the
+    /// vAlign this method already validated — carried through <see cref="CollapseInfo"/> so a
+    /// bad value is only ever logged once, here.
     ///
-    /// <para>The group's own shape — declared Y (before the shift above), Gap, VAlign, and
-    /// whether it collapses — is attached directly to the returned <see cref="InputGroup"/>
+    /// <para>The container's own shape — declared Y (before the shift above), Gap, VAlign, and
+    /// whether it collapses — is attached directly to the returned <see cref="Container"/>
     /// (rather than threaded through <see cref="BuildContext"/>) so <see
     /// cref="Rendering.LayoutFilter"/> can compute where a loose <c>&lt;Label&gt;</c> placed
-    /// directly inside this group should sit: the visual center of however many of this group's
-    /// slots actually survive for the current game, which is a per-game fact this build-time
-    /// pass has no way to know — see <see cref="InputGroup"/>'s own doc comment.</para>
+    /// directly inside this container should sit: the visual center of however many of this
+    /// container's slots actually survive for the current game, which is a per-game fact this
+    /// build-time pass has no way to know — see <see cref="Container"/>'s own doc comment.</para>
     ///
-    /// <para><c>groupXml.For</c> is unrelated to any of the above — it overrides
-    /// <c>ctx.CurrentInputName</c> for this Group's own children, for a Group reached with no
-    /// enclosing Input at all to have supplied one the ordinary way (see
-    /// <see cref="GroupNode.For"/>).</para>
+    /// <para><c>containerXml.For</c> is unrelated to any of the above — it overrides
+    /// <c>ctx.CurrentInputName</c> for this Container's own children, for a Container reached
+    /// with no enclosing Input at all to have supplied one the ordinary way (see
+    /// <see cref="ContainerNode.For"/>).</para>
     /// </summary>
-    private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
+    private Container BuildContainer(ContainerNode containerXml, BuildContext ctx)
     {
-        double gap = groupXml.Gap ?? 0;
-        int slotCount = CountSlots(groupXml.Children);
-        string vAlign = NormalizeVAlign(groupXml.VAlign);
+        double gap = containerXml.Gap ?? 0;
+        int slotCount = CountSlots(containerXml.Children);
+        string vAlign = NormalizeVAlign(containerXml.VAlign);
         double vAlignShift = StackVAlign.Shift(vAlign, slotCount, gap);
-        double declaredOriginY = groupXml.Y.Resolve(ctx.OriginY);
+        double declaredOriginY = containerXml.Y.Resolve(ctx.OriginY);
 
-        // Merges the Group's own style attributes the same way an Input's do (see ResolveStyle),
-        // so a cluster can declare style="…" once instead of repeating it on every member Input —
-        // but cascadeAmbient: false, so an empty Group doesn't pass a wrapping Input's own
-        // showIf/minOpacity/inactiveBlurRadius through to members several levels inside it (see
-        // ResolveStyle's own doc comment for why this is the Group-specific exception, not Input's).
-        ComputedStyle computed = Resolve(groupXml, ctx, "Group", cascadeAmbient: false);
+        // Merges the Container's own style attributes the same way an Input's do (see
+        // ResolveStyle), so a cluster can declare style="…" once instead of repeating it on
+        // every member Input — but cascadeAmbient: false, so an empty Container doesn't pass a
+        // wrapping Input's own showIf/minOpacity/inactiveBlurRadius through to members several
+        // levels inside it (see ResolveStyle's own doc comment for why this is the
+        // Container-specific exception, not Input's).
+        ComputedStyle computed = Resolve(containerXml, ctx, "Container", cascadeAmbient: false);
 
         var frame = new StackFrame
         {
-            OriginX = groupXml.X.Resolve(ctx.OriginX),
+            OriginX = containerXml.X.Resolve(ctx.OriginX),
             OriginY = declaredOriginY - vAlignShift,
             Gap = gap,
             SlotIndex = 0,
         };
-        // groupXml.For overrides CurrentInputName unconditionally when set -- it's only ever set
-        // when this Group has no enclosing Input of its own to have supplied one (a top-level
-        // Group inside a OneOf sibling of the whole it describes). Lets a loose Label placed
-        // directly inside still find its whole with no enclosing Input to attach to.
-        BuildContext groupCtx = ctx with
+        // containerXml.For overrides CurrentInputName unconditionally when set -- it's only ever
+        // set when this Container has no enclosing Input of its own to have supplied one (a
+        // top-level Container inside a OneOf sibling of the whole it describes). Lets a loose
+        // Label placed directly inside still find its whole with no enclosing Input to attach to.
+        BuildContext containerCtx = ctx with
         {
             Style = computed,
             OriginX = frame.OriginX,
             OriginY = frame.OriginY,
-            CurrentInputName = groupXml.For ?? ctx.CurrentInputName,
+            CurrentInputName = containerXml.For ?? ctx.CurrentInputName,
         };
 
         var children = new List<ILayoutElement>();
-        foreach (ILayoutNode child in groupXml.Children)
+        foreach (ILayoutNode child in containerXml.Children)
         {
-            children.Add(BuildNodeInStack(child, frame, groupCtx));
+            children.Add(BuildNodeInStack(child, frame, containerCtx));
         }
 
-        var group = new InputGroup(
+        var container = new Container(
             Children: children,
-            Overlays: [.. groupXml.Overlays
+            Overlays: [.. containerXml.Overlays
                 .Where(o => o.Src != null)
-                .Select(o => BuildOverlayDefinition(o, groupCtx))],
+                .Select(o => BuildOverlayDefinition(o, containerCtx))],
             DeclaredOriginY: declaredOriginY,
             Gap: gap,
             VAlign: vAlign,
-            Collapse: groupXml.Collapse,
-            ForInputName: groupXml.For);
+            Collapse: containerXml.Collapse,
+            ForInputName: containerXml.For);
 
-        if (groupXml.Collapse)
+        if (containerXml.Collapse)
             CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
 
-        _logger.Debug($"Group (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} vAlign={vAlign} collapse={groupXml.Collapse}): children={group.Children.Count}, overlays={group.Overlays.Count}");
-        return group;
+        _logger.Debug($"Container (at {frame.OriginX},{frame.OriginY} gap={frame.Gap} vAlign={vAlign} collapse={containerXml.Collapse}): children={container.Children.Count}, overlays={container.Overlays.Count}");
+        return container;
     }
 
     /// <summary>
     /// Counts the slots <paramref name="nodes"/> will consume once built, mirroring
-    /// <see cref="BuildNodeInStack"/>'s own slot rule exactly: Input/Group/OneOf each consume
+    /// <see cref="BuildNodeInStack"/>'s own slot rule exactly: Input/Container/OneOf each consume
     /// one slot, and a Condition is transparent, contributing its children's slots instead of
     /// one of its own. Computed ahead of the build so <see cref="StackVAlign.Shift"/> can shift
     /// the origin before the first slot is actually consumed.
@@ -225,7 +227,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     private static int CountSlots(ILayoutNode node) => node switch
     {
         InputNode => 1,
-        GroupNode => 1,
+        ContainerNode => 1,
         OneOfNode => 1,
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
         LabelNode => 0,
@@ -233,10 +235,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     };
 
     /// <summary>
-    /// Validates a Group's <c>vAlign</c> against the values <see cref="StackVAlign.Shift"/>
+    /// Validates a Container's <c>vAlign</c> against the values <see cref="StackVAlign.Shift"/>
     /// recognizes. An unrecognized value is logged and replaced with "top" — the only point in
     /// the pipeline this is ever checked, since render-time re-use of the value (for a
-    /// collapsing group's correction) trusts whatever this method already normalized.
+    /// collapsing container's correction) trusts whatever this method already normalized.
     /// </summary>
     private string NormalizeVAlign(string vAlign) => vAlign switch
     {
@@ -251,8 +253,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
-    /// Builds one layout node within a positioned group's slot loop. Inputs consume one slot
-    /// each and advance the frame's SlotIndex. Nested Groups and OneOfs consume one slot as a
+    /// Builds one layout node within a positioned container's slot loop. Inputs consume one slot
+    /// each and advance the frame's SlotIndex. Nested Containers and OneOfs consume one slot as a
     /// block and own their own inner traversal; Conditions are transparent — their children each
     /// advance the same counter.
     /// </summary>
@@ -268,10 +270,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 (double sx, double sy) = ConsumeSlot(frame);
                 return BuildInputDefinition(inputXml, ctx with { OriginX = sx, OriginY = sy });
             }
-            case GroupNode groupXml:
+            case ContainerNode containerXml:
             {
                 (double sx, double sy) = ConsumeSlot(frame);
-                return BuildInputGroup(groupXml, ctx with { OriginX = sx, OriginY = sy });
+                return BuildContainer(containerXml, ctx with { OriginX = sx, OriginY = sy });
             }
             case OneOfNode oneOfXml:
             {
@@ -303,7 +305,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         (frame.OriginX, frame.OriginY + (frame.SlotIndex++ * frame.Gap));
 
     /// <summary>Resolves a OneOfNode DTO into a OneOf, recursively building each
-    /// alternative branch (Input, Group, or nested OneOf).</summary>
+    /// alternative branch (Input, Condition, or nested OneOf).</summary>
     private OneOf BuildOneOf(OneOfNode oneOfXml, BuildContext ctx)
     {
         var oneOf = new OneOf(
@@ -313,7 +315,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>Resolves a ConditionNode DTO into a ConditionElement, recursively building each
-    /// child (Input, Group, OneOf, or nested Condition).</summary>
+    /// child (Input, Container, OneOf, or nested Condition).</summary>
     private ConditionElement BuildCondition(ConditionNode conditionXml, BuildContext ctx) =>
         BuildConditionElement(conditionXml, [.. conditionXml.Children.Select(c => BuildNode(c, ctx))]);
 
@@ -358,10 +360,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
     /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
     /// Y always resolves against the plain ambient origin — a loose Label centering against its
-    /// enclosing Group's declared position is a per-game fact (which of the group's slots
-    /// actually survive) this build-time pass has no way to know, so it's computed entirely by
-    /// <see cref="Rendering.LayoutFilter"/> at render time instead, from the group's own shape
-    /// (see <see cref="InputGroup"/>'s doc comment); this method never needs to special-case it.
+    /// enclosing Container's declared position is a per-game fact (which of the container's
+    /// slots actually survive) this build-time pass has no way to know, so it's computed
+    /// entirely by <see cref="Rendering.LayoutFilter"/> at render time instead, from the
+    /// container's own shape (see <see cref="Container"/>'s doc comment); this method never
+    /// needs to special-case it.
     /// </summary>
     private LabelDefinition BuildLabelDefinition(LabelNode labelXml, BuildContext ctx)
     {
@@ -383,7 +386,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
 
     /// <summary>
     /// Resolves a &lt;Label&gt; found somewhere other than as a direct child of its own
-    /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/
+    /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Container&gt;/
     /// &lt;OneOf&gt;/&lt;Condition&gt;) against whichever Input is ambient in <paramref name="ctx"/>.
     /// A missing ambient Input is a template-authoring error — logged once, here, at load time,
     /// same as a missing required attribute elsewhere in this file — rather than silently
@@ -402,9 +405,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// <summary>
     /// Resolves an OverlayNode DTO into an OverlayDefinition. Style values flow in via
     /// <paramref name="ctx"/> — an input-level overlay's caller passes inputCtx (whose Style is
-    /// that Input's own computed style); a group-level overlay's caller passes groupCtx (whose
-    /// Style is the Group's own) — both now genuinely populated, not always null the way a
-    /// group-level overlay's used to be before Group could originate its own style.
+    /// that Input's own computed style); a container-level overlay's caller passes containerCtx
+    /// (whose Style is the Container's own) — both now genuinely populated, not always null the
+    /// way a container-level overlay's used to be before Container (né Group) could originate
+    /// its own style.
     /// </summary>
     private OverlayDefinition BuildOverlayDefinition(OverlayNode overlayXml, BuildContext ctx)
     {
@@ -432,7 +436,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// Merges an <see cref="IStyledNode"/>'s own style attributes over its named style (if any)
     /// over whatever <see cref="ComputedStyle"/> is already ambient in <paramref name="ctx"/> —
     /// the shared implementation <see cref="ResolveStyle"/> uses for every element. Only
-    /// <see cref="InputNode"/> and <see cref="GroupNode"/> ever need this overload, since only
+    /// <see cref="InputNode"/> and <see cref="ContainerNode"/> ever need this overload, since only
     /// they're ever treated polymorphically as a cascade origin (see <see cref="IStyledNode"/>'s
     /// doc comment); a leaf calls <see cref="ResolveStyle"/> directly with its own fields.
     /// </summary>
@@ -446,21 +450,21 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// <c>inactiveBlurRadius</c>, only when <paramref name="cascadeAmbient"/> is true — whatever
     /// was already ambient in <paramref name="ctx"/>.
     ///
-    /// <para><paramref name="cascadeAmbient"/> is false only for <see cref="GroupNode"/>
-    /// (see <see cref="BuildInputGroup"/>). A Group exists specifically so a cluster can declare
-    /// style once for its own members — <see cref="BuildInputDefinition"/> passes true (the
-    /// default) for an Input's own resolution, so a member Input that sets nothing of its own
-    /// still sees the Group's own explicit value via <c>ctx.Style</c>. But an Input like
-    /// <c>AxisLeftStick</c> that wraps such a Group *itself* has real visual attributes (its own
-    /// <c>auto-blur</c>, say) that are only meant to govern its own glyph, not this Group's
-    /// members several levels inside it. If the Group's own resolution let that ambient value
-    /// flow through unchanged whenever the Group itself set nothing, a style like
-    /// <c>small-label-vacate</c> — meant to vacate to the built-in default (opacity 0) when
+    /// <para><paramref name="cascadeAmbient"/> is false only for <see cref="ContainerNode"/>
+    /// (see <see cref="BuildContainer"/>). A Container exists specifically so a cluster can
+    /// declare style once for its own members — <see cref="BuildInputDefinition"/> passes true
+    /// (the default) for an Input's own resolution, so a member Input that sets nothing of its
+    /// own still sees the Container's own explicit value via <c>ctx.Style</c>. But an Input like
+    /// <c>AxisLeftStick</c> that wraps such a Container *itself* has real visual attributes (its
+    /// own <c>auto-blur</c>, say) that are only meant to govern its own glyph, not this
+    /// Container's members several levels inside it. If the Container's own resolution let that
+    /// ambient value flow through unchanged whenever the Container itself set nothing, a style
+    /// like <c>small-label-vacate</c> — meant to vacate to the built-in default (opacity 0) when
     /// inactive — would instead inherit the wrapping Input's own <c>minOpacity</c>, fading
-    /// instead of vanishing. Stopping the cascade at an empty Group (rather than letting it
+    /// instead of vanishing. Stopping the cascade at an empty Container (rather than letting it
     /// reach through to whatever's further out) fixes that without touching Input's own
-    /// resolution at all: a Group's *explicit* value still reaches its members exactly as
-    /// intended; only a Group with nothing of its own stops being a pass-through for someone
+    /// resolution at all: a Container's *explicit* value still reaches its members exactly as
+    /// intended; only a Container with nothing of its own stops being a pass-through for someone
     /// else's ambient value.</para>
     ///
     /// <para><c>ShowIf</c> stays a raw string through this chain (like <see cref="StyleNode"/>'s
@@ -472,8 +476,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// <see cref="OverlayDefinition"/> means "nothing in the tree set this," resolved against the
     /// template default later, at evaluation time, not baked in here. <c>FontSize</c> is the one
     /// exception to both of the above — it always falls through regardless of
-    /// <paramref name="cascadeAmbient"/> (a Group's own members still need to reach a template-
-    /// wide font size default through an empty Group), and its template-default tier is already
+    /// <paramref name="cascadeAmbient"/> (a Container's own members still need to reach a
+    /// template-wide font size default through an empty Container), and its template-default tier is already
     /// baked into the root <see cref="BuildContext.Style"/>, set once at the top of the outer
     /// <c>Resolve</c> method, so it's always non-null by the time anything reads it.</para>
     /// </summary>
@@ -515,23 +519,23 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// all Build* calls (ImageSource, NamedStyles, CollapseInfo accumulator) alongside the
     /// <see cref="ComputedStyle"/> currently ambient — the style cascade's whole state at this
     /// point in the tree. The CollapseInfo dictionary is a single shared reference across all
-    /// <c>with</c> clones — mutations are visible to every BuildInputGroup call.
-    /// Use <c>with</c> to produce an inputCtx/groupCtx with <see cref="Style"/> set to that
+    /// <c>with</c> clones — mutations are visible to every BuildContainer call.
+    /// Use <c>with</c> to produce an inputCtx/containerCtx with <see cref="Style"/> set to that
     /// element's own <see cref="ComputedStyle"/>; nested Inputs receive that same context too —
     /// but since a nested Input always overrides <see cref="Style"/> from its own
     /// ShowIf/Style/FontSize (never falling through to whatever was ambient) via its own call to
     /// <c>Resolve</c>, this only ever actually matters for a bare Label found while descending
-    /// through Group/OneOf/Condition on the way to one — letting a loose Label inherit exactly
-    /// what a true direct child of the same Input (or Group) would.
+    /// through Container/OneOf/Condition on the way to one — letting a loose Label inherit
+    /// exactly what a true direct child of the same Input (or Container) would.
     /// <c>CurrentInputName</c> similarly tracks whichever Input is ambient at this point in the
     /// tree, reset whenever a new one is entered, for a bare Label's default coordinate origin —
     /// <see cref="Rendering.LayoutFilter"/> separately rediscovers the same Input during its own
     /// per-game walk, since the resolved <see cref="InputDefinition"/> a loose label belongs to
     /// doesn't exist as an object yet at the point its own children are being built. A loose
-    /// Label's centering against its enclosing Group is handled the same way — entirely by
+    /// Label's centering against its enclosing Container is handled the same way — entirely by
     /// <see cref="Rendering.LayoutFilter"/>, which rediscovers the enclosing
-    /// <see cref="InputGroup"/> during its own walk — so this context carries no equivalent field
-    /// for it; see <see cref="InputGroup"/>'s doc comment.
+    /// <see cref="Container"/> during its own walk — so this context carries no equivalent field
+    /// for it; see <see cref="Container"/>'s doc comment.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
@@ -562,9 +566,9 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double FontSize);
 
     /// <summary>
-    /// Mutable iteration state for one group's slot loop. SlotIndex advances as children consume
-    /// slots; a nested Group creates its own frame — slot counting does not leak across group
-    /// boundaries.
+    /// Mutable iteration state for one container's slot loop. SlotIndex advances as children
+    /// consume slots; a nested Container creates its own frame — slot counting does not leak
+    /// across container boundaries.
     /// </summary>
     private class StackFrame
     {

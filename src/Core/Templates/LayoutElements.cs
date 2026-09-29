@@ -4,53 +4,55 @@ namespace DynamicControls.Templates;
 
 /// <summary>
 /// Marker interface for nodes in the built template tree: InputDefinition (a single generic
-/// input), InputGroup (a conditional or always-included cluster), and OneOf (a mutually-exclusive
-/// alternatives container). Used purely for polymorphic dispatch; structural equality semantics
+/// input), Container (a positioned cluster), and OneOf (a mutually-exclusive alternatives
+/// container). Used purely for polymorphic dispatch; structural equality semantics
 /// would be on the concrete records, not the interface (the layout pipeline already tracks these
 /// nodes by reference identity via ReferenceEqualityComparer).
 /// </summary>
 public interface ILayoutElement;
 
 /// <summary>
-/// A wrapper around a cluster of related inputs (i.e. a &lt;Group&gt;), positioned and gated on
-/// visibility. Included at render time only when any contained input has at least one render
-/// visible under its own ShowIf — otherwise every member (and any Overlay this group carries) is
-/// excluded from rendering entirely (semantic exclusion, not just visual fading). Members still
-/// handle their own individual visibility via showIf when the group itself is included; when
-/// nested inside another group, an InputGroup always occupies one slot as an opaque block (see
+/// A wrapper around a cluster of related inputs (i.e. a &lt;Container&gt;), positioned but never
+/// self-gating: unlike the &lt;Group&gt; it replaced, a Container has no implicit "any member
+/// visible" check of its own — it's always rendered once <see cref="Rendering.LayoutFilter"/>
+/// reaches it. Whoever wraps it (typically an explicit &lt;Condition&gt;) decides whether it
+/// exists at all this game; the Container itself only decides where its members sit. Members
+/// still handle their own individual visibility via showIf once the Container is reached; when
+/// nested inside another Container's stack, one always occupies one slot as an opaque block (see
 /// <see cref="Templates.CollapseGroupBuilder"/>) — its own inner traversal is independent.
 /// </summary>
-/// <param name="Children">Nested layout children — InputDefinition, InputGroup, or OneOf in
+/// <param name="Children">Nested layout children — InputDefinition, Container, or OneOf in
 /// document order.</param>
-/// <param name="Overlays">Overlays declared at the group level. Rendered once when the group is
-/// included; no per-overlay visibility — the group's inclusion does the gating. Lets a cluster
-/// declare shared overlay artwork (e.g. dpad lines) once rather than repeating it on every
-/// member.</param>
-/// <param name="DeclaredOriginY">The group's own declared Y, before any <paramref name="VAlign"/>
-/// shift — i.e. the value a bare `y` attribute resolved to. Together with <paramref
-/// name="Gap"/>/<paramref name="VAlign"/>/<paramref name="Collapse"/>, this is everything
-/// <see cref="Rendering.LayoutFilter"/> needs to compute where a loose <c>&lt;Label&gt;</c>
-/// placed directly inside this group should sit — the visual center of however many of this
-/// group's slots actually survive for the current game, which can only be known at render time
-/// (see <see cref="Rendering.LayoutFilter"/>'s label-centering logic). Kept as plain fields
-/// directly on this record, rather than sharing the per-Input <see cref="CollapseInfo"/>
-/// instance member Inputs are keyed by, so each type stays a single, self-contained concept: this
-/// record fully describes itself; <see cref="CollapseInfo"/> stays purely "how does an arbitrary
-/// Input find its way back to its enclosing group's shape."</param>
-/// <param name="Gap">Vertical spacing between this group's slots. Meaningless unless the group
+/// <param name="Overlays">Overlays declared at the container level. Rendered once whenever the
+/// container itself is reached — no per-overlay visibility, and no gating of their own; an
+/// enclosing Condition decides whether the container (and so these overlays) exists at all this
+/// game. Lets a cluster declare shared overlay artwork (e.g. dpad lines) once rather than
+/// repeating it on every member.</param>
+/// <param name="DeclaredOriginY">The container's own declared Y, before any <paramref
+/// name="VAlign"/> shift — i.e. the value a bare `y` attribute resolved to. Together with
+/// <paramref name="Gap"/>/<paramref name="VAlign"/>/<paramref name="Collapse"/>, this is
+/// everything <see cref="Rendering.LayoutFilter"/> needs to compute where a loose
+/// <c>&lt;Label&gt;</c> placed directly inside this container should sit — the visual center of
+/// however many of this container's slots actually survive for the current game, which can only
+/// be known at render time (see <see cref="Rendering.LayoutFilter"/>'s label-centering logic).
+/// Kept as plain fields directly on this record, rather than sharing the per-Input <see
+/// cref="CollapseInfo"/> instance member Inputs are keyed by, so each type stays a single,
+/// self-contained concept: this record fully describes itself; <see cref="CollapseInfo"/> stays
+/// purely "how does an arbitrary Input find its way back to its enclosing container's shape."</param>
+/// <param name="Gap">Vertical spacing between this container's slots. Meaningless unless it
 /// actually has slotted children; defaults to 0.</param>
 /// <param name="VAlign">Which slot <paramref name="DeclaredOriginY"/> refers to — "top" (default),
 /// "bottom", or "center". Already validated/normalized by <see cref="Templates.LayoutResolver"/>.</param>
-/// <param name="Collapse">Whether this group's slots vacate when hidden. When false, a loose
+/// <param name="Collapse">Whether this container's slots vacate when hidden. When false, a loose
 /// label's center always uses the full nominal slot count — nothing varies by game, since without
 /// collapse slots never vacate, hidden or not.</param>
-/// <param name="ForInputName">Name of the Input this Group builds on behalf of, when it has no
-/// enclosing Input of its own (see <see cref="Templates.GroupNode.For"/>) — lets
+/// <param name="ForInputName">Name of the Input this Container builds on behalf of, when it has
+/// no enclosing Input of its own (see <see cref="Templates.ContainerNode.For"/>) — lets
 /// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label placed
 /// directly inside should attach to, since the render-time walk otherwise only learns "current
 /// input" by actually entering one.</param>
 [ExcludeFromCodeCoverage]
-public record InputGroup(
+public record Container(
     IReadOnlyList<ILayoutElement> Children,
     IReadOnlyList<OverlayDefinition> Overlays,
     double DeclaredOriginY = 0,
@@ -61,31 +63,32 @@ public record InputGroup(
 
 /// <summary>
 /// A mutually-exclusive container: at render time, alternatives are evaluated in document order
-/// and only the first one with a visible render (any-render-visible for an InputDefinition,
-/// any-member-visible for an InputGroup) is included in the output. The rest are dropped
+/// and only the first one with a visible render (any-render-visible for an InputDefinition, its
+/// own explicit check for a Condition) is included in the output. The rest are dropped
 /// entirely. Used to express "render X OR render Y, never both" — e.g., a labelled cluster of
 /// directional inputs vs. a single labelled stick render at the same screen position.
 /// </summary>
 /// <param name="Alternatives">The alternative branches in document order. Each is an
-/// InputDefinition or InputGroup; the first whose visibility check passes is rendered.</param>
+/// InputDefinition or ConditionElement; the first whose visibility check passes is rendered.</param>
 [ExcludeFromCodeCoverage]
 public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement;
 
 /// <summary>
 /// Gates its <see cref="Children"/> on an explicit boolean check over named generic inputs'
 /// label/mapping state, evaluated directly against <see cref="Rendering.VisibilityContext"/> —
-/// unlike every other node, it never folds in structural descendants, so it can gate a subtree
-/// on a name that isn't (or isn't only) one of that subtree's own inputs. Used where
-/// <see cref="InputGroup"/>'s implicit "any descendant visible" rule can't express the needed
-/// condition, e.g. distinguishing "all four directions individually labelled" from "some
-/// subset labelled" when both leave a label on the same whole-control name.
+/// unlike a structural fold, it never depends on what's actually inside it, so it can gate a
+/// subtree on a name that isn't (or isn't only) one of that subtree's own inputs, e.g.
+/// distinguishing "all four directions individually labelled" from "some subset labelled" when
+/// both leave a label on the same whole-control name. This is also the schema's only mechanism
+/// for deciding whether a <see cref="Container"/> exists at all this game, since a Container has
+/// no implicit visibility check of its own.
 /// </summary>
 /// <param name="Mode">Whether <see cref="Names"/> must all match, any one, or none.</param>
 /// <param name="Names">The generic input names the condition checks — not necessarily
 /// descendants of <see cref="Children"/>.</param>
 /// <param name="Match">Whether a name "matches" by having a label or by being mapped.</param>
 /// <param name="Children">Rendered only when the condition evaluates true; dropped entirely
-/// otherwise, the same as an excluded <see cref="InputGroup"/>.</param>
+/// otherwise, the same as anything else that isn't reached.</param>
 [ExcludeFromCodeCoverage]
 public record ConditionElement(
     ConditionMode Mode,
@@ -118,7 +121,7 @@ public enum ConditionMatch
 
 /// <summary>
 /// A single label render that lives outside its owning Input's own direct children — e.g. nested
-/// inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
+/// inside a &lt;Condition&gt; wrapping a &lt;Container&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
 /// rather than directly inside an &lt;Input&gt;. Carries no owner reference of its own: the owning
 /// InputDefinition can't be baked in at resolve time (it's still being constructed while its own
 /// children, including this one, are being built), so <see cref="Rendering.LayoutFilter"/>
@@ -152,12 +155,10 @@ public record LabelElement(LabelDefinition Label) : ILayoutElement;
 /// instead, which additionally includes any loose Condition-gated labels that survived for the
 /// current game (see <see cref="LabelElement"/>); reading this field directly at that point
 /// would silently miss those.</param>
-/// <param name="Children">Nested layout elements — either InputDefinitions or InputGroups in
-/// document order. Structural nesting is how parent/child relationships are expressed: a parent
-/// Input's own image fans out to every InputDefinition in its structural descendant set
-/// (recursive, through nested Inputs and Groups), and each descendant's image fallback resolves
-/// through its structural parent's Name. A duplicate top-level Input with an empty Children
-/// list expresses a strict-self render position (no fan-out).</param>
+/// <param name="Children">Nested layout elements — Container, OneOf, or Condition in document
+/// order (nesting another InputDefinition directly is unusual, and the shipped template no
+/// longer does it at all). A whole control's own <c>showIf="auto"</c> fan-out does <b>not</b>
+/// come from here — see <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>.</param>
 [ExcludeFromCodeCoverage]
 public record InputDefinition(
     string Name,
