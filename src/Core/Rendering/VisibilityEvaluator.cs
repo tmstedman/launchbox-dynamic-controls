@@ -81,6 +81,9 @@ public class VisibilityEvaluator : IVisibilityEvaluator
         {
             ConditionMatch.Label => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name)),
             ConditionMatch.Mapped => IsMapped(ctx.Mapping, name),
+            ConditionMatch.Auto => ctx.IsGameSpecific
+                ? !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name))
+                : IsMapped(ctx.Mapping, name),
             _ => throw new InvalidOperationException($"Unhandled ConditionMatch: {condition.Match}")
         };
 

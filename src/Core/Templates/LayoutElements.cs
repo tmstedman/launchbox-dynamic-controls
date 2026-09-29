@@ -119,7 +119,12 @@ public enum ConditionMatch
     Label,
 
     /// <summary>The name is mapped (a platform button drives it, or its natural button still is).</summary>
-    Mapped
+    Mapped,
+
+    /// <summary>Label mode when the game contributed its own labels, Mapped mode otherwise —
+    /// mirrors <see cref="Rendering.VisibilityFlags.IsVisible"/>'s handling of
+    /// <see cref="ShowIfCondition.Auto"/>.</summary>
+    Auto
 }
 
 /// <summary>

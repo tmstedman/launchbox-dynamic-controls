@@ -402,7 +402,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 | `any` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *at least one* named input matches |
 | `all` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *every* named input matches. An empty name list is always false, never vacuously true |
 | `none` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *no* named input matches |
-| `match` | `label` \| `mapping` | no | What "matches" means for each name — `label` checks `HasLabel`, `mapping` checks `IsMapped`. Default `label` |
+| `match` | `label` \| `mapping` \| `auto` | no | What "matches" means for each name — `label` checks `HasLabel`, `mapping` checks `IsMapped`, `auto` checks `HasLabel` when the game contributed its own labels and `IsMapped` otherwise (mirrors `showIf="auto"` — see [`showIf` modes](#showif-modes)). Default `label` |
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
@@ -431,7 +431,7 @@ The parser emits errors to the configured `ILogger` for:
 - `style="X"` (on `<Input>`, `<Container>`, `<Overlay>`, or `<Label>`) where `X` isn't a `<Style name="X">` in `<Head>`
 - `<Input showIf="X">` (or `<Container>`/`<Overlay>`) where `X` isn't a known mode
 - `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
-- `<Condition match="X">` where `X` isn't `label` or `mapping` (falls back to `label`)
+- `<Condition match="X">` where `X` isn't `label`, `mapping`, or `auto` (falls back to `label`)
 - A loose `<Label>` (see [Loose `<Label>`](#loose-label)) with no enclosing `<Input>` at all, ambient or otherwise
 
 Errors don't abort the load — the bad element is skipped (or, for coordinate problems, replaced with `+0`), the rest of the template parses normally. Check the log file after a problem template to see what was dropped.
