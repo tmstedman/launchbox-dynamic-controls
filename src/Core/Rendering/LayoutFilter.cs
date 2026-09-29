@@ -32,6 +32,8 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var inputsToRender = new List<InputDefinition>();
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
         var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>>(ReferenceEqualityComparer.Instance);
+        var looseInputOverlays = new Dictionary<InputDefinition, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
+        var looseContainerOverlays = new Dictionary<Container, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
 
         // A top-level Container naming an Input via ForInputName has no enclosing Input of its
         // own to learn "current input" from by actually entering one -- this resolves that name
@@ -43,16 +45,16 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
 
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, currentInput: null, currentContainer: null, topLevelInputsByName, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput: null, currentContainer: null, topLevelInputsByName, ctx);
         }
 
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
         Dictionary<InputDefinition, double> adjustments = ComputeCollapseAdjustments(inputsToRender, template, ctx, renderSet);
 
-        // Merged once, here, so InputLabelRenderer never needs to know a static
-        // (InputDefinition.Labels) and a loose (Condition-gated) source ever existed
-        // separately -- LayoutInput.Labels is simply the complete set for this render pass.
-        // Images have no loose source (there is no longer a separate Render concept), so
+        // Merged once, here, so InputLabelRenderer/InputImageRenderer never need to know a static
+        // (InputDefinition.Labels/Overlays) and a loose (Condition-gated) source ever existed
+        // separately -- LayoutInput.Labels/Overlays are simply the complete sets for this render
+        // pass. Images have no loose source (there is no longer a separate Render concept), so
         // LayoutInput.Images is always exactly InputDefinition.InputImages.
         var layout = inputsToRender.Select(input =>
         {
@@ -63,7 +65,8 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 flags,
                 input.InputImages,
                 [.. input.Labels, .. looseLabels.GetValueOrDefault(input, [])
-                    .Select(entry => ResolveLooseLabel(entry, template, ctx, renderSet))]);
+                    .Select(entry => ResolveLooseLabel(entry, template, ctx, renderSet))],
+                [.. input.Overlays, .. looseInputOverlays.GetValueOrDefault(input, [])]);
         }).ToList();
 
         return new FilteredLayout(Inputs: layout, GroupOverlays: includedGroupOverlays);
@@ -206,24 +209,37 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// before reaching it here. OneOfs render the first alternative with a visible render and
     /// drop the rest.
     /// <paramref name="currentInput"/> tracks whichever InputDefinition was most recently entered
-    /// (reset each time a nested one is), so a bare <see cref="LabelElement"/> reached through
-    /// Container/OneOf/Condition attaches to the right owner — it can only be reached at all by
-    /// having already recursed through every wrapping Condition/Container/OneOf above it, which
-    /// is what makes nested Conditions AND together for free, with no separate "accumulate and
-    /// re-check" step needed here. A top-level <see cref="Container.ForInputName"/> overrides it
-    /// outright via <paramref name="topLevelInputsByName"/>, for a Container reached with no
-    /// enclosing Input at all to have supplied one the ordinary way.
+    /// (reset each time a nested one is), so a bare <see cref="LabelElement"/>/<see
+    /// cref="OverlayElement"/> reached through Container/OneOf/Condition attaches to the right
+    /// owner — it can only be reached at all by having already recursed through every wrapping
+    /// Condition/Container/OneOf above it, which is what makes nested Conditions AND together for
+    /// free, with no separate "accumulate and re-check" step needed here. A top-level <see
+    /// cref="Container.ForInputName"/> overrides it outright via <paramref
+    /// name="topLevelInputsByName"/>, for a Container reached with no enclosing Input at all to
+    /// have supplied one the ordinary way.
     /// <paramref name="currentContainer"/> tracks whichever Container was most recently entered,
     /// the same way — reset on entering a nested InputDefinition or overwritten on entering a
     /// nested Container (never transparent), unaffected by OneOf/Condition — so a loose Label
-    /// knows which container's shape to center against (see <see cref="ResolveLooseLabel"/>); a
-    /// label with no enclosing container at all just keeps its build-time value unchanged.
+    /// knows which container's shape to center against (see <see cref="ResolveLooseLabel"/>) and
+    /// a loose Overlay with no ambient Input knows which container's aggregate flags to join; an
+    /// element with no enclosing container at all is unaffected either way.
+    /// <para>A loose <see cref="OverlayElement"/> is looked up by owner in strict priority order:
+    /// an ambient Input (<paramref name="looseInputOverlays"/>, merged into that Input's own
+    /// Overlays the same way a loose Label merges into its Labels — see <see cref="Filter"/>),
+    /// else an ambient Container (<paramref name="looseContainerOverlays"/>, merged into that
+    /// Container's own <see cref="Container.Overlays"/> right where its case below already emits
+    /// them, since by then every loose overlay in its subtree has necessarily already been
+    /// collected — children are always visited before a Container emits its overlays), else
+    /// neither at all, in which case it renders unconditionally right here, with no fold-in
+    /// target to gate against.</para>
     /// </summary>
     private void CollectVisibleElement(
         ILayoutElement element,
         List<InputDefinition> inputsToRender,
         List<LayoutGroupOverlay> includedGroupOverlays,
         Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>> looseLabels,
+        Dictionary<InputDefinition, List<OverlayDefinition>> looseInputOverlays,
+        Dictionary<Container, List<OverlayDefinition>> looseContainerOverlays,
         InputDefinition? currentInput,
         Container? currentContainer,
         Dictionary<string, InputDefinition> topLevelInputsByName,
@@ -235,7 +251,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, input, currentContainer: null, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, input, currentContainer: null, topLevelInputsByName, ctx);
                 }
                 break;
             case Container container:
@@ -247,12 +263,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                         : currentInput;
                 foreach (ILayoutElement child in container.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, containerCurrentInput, currentContainer: container, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, containerCurrentInput, currentContainer: container, topLevelInputsByName, ctx);
                 }
-                if (container.Overlays.Count > 0)
+                List<OverlayDefinition> containerOverlays = [.. container.Overlays, .. looseContainerOverlays.GetValueOrDefault(container, [])];
+                if (containerOverlays.Count > 0)
                 {
                     VisibilityFlags containerFlags = _evaluator.AggregateFlags(container, ctx);
-                    foreach (OverlayDefinition overlay in container.Overlays)
+                    foreach (OverlayDefinition overlay in containerOverlays)
                     {
                         includedGroupOverlays.Add(new LayoutGroupOverlay(overlay, containerFlags));
                     }
@@ -263,7 +280,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentContainer, topLevelInputsByName, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput, currentContainer, topLevelInputsByName, ctx);
                         break;
                     }
                 }
@@ -271,7 +288,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, currentInput, currentContainer, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput, currentContainer, topLevelInputsByName, ctx);
                 }
                 break;
             case ConditionElement:
@@ -286,6 +303,21 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 // No ambient Input reached this point at all -- LayoutResolver already logged
                 // this as a template error when it was parsed; nothing more to do at render time.
                 break;
+            case OverlayElement oe when currentInput != null:
+                looseInputOverlays.TryAdd(currentInput, []);
+                looseInputOverlays[currentInput].Add(oe.Overlay);
+                break;
+            case OverlayElement oe when currentContainer != null:
+                looseContainerOverlays.TryAdd(currentContainer, []);
+                looseContainerOverlays[currentContainer].Add(oe.Overlay);
+                break;
+            case OverlayElement oe:
+                // No ambient Input or Container at all -- unlike a loose Label, this isn't a
+                // template error: there's simply no fold-in target to gate against, so it
+                // renders unconditionally as its own template-level overlay. Its own ShowIf still
+                // governs its own opacity, the same as a direct child always has.
+                includedGroupOverlays.Add(new LayoutGroupOverlay(oe.Overlay, VisibilityFlags.None));
+                break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {element.GetType().Name}");
         }
@@ -298,6 +330,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         OneOf oneOf => oneOf.Alternatives.SelectMany(CollectInputLeaves),
         ConditionElement condition => condition.Children.SelectMany(CollectInputLeaves),
         LabelElement => [],
+        OverlayElement => [],
         _ => throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}")
     };
 }

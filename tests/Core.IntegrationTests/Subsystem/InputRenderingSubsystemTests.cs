@@ -503,6 +503,56 @@ public class InputRenderingSubsystemTests
         label.Top.ShouldBe(794.5);
     }
 
+    [Fact]
+    public void Render_ConditionGatedLooseOverlay_AttachesToEnclosingInputAndUsesItsOwnFlags()
+    {
+        // given an Input whose only child is a Condition wrapping a bare Overlay -- no wrapping
+        // Input needed, unlike the "strict-self render position" pattern this generalizes away:
+        // an extra decoration that should only render once this specific input is mapped
+        var overlayElement = new OverlayElement(new OverlayDefinition(X: 5, Y: 5, Source: "extra.png", ShowIf: Mapped));
+        var condition = new ConditionElement(ConditionMode.Any, ["ButtonA"], ConditionMatch.Mapped, [overlayElement]);
+        var inputA = new InputDefinition(
+            Name: "ButtonA",
+            InputImages: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png", ShowIf: Mapped)],
+            Overlays: [],
+            Labels: [],
+            Children: [condition]);
+
+        _images.With(src: "ButtonA.png", generic: "ButtonA.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([inputA]);
+        ResolvedMapping mapping = MappingOf(("A", "ButtonA"));
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then the loose overlay rendered with ButtonA's own identity and its own IsMapped flag,
+        // exactly as if it had been a direct child of the Input
+        RenderedImage overlayImage = result.Images.Single(i => i.Source == "extra.png");
+        overlayImage.Opacity.ShouldBe(1.0);
+        overlayImage.InputName.ShouldBe("ButtonA");
+    }
+
+    [Fact]
+    public void Render_ConditionGatedLooseOverlay_WithNoAmbientOwner_RendersUnconditionally()
+    {
+        // given a top-level Condition (no enclosing Input or Container at all) wrapping a bare
+        // Overlay -- there's no fold-in target, so it renders unconditionally rather than being
+        // treated as a template-authoring error the way a loose Label would be
+        var overlayElement = new OverlayElement(new OverlayDefinition(X: 0, Y: 0, Source: "background.png"));
+        var condition = new ConditionElement(ConditionMode.Any, ["ButtonA"], ConditionMatch.Mapped, [overlayElement]);
+
+        Template template = TemplateOf([condition]);
+
+        // when the service renders with ButtonA mapped, so the wrapping Condition's own gate passes
+        RenderResult result = _service.Render(template, MappingOf(("A", "ButtonA")), LabelsOf());
+
+        // then the overlay rendered at full opacity, with no InputName of its own
+        RenderedImage overlayImage = result.Images.Single(i => i.Source == "background.png");
+        overlayImage.Opacity.ShouldBe(1.0);
+        overlayImage.InputName.ShouldBeNull();
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(
