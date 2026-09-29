@@ -112,14 +112,17 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         }
     }
 
-    /// <summary>Parses one layout-child element (Input / Container / OneOf / Condition / Label) and
-    /// appends it to <paramref name="output"/>. Returns true if the element name matched one of
-    /// those (caller is responsible for handling unknown names). An Input or Condition that
-    /// fails its own validation is treated as matched but not appended.
-    /// <para>A loose Label parsed here (i.e. one that isn't a direct child of its own Input —
-    /// <see cref="ParseInputNode"/> intercepts that case before ever calling this method) has no
-    /// Input of its own to attach to; it resolves against whichever Input is ambient at this
-    /// point in the tree, at build time (see <c>LayoutResolver.BuildContext.CurrentInputName</c>).</para>
+    /// <summary>Parses one layout-child element (Input / Container / OneOf / Condition / Label /
+    /// Overlay) and appends it to <paramref name="output"/>. Returns true if the element name
+    /// matched one of those (caller is responsible for handling unknown names). An Input,
+    /// Condition, or Overlay that fails its own validation is treated as matched but not appended.
+    /// <para>A loose Label or Overlay parsed here (i.e. one that isn't a direct child of its own
+    /// Input/Container — <see cref="ParseInputNode"/> and <see cref="ParseContainerNode"/> each
+    /// intercept that case before ever calling this method) has no Input/Container of its own to
+    /// attach to; it resolves against whichever is ambient at this point in the tree, at build
+    /// time (see <c>LayoutResolver.BuildContext.CurrentInputName</c>). Unlike a loose Label, a
+    /// loose Overlay with no ambient owner at all is not a template error — it just renders
+    /// unconditionally (see <see cref="OverlayElement"/>).</para>
     /// </summary>
     private bool TryParseLayoutChild(XmlElement node, List<ILayoutNode> output)
     {
@@ -141,6 +144,10 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
                 return true;
             case "Label":
                 output.Add(ParseLabel(node));
+                return true;
+            case "Overlay":
+                OverlayNode? overlay = ParseOverlay(node);
+                if (overlay != null) output.Add(overlay);
                 return true;
             default:
                 return false;
@@ -239,17 +246,20 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
         foreach (XmlElement child in containerNode.ChildNodes.OfType<XmlElement>())
         {
-            if (TryParseLayoutChild(child, container.Children)) continue;
-
+            // Checked before TryParseLayoutChild, mirroring ParseInputNode: Overlay is also a
+            // valid loose child of Container/OneOf/Condition (see TryParseLayoutChild), but an
+            // Overlay that's a *direct* child of its own Container always belongs on that
+            // Container's own Overlays list (aggregate-flagged), never the generic Children list.
             if (child.Name == "Overlay")
             {
                 OverlayNode? overlay = ParseOverlay(child);
                 if (overlay != null) container.Overlays.Add(overlay);
+                continue;
             }
-            else
-            {
-                _logger.Error($"Invalid element <{child.Name}> in <Container>");
-            }
+
+            if (TryParseLayoutChild(child, container.Children)) continue;
+
+            _logger.Error($"Invalid element <{child.Name}> in <Container>");
         }
 
         _logger.Debug($"Container: x={container.X}, y={container.Y}, gap={container.Gap}, vAlign={container.VAlign}, for={container.For}, children={container.Children.Count}, overlays={container.Overlays.Count}");

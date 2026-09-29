@@ -21,14 +21,16 @@ public record FilteredLayout(
 /// here so downstream stages don't recompute them per image.
 /// <para><see cref="Images"/> is always identical to <see cref="Input"/>'s own static
 /// <c>InputImages</c> — there is no longer a separate Render concept, so an Input's image can't
-/// vary by game. <see cref="Labels"/> is <see cref="Input"/>'s own static <c>Labels</c>
-/// concatenated with whatever bare Label elements survived a wrapping Condition/Group/OneOf this
-/// game (see <see cref="Templates.LabelElement"/>), merged once here by <see cref="LayoutFilter"/>
-/// so <see cref="InputLabelRenderer"/> never needs to know two sources existed. Both fields are
-/// kept for shape symmetry between the two renderers even though only Labels ever actually
-/// differs from its InputDefinition source. A surrounding Condition only ever decided whether a
-/// loose label exists at all this game — it still carries its own ShowIf governing its own
-/// opacity, exactly as if it had been a direct child.</para>
+/// vary by game. <see cref="Labels"/> and <see cref="Overlays"/> are each <see cref="Input"/>'s
+/// own static set concatenated with whatever bare Label/Overlay elements survived a wrapping
+/// Condition/Container/OneOf this game (see <see cref="Templates.LabelElement"/>/
+/// <see cref="Templates.OverlayElement"/>), merged once here by <see cref="LayoutFilter"/> so
+/// <see cref="InputLabelRenderer"/>/<see cref="InputImageRenderer"/> never need to know two
+/// sources existed. All three fields are kept for shape symmetry between the renderers even
+/// though only Labels and Overlays ever actually differ from their InputDefinition source. A
+/// surrounding Condition only ever decided whether a loose label/overlay exists at all this game
+/// — it still carries its own ShowIf governing its own opacity, exactly as if it had been a
+/// direct child.</para>
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record LayoutInput(
@@ -36,10 +38,12 @@ public record LayoutInput(
     double YOffset,
     VisibilityFlags Flags,
     IReadOnlyList<InputImageDefinition>? Images = null,
-    IReadOnlyList<LabelDefinition>? Labels = null)
+    IReadOnlyList<LabelDefinition>? Labels = null,
+    IReadOnlyList<OverlayDefinition>? Overlays = null)
 {
     public IReadOnlyList<InputImageDefinition> Images { get; init; } = Images ?? [];
     public IReadOnlyList<LabelDefinition> Labels { get; init; } = Labels ?? [];
+    public IReadOnlyList<OverlayDefinition> Overlays { get; init; } = Overlays ?? [];
 }
 
 /// <summary>

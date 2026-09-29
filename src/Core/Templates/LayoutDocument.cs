@@ -298,11 +298,13 @@ public record InputNode : ILayoutNode, IStyledNode
 }
 
 /// <summary>
-/// Raw DTO for an Overlay child element in Layout.xml, specifying an arbitrary image and its canvas position.
-/// Nested within InputNode; consumed by TemplateService,
-/// which resolves the image path and maps it to an OverlayDefinition.
+/// Raw DTO for an Overlay child element in Layout.xml, specifying an arbitrary image and its
+/// canvas position. Usually a direct child of InputNode or ContainerNode, but — implementing
+/// ILayoutNode — can also appear as a loose child of OneOfNode/ConditionNode/&lt;Body&gt; itself,
+/// the same as LabelNode; consumed by TemplateService, which resolves the image path and maps it
+/// to an OverlayDefinition.
 /// </summary>
-public record OverlayNode
+public record OverlayNode : ILayoutNode
 {
     /// <summary>
     /// Image filename as written in Layout.xml, passed to TemplateImageResolver to produce a full path.
