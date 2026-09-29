@@ -553,6 +553,39 @@ public class InputRenderingSubsystemTests
         overlayImage.InputName.ShouldBeNull();
     }
 
+    [Fact]
+    public void Render_ConditionMatchAuto_NoLabelsAtAll_StillRendersMappedPair()
+    {
+        // Regression: a pair of Inputs wrapped in <Condition ... match="auto"> (the real
+        // AxisTriggerLeft/ButtonLeftShoulder shape) used to strand both entirely for a ROM with
+        // no labels at all -- "auto" wasn't a recognized match value, so it silently defaulted to
+        // "label", which this Condition can never satisfy when there are no labels anywhere.
+        // Each Input's own image is ShowIf=Always so the test isolates the Condition's own
+        // include/drop decision from each Input's individual fade.
+        var triggerLeft = Input(
+            name: "AxisTriggerLeft",
+            images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisTriggerLeft.png")]);
+        var shoulderLeft = Input(
+            name: "ButtonLeftShoulder",
+            images: [new InputImageDefinition(X: 0, Y: 100, ImageFile: "ButtonLeftShoulder.png")]);
+        var condition = new ConditionElement(
+            ConditionMode.Any, ["AxisTriggerLeft", "ButtonLeftShoulder"], ConditionMatch.Auto,
+            [triggerLeft, shoulderLeft]);
+
+        _images.With(src: "AxisTriggerLeft.png", generic: "AxisTriggerLeft.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "ButtonLeftShoulder.png", generic: "ButtonLeftShoulder.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([condition]);
+        ResolvedMapping mapping = MappingOf(("X", "ButtonLeftShoulder"));
+
+        // when the service renders with default (non-game-specific) labels -- i.e. none at all
+        RenderResult result = _service.Render(template, mapping, LabelsOf(isGameSpecific: false));
+
+        // then both survive -- Auto fell back to checking IsMapped, which ButtonLeftShoulder
+        // satisfies, so the Condition passes and neither Input is dropped
+        result.Images.Select(i => i.InputName).ShouldBe(["AxisTriggerLeft", "ButtonLeftShoulder"]);
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(

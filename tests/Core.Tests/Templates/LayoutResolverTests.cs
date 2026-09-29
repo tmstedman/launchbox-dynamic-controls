@@ -757,6 +757,20 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_ConditionMatchAuto_Parses()
+    {
+        // Regression guard: "auto" used to be an unrecognized match value (only label/mapping
+        // were), silently defaulting to label and stranding any Condition gated purely on
+        // mapping for a ROM with no labels at all — see ConditionMatch.Auto's own doc comment.
+        TestLayout config = new TestLayout().Condition(c => c.Any("A").Match("auto").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Match.ShouldBe(ConditionMatch.Auto);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
     public void Resolve_ConditionUnknownMatch_LogsErrorAndDefaultsToLabel()
     {
         TestLayout config = new TestLayout().Condition(c => c.Any("A").Match("bogus").Input("A"));

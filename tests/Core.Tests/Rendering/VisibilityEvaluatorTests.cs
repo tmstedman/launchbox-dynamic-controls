@@ -341,6 +341,60 @@ public class VisibilityEvaluatorTests
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
 
+    // Regression guard: match="auto" used to be unrecognized (only label/mapping were valid),
+    // silently defaulting to label -- which stranded a Condition gating a ROM with no labels at
+    // all (not game-specific, no defaults either), even when the named input was mapped fine.
+    [Fact]
+    public void AnyVisible_ConditionMatchAuto_NotGameSpecific_ChecksMappingNotLabel()
+    {
+        // given a name that's labelled but not mapped, and default (non-game-specific) labels --
+        // Auto behaves like Mapped here, so a Label-only match would wrongly pass
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["A"] = "Jump" },
+            mapping: EmptyMapping(),
+            isGameSpecific: false);
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchAuto_NotGameSpecific_TrueWhenMapped()
+    {
+        // the exact real-world case this fixes: no labels anywhere, but the name is mapped
+        VisibilityContext ctx = Ctx(
+            mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }),
+            isGameSpecific: false);
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchAuto_GameSpecific_ChecksLabelNotMapping()
+    {
+        // given a name that's mapped but not labelled, with game-specific labels present --
+        // Auto behaves like Label here, so a Mapped-only match would wrongly pass
+        VisibilityContext ctx = Ctx(
+            mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }),
+            isGameSpecific: true);
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchAuto_GameSpecific_TrueWhenLabelled()
+    {
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["A"] = "Jump" },
+            mapping: EmptyMapping(),
+            isGameSpecific: true);
+        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
     [Fact]
     public void AnyVisible_ConditionAll_EmptyNamesList_ReturnsFalse()
     {
