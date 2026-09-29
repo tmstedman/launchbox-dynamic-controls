@@ -1,3 +1,4 @@
+using DynamicControls;
 using DynamicControls.InputMapping;
 
 namespace DynamicControls.Labels;
