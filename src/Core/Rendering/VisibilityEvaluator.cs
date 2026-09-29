@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using DynamicControls;
 using DynamicControls.InputMapping;
 using DynamicControls.Templates;
 
@@ -20,8 +21,8 @@ public interface IVisibilityEvaluator
 
     /// <summary>
     /// Returns the visibility flags for an input, fanning out across its whole-control part
-    /// names (per <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>, looked up by
-    /// the input's own name — empty for an input that isn't a whole). A whole is considered
+    /// names (per <see cref="WholeInputs.PartsOf"/>, looked up by the input's own name — empty
+    /// for an input that isn't a whole). A whole is considered
     /// active when any of its direction names has a label or mapping — that's what makes a stick
     /// or Dpad light up as a unit even though the whole itself is never directly mapped.
     /// </summary>
@@ -185,7 +186,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// Pipeline input assembled once per render pass and threaded through LayoutFilter,
 /// InputImageRenderer, and VisibilityEvaluator. Holds the mapping, label text, and game-specific
 /// flag for the current template; whole-control fan-out is read directly from
-/// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>, needing no per-template state.
+/// <see cref="WholeInputs.PartsOf"/>, needing no per-template state.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record VisibilityContext(
