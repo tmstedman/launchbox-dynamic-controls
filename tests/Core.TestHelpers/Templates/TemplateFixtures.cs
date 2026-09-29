@@ -17,7 +17,7 @@ public static class TemplateFixtures
         ITemplateImageSource? imageSource = null,
         IReadOnlyList<ILayoutElement>? elements = null,
         IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
-        IReadOnlyDictionary<InputDefinition, IReadOnlyList<InputDefinition>>? inputDescendants = null)
+        IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>>? inputDescendants = null)
     {
         IReadOnlyList<ILayoutElement> elementList = elements ?? [];
         return new(

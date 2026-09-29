@@ -287,11 +287,18 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         (frame.OriginX, frame.OriginY + (frame.SlotIndex++ * frame.Gap));
 
     /// <summary>Resolves a OneOfNode DTO into a OneOf, recursively building each
-    /// alternative branch (Input, Group, or nested OneOf).</summary>
+    /// alternative branch (Input, Group, or nested OneOf). When <see cref="OneOfNode.For"/> is
+    /// set, it becomes the ambient CurrentInputName for the alternatives — this is what lets a
+    /// top-level OneOf with no enclosing Input still anchor a loose Label to the whole it's
+    /// describing (see the doc comment on OneOfNode.For).</summary>
     private OneOf BuildOneOf(OneOfNode oneOfXml, BuildContext ctx)
     {
+        BuildContext alternativesCtx = oneOfXml.For is { } forName
+            ? ctx with { CurrentInputName = forName }
+            : ctx;
         var oneOf = new OneOf(
-            Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, ctx))]);
+            Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, alternativesCtx))],
+            ForInputName: oneOfXml.For);
         _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
     }

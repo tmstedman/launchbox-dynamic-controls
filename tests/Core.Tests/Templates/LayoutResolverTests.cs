@@ -633,6 +633,38 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_TopLevelOneOfWithFor_CarriesForInputNameOntoTheResolvedOneOf()
+    {
+        // given a top-level OneOf naming the Input it builds on behalf of, with no enclosing
+        // Input of its own -- LayoutFilter needs this at render time to know which Input a loose
+        // Label reached inside should attach to
+        TestLayout config = new TestLayout()
+            .OneOf(o => o.For("ButtonDpad").Input("A"));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.Elements.FirstOneOf().ForInputName.ShouldBe("ButtonDpad");
+    }
+
+    [Fact]
+    public void Resolve_LooseLabelUnderTopLevelOneOfWithFor_ResolvesAgainstTheNamedInputInsteadOfLoggingAnError()
+    {
+        // given a top-level OneOf (no enclosing Input) whose for= names the Input a loose Label
+        // reached through its Condition should attach to -- the mechanism that lets a whole
+        // control's merged-label cluster live as a sibling of its own bare Input rather than
+        // nested inside it
+        TestLayout config = new TestLayout()
+            .OneOf(o => o.For("ButtonDpad")
+                .Condition(c => c.Any("X").LooseLabel(l => l.Offset(-10, 20))));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        LabelElement label = result.Elements.FirstOneOf().Alternatives.FirstCondition().Children.FirstLabelElement();
+        label.Label.X.ShouldBe(-10);
+        label.Label.Y.ShouldBe(20);
+    }
+
+    [Fact]
     public void Resolve_UnknownNodeType_Throws()
     {
         // given a layout containing an ILayoutNode subtype that BuildNode doesn't handle
