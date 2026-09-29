@@ -572,6 +572,45 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_OneOfFor_ParsedOntoNode()
+    {
+        // given a top-level OneOf naming the Input it builds on behalf of
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <OneOf for='ButtonDpad'>
+                  <Input name='Primary' />
+                </OneOf>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<OneOfNode>().Single().For.ShouldBe("ButtonDpad");
+    }
+
+    [Fact]
+    public void LoadLayout_OneOfWithoutFor_LeavesItNull()
+    {
+        // given an ordinary OneOf with no for= attribute -- the common case, reached through an
+        // enclosing Input that supplies CurrentInputName the ordinary way
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <OneOf>
+                  <Input name='Primary' />
+                </OneOf>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<OneOfNode>().Single().For.ShouldBeNull();
+    }
+
+    [Fact]
     public void LoadLayout_InvalidOneOfChild_IsLoggedAndSkipped()
     {
         // given a OneOf containing an unrecognised element alongside a valid alternative

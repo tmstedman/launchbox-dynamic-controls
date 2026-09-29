@@ -17,9 +17,11 @@ public interface IVisibilityEvaluator
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
     /// <summary>
-    /// Returns the visibility flags for an input, fanning out across its structural descendants.
-    /// A parent input is considered active when any descendant has a label or mapping — that's
-    /// what makes a complex input (e.g. a stick with directional children) light up as a unit.
+    /// Returns the visibility flags for an input, fanning out across the names in
+    /// <see cref="VisibilityContext.InputDescendants"/> (a whole control's direction names, per
+    /// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>). A whole is considered
+    /// active when any of its direction names has a label or mapping — that's what makes a stick
+    /// or Dpad light up as a unit even though the whole itself is never directly mapped.
     /// </summary>
     VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx);
 
@@ -91,9 +93,9 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)
     {
-        IEnumerable<InputDefinition> all = ctx.InputDescendants[input].Prepend(input);
-        bool hasLabel = all.Any(c => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(c.Name)));
-        bool isMapped = all.Any(c => IsMapped(ctx.Mapping, c.Name));
+        IEnumerable<string> names = ctx.InputDescendants[input].Prepend(input.Name);
+        bool hasLabel = names.Any(n => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(n)));
+        bool isMapped = names.Any(n => IsMapped(ctx.Mapping, n));
         return new VisibilityFlags(hasLabel, isMapped);
     }
 
@@ -181,11 +183,11 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// <summary>
 /// Pipeline input assembled once per render pass and threaded through LayoutFilter,
 /// InputImageRenderer, and VisibilityEvaluator. Holds the mapping, label text, game-specific
-/// flag, and pre-computed fan-out index for the current game.
+/// flag, and the whole-control fan-out names for the current template.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record VisibilityContext(
     ResolvedMapping Mapping,
     IReadOnlyDictionary<string, string> LabelText,
     bool IsGameSpecific,
-    IReadOnlyDictionary<InputDefinition, IReadOnlyList<InputDefinition>> InputDescendants);
+    IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>> InputDescendants);
