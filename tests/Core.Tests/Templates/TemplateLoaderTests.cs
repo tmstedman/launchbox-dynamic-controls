@@ -527,6 +527,45 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_GroupFor_ParsedOntoNode()
+    {
+        // given a top-level Group naming the Input it builds on behalf of
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Group for='ButtonDpad'>
+                  <Input name='A' />
+                </Group>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<GroupNode>().Single().For.ShouldBe("ButtonDpad");
+    }
+
+    [Fact]
+    public void LoadLayout_GroupWithoutFor_LeavesItNull()
+    {
+        // given an ordinary Group with no for= attribute -- the common case, reached through an
+        // enclosing Input that supplies CurrentInputName the ordinary way
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Group>
+                  <Input name='A' />
+                </Group>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<GroupNode>().Single().For.ShouldBeNull();
+    }
+
+    [Fact]
     public void LoadLayout_GroupOverlayMissingSrc_IsSkippedAndLogged()
     {
         // given a Group whose Overlay is missing a src attribute
@@ -569,45 +608,6 @@ public class TemplateLoaderTests
         OneOfNode oneOf = result.Elements.OfType<OneOfNode>().Single();
         oneOf.Alternatives.OfType<InputNode>().Select(i => i.Name)
             .ShouldBe(["Primary", "Fallback"]);
-    }
-
-    [Fact]
-    public void LoadLayout_OneOfFor_ParsedOntoNode()
-    {
-        // given a top-level OneOf naming the Input it builds on behalf of
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <OneOf for='ButtonDpad'>
-                  <Input name='Primary' />
-                </OneOf>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<OneOfNode>().Single().For.ShouldBe("ButtonDpad");
-    }
-
-    [Fact]
-    public void LoadLayout_OneOfWithoutFor_LeavesItNull()
-    {
-        // given an ordinary OneOf with no for= attribute -- the common case, reached through an
-        // enclosing Input that supplies CurrentInputName the ordinary way
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <OneOf>
-                  <Input name='Primary' />
-                </OneOf>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<OneOfNode>().Single().For.ShouldBeNull();
     }
 
     [Fact]

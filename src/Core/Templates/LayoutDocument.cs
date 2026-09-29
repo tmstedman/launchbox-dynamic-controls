@@ -163,6 +163,14 @@ public record GroupNode : ILayoutNode, IStyledNode
     /// <inheritdoc />
     public double? FontSize { get; set; }
 
+    /// <summary>Optional generic input name this Group builds on behalf of, when it has no
+    /// enclosing &lt;Input&gt; of its own (e.g. a top-level Group inside a &lt;OneOf&gt; sibling
+    /// of the whole it describes). Sets the ambient <c>CurrentInputName</c> for everything
+    /// inside — in particular, a loose &lt;Label&gt; placed directly in this Group still needs to
+    /// know which Input's Labels list to merge into. Unset when the Group is already reached
+    /// through an enclosing Input, which supplies this ambiently on its own.</summary>
+    public string? For { get; set; }
+
     /// <summary>Nested layout children — Input, Group, OneOf, or Condition in document order. The
     /// group is included whenever any descendant has a visible render, recursing through nested
     /// Groups, Conditions, and the active branch of nested OneOfs.</summary>
@@ -188,14 +196,6 @@ public record OneOfNode : ILayoutNode
     /// <summary>The alternative branches in document order — each is an InputNode or
     /// GroupNode. Only the first whose visibility check passes is rendered.</summary>
     public List<ILayoutNode> Alternatives { get; set; } = [];
-
-    /// <summary>Optional generic input name this OneOf builds on behalf of, when it has no
-    /// enclosing &lt;Input&gt; of its own (e.g. a top-level OneOf sibling of the whole it
-    /// describes). Sets the ambient <c>CurrentInputName</c> for everything inside — in
-    /// particular, a loose &lt;Label&gt; reached through a nested Group/Condition still needs to
-    /// know which Input's Labels list to merge into. Unset when the OneOf is already reached
-    /// through an enclosing Input, which supplies this ambiently on its own.</summary>
-    public string? For { get; set; }
 }
 
 /// <summary>

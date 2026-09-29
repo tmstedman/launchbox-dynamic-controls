@@ -44,6 +44,11 @@ public interface ILayoutElement;
 /// <param name="Collapse">Whether this group's slots vacate when hidden. When false, a loose
 /// label's center always uses the full nominal slot count — nothing varies by game, since without
 /// collapse slots never vacate, hidden or not.</param>
+/// <param name="ForInputName">Name of the Input this Group builds on behalf of, when it has no
+/// enclosing Input of its own (see <see cref="Templates.GroupNode.For"/>) — lets
+/// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label placed
+/// directly inside should attach to, since the render-time walk otherwise only learns "current
+/// input" by actually entering one.</param>
 [ExcludeFromCodeCoverage]
 public record InputGroup(
     IReadOnlyList<ILayoutElement> Children,
@@ -51,7 +56,8 @@ public record InputGroup(
     double DeclaredOriginY = 0,
     double Gap = 0,
     string VAlign = "top",
-    bool Collapse = false) : ILayoutElement;
+    bool Collapse = false,
+    string? ForInputName = null) : ILayoutElement;
 
 /// <summary>
 /// A mutually-exclusive container: at render time, alternatives are evaluated in document order
@@ -62,13 +68,8 @@ public record InputGroup(
 /// </summary>
 /// <param name="Alternatives">The alternative branches in document order. Each is an
 /// InputDefinition or InputGroup; the first whose visibility check passes is rendered.</param>
-/// <param name="ForInputName">Name of the Input this OneOf builds on behalf of, when it has no
-/// enclosing Input of its own (see <see cref="Templates.OneOfNode.For"/>) — lets
-/// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label inside
-/// should attach to, since the render-time walk otherwise only learns "current input" by
-/// actually entering one.</param>
 [ExcludeFromCodeCoverage]
-public record OneOf(IReadOnlyList<ILayoutElement> Alternatives, string? ForInputName = null) : ILayoutElement;
+public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement;
 
 /// <summary>
 /// Gates its <see cref="Children"/> on an explicit boolean check over named generic inputs'

@@ -149,6 +149,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// directly inside this group should sit: the visual center of however many of this group's
     /// slots actually survive for the current game, which is a per-game fact this build-time
     /// pass has no way to know — see <see cref="InputGroup"/>'s own doc comment.</para>
+    ///
+    /// <para><c>groupXml.For</c> is unrelated to any of the above — it overrides
+    /// <c>ctx.CurrentInputName</c> for this Group's own children, for a Group reached with no
+    /// enclosing Input at all to have supplied one the ordinary way (see
+    /// <see cref="GroupNode.For"/>).</para>
     /// </summary>
     private InputGroup BuildInputGroup(GroupNode groupXml, BuildContext ctx)
     {
@@ -172,7 +177,17 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             Gap = gap,
             SlotIndex = 0,
         };
-        BuildContext groupCtx = ctx with { Style = computed, OriginX = frame.OriginX, OriginY = frame.OriginY };
+        // groupXml.For overrides CurrentInputName unconditionally when set -- it's only ever set
+        // when this Group has no enclosing Input of its own to have supplied one (a top-level
+        // Group inside a OneOf sibling of the whole it describes). Lets a loose Label placed
+        // directly inside still find its whole with no enclosing Input to attach to.
+        BuildContext groupCtx = ctx with
+        {
+            Style = computed,
+            OriginX = frame.OriginX,
+            OriginY = frame.OriginY,
+            CurrentInputName = groupXml.For ?? ctx.CurrentInputName,
+        };
 
         var children = new List<ILayoutElement>();
         foreach (ILayoutNode child in groupXml.Children)
@@ -188,7 +203,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
             DeclaredOriginY: declaredOriginY,
             Gap: gap,
             VAlign: vAlign,
-            Collapse: groupXml.Collapse);
+            Collapse: groupXml.Collapse,
+            ForInputName: groupXml.For);
 
         if (groupXml.Collapse)
             CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
@@ -287,18 +303,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         (frame.OriginX, frame.OriginY + (frame.SlotIndex++ * frame.Gap));
 
     /// <summary>Resolves a OneOfNode DTO into a OneOf, recursively building each
-    /// alternative branch (Input, Group, or nested OneOf). When <see cref="OneOfNode.For"/> is
-    /// set, it becomes the ambient CurrentInputName for the alternatives — this is what lets a
-    /// top-level OneOf with no enclosing Input still anchor a loose Label to the whole it's
-    /// describing (see the doc comment on OneOfNode.For).</summary>
+    /// alternative branch (Input, Group, or nested OneOf).</summary>
     private OneOf BuildOneOf(OneOfNode oneOfXml, BuildContext ctx)
     {
-        BuildContext alternativesCtx = oneOfXml.For is { } forName
-            ? ctx with { CurrentInputName = forName }
-            : ctx;
         var oneOf = new OneOf(
-            Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, alternativesCtx))],
-            ForInputName: oneOfXml.For);
+            Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, ctx))]);
         _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
     }
