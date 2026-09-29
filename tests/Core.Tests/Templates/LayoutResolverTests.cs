@@ -273,10 +273,12 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_NestedChildInput_DoesNotInheritShowIfFromParent()
+    public void Resolve_NestedChildInput_InheritsShowIfFromParent()
     {
         // given a parent input that sets showIf="label" and a child input that sets nothing
-        // The cascade is intentionally broken at structural boundaries — child inputs start fresh.
+        // Consistent with Group's own cascade to its members: a structural child that sets
+        // nothing of its own falls through to whatever's ambient, the same as a Label/Overlay
+        // reaching through the same nesting always has.
         TestLayout config = new TestLayout()
             .Input("Parent", p => p.ShowIf("label")
                 .Child("Child"));
@@ -284,9 +286,61 @@ public class TemplateLayoutResolverTests
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the child's image is Always — it does not inherit the parent's showIf
+        // then the child's image inherits the parent's showIf
         InputDefinition child = result.FirstInput().Children.FirstInput();
-        child.InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Always);
+        child.InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Label);
+    }
+
+    [Fact]
+    public void Resolve_NestedChildInput_OwnExplicitShowIfWinsOverParent()
+    {
+        // given a parent input that sets showIf="label" and a child that sets its own showIf
+        TestLayout config = new TestLayout()
+            .Input("Parent", p => p.ShowIf("label")
+                .Child("Child", c => c.ShowIf("mapping")));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the child's own explicit value wins over whatever's ambient from the parent
+        InputDefinition child = result.FirstInput().Children.FirstInput();
+        child.InputImages.Single().ShowIf.ShouldBe(ShowIfCondition.Mapped);
+    }
+
+    [Fact]
+    public void Resolve_GroupWithNoOwnStyle_DoesNotPassAWrappingInputsAmbientStyleToMembers()
+    {
+        // given an Input with its own explicit minOpacity, wrapping a Group that sets nothing of
+        // its own -- the Group must not relay the Input's ambient value to its member, or a style
+        // meant to vacate fully (no minOpacity of its own, relying on the built-in default of 0)
+        // would instead fade, exactly the real small-label-vacate regression this guards against
+        TestLayout config = new TestLayout()
+            .Input("AxisLeftStick", i => i.MinOpacity(0.3)
+                .ChildGroup(g => g.Input("AxisLeftStickUp")));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the member's own MinOpacity is null -- it never saw the wrapping Input's 0.3
+        InputDefinition member = result.FirstInput().Children.FirstInputGroup().Children.FirstInput();
+        member.InputImages.Single().MinOpacity.ShouldBeNull();
+    }
+
+    [Fact]
+    public void Resolve_GroupWithItsOwnStyle_StillPassesItToMembers()
+    {
+        // given a Group that sets its own explicit minOpacity -- cascadeAmbient: false only
+        // blocks an ambient value passing *through* an empty Group; the Group's own explicit
+        // value must still reach members that set nothing themselves
+        TestLayout config = new TestLayout()
+            .Group(g => g.MinOpacity(0.5).Input("ButtonA"));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the member inherits the Group's own explicit value
+        InputDefinition member = result.FirstInputGroup().Children.FirstInput();
+        member.InputImages.Single().MinOpacity.ShouldBe(0.5);
     }
 
     // --- Image filename derivation ---

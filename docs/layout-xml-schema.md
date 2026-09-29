@@ -48,20 +48,22 @@ Allowed values:
 
 `showIf` can be set on:
 - A named `<Style>` in `<Head>` — applied to any element that references the style
-- An `<Input>` — governs its own image, and is inherited by its `<Overlay>` children that don't set their own
+- An `<Input>` or `<Group>` — governs an Input's own image, and is inherited by whatever's reachable from it that doesn't set its own (see [Style cascade](#style-cascade))
 - An `<Overlay>` — wins over the inherited value
 
 ### Style cascade
 
-Each visual attribute (`fontSize`, `minOpacity`, `inactiveBlurRadius`, `showIf`) is resolved in priority order:
+`style`, `showIf`, `minOpacity`, `inactiveBlurRadius`, and `fontSize` all resolve through the same cascade, and every element that carries visual attributes participates in it — `<Input>` and `<Group>` as origins whose result flows down to whatever they contain, `<Overlay>`/`<Label>` as the leaves at the end of it. Each attribute is resolved in priority order:
 
-1. **Explicit attribute on the element** — `<Input minOpacity="0.5">`
-2. **Named style reference** — `<Input style="foo">` looks up the `<Style name="foo">` in `<Head>`
-3. **Inherited from parent** — for an `<Overlay>` inside an `<Input>`, the Input's attribute is inherited
-4. **Template default** — the unnamed `<Style>` in `<Head>`
-5. **Built-in default** — `fontSize=28`, `minOpacity=0`, `inactiveBlurRadius=0`
+1. **Explicit attribute on the element itself** — `<Input minOpacity="0.5">`, `<Group style="foo">`
+2. **Named style reference** — `style="foo"` looks up the `<Style name="foo">` in `<Head>`
+3. **Whatever's already ambient** — the nearest enclosing `<Input>`/`<Group>`'s own resolved value, itself resolved the same way
+4. **Template default** — the unnamed `<Style>` in `<Head>` (`fontSize`/`minOpacity`/`inactiveBlurRadius` only — the unnamed form doesn't carry `showIf`, see `<Style>` below)
+5. **Built-in default** — `fontSize=28`, `minOpacity=0`, `inactiveBlurRadius=0`, `showIf` *(omitted)*
 
-Explicit attributes always win. Use named styles to share visual treatment across many inputs without repetition.
+Explicit attributes always win. Use a named style, or a `<Group>`'s own attributes, to share visual treatment across many inputs without repeating it on each one.
+
+**One exception**: a `<Group>` that sets nothing of its own for `showIf`/`minOpacity`/`inactiveBlurRadius` does *not* pass an ambient value through to its members (tier 3 is skipped for those three attributes specifically, though not for `fontSize`, which always keeps falling through). A `<Group>` exists to declare a shared value *for its own members*, not to relay whatever its enclosing `<Input>` happened to set for a completely different purpose — an analog stick's own `auto-blur` fade, say, isn't meant to reach four levels down into a `small-label-vacate` direction inside it and turn its vacate-to-zero into a fade instead. A `<Group>` that *does* set its own explicit value still passes it to members exactly as you'd expect; only an empty one stops being a pass-through for someone else's ambient value.
 
 ### Image resolution
 
@@ -147,10 +149,10 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 |---|---|---|---|
 | `name` | string | **yes** | Generic input name. Input with no name is skipped + logged |
 | `style` | string | no | Named style reference (`<Style name="...">` in `<Head>`) |
-| `showIf` | enum | no | Governs this Input's own image; inherited by `<Overlay>` children that don't set their own |
-| `minOpacity` | double | no | Governs this Input's own image; inherited by `<Overlay>` |
-| `inactiveBlurRadius` | double | no | Governs this Input's own image; inherited by `<Overlay>` |
-| `fontSize` | double | no | Inherited by `<Label>` |
+| `showIf` | enum | no | Governs this Input's own image; falls through to whatever's reachable from it that sets its own (`<Overlay>`, a nested `<Input>`, ...) — see [Style cascade](#style-cascade) |
+| `minOpacity` | double | no | Governs this Input's own image; falls through the same way |
+| `inactiveBlurRadius` | double | no | Governs this Input's own image; falls through the same way |
+| `fontSize` | double | no | Falls through to `<Label>` the same way |
 | `x` | coordinate | no | Also the position of this Input's own image. Origin for nested elements with relative coords. Default `+0` |
 | `y` | coordinate | no | Same. Default `+0` |
 | `width` | double | no | This Input's own image render width. NaN = use the image's natural width |
@@ -164,7 +166,7 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 - `<Overlay>` — additional image
 - `<Input>`, `<Group>`, `<OneOf>`, `<Condition>` — nested layout
 
-**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's own image fans out to the child's image for fallback (a child input that can't find its own image uses the parent's). A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
+**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's own image fans out to the child's image for fallback (a child input that can't find its own image uses the parent's). The parent's `showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` are also what the child falls through to via the [style cascade](#style-cascade) when the child sets none of its own — same as a `<Label>`/`<Overlay>` reachable from the parent would. A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
 
 **Strict-self render position**: A duplicate top-level `<Input>` with no nested children expresses "render the parent input's image at this position, independent of its descendants" — used by some templates to put an extra render in a different slot.
 
@@ -219,9 +221,10 @@ An arbitrary image rendered at a position, with no implicit relationship to the 
 | `y` | coordinate | no | Same |
 | `width` | double | no | NaN = natural |
 | `height` | double | no | NaN = natural |
-| `showIf` | enum | no | Inherited from Input when nested in one |
-| `minOpacity` | double | no | Inherited |
-| `inactiveBlurRadius` | double | no | Inherited |
+| `style` | string | no | Named style reference — see [Style cascade](#style-cascade) |
+| `showIf` | enum | no | Falls through the cascade when unset — see [Style cascade](#style-cascade) |
+| `minOpacity` | double | no | Same |
+| `inactiveBlurRadius` | double | no | Same |
 
 **Placement**: Overlays can be children of `<Input>` (visibility inherits from the Input) or `<Group>` (visible once when the group is included), or anywhere a render-context exists.
 
@@ -238,16 +241,18 @@ Where to draw the label text for this input. The text content itself comes from 
 | `x` | coordinate | no | Relative to Input's origin |
 | `y` | coordinate | no | Same |
 | `align` | enum | no | `left`, `center`, `right`. Default `left`. Lower-cased on read |
-| `fontSize` | double | no | Defaults to inherited from Input, then template default |
+| `style` | string | no | Named style reference, for `fontSize` only — a Label has no `minOpacity`/`inactiveBlurRadius` of its own |
+| `fontSize` | double | no | Falls through the cascade when unset — see [Style cascade](#style-cascade) |
 
 A label with an unparseable coordinate logs the error and keeps the default (+0).
 
 ### `<Group>` — positioned, conditional cluster
 
-A vertical list of inputs, each spaced `gap` pixels below the last. Which slot sits at `y` itself depends on `vAlign`: by default (`vAlign="top"`) the first child sits at the Group's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on. Two purposes, always in force together:
+A vertical list of inputs, each spaced `gap` pixels below the last. Which slot sits at `y` itself depends on `vAlign`: by default (`vAlign="top"`) the first child sits at the Group's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on. Three purposes, always in force together:
 
 1. **Conditional inclusion**: when no descendant has a visible render, the *entire group* is excluded from `inputsToRender` — its labels aren't rendered, its overlays aren't drawn. This is "semantic exclusion", not just fading. Each child still decides its own individual visibility independently when the group *is* included.
 2. **Shared overlays**: an `<Overlay>` declared at the group level renders once when the group is included, instead of being repeated on every member.
+3. **Shared style**: `style`/`showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` declared on the Group flow to its member Inputs and Overlay children the same way an Input's own attributes flow to its Labels and Overlays — see [Style cascade](#style-cascade), including the one exception that applies only here (an *empty* Group doesn't relay a wrapping Input's own ambient value through to members).
 
 ```xml
 <Group x="312" y="291" gap="45" collapse="true">
@@ -266,6 +271,11 @@ A vertical list of inputs, each spaced `gap` pixels below the last. Which slot s
 | `gap` | double | no | Vertical spacing between children. Default 0 |
 | `vAlign` | `top` \| `bottom` \| `center` | no | Which slot `y` refers to. Default `top` — see below |
 | `collapse` | bool (`true`/anything-else) | no | When `true`, hidden children vacate their slot and later children shift up to close the gap |
+| `style` | string | no | Named style reference — see [Style cascade](#style-cascade) |
+| `showIf` | enum | no | Default for member Inputs/Overlays that don't set their own — see [Style cascade](#style-cascade) |
+| `minOpacity` | double | no | Same |
+| `inactiveBlurRadius` | double | no | Same |
+| `fontSize` | double | no | Same |
 
 **`vAlign`** shifts the group's whole origin *before* slots are laid out, so it changes where every child ends up, not just one of them:
 
@@ -370,8 +380,8 @@ The parser emits errors to the configured `ILogger` for:
 - Element with a missing required attribute (e.g. `<Input>` without `name`)
 - Element with an unparseable coordinate
 - Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Overlay>`, `<Label>`, `<Group>`, `<OneOf>`, `<Condition>` was expected
-- `<Input style="X">` where `X` isn't a `<Style name="X">` in `<Head>`
-- `<Input showIf="X">` where `X` isn't a known mode
+- `style="X"` (on `<Input>`, `<Group>`, `<Overlay>`, or `<Label>`) where `X` isn't a `<Style name="X">` in `<Head>`
+- `<Input showIf="X">` (or `<Group>`/`<Overlay>`) where `X` isn't a known mode
 - `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
 - `<Condition match="X">` where `X` isn't `label` or `mapping` (falls back to `label`)
 - A loose `<Label>` (see [Loose `<Label>`](#loose-label)) with no enclosing `<Input>` at all, ambient or otherwise
