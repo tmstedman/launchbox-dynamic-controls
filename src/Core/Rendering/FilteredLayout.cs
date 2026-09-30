@@ -23,8 +23,8 @@ public record FilteredLayout(
 /// <c>InputImages</c> — there is no longer a separate Render concept, so an Input's image can't
 /// vary by game. <see cref="Labels"/> and <see cref="Overlays"/> are each <see cref="Input"/>'s
 /// own static set concatenated with whatever bare Label/Overlay elements survived a wrapping
-/// Condition/Container/OneOf this game (see <see cref="Templates.LabelElement"/>/
-/// <see cref="Templates.OverlayElement"/>), merged once here by <see cref="LayoutFilter"/> so
+/// Condition/Container/OneOf this game (see <see cref="LabelElement"/>/
+/// <see cref="OverlayElement"/>), merged once here by <see cref="LayoutFilter"/> so
 /// <see cref="InputLabelRenderer"/>/<see cref="InputImageRenderer"/> never need to know two
 /// sources existed. All three fields are kept for shape symmetry between the renderers even
 /// though only Labels and Overlays ever actually differ from their InputDefinition source. A
