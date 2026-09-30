@@ -19,7 +19,7 @@ public interface ILayoutElement;
 /// exists at all this game; the Container itself only decides where its members sit. Members
 /// still handle their own individual visibility via showIf once the Container is reached; when
 /// nested inside another Container's stack, one always occupies one slot as an opaque block (see
-/// <see cref="Templates.CollapseGroupBuilder"/>) — its own inner traversal is independent.
+/// <see cref="CollapseGroupBuilder"/>) — its own inner traversal is independent.
 /// </summary>
 /// <param name="Children">Nested layout children — InputDefinition, Container, or OneOf in
 /// document order.</param>
@@ -45,12 +45,12 @@ public interface ILayoutElement;
 /// <param name="Gap">Vertical spacing between this container's slots. Meaningless unless it
 /// actually has slotted children; defaults to 0.</param>
 /// <param name="VAlign">Which slot <paramref name="DeclaredOriginY"/> refers to — "top" (default),
-/// "bottom", or "center". Already validated/normalized by <see cref="Templates.LayoutResolver"/>.</param>
+/// "bottom", or "center". Already validated/normalized by <see cref="LayoutResolver"/>.</param>
 /// <param name="Collapse">Whether this container's slots vacate when hidden. When false, a loose
 /// label's center always uses the full nominal slot count — nothing varies by game, since without
 /// collapse slots never vacate, hidden or not.</param>
 /// <param name="ForInputName">Name of the Input this Container builds on behalf of, when it has
-/// no enclosing Input of its own (see <see cref="Templates.ContainerNode.For"/>) — lets
+/// no enclosing Input of its own (see <see cref="ContainerNode.For"/>) — lets
 /// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label placed
 /// directly inside should attach to, since the render-time walk otherwise only learns "current
 /// input" by actually entering one.</param>
@@ -187,7 +187,7 @@ public record OverlayElement(OverlayDefinition Overlay) : ILayoutElement;
 /// <param name="Children">Nested layout elements — Container, OneOf, or Condition in document
 /// order (nesting another InputDefinition directly is unusual, and the shipped template no
 /// longer does it at all). A whole control's own <c>showIf="auto"</c> fan-out does <b>not</b>
-/// come from here — see <see cref="DynamicControls.WholeInputs.PartsOf"/>.</param>
+/// come from here — see <see cref="WholeInputs.PartsOf"/>.</param>
 [ExcludeFromCodeCoverage]
 public record InputDefinition(
     string Name,

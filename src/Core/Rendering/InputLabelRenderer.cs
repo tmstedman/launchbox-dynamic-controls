@@ -1,5 +1,3 @@
-using DynamicControls.Templates;
-
 namespace DynamicControls.Rendering;
 
 /// <summary>
