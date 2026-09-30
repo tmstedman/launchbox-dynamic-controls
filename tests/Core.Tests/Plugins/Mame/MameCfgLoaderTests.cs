@@ -17,6 +17,7 @@ public class MameCfgLoaderTests
     private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly IFileSystem _fs = TestFs.Create();
     private readonly IJoycodeMappingLoader _joycodeMappingLoader = Substitute.For<IJoycodeMappingLoader>();
+    private readonly IDelay _delay = Substitute.For<IDelay>();
     private readonly MameCfgLoader _underTest;
 
     public MameCfgLoaderTests()
@@ -32,7 +33,7 @@ public class MameCfgLoaderTests
             ["JOYCODE_1_COIN"] = ["Coin"],
         });
         _joycodeMappingLoader.Load().Returns(joycodeMapping);
-        _underTest = new MameCfgLoader(_logger, _fs, _joycodeMappingLoader);
+        _underTest = new MameCfgLoader(_logger, _fs, _joycodeMappingLoader, _delay);
     }
 
     private void StubXml(string xml)
@@ -44,16 +45,45 @@ public class MameCfgLoaderTests
     [Fact]
     public void Load_FileMissing_ReturnsNullAndDoesNotParse()
     {
-        // given no cfg file at the given path
+        // given no cfg file at the given path, on every retry attempt
         _fs.FileExists(CfgPath).Returns(false);
 
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then null is returned, no XML is loaded, and the joycode mapping is not even fetched
+        // then null is returned, no XML is loaded, and the joycode mapping is not even fetched --
+        // all retries are exhausted first, with a delay between each
         result.ShouldBeNull();
         _fs.DidNotReceive().OpenRead(Arg.Any<string>());
         _joycodeMappingLoader.DidNotReceive().Load();
+        _fs.Received(3).FileExists(CfgPath);
+        _delay.Received(2).Sleep(Arg.Any<int>());
+    }
+
+    [Fact]
+    public void Load_FileAppearsOnRetry_ReturnsOverrides()
+    {
+        // given the file is momentarily missing (MAME still mid-write on exit from a prior
+        // launch) but shows up by the second check
+        _fs.FileExists(CfgPath).Returns(false, true);
+        _fs.OpenRead(CfgPath).Returns(_ => new MemoryStream(Encoding.UTF8.GetBytes("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """)));
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then the retry closes the race and the file is parsed normally
+        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
+        _delay.Received(1).Sleep(Arg.Any<int>());
     }
 
     [Fact]
