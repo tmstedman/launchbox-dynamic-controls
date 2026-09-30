@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using DynamicControls;
 using DynamicControls.InputMapping;
 using DynamicControls.Templates;
 
@@ -15,7 +14,7 @@ public interface IVisibilityEvaluator
     /// delegate to AnyRenderVisible; OneOfs pass when any alternative passes; Conditions pass
     /// on their own explicit check. A Container has no case of its own — unlike the &lt;Group&gt;
     /// it replaced, it never decides its own visibility, so it's never reached as a bare
-    /// alternative to ask this of directly (see <see cref="Templates.Container"/>'s doc comment).
+    /// alternative to ask this of directly (see <see cref="Container"/>'s doc comment).
     /// </summary>
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
