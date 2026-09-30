@@ -23,7 +23,8 @@ public interface IMameCfgLoader
 public class MameCfgLoader(
     ILogger logger,
     IFileSystem fs,
-    IJoycodeMappingLoader joycodeMappingLoader) : IMameCfgLoader
+    IJoycodeMappingLoader joycodeMappingLoader,
+    IDelay delay) : IMameCfgLoader
 {
     /// <summary>
     /// A true analogue port (DIAL, PADDLE, PEDAL, TRACKBALL_X/Y, ...) carries its "standard"
@@ -35,14 +36,24 @@ public class MameCfgLoader(
     /// </summary>
     private static readonly string[] SequenceTypes = ["standard", "increment", "decrement"];
 
+    /// <summary>
+    /// MAME rewrites a game's cfg on every clean exit, so a relaunch soon after closing the same
+    /// game can land while MAME is still mid-write (most likely a write-then-rename, which makes
+    /// the target genuinely not exist for a moment) — indistinguishable from the file never having
+    /// been written at all. A short bounded retry closes that race; it costs nothing extra on a
+    /// genuine first-ever launch, since that case still fails on the very first check.
+    /// </summary>
+    private const int MaxAttempts = 3;
+    private const int RetryDelayMs = 50;
+
     private readonly ILogger _logger = logger;
     private readonly IFileSystem _fs = fs;
     private readonly IJoycodeMappingLoader _joycodeMappingLoader = joycodeMappingLoader;
+    private readonly IDelay _delay = delay;
 
     public Dictionary<string, List<string>>? Load(string path)
     {
-        _logger.Debug($"MAME cfg path: {path}, Exists: {_fs.FileExists(path)}");
-        if (!_fs.FileExists(path)) return null;
+        if (!WaitForFile(path)) return null;
 
         JoycodeMapping joycodeMapping = _joycodeMappingLoader.Load();
 
@@ -105,6 +116,23 @@ public class MameCfgLoader(
         }
 
         return overrides;
+    }
+
+    /// <summary>
+    /// Retries <see cref="IFileSystem.FileExists"/> a few times, a short delay apart, before
+    /// accepting that the file genuinely isn't there. See <see cref="MaxAttempts"/>.
+    /// </summary>
+    private bool WaitForFile(string path)
+    {
+        for (int attempt = 1; attempt <= MaxAttempts; attempt++)
+        {
+            bool exists = _fs.FileExists(path);
+            _logger.Debug($"MAME cfg path: {path}, Exists: {exists} (attempt {attempt}/{MaxAttempts})");
+            if (exists) return true;
+            if (attempt < MaxAttempts) _delay.Sleep(RetryDelayMs);
+        }
+
+        return false;
     }
 
     /// <summary>

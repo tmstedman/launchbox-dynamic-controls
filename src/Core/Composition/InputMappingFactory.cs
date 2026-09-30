@@ -52,7 +52,7 @@ internal static class InputMappingFactory
         if (transforms == null)
         {
             var joycodes = new JoycodeMappingLoader(logger, lfs);
-            var mameCfgLoader = new MameCfgLoader(logger, fs, joycodes);
+            var mameCfgLoader = new MameCfgLoader(logger, fs, joycodes, new SystemDelay());
             transforms = [new MameInputMappingSource(logger, mameCfgLoader), retroArch.Transform];
         }
 
