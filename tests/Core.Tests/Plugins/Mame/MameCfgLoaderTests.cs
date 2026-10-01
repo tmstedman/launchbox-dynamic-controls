@@ -158,9 +158,69 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_IgnoresPlayer3PlusAndUnknownPortTypes()
+    public void Load_SecondStartSlotBoundToPlayerOne_KeepsItsDigit()
     {
-        // given a cfg with P3 / unrecognized port types alongside one valid P1 port
+        // the 20pacgal shape: a cabinet with two game-select buttons for ONE player spends two
+        // start slots on them, both wired to player 1's own pad. The digit is a slot number, not
+        // proof of whose controller drives it, so START3 has to survive to carry its own label --
+        // dropping everything above "1" discarded the second button before it could be labelled
+        StubXml("""
+            <mameconfig>
+              <system name='20pacgal'>
+                <input>
+                  <port type='START1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                  <port type='START3'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then START1 still collapses to the canonical bare START every Labels.xml entry is
+        // written against, while START3 keeps its digit as a distinct button
+        result.ShouldBeDictionaryOf(
+            ("START", ["ButtonA"]),
+            ("START3", ["ButtonB"]));
+    }
+
+    [Fact]
+    public void Load_GenuineSecondPlayerStart_ProducesNothing()
+    {
+        // a real player-2 start button -- passing the port through is harmless because
+        // JOYCODE_2_* is never in the vocabulary, the same safeguard that makes P2_* safe
+        StubXml("""
+            <mameconfig>
+              <system name='20pacgal'>
+                <input>
+                  <port type='START2'>
+                    <newseq type='standard'>JOYCODE_2_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeEmpty();
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("unknown JOYCODE") && s.Contains("START2")));
+    }
+
+    [Fact]
+    public void Load_UnconventionalPortTypes_BoundToPlayerOne_AreKept()
+    {
+        // the pc_1942 / funcube shape: MAME parks a player-one control in a slot whose name
+        // suggests otherwise -- a PlayChoice-10's game-menu button on SERVICE, a touch button on
+        // P3. Both are bound to player one's own pad, so both have to survive to be labelled.
+        // Dropping them on the port's NAME is what used to lose them; reachability is the
+        // joycode's business, checked at translation (see the two tests below).
         StubXml("""
             <mameconfig>
               <system name='galaga'>
@@ -182,8 +242,36 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then only the P1 port survives — P3+ never normalizes, SERVICE is unrecognized
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
+        // then each keeps its own port name, so Labels.xml can address them separately
+        result.ShouldBeDictionaryOf(
+            ("P3_BUTTON1", ["ButtonB"]),
+            ("SERVICE", ["ButtonC"]),
+            ("P1_BUTTON1", ["ButtonA"]));
+    }
+
+    [Fact]
+    public void Load_UnconventionalPortType_BoundToAnotherPlayer_ProducesNothing()
+    {
+        // the counterweight to the test above: now that no port is filtered by name, the joycode
+        // is the only thing keeping another player's controls out -- a genuine player-3 button
+        // translates to nothing and is dropped at the translation step
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P3_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_3_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeEmpty();
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("unknown JOYCODE") && s.Contains("P3_BUTTON1")));
     }
 
     [Fact]

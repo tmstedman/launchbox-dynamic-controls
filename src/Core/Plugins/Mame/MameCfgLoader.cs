@@ -136,27 +136,30 @@ public class MameCfgLoader(
     }
 
     /// <summary>
-    /// Normalizes a MAME cfg port type to the canonical input name used by the platform XML and
-    /// labels. Returns null for ports we ignore (player 3-4, unrecognized types).
+    /// Maps a MAME cfg port type onto the platform button vocabulary Controllers.xml and
+    /// Labels.xml are written against. Only <c>START1</c>/<c>COIN1</c> are renamed; every other
+    /// port keeps its own name, and null comes back only when the cfg named no type at all.
     ///
-    /// <para><c>P1_*</c>/<c>P2_*</c> per-player actions (BUTTONn, JOYSTICK_*, AD_STICK_*, ...)
-    /// pass through unchanged, prefix included. A single-player game sometimes has no room left
-    /// in its P1 input slots for an extra axis or button, so MAME borrows a P2 slot for it — the
-    /// player-1 controller's own JOYCODE still drives that <c>P2_*</c> port (see #16). Keeping
-    /// the prefix, rather than stripping "P1_" and dropping "P2_" as before, is what lets a
-    /// borrowed P2 slot and a real P1 slot coexist as distinct button names instead of colliding
-    /// on write; a genuine second player's <c>P2_*</c> port still produces nothing downstream,
-    /// since <see cref="JoycodeMapping"/> only ever recognizes <c>JOYCODE_1_*</c> tokens.</para>
+    /// <para><c>START1</c> and <c>COIN1</c> collapse to bare <c>START</c>/<c>COIN</c> because
+    /// that is the spelling thousands of existing entries already use — renaming them now would
+    /// strand every one. They are the only exception; nothing else is rewritten.</para>
     ///
-    /// <para>Cabinet/system inputs use a trailing "1" instead (START1, COIN1) -> drop the digit;
-    /// these have no per-player borrowing concern, so they stay collapsed to one name.</para>
+    /// <para>Nothing is filtered out by name, either. Whether a port can reach the overlay is
+    /// settled one step later by the joycode bound to it: <see cref="JoycodeMapping"/> only ever
+    /// recognizes <c>JOYCODE_1_*</c> tokens, so another player's control translates to nothing
+    /// and is dropped there. Filtering on the port name as well used to duplicate that check,
+    /// less accurately — MAME routinely parks a player-one control in a slot named for somebody
+    /// else, and a name-based filter discards precisely those. It cost hwchamp's second boxing
+    /// lever (<c>P2_AD_STICK_Z</c> on <c>JOYCODE_1_RZAXIS</c>, see #16), 20pacgal's Galaga start
+    /// button (<c>START3</c> on <c>JOYCODE_1_BUTTON6</c>), and the PlayChoice-10 cabinets' two
+    /// game-menu buttons (<c>SERVICE</c> on <c>JOYCODE_1_BUTTON5</c>), each carved out in turn as
+    /// it was noticed. Letting the joycode decide retires the whole class of bug.</para>
     /// </summary>
     private static string? NormalizePortType(string? portType) => portType switch
     {
         null => null,
-        string t when t.StartsWith("P1_") || t.StartsWith("P2_") => t,
         "START1" => "START",
         "COIN1" => "COIN",
-        _ => null
+        string t => t
     };
 }
