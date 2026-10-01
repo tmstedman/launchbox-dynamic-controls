@@ -130,7 +130,7 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_NormalizesCabinetPorts_StripTrailingOne()
+    public void Load_CabinetPorts_KeepTheirOwnNames()
     {
         // given a cfg with cabinet/system ports (START1, COIN1) — these use a digit suffix, not "P1_"
         StubXml("""
@@ -151,10 +151,10 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then the trailing "1" is dropped to produce canonical START/COIN keys
+        // then each keeps the name the cfg gave it -- the vocabulary is MAME's own, unrewritten
         result.ShouldBeDictionaryOf(
-            ("START", ["Start"]),
-            ("COIN", ["Coin"]));
+            ("START1", ["Start"]),
+            ("COIN1", ["Coin"]));
     }
 
     [Fact]
@@ -182,10 +182,9 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then START1 still collapses to the canonical bare START every Labels.xml entry is
-        // written against, while START3 keeps its digit as a distinct button
+        // then both survive under their own cfg names, so Labels.xml can address them apart
         result.ShouldBeDictionaryOf(
-            ("START", ["ButtonA"]),
+            ("START1", ["ButtonA"]),
             ("START3", ["ButtonB"]));
     }
 
