@@ -111,6 +111,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START">Start Ms. Pac-Man</Input>
+        <Input name="START3">Start Galaga</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="25pacman">
@@ -5858,6 +5859,10 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="dotron">
+        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_DOWN">Move</Input>
+        <Input name="P1_JOYSTICK_LEFT">Move</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_DIAL">Move Shoot Postiton</Input>
         <Input name="P1_BUTTON1">Disc</Input>
         <Input name="P1_BUTTON2">(Hold) Deflect</Input>
@@ -9683,6 +9688,7 @@
     <Game romName="hidctch3">
         <Input name="P1_LIGHTGUN_X">Move</Input>
         <Input name="P1_LIGHTGUN_Y">Move</Input>
+        <Input name="P1_BUTTON1">Select</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -9927,6 +9933,7 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="hrclass">
+        <Input name="P1_BUTTON1">Button</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="hrdtimes">
@@ -10257,6 +10264,7 @@
     </Game>
     <Game romName="indytemp">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Whip</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="inferno">
@@ -10643,11 +10651,13 @@
     </Game>
     <Game romName="jongbou">
         <Input name="P1_DIAL">Move</Input>
+        <Input name="P1_BUTTON1">Button</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="jongbou2">
         <Input name="P1_DIAL">Move</Input>
+        <Input name="P1_BUTTON1">Button</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -10770,11 +10780,13 @@
     </Game>
     <Game romName="jungleh">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Jump</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="junglek">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Jump</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -13079,6 +13091,7 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="micon2">
+        <Input name="P1_BUTTON1">Button</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -13650,6 +13663,7 @@
     </Game>
     <Game romName="mrdrillr">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Drill</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -16298,6 +16312,7 @@
     </Game>
     <Game romName="plotting">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -18607,6 +18622,7 @@
     <Game romName="safarir">
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
+        <Input name="P1_BUTTON1">Accelerate</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -18780,6 +18796,7 @@
     <Game romName="sasuke">
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -20408,8 +20425,10 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="snakepit">
-        <Input name="P1_JOYSTICKLEFT">Move</Input>
-        <Input name="P1_JOYSTICKRIGHT">Whip</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Whip</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Whip</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Whip</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Whip</Input>
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
         <Input name="P1_BUTTON1">Alaron / Use Amulet</Input>
@@ -22506,6 +22525,7 @@
     </Game>
     <Game romName="tankfrce4">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="tantr">
@@ -22781,6 +22801,7 @@
     </Game>
     <Game romName="tenkomor">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
@@ -23683,21 +23704,30 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="triviabb">
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Green / Correct / Right</Input>
         <Input name="P1_BUTTON2">Red / Incorrect / Left</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="triviag1">
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Green / Correct / Right</Input>
         <Input name="P1_BUTTON2">Red / Incorrect / Left</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="triviag2">
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Green / Correct / Right</Input>
         <Input name="P1_BUTTON2">Red / Incorrect / Left</Input>
         <Input name="START">Start</Input>
@@ -23711,14 +23741,20 @@
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="triviasp">
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Green / Correct / Right</Input>
         <Input name="P1_BUTTON2">Red / Incorrect / Left</Input>
         <Input name="START">Start</Input>
         <Input name="COIN">Insert Coin</Input>
     </Game>
     <Game romName="triviayp">
-        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_UP">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_DOWN">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Green / Correct / Right</Input>
         <Input name="P1_BUTTON2">Red / Incorrect / Left</Input>
         <Input name="START">Start</Input>
