@@ -1,7 +1,7 @@
 <Labels>
   <Defaults>
-    <Input name="START">Start</Input>
-    <Input name="COIN">Insert Coin</Input>
+    <Input name="START1">Start</Input>
+    <Input name="COIN1">Insert Coin</Input>
   </Defaults>
   <Game romName="3countb">
     <!-- No combination entry for RB, BUTTON1/BUTTON2's shared trigger (see 3countb.cfg),

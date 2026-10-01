@@ -9,8 +9,8 @@
         <Mapping name="BUTTON7" input="AxisTriggerLeft" />
         <Mapping name="BUTTON8" input="AxisTriggerRight" />
         <Mapping name="JOYSTICK" input="AxisLeftStick" />
-        <Mapping name="START" input="ButtonStart" />
-        <Mapping name="COIN" input="ButtonBack" />
+        <Mapping name="START1" input="ButtonStart" />
+        <Mapping name="COIN1" input="ButtonBack" />
         <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
         <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
         <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />

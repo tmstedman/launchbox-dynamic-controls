@@ -76,7 +76,7 @@
         <Mapping name="P1_LIGHTGUN_Y" input="AxisRightStickDown" />
 
         <!-- System buttons -->
-        <Mapping name="START" input="ButtonStart" />
-        <Mapping name="COIN" input="ButtonBack" />
+        <Mapping name="START1" input="ButtonStart" />
+        <Mapping name="COIN1" input="ButtonBack" />
     </Controller>
 </Controllers>
