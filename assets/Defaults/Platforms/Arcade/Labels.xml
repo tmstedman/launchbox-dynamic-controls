@@ -22320,7 +22320,7 @@
     <Game romName="swa">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
-        <Input name="P1_PEDAL">Laser</Input>
+        <Input name="P1_PEDAL">Throttle</Input>
         <Input name="P1_BUTTON1">Laser</Input>
         <Input name="P1_BUTTON2">Proton Torpedo</Input>
         <Input name="P1_BUTTON3">View Change</Input>
