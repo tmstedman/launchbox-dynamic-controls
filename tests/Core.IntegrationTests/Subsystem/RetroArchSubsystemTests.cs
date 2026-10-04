@@ -175,6 +175,43 @@ public class RetroArchSubsystemTests
     }
 
     [Fact]
+    public void NoPerCoreXml_ButAGameRemap_StillAppliesTheSwap()
+    {
+        // The companion to the test above, which has a cfg naming a variant and nothing else to
+        // say -- so RetroArch contributes nothing and the chain falls through. Here it has a
+        // remap, which is worth saying whether or not a variant catalog exists: exchanging two
+        // buttons means the same on any controller. Reading the per-core xml used to gate both,
+        // so one missing file discarded the remap too -- and the plugin ships no xml for any
+        // single-controller core, snes9x and the rest included, so none of them ever applied one.
+        //
+        // Stated here rather than only end-to-end because the premise is a file that must NOT
+        // exist. On disk that is invisible: someone adding the core's xml later would silence
+        // this with no test turning red. Simply not calling StageCoreXml says it outright.
+        StageRetroArchCfg();
+        StageCoreInfo(
+            coreDll: CoreDll,
+            displayName: CoreDisplayName);
+        StageGameRmp(RmpSwap("b", "1"));
+
+        InputMappingConfig? result = Resolve(
+            Game(
+                emulatorPath: RetroArchExe,
+                romDirectory: RomDir,
+                retroArchCore: CoreDll),
+            GenesisPlatform());
+
+        // With no variant to select the source yields the platform default -- the same mapping
+        // PlatformDefaultMappingSource would have supplied had RetroArch declined -- and the
+        // transform applies the remap on top. The baseline has B driving ButtonA; the remap
+        // rebinds that slot to the core's button 1, which is Genesis A, so ButtonA now carries
+        // A and B drives nothing. Before the fix none of this happened and B stayed put.
+        result.ShouldNotBeNull();
+        result.Controller.ShouldBe("6-Button");
+        result.Mappings.ShouldContainEntry("A", "ButtonA");
+        result.Mappings.ShouldNotContainEntry("B", "ButtonA");
+    }
+
+    [Fact]
     public void Load_NonRetroArchEmulatorPath_ReturnsNull()
     {
         // Even when every RetroArch artifact is in place, the gate trips when the emulator

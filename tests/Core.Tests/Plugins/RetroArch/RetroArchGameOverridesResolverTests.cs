@@ -113,16 +113,23 @@ public class RetroArchGameOverridesResolverTests
     }
 
     [Fact]
-    public void Resolve_NoCoreDefinitionFile_ReturnsNullWithoutCallingParsers()
+    public void Resolve_NoCoreDefinitionFile_StillParsesWithAnEmptyCatalogue()
     {
-        // given the plugin ships no definition for this core, so there is no variant catalogue
+        // given the plugin ships no definition for this core -- true of every single-controller
+        // core, snes9x among them. That settles the variant question (there is no variant to
+        // select) but says nothing about swaps: a remap exchanging two buttons means the same
+        // whatever controller is plugged in. An empty catalogue expresses exactly that, where
+        // returning early here silenced the remap as well.
         _coreLoader.Load(CoreDisplayName).Returns((RetroArchCoreConfig?)null);
+        StubRmp(new RetroArchInputOverrides(null, new Dictionary<string, int> { ["b"] = 3 }));
 
         RetroArchGameOverrides? result = _underTest.Resolve(Game());
 
-        result.ShouldBeNull();
-        _cfgParser.DidNotReceive().Parse(
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetroArchCoreConfig>(), Arg.Any<GameInfo>());
+        result.ShouldNotBeNull();
+        result.Rmp!.Swaps.ShouldBe(new Dictionary<string, int> { ["b"] = 3 });
+        _cfgParser.Received().Parse(
+            Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Is<RetroArchCoreConfig>(c => c.Controllers.Count == 0), Arg.Any<GameInfo>());
     }
 
     [Fact]

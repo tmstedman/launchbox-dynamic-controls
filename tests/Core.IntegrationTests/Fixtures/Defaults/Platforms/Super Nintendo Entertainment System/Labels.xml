@@ -1,0 +1,12 @@
+<Labels>
+    <Defaults>
+        <Input name="Start">Start</Input>
+        <Input name="Select">Select</Input>
+    </Defaults>
+    <Game romName="Phalanx - The Enforce Fighter A-144 (USA)">
+        <Input name="B">Shoot</Input>
+        <Input name="Y">Bomb</Input>
+        <Input name="A">Speed Up</Input>
+        <Input name="X">Weapon Select</Input>
+    </Game>
+</Labels>
