@@ -74,6 +74,21 @@
   <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickUp" />
   <Mapping joycode="JOYCODE_1_RZAXIS" input="AxisRightStickDown" />
 
+  <!-- Inverted analogue axes. MAME appends _REVERSE when an axis is read the other way round,
+       usually a flight-style pitch control. Each resolves exactly as its plain form above: the
+       bare joycode carries no sign, so both halves are already declared against it, and
+       flipping the polarity only swaps which half is which — a distinction this file does not
+       draw. Without these the token matches nothing and the port silently resolves to no
+       control at all. -->
+  <Mapping joycode="JOYCODE_1_XAXIS_REVERSE" input="AxisLeftStickLeft" />
+  <Mapping joycode="JOYCODE_1_XAXIS_REVERSE" input="AxisLeftStickRight" />
+  <Mapping joycode="JOYCODE_1_YAXIS_REVERSE" input="AxisLeftStickUp" />
+  <Mapping joycode="JOYCODE_1_YAXIS_REVERSE" input="AxisLeftStickDown" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_REVERSE" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_REVERSE" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_REVERSE" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_REVERSE" input="AxisRightStickDown" />
+
   <!-- Bare trigger sliders. A pedal travels rest-to-floor, one direction only, not a two-way
        axis like the sticks above — it needs just the one input the _SWITCH variant already uses. -->
   <Mapping joycode="JOYCODE_1_SLIDER1_NEG" input="AxisTriggerLeft" />
