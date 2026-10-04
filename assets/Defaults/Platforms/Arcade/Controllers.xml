@@ -7,10 +7,8 @@
         <Mapping name="P1_BUTTON4" input="ButtonY" />
         <Mapping name="P1_BUTTON5" input="ButtonLeftShoulder" />
         <Mapping name="P1_BUTTON6" input="ButtonRightShoulder" />
-        <Mapping name="P1_BUTTON7" input="AxisTriggerLeft" />
-        <Mapping name="P1_BUTTON8" input="AxisTriggerRight" />
-        <Mapping name="P1_BUTTON9" input="ButtonLeftStick" />
-        <Mapping name="P1_BUTTON10" input="ButtonRightStick" />
+        <Mapping name="P1_BUTTON7" input="ButtonLeftStick" />
+        <Mapping name="P1_BUTTON8" input="ButtonRightStick" />
 
         <!-- Standard joystick -->
         <Mapping name="P1_JOYSTICK" input="ButtonDpad" />

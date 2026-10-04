@@ -684,9 +684,13 @@ public class ArcadeEndToEndTests
     /// MAME default.cfg fallback: a ROM with no per-rom cfg picks up cfg/default.cfg, whose remap
     /// moves BUTTON7 onto ButtonRightShoulder — BUTTON6's own baseline binding. Neither button's
     /// text was written to describe ButtonRightShoulder once both reach it equally directly, so
-    /// it renders unlabelled; that absence, alongside AxisTriggerLeft's, is what proves the remap
+    /// it renders unlabelled; that absence, alongside ButtonLeftStick's, is what proves the remap
     /// took effect (without it, ButtonRightShoulder would cleanly show BUTTON6's "Attack 6" alone,
-    /// and AxisTriggerLeft would carry BUTTON7's "Attack 7").
+    /// and ButtonLeftStick would carry BUTTON7's "Attack 7").
+    ///
+    /// <para>"Attack 9" appears nowhere: MAME's own defaults leave BUTTON9 unbound, so the
+    /// Controllers.xml baseline says nothing about it and this ROM's cfg does not bind it either.
+    /// A label for a button the player has no way to press is correctly not drawn.</para>
     /// </summary>
     [Fact]
     public void Arcade_MoleAttack_MameDefaultCfgFallback()
@@ -705,8 +709,8 @@ public class ArcadeEndToEndTests
         // Discriminators that prove default.cfg was applied:
         // (1) ButtonRightShoulder has no label — BUTTON6 and BUTTON7 now tie for it equally
         overlay.InputLabels.ShouldNotContain(l => l.InputName == "ButtonRightShoulder");
-        // (2) AxisTriggerLeft has no label — without default.cfg it would carry BUTTON7's "Attack 7"
-        overlay.InputLabels.ShouldNotContain(l => l.InputName == "AxisTriggerLeft");
+        // (2) ButtonLeftStick has no label — without default.cfg it would carry BUTTON7's "Attack 7"
+        overlay.InputLabels.ShouldNotContain(l => l.InputName == "ButtonLeftStick");
 
         // Sanity: baseline mole labels still flow through for the untouched ports
         #pragma warning disable format
@@ -715,8 +719,7 @@ public class ArcadeEndToEndTests
         overlay.ShouldHaveLabel("ButtonX",            "Attack 3");      // BUTTON3
         overlay.ShouldHaveLabel("ButtonY",            "Attack 4");      // BUTTON4
         overlay.ShouldHaveLabel("ButtonLeftShoulder", "Attack 5");      // BUTTON5
-        overlay.ShouldHaveLabel("AxisTriggerRight",   "Attack 8");      // BUTTON8
-        overlay.ShouldHaveLabel("ButtonLeftStick",    "Attack 9");      // BUTTON9
+        overlay.ShouldHaveLabel("ButtonRightStick",   "Attack 8");      // BUTTON8
         overlay.ShouldHaveLabel("ButtonStart",        "Start");         // inherited default
         overlay.ShouldHaveLabel("ButtonBack",         "Insert Coin");   // inherited default
         #pragma warning restore format
