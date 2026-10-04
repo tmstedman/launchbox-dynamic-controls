@@ -65,9 +65,12 @@ public class RetroArchGameOverridesResolver(
         string coreDisplayName = _coreInfo.ReadDisplayName(retroArchDir, game.RetroArchCore) ?? game.RetroArchCore;
 
         // The plugin's own per-core file declares which controller variants the core offers and
-        // which RetroArch device-type IDs select each one. Without it there is nothing to match against.
-        RetroArchCoreConfig? coreConfig = _coreLoader.Load(coreDisplayName);
-        if (coreConfig == null) return null;
+        // which RetroArch device-type IDs select each one. Only the variant question needs it:
+        // a core with no file simply offers no variant to select, which an empty catalog says
+        // exactly. Swaps are a separate matter — a remap saying "B and Y are exchanged" means
+        // the same whatever controller is plugged in — so returning early here used to silence
+        // them too, and with them every single-controller core, none of which has a file.
+        RetroArchCoreConfig coreConfig = _coreLoader.Load(coreDisplayName) ?? new RetroArchCoreConfig();
 
         RetroArchInputOverrides? cfg = _cfgResolver.Parse(retroArchDir, coreDisplayName, coreConfig, game);
         RetroArchInputOverrides? rmp = _remapResolver.Parse(retroArchDir, coreDisplayName, coreConfig, game);

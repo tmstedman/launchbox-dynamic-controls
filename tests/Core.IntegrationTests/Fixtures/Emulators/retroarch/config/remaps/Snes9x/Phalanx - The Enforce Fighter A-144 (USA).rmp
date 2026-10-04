@@ -1,0 +1,8 @@
+# Verbatim from a real RetroArch game remap: B and Y exchanged. Snes9x deliberately has NO
+# Emulators/RetroArch/Snes9x.xml beside the other cores -- "a core the plugin ships no
+# definition for" is the condition under test, and adding one would quietly gut this test.
+input_libretro_device_p1 = "1"
+input_player1_analog_dpad_mode = "1"
+input_player1_btn_b = "1"
+input_player1_btn_y = "0"
+input_remap_port_p1 = "0"

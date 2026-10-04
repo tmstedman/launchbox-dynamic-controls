@@ -43,7 +43,11 @@ public class RetroArchVariantResolver(ILogger logger, string logSource) : IRetro
             RetroArchControllerConfig? variant = coreConfig.SelectController(deviceType);
             if (variant == null)
             {
-                if (deviceType != 1)
+                // An unmatched ID is only a fault when the core declares variants and this is
+                // not among them. A core with no file of its own declares none, so there is
+                // nothing for the ID to contradict — that is a core the plugin has no opinion
+                // about, not a misconfigured one.
+                if (deviceType != 1 && coreConfig.Controllers.Count > 0)
                     _logger.Error($"RetroArch {_logSource}: device type {deviceType} not declared in core XML for '{coreDisplayName}'");
                 else
                     _logger.Debug($"RetroArch {_logSource}: no device type override");

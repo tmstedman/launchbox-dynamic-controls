@@ -68,6 +68,21 @@ public class RetroArchVariantResolverTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("256") && s.Contains(Core)));
     }
 
+    [Fact]
+    public void Resolve_DeviceTypeUnmatched_ButCoreDeclaresNoVariants_IsNotAnError()
+    {
+        // a core the plugin ships no file for arrives with an empty catalogue, so swaps can still
+        // be read for it. An unmatched id is only a fault when the core declares variants and
+        // this is not among them -- declaring none leaves nothing for the id to contradict, and
+        // reporting "not declared in core XML" about a core that has no XML would misdirect.
+        var entries = new Dictionary<string, string> { ["input_libretro_device_p1"] = "256" };
+
+        var result = _underTest.Resolve(Data(entries), CoreConfig(), Core);
+
+        result.ShouldBeNull();
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
     // ---- match ----
 
     [Fact]

@@ -528,4 +528,42 @@ public class RetroArchEndToEndTests
             new(Input: "ButtonStart", Text: "Pause"));      // inherited default
             #pragma warning restore format
     }
+
+    /// <summary>
+    /// A game remap on a core the plugin ships no definition file for. That file declares which
+    /// controller variants a core offers, which snes9x — one pad, no variants — has no need of,
+    /// and every other single-controller core is in the same position. Reading it used to gate
+    /// the whole of RetroArch's configuration, so a missing file silenced the player's remaps
+    /// along with the variant lookup and the pad fell back to the platform default.
+    ///
+    /// <para>The .rmp is verbatim from RetroArch, exchanging B and Y. Controllers.xml maps SNES
+    /// B to ButtonA and Y to ButtonX, so the exchange is visible as those two labels trading
+    /// places while A and X, which the remap does not touch, stay where they are.</para>
+    /// </summary>
+    [Fact]
+    public void Snes_Phalanx_RetroArchRmpSwap_OnCoreWithNoDefinitionFile()
+    {
+        var game = new GameInfo(
+            Platform: "Super Nintendo Entertainment System",
+            RomName: "Phalanx - The Enforce Fighter A-144 (USA)",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "snes9x_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        #pragma warning disable format
+        overlay.ShouldHaveLabels(
+            // swapped: without the remap these read ButtonA=Shoot, ButtonX=Bomb
+            new(Input: "ButtonA",    Text: "Bomb"),            // SNES Y, via the remap
+            new(Input: "ButtonX",    Text: "Shoot"),           // SNES B, via the remap
+            // untouched by the remap
+            new(Input: "ButtonB",    Text: "Speed Up"),        // SNES A
+            new(Input: "ButtonY",    Text: "Weapon Select"),   // SNES X
+            new(Input: "ButtonStart", Text: "Start"),          // inherited default
+            new(Input: "ButtonBack",  Text: "Select"));        // inherited default
+        #pragma warning restore format
+    }
 }
