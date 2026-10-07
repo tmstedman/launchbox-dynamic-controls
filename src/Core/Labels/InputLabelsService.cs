@@ -142,10 +142,13 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// derived rather than its own binding — an <c>analogToDigital</c> mirror appends the stick
     /// onto the Dpad's list well after the Dpad's own targets. So when the full set has no match,
     /// it's retried after dropping every button whose reach here isn't at its strongest (lowest)
-    /// rank, in case that was masking a real match underneath. When neither the full set nor the
-    /// strongest-only set matches, and more than one button remains, that's a genuine ambiguity —
-    /// those buttons fire together but nothing says what that means — so it's logged and the
-    /// generic is left unlabelled rather than guessing.</para>
+    /// rank, in case that was masking a real match underneath.</para>
+    ///
+    /// <para>When neither set matches and more than one button remains, the contenders are asked
+    /// whether they disagree at all: where each carries its own text and all of it is the same,
+    /// that text is taken, because there is nothing to choose between. Only a real disagreement
+    /// — those buttons fire together and say different things about it — is logged and left
+    /// unlabelled rather than guessed at.</para>
     /// </summary>
     private ResolvedLabels TranslateToGeneric(
         Dictionary<string, string> platformLabels,
@@ -204,11 +207,29 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
 
             if (strongestOnly.Length > 1)
             {
-                // These buttons fire together with nothing to tell them apart, but no label names
-                // exactly that combination -- neither button's own text was written to describe
-                // it, and nothing here can choose between them. Leave it unlabelled; the log
-                // names them so a genuine simultaneous action can be given its own text with
-                // <Input name="A B">.
+                // Before calling it ambiguous, see whether there is anything to be ambiguous
+                // about. Two ports can describe one physical control -- MAME binds a driver's
+                // lightgun and trackball on the same axis to the same joycode, since either
+                // scheme might be the one the game reads -- and the labels then say the same
+                // words about each. Choosing between them is a distinction without a difference,
+                // so take what they agree on. Every contender must carry its own text: a button
+                // known only from inside a combination entry has said nothing on its own account
+                // to agree with.
+
+                string?[] ownTexts = [.. strongestOnly.Select(b =>
+                    labelsByButtonSet.TryGetValue(ButtonSetKey(b), out string? t) ? t : null)];
+                if (ownTexts.All(t => t != null) && ownTexts.Distinct().Count() == 1)
+                {
+                    labelText[generic] = ownTexts[0]!;
+                    _logger.Debug($"Label: '{string.Join(' ', strongestOnly)}' agree -> generic: {generic} -> {ownTexts[0]}");
+                    continue;
+                }
+
+                // They genuinely disagree: these buttons fire together with nothing to tell them
+                // apart, and no label names exactly that combination -- neither button's own text
+                // was written to describe it, and nothing here can choose between them. Leave it
+                // unlabelled; the log names them so a genuine simultaneous action can be given
+                // its own text with <Input name="A B">.
                 _logger.Error($"{generic} is driven by {string.Join(" and ", strongestOnly)} at once, with no \"{string.Join(' ', strongestOnly)}\" label to say what that means; leaving it unlabelled.");
             }
         }
