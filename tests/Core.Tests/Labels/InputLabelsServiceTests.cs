@@ -384,6 +384,40 @@ public class InputLabelsServiceTests
             m.Contains("ButtonRightShoulder") && m.Contains("BUTTON1") && m.Contains("BUTTON2")));
     }
 
+    [Fact]
+    public void Load_ButtonsShareAnInputEquallyButAgreeOnTheText_TakesIt()
+    {
+        // The bbhcotw shape: a MAME driver offers both a lightgun and a trackball, so the
+        // player's one physical axis is bound to both ports and both reach the same control.
+        // That is not a misconfiguration and the labels are not in conflict -- each port is
+        // described, correctly, with the same words. There is nothing to choose between, so the
+        // shared control takes what they agree on instead of being left blank as a conflict.
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Move Crosshair"),
+            ("BUTTON2", "Move Crosshair")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        labels.LabelText["ButtonRightShoulder"].ShouldBe("Move Crosshair");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_ButtonsShareAnInput_OneKnownOnlyFromACombination_StaysUnlabelled()
+    {
+        // Both buttons reach RB, but BUTTON2 is named only inside a combination, so it has said
+        // nothing on its own account for BUTTON1 to agree with. Agreement needs every contender
+        // to carry its own text; without that this would be reading one button's words as though
+        // both had spoken.
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("BUTTON1", "Punch"),
+            ("BUTTON2 BUTTON3", "Power Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3countb"), SharedShoulderMapping());
+
+        labels.LabelText.ContainsKey("ButtonRightShoulder").ShouldBeFalse();
+    }
+
     /// <summary>
     /// The rsgun shape: three buttons all fire together on one shared trigger (Sword), and each
     /// pair among them ALSO shares a second, distinct trigger of its own -- because all three
