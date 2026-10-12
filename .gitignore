@@ -28,3 +28,6 @@ TestResults/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Plugin debug log, written at runtime
+assets/Logs/
