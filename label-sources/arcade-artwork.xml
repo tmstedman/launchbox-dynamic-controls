@@ -388,7 +388,6 @@
         <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -399,7 +398,6 @@
         <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
