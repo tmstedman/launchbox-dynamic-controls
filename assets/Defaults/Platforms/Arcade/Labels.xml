@@ -412,6 +412,7 @@
         <Input name="P1_BUTTON3">Weapon B</Input>
         <Input name="P1_BUTTON4">Weapon C</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">(Analog) Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="agallet">
@@ -1482,6 +1483,7 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="START1">Start 1 Player (Blue)</Input>
+        <Input name="START2">Start 2 Players (Green)</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="baluba">
@@ -1854,6 +1856,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Shield</Input>
+        <Input name="P1_POSITIONAL">Rotate Second Weapon</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -2699,6 +2702,7 @@
         <Input name="P1_PADDLE">Move</Input>
         <Input name="P1_BUTTON1">Button</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="bombjack">
@@ -3497,6 +3501,7 @@
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="carnking">
@@ -4643,6 +4648,8 @@
         <Input name="P1_BUTTON1">Bat</Input>
         <Input name="P1_BUTTON2">Bunt</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P2_BUTTON2">Pitch Right</Input>
+        <Input name="P2_BUTTON1">Pitch Left</Input>
     </Game>
     <Game romName="cutefght">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -4656,6 +4663,7 @@
         <Input name="P1_PADDLE">Move</Input>
         <Input name="P1_BUTTON1">Button</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="cybattlr">
@@ -5065,6 +5073,7 @@
         <Input name="P1_BUTTON3">Move</Input>
         <Input name="P1_BUTTON4">Move</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="dcon">
@@ -5352,6 +5361,7 @@
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="demoderb">
@@ -5552,6 +5562,7 @@
         <Input name="P1_BUTTON1">Dig Hole</Input>
         <Input name="P1_BUTTON2">Fill Hole</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="diggerc">
@@ -6073,6 +6084,7 @@
         <Input name="P1_BUTTON7">1st Gear</Input>
         <Input name="P1_BUTTON8">2nd Gear</Input>
         <Input name="P1_BUTTON9">3rd Gear</Input>
+        <Input name="P1_PEDAL3">Clutch</Input>
         <Input name="START1">Start / Key</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -6087,6 +6099,7 @@
         <Input name="COIN1">Insert Coin</Input>
         <Input name="P1_BUTTON2">Green Button</Input>
         <Input name="P1_BUTTON1">Red Button</Input>
+        <Input name="P2_BUTTON3">Clutch</Input>
     </Game>
     <Game romName="drivfrcp">
         <Input name="P1_JOYSTICK_LEFT">Steering</Input>
@@ -6903,6 +6916,7 @@
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="fantzn2x">
@@ -7285,6 +7299,7 @@
         <Input name="P1_BUTTON1">Accelerate</Input>
         <Input name="P1_BUTTON2">Horn</Input>
         <Input name="P1_BUTTON3">Select Track</Input>
+        <Input name="P2_BUTTON1">Bell</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -7611,22 +7626,27 @@
     <Game romName="funcube">
         <Input name="P1_BUTTON2">Change Game</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P3_BUTTON1">Touch</Input>
     </Game>
     <Game romName="funcube2">
         <Input name="P1_BUTTON2">Change Game</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P3_BUTTON1">Touch</Input>
     </Game>
     <Game romName="funcube3">
         <Input name="P1_BUTTON2">Change Game</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P3_BUTTON1">Touch</Input>
     </Game>
     <Game romName="funcube4">
         <Input name="P1_BUTTON2">Change Game</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P3_BUTTON1">Touch</Input>
     </Game>
     <Game romName="funcube5">
         <Input name="P1_BUTTON2">Change Game</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P3_BUTTON1">Touch</Input>
     </Game>
     <Game romName="funkybee">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -8142,6 +8162,7 @@
         <Input name="P1_BUTTON7">Tilt</Input>
         <Input name="P1_BUTTON8">Tilt</Input>
         <Input name="START1">Start</Input>
+        <Input name="COIN2">Insert Coin</Input>
         <Input name="COIN1">Start</Input>
     </Game>
     <Game romName="gdarius2">
@@ -8172,6 +8193,7 @@
         <Input name="P1_PADDLE">Move</Input>
         <Input name="P1_BUTTON1">Button</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="gekiridn">
@@ -9063,6 +9085,7 @@
         <Input name="P1_PEDAL2">Brake</Input>
         <Input name="P1_PADDLE">Steering</Input>
         <Input name="P1_BUTTON5">Change MT / AT</Input>
+        <Input name="P1_PEDAL3">Handbrake</Input>
         <Input name="START1">Start / View</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -9590,6 +9613,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Speed Up</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="headonch">
@@ -10360,6 +10384,7 @@
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="invmulti">
@@ -10374,6 +10399,7 @@
         <Input name="P1_BUTTON1">Start</Input>
         <Input name="P1_BUTTON2">Shoot / Move</Input>
         <Input name="START1">Left Start</Input>
+        <Input name="START2">Right Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="invrvnge">
@@ -10458,6 +10484,7 @@
         <Input name="P1_DIAL">Turn Turret</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="jack">
@@ -11002,6 +11029,7 @@
         <Input name="P1_DIAL">Move</Input>
         <Input name="P1_BUTTON1">Kick</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="kickball">
@@ -13000,6 +13028,7 @@
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Missiles</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="metlsavr">
@@ -13301,6 +13330,7 @@
         <Input name="P1_AD_STICK_X">Yoke</Input>
         <Input name="P1_AD_STICK_Y">Yoke</Input>
         <Input name="START1">Start</Input>
+        <Input name="SERVICE2">Door</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="mmagic">
@@ -14693,6 +14723,7 @@
         <Input name="P1_BUTTON1">Shoot Left / Right</Input>
         <Input name="P1_BUTTON2">Shoot Up</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="numanath">
@@ -15515,77 +15546,99 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_bball">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_bfght">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_bload">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_bstar">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_cntra">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_cshwk">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_cvnia">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_dbldr">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ddrgn">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_drmro">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_duckh">
@@ -15595,287 +15648,369 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="P1_BUTTON3">B</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ebike">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ftqst">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_gntlt">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_golf">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_goons">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_grdus">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_hgaly">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_kngfu">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_mario">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_miket">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_mman3">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_moglf">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_mtoid">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ngai2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ngai3">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ngaid">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_pinbt">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_pwbld">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_pwrst">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_radr2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_radrc">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_rcpam">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_rkats">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_rnatk">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_rrngr">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_rygar">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_sjetm">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_smb">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_smb2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_smb3">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_suprc">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_tbowl">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_tenis">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_tkfld">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_tmnt">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_tmnt2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_trjan">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ttoon">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_vball">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_wcup">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_wgnmn">
@@ -15885,14 +16020,18 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="P1_BUTTON3">B</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pc_ynoid">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
+        <Input name="SERVICE">Enter/(Hold)GameMenu</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Game Menu Selection</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="pcktgal">
@@ -17191,6 +17330,7 @@
         <Input name="P1_BUTTON7">Tilt</Input>
         <Input name="P1_BUTTON8">Tilt</Input>
         <Input name="START1">Start</Input>
+        <Input name="COIN2">Insert Coin</Input>
         <Input name="COIN1">Start</Input>
     </Game>
     <Game romName="pwrgoal">
@@ -18755,6 +18895,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="samuraia">
@@ -20325,6 +20466,7 @@
         <Input name="P1_BUTTON1">A Button</Input>
         <Input name="P1_BUTTON2">B Button</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="slimekun">
@@ -21014,6 +21156,10 @@
     </Game>
     <Game romName="speedfrk">
         <Input name="P1_DIAL">Steering</Input>
+        <Input name="P2_JOYSTICK_LEFT">2nd</Input>
+        <Input name="P2_JOYSTICK_DOWN">4th</Input>
+        <Input name="P2_JOYSTICK_RIGHT">3rd</Input>
+        <Input name="P2_JOYSTICK_UP">1st</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23047,6 +23193,7 @@
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PEDAL2">Brake</Input>
         <Input name="P1_PADDLE">Steering</Input>
+        <Input name="P1_PEDAL3">Handbrake</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23274,6 +23421,8 @@
         <Input name="P1_AD_STICK_X">Left Track</Input>
         <Input name="P1_AD_STICK_Y">Right Track</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="P2_BUTTON1">Secondary Fire</Input>
+        <Input name="P2_BUTTON2">Special</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23636,6 +23785,7 @@
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Transform</Input>
         <Input name="START1">Start</Input>
+        <Input name="START2">Start 2 Players</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="travrusa">
@@ -24751,6 +24901,7 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="START1">Start 1 Player (Blue)</Input>
+        <Input name="START2">Start 2 Players (Green)</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="vscaptfl">
@@ -24801,6 +24952,7 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="START1">Start 1 Player (Blue)</Input>
+        <Input name="START2">Start 2 Players (Green)</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="vsnetscr">
@@ -24852,6 +25004,9 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="START1">Start 1 Player v CPU</Input>
+        <Input name="START2">Start 2P Vs. (Green)</Input>
+        <Input name="START3">Start 2P Doubles (Purp.)</Input>
+        <Input name="START4">Start 4 Players (Yellow)</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="vstetris">
@@ -25469,6 +25624,7 @@
         <Input name="P1_BUTTON1">B</Input>
         <Input name="P1_BUTTON2">A</Input>
         <Input name="START1">Start 1 Player (Blue)</Input>
+        <Input name="START2">Start 2 Players (Green)</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="wrestwar">
@@ -25570,6 +25726,8 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Headlock / Moves / Attack</Input>
         <Input name="P1_BUTTON2">Moves / Pin / Whip</Input>
+        <Input name="START2">Start 2P Vs.</Input>
+        <Input name="START3">Start 2P Co-Op</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="wwfwfest">
