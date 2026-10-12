@@ -355,7 +355,6 @@
     </Game>
     <Game romName="aburner" title="After Burner">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
@@ -486,6 +485,7 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="ButtonDpad">Steering</Label>
         <Label control="AxisTriggerRight">(Analog) Accelerate</Label>
+        <Label control="ButtonRightShoulder">(Analog) Start 2 Players</Label>
         <Label control="ButtonA">Weapon A</Label>
         <Label control="ButtonB">Weapon B</Label>
         <Label control="ButtonX">Shoot</Label>
@@ -1694,6 +1694,7 @@
     <Game romName="balonfgt" title="Vs. Balloon Fight">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players (Green)</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start 1 Player (Blue)</Label>
@@ -2104,7 +2105,10 @@
     </Game>
     <Game romName="bermudat" title="Bemuda Triangle">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisRightStick">Rotate Second Weapon</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerLeft">Rotate Second Weapon</Label>
+        <Label control="AxisTriggerRight">Rotate Second Weapon</Label>
         <Label control="ButtonLeftShoulder">Shield</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonA">Shield</Label>
@@ -3029,6 +3033,7 @@
     </Game>
     <Game romName="bombbee" title="Bomb-Bee">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -3911,6 +3916,7 @@
     <Game romName="carnival" title="Carnival">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5162,6 +5168,8 @@
     </Game>
     <Game romName="curvebal" title="Curve Ball">
         <Label control="ButtonA">Bat</Label>
+        <Label control="ButtonB">Pitch Right</Label>
+        <Label control="ButtonX">Pitch Left</Label>
         <Label control="ButtonY">Bunt</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5177,6 +5185,7 @@
     </Game>
     <Game romName="cutieq" title="Cutie Q">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5643,6 +5652,7 @@
     <Game romName="dcclub" title="Dynamic Country Club">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Club Swing / Hit Ball</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Change Stance</Label>
         <Label control="ButtonX">Change Club</Label>
         <Label control="ButtonStart">Start</Label>
@@ -5966,6 +5976,7 @@
     <Game romName="demndrgn" title="Demons &amp; Dragons">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Shoot</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -6185,6 +6196,7 @@
     <Game romName="digger" title="Digger">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Fill Hole</Label>
         <Label control="ButtonX">Dig Hole</Label>
         <Label control="ButtonStart">Start</Label>
@@ -6780,6 +6792,7 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonLeftShoulder">Clutch</Label>
         <Label control="ButtonA">Turbo</Label>
         <Label control="ButtonB">Horn</Label>
         <Label control="ButtonX">Fan</Label>
@@ -6795,6 +6808,7 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonRightShoulder">Clutch</Label>
         <Label control="ButtonA">Green Button</Label>
         <Label control="ButtonX">Red Button</Label>
         <Label control="ButtonStart">Start</Label>
@@ -7705,6 +7719,7 @@
     <Game romName="fantzn2" title="Fantasy Zone II: The Tears of Opa-Opa">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Bomb</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8136,6 +8151,7 @@
     <Game romName="firetrk" title="Fire Truck / Smokey Joe">
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
+        <Label control="ButtonB">Bell</Label>
         <Label control="ButtonX">Select Track</Label>
         <Label control="ButtonY">Horn</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8508,26 +8524,36 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="funcube" title="Funcube">
+        <Label control="AxisTriggerRight">Touch</Label>
+        <Label control="ButtonA">Touch</Label>
         <Label control="ButtonX">Change Game</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="funcube2" title="Funcube 2">
+        <Label control="AxisTriggerRight">Touch</Label>
+        <Label control="ButtonA">Touch</Label>
         <Label control="ButtonX">Change Game</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="funcube3" title="Funcube 3">
+        <Label control="AxisTriggerRight">Touch</Label>
+        <Label control="ButtonA">Touch</Label>
         <Label control="ButtonX">Change Game</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="funcube4" title="Funcube 4">
+        <Label control="AxisTriggerRight">Touch</Label>
+        <Label control="ButtonA">Touch</Label>
         <Label control="ButtonX">Change Game</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="funcube5" title="Funcube 5">
+        <Label control="AxisTriggerRight">Touch</Label>
+        <Label control="ButtonA">Touch</Label>
         <Label control="ButtonX">Change Game</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -9098,6 +9124,7 @@
         <Label control="ButtonA">Use Item Right</Label>
         <Label control="ButtonY">Right Flipper</Label>
         <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gdarius2" title="G-Darius Ver.2">
         <Label control="AxisLeftStick">Move</Label>
@@ -9126,6 +9153,7 @@
     </Game>
     <Game romName="geebee" title="Gee Bee">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10054,6 +10082,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
+        <Label control="ButtonA">Handbrake</Label>
         <Label control="ButtonB">Shift Down</Label>
         <Label control="ButtonX">Shift Up</Label>
         <Label control="ButtonStart">Start / View</Label>
@@ -10654,6 +10683,7 @@
     <Game romName="headon2" title="Head On 2">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Speed Up</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -11521,6 +11551,7 @@
     <Game romName="invinco" title="Invinco / Dual!">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -11536,6 +11567,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonLeftShoulder">Left Start</Label>
+        <Label control="ButtonRightShoulder">Right Start</Label>
         <Label control="ButtonA">Shoot / Move</Label>
         <Label control="ButtonX">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -11628,6 +11660,7 @@
         <Label control="AxisRightStick">Turn Turret</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -12244,6 +12277,7 @@
     <Game romName="kick" title="Kick">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Kick</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -14473,6 +14507,7 @@
         <Label control="AxisRightStick">Altitude</Label>
         <Label control="AxisTriggerLeft">Missiles</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Missiles</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -14816,6 +14851,7 @@
     </Game>
     <Game romName="mlanding" title="Midnight Landing">
         <Label control="AxisLeftStick">Yoke</Label>
+        <Label control="ButtonA">Door</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -16405,6 +16441,7 @@
     <Game romName="nsub" title="N-Sub">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Shoot Left / Right</Label>
         <Label control="ButtonX">Shoot Up</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17317,6 +17354,8 @@
     <Game romName="pc_1942" title="1942 (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17325,6 +17364,8 @@
     <Game romName="pc_bball" title="Baseball (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17333,6 +17374,8 @@
     <Game romName="pc_bfght" title="Balloon Fight (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17341,6 +17384,8 @@
     <Game romName="pc_bload" title="Bases Loaded (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17349,6 +17394,8 @@
     <Game romName="pc_bstar" title="Baseball Stars: Be a Champ! (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17357,6 +17404,8 @@
     <Game romName="pc_cntra" title="Contra (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17365,6 +17414,8 @@
     <Game romName="pc_cshwk" title="Captain Sky Hawk (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17373,6 +17424,8 @@
     <Game romName="pc_cvnia" title="Castlevania (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17381,6 +17434,8 @@
     <Game romName="pc_dbldr" title="Double Dribble (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17389,6 +17444,8 @@
     <Game romName="pc_ddrgn" title="Double Dragon (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17397,6 +17454,8 @@
     <Game romName="pc_drmro" title="Dr. Mario (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17405,6 +17464,8 @@
     <Game romName="pc_duckh" title="Duck Hunt (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17413,6 +17474,8 @@
     <Game romName="pc_ebike" title="Excitebike (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17421,6 +17484,8 @@
     <Game romName="pc_ftqst" title="Uncle Festers Quest: The Addams Family (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17429,6 +17494,8 @@
     <Game romName="pc_gntlt" title="Gauntlet (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17437,6 +17504,8 @@
     <Game romName="pc_golf" title="Golf (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17445,6 +17514,8 @@
     <Game romName="pc_goons" title="The Goonies (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17453,6 +17524,8 @@
     <Game romName="pc_grdus" title="Gradius (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17461,6 +17534,8 @@
     <Game romName="pc_hgaly" title="Hogan's Alley (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17469,6 +17544,8 @@
     <Game romName="pc_kngfu" title="Kung Fu (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17477,6 +17554,8 @@
     <Game romName="pc_mario" title="Mario Bros. (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17485,6 +17564,8 @@
     <Game romName="pc_miket" title="Mike Tyson's Punch Out!! (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17493,6 +17574,8 @@
     <Game romName="pc_mman3" title="Mega Man III (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17501,6 +17584,8 @@
     <Game romName="pc_moglf" title="Mario's Open Golf (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17509,6 +17594,8 @@
     <Game romName="pc_mtoid" title="Metroid (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17517,6 +17604,8 @@
     <Game romName="pc_ngai2" title="Ninja Gaiden II: The Dark Sword of Chaos (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17525,6 +17614,8 @@
     <Game romName="pc_ngai3" title="Ninja Gaiden III: The Ancient Ship of Doom (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17533,6 +17624,8 @@
     <Game romName="pc_ngaid" title="Ninja Gaiden (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17541,6 +17634,8 @@
     <Game romName="pc_pinbt" title="PinBot (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17549,6 +17644,8 @@
     <Game romName="pc_pwbld" title="Power Blade (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17557,6 +17654,8 @@
     <Game romName="pc_pwrst" title="Pro Wrestling (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17565,6 +17664,8 @@
     <Game romName="pc_radr2" title="Rad Racer II (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17573,6 +17674,8 @@
     <Game romName="pc_radrc" title="Rad Racer (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17581,6 +17684,8 @@
     <Game romName="pc_rcpam" title="R.C. Pro-Am (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17589,6 +17694,8 @@
     <Game romName="pc_rkats" title="Rockin' Kats (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17597,6 +17704,8 @@
     <Game romName="pc_rnatk" title="Rush'n Attack (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17605,6 +17714,8 @@
     <Game romName="pc_rrngr" title="Chip'n Dale: Rescue Rangers (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17613,6 +17724,8 @@
     <Game romName="pc_rygar" title="Rygar (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17621,6 +17734,8 @@
     <Game romName="pc_sjetm" title="Solar Jetman (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17629,6 +17744,8 @@
     <Game romName="pc_smb" title="Super Mario Bros. (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17637,6 +17754,8 @@
     <Game romName="pc_smb2" title="Super Mario Bros. 2 (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17645,6 +17764,8 @@
     <Game romName="pc_smb3" title="Super Mario Bros. 3 (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17653,6 +17774,8 @@
     <Game romName="pc_suprc" title="Super C (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17661,6 +17784,8 @@
     <Game romName="pc_tbowl" title="Tecmo Bowl (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17669,6 +17794,8 @@
     <Game romName="pc_tenis" title="Tennis (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17677,6 +17804,8 @@
     <Game romName="pc_tkfld" title="Track &amp; Field (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17685,6 +17814,8 @@
     <Game romName="pc_tmnt" title="Teenage Mutant Ninja Turtles (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17693,6 +17824,8 @@
     <Game romName="pc_tmnt2" title="Teenage Mutant Ninja Turtles II: The Arcade Game (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17701,6 +17834,8 @@
     <Game romName="pc_trjan" title="Trojan (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17709,6 +17844,8 @@
     <Game romName="pc_ttoon" title="Tiny Toon Adventures (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17717,6 +17854,8 @@
     <Game romName="pc_vball" title="Volley Ball (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17725,6 +17864,8 @@
     <Game romName="pc_wcup" title="Nintendo World Cup (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17733,6 +17874,8 @@
     <Game romName="pc_wgnmn" title="Wild Gunman (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -17741,6 +17884,8 @@
     <Game romName="pc_ynoid" title="Yo! Noid (PlayChoice-10)">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Enter/(Hold)GameMenu</Label>
+        <Label control="ButtonRightShoulder">Game Menu Selection</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start</Label>
@@ -19181,6 +19326,7 @@
         <Label control="ButtonA">Use Item Right</Label>
         <Label control="ButtonY">Right Flipper</Label>
         <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="pwrgoal" title="Taito Power Goal">
         <Label control="AxisLeftStick">Move</Label>
@@ -20932,6 +21078,7 @@
     <Game romName="samurai" title="Samurai">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Attack</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -22658,6 +22805,7 @@
     <Game romName="slapshtr" title="Slap Shooter">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">B Button</Label>
         <Label control="ButtonX">A Button</Label>
         <Label control="ButtonStart">Start</Label>
@@ -23443,6 +23591,10 @@
     </Game>
     <Game romName="speedfrk" title="Speed Freak">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="ButtonA">2nd</Label>
+        <Label control="ButtonB">4th</Label>
+        <Label control="ButtonX">3rd</Label>
+        <Label control="ButtonY">1st</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -25714,6 +25866,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonLeftShoulder">Shift Up</Label>
         <Label control="ButtonRightShoulder">Shift Down</Label>
+        <Label control="ButtonA">Handbrake</Label>
         <Label control="ButtonB">Shift Up</Label>
         <Label control="ButtonX">Shift Down</Label>
         <Label control="ButtonStart">Start</Label>
@@ -25978,7 +26131,9 @@
     <Game romName="tmek" title="T-MEK">
         <Label control="AxisLeftStick">Left Track</Label>
         <Label control="AxisRightStick">Right Track</Label>
+        <Label control="AxisTriggerLeft">Secondary Fire</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
+        <Label control="ButtonA">Special</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -26394,6 +26549,7 @@
     <Game romName="transfrm" title="Transformer">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonA">Transform</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -27625,6 +27781,7 @@
     <Game romName="vsbball" title="Vs. Baseball">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players (Green)</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start 1 Player (Blue)</Label>
@@ -27678,6 +27835,7 @@
     <Game romName="vsmahjng" title="Vs. Mahjong">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players (Green)</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start 1 Player (Blue)</Label>
@@ -27736,6 +27894,9 @@
     <Game romName="vstennis" title="Vs. Tennis">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="AxisTriggerRight">Start 4 Players (Yellow)</Label>
+        <Label control="ButtonLeftShoulder">Start 2P Doubles (Purp.)</Label>
+        <Label control="ButtonRightShoulder">Start 2P Vs. (Green)</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start 1 Player v CPU</Label>
@@ -28424,6 +28585,7 @@
     <Game romName="wrecking" title="Vs. Wrecking Crew">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players (Green)</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonX">B</Label>
         <Label control="ButtonStart">Start 1 Player (Blue)</Label>
@@ -28538,6 +28700,8 @@
     <Game romName="wwfsstar" title="WWF Superstars">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Start 2P Co-Op</Label>
+        <Label control="ButtonRightShoulder">Start 2P Vs.</Label>
         <Label control="ButtonA">Moves / Pin / Whip</Label>
         <Label control="ButtonB">Start</Label>
         <Label control="ButtonX">Headlock / Moves / Attack</Label>

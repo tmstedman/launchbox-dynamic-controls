@@ -342,7 +342,6 @@
     </Game>
     <Game romName="aburner" title="After Burner">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
@@ -353,7 +352,6 @@
     <Game romName="aburner2" title="After Burner II">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Throttle</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
