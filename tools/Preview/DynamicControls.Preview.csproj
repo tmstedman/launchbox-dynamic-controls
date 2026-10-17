@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Developer tool, not part of the shipped plugin. Deliberately absent from both .slnx files
+    and from every csproj CI builds, so the release stays exactly two DLLs and this project's
+    existence can never affect coverage, packaging, or the LaunchBox publish. Run it via
+    "dotnet run" against this project; see Options.cs for the arguments and an example.
+
+    SkiaSharp is why this lives under tools/ rather than beside the renderer: src/ carries no
+    NuGet dependencies at all, which is what keeps the shipped plugin to two DLLs.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>DynamicControls.Preview</RootNamespace>
+    <AssemblyName>DynamicControls.Preview</AssemblyName>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable;CS8509</WarningsAsErrors>
+    <NoWarn>CS8524</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.macOS" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\DynamicControls.Core.csproj" />
+  </ItemGroup>
+
+</Project>
