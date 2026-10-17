@@ -83,6 +83,16 @@ if (model.RenderedImages.Count == 0 && model.InputLabels.Count == 0)
 // --- draw ------------------------------------------------------------------------------------
 
 SKTypeface typeface = LoadTypeface(fontPath);
+
+// Say so when the labels are not in the font the theme asks for. Metrics drive wrapping inside
+// the fixed-width label box, so a preview in a substitute can break a line where Windows would
+// not -- worth knowing before trusting one to judge a layout change.
+if (!typeface.FamilyName.StartsWith("Segoe UI", StringComparison.OrdinalIgnoreCase))
+{
+    Console.Error.WriteLine($"Note: labels drawn in {typeface.FamilyName}, not the Segoe UI the "
+                          + "theme asks for. Metrics differ, so wrapping inside the label box "
+                          + "may not match Windows.");
+}
 using SKBitmap bitmap = OverlayRenderer.Render(model, typeface, ParseColour(bg));
 
 string? dir = Path.GetDirectoryName(output);
@@ -101,10 +111,15 @@ return 0;
 static string Sanitise(string name) =>
     string.Join("_", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
 
-// The theme asks for Segoe UI SemiBold, which ships on Windows only. The fallbacks are ordered
-// by how close their metrics are to it, so a preview taken off Windows is as near as the host
-// allows -- and the chosen family is printed, because a different font means text wraps inside
-// the fixed-width label box at different points.
+// The theme asks for Segoe UI SemiBold. Install it and this picks it up with no further
+// argument; otherwise it walks down to whatever the host has, ordered by how close the metrics
+// are. Selawik is the one worth having if Segoe UI is not an option -- it is metric-compatible
+// by design, so text wraps inside the fixed-width label box at the same points.
+//
+// Two spellings are tried per family because Windows ships SemiBold as its own face: asking the
+// "Segoe UI" family for weight 600 finds it when the whole family is installed, while a
+// standalone install presents itself as the family "Segoe UI Semibold" and would otherwise be
+// rejected as a substitute.
 static SKTypeface LoadTypeface(string path)
 {
     if (path.Length > 0)
@@ -116,12 +131,21 @@ static SKTypeface LoadTypeface(string path)
 
     foreach (string family in new[] { "Segoe UI", "Selawik", "Tahoma", "Verdana", "Arial", "Helvetica Neue" })
     {
-        SKTypeface? found = SKTypeface.FromFamilyName(family, SKFontStyleWeight.SemiBold,
-            SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
-        if (found != null && found.FamilyName.Equals(family, StringComparison.OrdinalIgnoreCase))
-            return found;
+        if (Exact(family) is { } hit) return hit;
+        if (Exact(family + " Semibold") is { } semibold) return semibold;
     }
     return SKTypeface.Default;
+
+    // FromFamilyName substitutes silently for a family the host does not have, so the name has
+    // to be compared back -- without this every lookup "succeeds" and the first entry always wins.
+    static SKTypeface? Exact(string family)
+    {
+        SKTypeface? found = SKTypeface.FromFamilyName(family, SKFontStyleWeight.SemiBold,
+            SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
+        return found != null && found.FamilyName.Equals(family, StringComparison.OrdinalIgnoreCase)
+            ? found
+            : null;
+    }
 }
 
 static SKColor ParseColour(string hex) =>
