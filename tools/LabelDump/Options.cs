@@ -19,6 +19,9 @@ namespace DynamicControls.LabelDump;
 /// order when <paramref name="ArtworkOut"/> is set. Empty to skip both.</param>
 /// <param name="ArtworkOut">Where to write the re-ordered copy of <paramref name="Artwork"/>.
 /// Empty to write only the pipeline dump.</param>
+/// <param name="ImagesOut">Where to write the images each ROM rendered. A separate file rather
+/// than more elements in <paramref name="Out"/>, which is diffed against a transcription that has
+/// no notion of an image — folding them together would wreck that comparison. Empty to skip.</param>
 public record Options(
     string Root,
     string CfgPack,
@@ -26,7 +29,8 @@ public record Options(
     string Platform,
     int Limit,
     string Artwork,
-    string ArtworkOut)
+    string ArtworkOut,
+    string ImagesOut)
 {
     private const string Usage = """
         Runs the real plugin pipeline over every ROM in a MAME cfg pack and writes the labels
@@ -41,6 +45,10 @@ public record Options(
                               Default: label-sources/arcade-artwork.xml
           --artwork-out <f>   also write that transcription back in canonical order, so the
                               pair diffs cleanly. Default: label-sources/arcade-artwork-sorted.xml
+          --images-out <f>    also write the images each rom rendered, as a baseline for changes
+                              that never touch a label (an input losing its platform-specific
+                              artwork is invisible to the label dump).
+                              Default: label-sources/arcade-pipeline-images.xml
 
         e.g. dotnet run --project tools/LabelDump -- --cfg romcontrols
         """;
@@ -58,6 +66,7 @@ public record Options(
         int limit = 0;
         string artwork = "label-sources/arcade-artwork.xml";
         string artworkOut = "label-sources/arcade-artwork-sorted.xml";
+        string imagesOut = "label-sources/arcade-pipeline-images.xml";
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -71,6 +80,7 @@ public record Options(
                 "--limit" => int.TryParse(Next(), out limit) ? "ok" : null,
                 "--artwork" => artwork = Next() ?? "",
                 "--artwork-out" => artworkOut = Next() ?? "",
+                "--images-out" => imagesOut = Next() ?? "",
                 _ => null
             };
             if (value is not { Length: > 0 })
@@ -86,6 +96,6 @@ public record Options(
             return null;
         }
 
-        return new Options(root, cfg, output, platform, limit, artwork, artworkOut);
+        return new Options(root, cfg, output, platform, limit, artwork, artworkOut, imagesOut);
     }
 }

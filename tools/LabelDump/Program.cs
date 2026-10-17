@@ -53,6 +53,7 @@ Console.Error.WriteLine($"Resolving against {options.Root} as platform '{options
 ControllerOverlayService service = ControllerOverlayFactory.Create(options.Root);
 
 List<GameLabels> games = [];
+List<(string RomName, IReadOnlyList<GameImage> Images)> renders = [];
 List<string> empty = [];
 List<string> conflicting = [];
 
@@ -82,6 +83,21 @@ foreach (string rom in roms)
 
     foreach ((string control, List<string> texts) in byControl.Where(e => e.Texts.Count > 1))
         conflicting.Add($"{rom} {control}: {string.Join(" | ", texts)}");
+
+    // Collected before the empty-label check below, because a ROM that renders no label still
+    // renders a controller: on a platform whose artwork replaces buttons rather than labelling
+    // them, that render is the entire output and skipping it would hide exactly the platforms
+    // this file exists to cover.
+    if (options.ImagesOut.Length > 0)
+    {
+        renders.Add((rom, [.. model.RenderedImages.Select(i => new GameImage(
+            Control: i.InputName is { Length: > 0 } n ? n : "(none)",
+            Source: ImageWriter.Relative(i.Source),
+            Opacity: i.Opacity,
+            BlurRadius: i.BlurRadius,
+            Width: i.Width,
+            Height: i.Height))]));
+    }
 
     if (byControl.Count == 0)
     {
@@ -143,6 +159,26 @@ if (options.ArtworkOut.Length > 0 && artwork.Count > 0)
         that diff with reshuffling.
         """, command);
     Console.Error.WriteLine($"{artwork.Count} roms re-ordered -> {options.ArtworkOut}");
+}
+
+if (options.ImagesOut.Length > 0)
+{
+    ImageWriter.Write(options.ImagesOut, renders, """
+        GENERATED - do not edit by hand.
+
+        The images the plugin renders, per ROM, from the same run that produced the label dump
+        beside it. That file answers "what text does the player read"; this one answers "what
+        does the player look at" - the half a labels-only comparison cannot see. An input
+        silently losing its platform-specific artwork and falling back to the generic leaves no
+        trace in the labels at all.
+
+        Position and size are omitted deliberately: they come from the template and are the same
+        for every ROM. What varies is the source file, the size and the opacity. On a platform with
+        artwork of its own - Arcade is one - every source is generic and the opacity is the whole
+        of the per-game signal, so it is what a visibility change shows up in.
+        """, command);
+    Console.Error.WriteLine($"{renders.Count} roms rendered "
+                          + $"{renders.Sum(r => r.Images.Count)} images -> {options.ImagesOut}");
 }
 
 return 0;
