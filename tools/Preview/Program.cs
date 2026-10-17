@@ -13,7 +13,9 @@ const string Usage = """
       --rom <name>       rom name. Omit for the platform's default mapping.
       --all              every platform's default, plus each game its Labels.xml names -
                          the same set platform-renders.xml records. Ignores --platform/--rom.
-      --no-labels        draw the buttons alone, with no label text.
+      --no-labels        draw the buttons alone, with no label text. For a game render where
+                         the artwork is the question; most platform defaults carry no labels
+                         anyway, so it changes nothing on a sweep.
       --out <file>       PNG to write. Default: preview/games/{platform}/{rom}.png,
                          or preview/platforms/{platform}.png when --rom is omitted.
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
@@ -22,8 +24,8 @@ const string Usage = """
 
     e.g. dotnet run --project tools/Preview -- --platform "Nintendo 64" --rom "GoldenEye 007"
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols
-         dotnet run --project tools/Preview -- --platform "Nintendo 64" --no-labels
-         dotnet run --project tools/Preview -- --all --no-labels
+         dotnet run --project tools/Preview -- --all
+         dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --no-labels
     """;
 
 // A rom name nothing can match, so no ControllerOverrides file and no Labels entry applies and
