@@ -10,7 +10,8 @@ const string Usage = """
 
       --root <dir>       plugin data root (Defaults/, User/, Templates/). Default: assets
       --platform <name>  platform to resolve as. Required.
-      --rom <name>       rom name. Required. Use any name for a platform's default render.
+      --rom <name>       rom name. Omit for the platform's default mapping.
+      --no-labels        draw the buttons alone, with no label text.
       --out <file>       PNG to write. Default: preview/{platform}-{rom}.png
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
@@ -18,9 +19,16 @@ const string Usage = """
 
     e.g. dotnet run --project tools/Preview -- --platform "Nintendo 64" --rom "GoldenEye 007"
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols
+         dotnet run --project tools/Preview -- --platform "Nintendo 64" --no-labels
     """;
 
+// A rom name nothing can match, so no ControllerOverrides file and no Labels entry applies and
+// what resolves is the platform's own default -- the same synthetic game LabelDump's platform
+// sweep uses, so a render and the row in platform-images.xml describe the same thing.
+const string PlatformDefaultRom = "__platform_default__";
+
 string root = "assets", platform = "", rom = "", output = "", cfgPack = "", fontPath = "", bg = "101014";
+bool noLabels = false;
 for (int i = 0; i < args.Length; i++)
 {
     string? Next() => i + 1 < args.Length ? args[++i] : null;
@@ -29,6 +37,9 @@ for (int i = 0; i < args.Length; i++)
         "--root" => root = Next() ?? "",
         "--platform" => platform = Next() ?? "",
         "--rom" => rom = Next() ?? "",
+        // "ok" rather than a value: the switch arms all yield the string a flag consumed, and
+        // the loop treats empty or null as a parse failure, so a valueless flag needs a stand-in.
+        "--no-labels" => Set(ref noLabels),
         "--out" => output = Next() ?? "",
         "--cfg" => cfgPack = Next() ?? "",
         "--font" => fontPath = Next() ?? "",
@@ -42,9 +53,9 @@ for (int i = 0; i < args.Length; i++)
     }
 }
 
-if (platform.Length == 0 || rom.Length == 0)
+if (platform.Length == 0)
 {
-    Console.Error.WriteLine($"--platform and --rom are both required.\n\n{Usage}");
+    Console.Error.WriteLine($"--platform is required.\n\n{Usage}");
     return 1;
 }
 if (!Directory.Exists(root))
@@ -52,8 +63,14 @@ if (!Directory.Exists(root))
     Console.Error.WriteLine($"Data root not found: {root}");
     return 1;
 }
+
+bool platformDefault = rom.Length == 0;
+if (platformDefault) rom = PlatformDefaultRom;
 if (output.Length == 0)
-    output = Path.Combine("preview", $"{Sanitise(platform)}-{Sanitise(rom)}.png");
+{
+    string stem = platformDefault ? "default" : Sanitise(rom);
+    output = Path.Combine("preview", $"{Sanitise(platform)}-{stem}{(noLabels ? "-unlabelled" : "")}.png");
+}
 
 // --- resolve ---------------------------------------------------------------------------------
 
@@ -79,6 +96,11 @@ if (model.RenderedImages.Count == 0 && model.InputLabels.Count == 0)
                           + $"pipeline errored. Check {Path.Combine(root, "Logs")}.");
     return 1;
 }
+
+// Dropped after resolving, not before: the labels still decide what is drawn. A control's
+// opacity comes from whether it has a label, so suppressing them earlier would dim the very
+// buttons the unlabelled render is meant to show.
+if (noLabels) model.InputLabels.Clear();
 
 // --- draw ------------------------------------------------------------------------------------
 
@@ -107,6 +129,12 @@ Console.Error.WriteLine($"{platform}/{rom}: {model.RenderedImages.Count} images,
 return 0;
 
 // --- helpers ---------------------------------------------------------------------------------
+
+static string Set(ref bool flag)
+{
+    flag = true;
+    return "ok";
+}
 
 static string Sanitise(string name) =>
     string.Join("_", name.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
