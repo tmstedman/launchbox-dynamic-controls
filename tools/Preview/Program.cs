@@ -1,6 +1,7 @@
 using DynamicControls;
 using DynamicControls.Composition;
 using DynamicControls.Preview;
+using DynamicControls.Tools.Common;
 using SkiaSharp;
 
 // --- arguments -------------------------------------------------------------------------------
@@ -27,11 +28,6 @@ const string Usage = """
          dotnet run --project tools/Preview -- --all
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --no-labels
     """;
-
-// A rom name nothing can match, so no ControllerOverrides file and no Labels entry applies and
-// what resolves is the platform's own default -- the same synthetic game LabelDump's platform
-// sweep uses, so a render and the row in platform-renders.xml describe the same thing.
-const string PlatformDefaultRom = "__platform_default__";
 
 /// <summary>How many of a platform's named games <c>--all</c> will render before giving up on
 /// it. Exists for Arcade, whose Labels.xml names thousands — a PNG each is hundreds of megabytes
@@ -89,7 +85,7 @@ if (!noLabels && !typeface.FamilyName.StartsWith("Segoe UI", StringComparison.Or
                           + "may not match Windows.");
 }
 
-ControllerOverlayService service = ControllerOverlayFactory.Create(root);
+var resolver = new ToolResolver(root, cfgPack);
 
 // --- sweep -----------------------------------------------------------------------------------
 
@@ -97,24 +93,23 @@ ControllerOverlayService service = ControllerOverlayFactory.Create(root);
 // same render. --out is ignored here: a sweep writes a tree, not a file.
 if (all)
 {
-    string platformsDir = Path.Combine(root, "Defaults", "Platforms");
-    if (!Directory.Exists(platformsDir))
+    IReadOnlyList<string> platforms = SweepTargets.Platforms(root);
+    if (platforms.Count == 0)
     {
-        Console.Error.WriteLine($"No platforms folder: {platformsDir}");
+        Console.Error.WriteLine($"No platforms under {root}.");
         return 1;
     }
 
     int drawn = 0, empty = 0;
-    foreach (string dir in Directory.EnumerateDirectories(platformsDir).OrderBy(d => d, StringComparer.Ordinal))
+    foreach (string name in platforms)
     {
-        string name = Path.GetFileName(dir);
-        if (Draw(name, "", DefaultPath(name, ""))) drawn++; else empty++;
+        if (Draw(new SweepTarget(name, ""))) drawn++; else empty++;
 
         // Arcade declares thousands of games; rendering each as a PNG is hundreds of megabytes
         // nobody will look through, and its roms are what the cfg sweep and the label dump are
         // for. A platform past the cap keeps its default render and says what it dropped --
         // ask for one of its games by name to get it.
-        IReadOnlyList<string> named = NamedGames(Path.Combine(dir, "Labels.xml"));
+        IReadOnlyList<string> named = SweepTargets.NamedGames(root, name, Console.Error.WriteLine);
         if (named.Count > MaxGamesPerPlatform)
         {
             Console.Error.WriteLine($"{name}: {named.Count} named games, past the cap of "
@@ -123,7 +118,7 @@ if (all)
         }
 
         foreach (string namedRom in named)
-            if (Draw(name, namedRom, DefaultPath(name, namedRom))) drawn++; else empty++;
+            if (Draw(new SweepTarget(name, namedRom))) drawn++; else empty++;
     }
 
     Console.Error.WriteLine($"{drawn} rendered, {empty} with nothing to draw -> preview/");
@@ -132,7 +127,7 @@ if (all)
 
 // --- one render ------------------------------------------------------------------------------
 
-return Draw(platform, rom, output.Length > 0 ? output : DefaultPath(platform, rom)) ? 0 : 1;
+return Draw(new SweepTarget(platform, rom), output) ? 0 : 1;
 
 // --- helpers ---------------------------------------------------------------------------------
 
@@ -140,34 +135,23 @@ return Draw(platform, rom, output.Length > 0 ? output : DefaultPath(platform, ro
 // their platform, which is the only grouping that stays legible once a platform has more than a
 // handful. A re-render overwrites: the name says what was drawn, not how, so the same game with
 // and without labels is one file -- pass --out to keep both.
-string DefaultPath(string platformName, string romName) =>
-    romName.Length == 0
-        ? Path.Combine("preview", "platforms", $"{Sanitise(platformName)}.png")
-        : Path.Combine("preview", "games", Sanitise(platformName), $"{Sanitise(romName)}.png");
+static string DefaultPath(SweepTarget target) =>
+    target.IsPlatformDefault
+        ? Path.Combine("preview", "platforms", $"{Sanitise(target.Platform)}.png")
+        : Path.Combine("preview", "games", Sanitise(target.Platform), $"{Sanitise(target.RomName)}.png");
 
 // Resolves one game and writes its PNG. False when there was nothing to draw, which a sweep
 // counts and a single render turns into a non-zero exit.
-bool Draw(string platformName, string romName, string path)
+bool Draw(SweepTarget target, string explicitPath = "")
 {
-    // Same synthetic mame.exe trick LabelDump uses: nothing opens it, but MameEmulator gates the
-    // MAME chain on the filename and MameInputMappingSource takes the cfg folder from its
-    // directory.
-    string? emulatorPath = cfgPack.Length > 0 ? Path.Combine(cfgPack, "mame.exe") : null;
+    string path = explicitPath.Length > 0 ? explicitPath : DefaultPath(target);
+    ControllerOverlayModel model = resolver.Resolve(target);
 
-    ControllerOverlayModel model = service.Resolve(new GameInfo(
-        Platform: platformName,
-        RomName: romName.Length > 0 ? romName : PlatformDefaultRom,
-        CloneOf: null,
-        LaunchBoxId: null,
-        EmulatorPath: emulatorPath,
-        RomDirectory: null,
-        RetroArchCore: null));
-
-    if (model.RenderedImages.Count == 0 && model.InputLabels.Count == 0)
+    if (ToolResolver.IsEmpty(model))
     {
         // ControllerOverlayService turns every exception into an empty model, so "nothing to
         // draw" and "the pipeline threw" are indistinguishable here. Say both.
-        Console.Error.WriteLine($"Nothing rendered for {platformName}/{romName} — no mapping, or "
+        Console.Error.WriteLine($"Nothing rendered for {target} — no mapping, or "
                               + $"the pipeline errored. Check {Path.Combine(root, "Logs")}.");
         return false;
     }
@@ -186,34 +170,9 @@ bool Draw(string platformName, string romName, string path)
     using (FileStream file = File.Create(path))
         png.SaveTo(file);
 
-    Console.Error.WriteLine($"{platformName}/{(romName.Length > 0 ? romName : "default")}: "
-                          + $"{model.RenderedImages.Count} images, {model.InputLabels.Count} labels "
-                          + $"-> {path}");
+    Console.Error.WriteLine($"{target}: {model.RenderedImages.Count} images, "
+                          + $"{model.InputLabels.Count} labels -> {path}");
     return true;
-}
-
-// The rom names a platform's Labels.xml declares, matching LabelDump's platform sweep so the
-// two produce the same set.
-static IReadOnlyList<string> NamedGames(string labelsPath)
-{
-    if (!File.Exists(labelsPath)) return [];
-    try
-    {
-        System.Xml.Linq.XElement? labelsRoot = System.Xml.Linq.XDocument.Load(labelsPath).Root;
-        if (labelsRoot == null) return [];
-
-        return [.. labelsRoot.Elements("Game")
-            .Select(g => (string?)g.Attribute("romName"))
-            .Where(n => !string.IsNullOrEmpty(n))
-            .Select(n => n!)
-            .Distinct()
-            .OrderBy(n => n, StringComparer.Ordinal)];
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"Could not read {labelsPath}: {ex.Message}");
-        return [];
-    }
 }
 
 static string Set(ref bool flag)

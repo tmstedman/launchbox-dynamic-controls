@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Core\DynamicControls.Core.csproj" />
+    <ProjectReference Include="..\Common\DynamicControls.Tools.Common.csproj" />
   </ItemGroup>
 
 </Project>

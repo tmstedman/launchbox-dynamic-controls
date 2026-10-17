@@ -1,6 +1,7 @@
 using DynamicControls;
 using DynamicControls.Composition;
 using DynamicControls.LabelDump;
+using DynamicControls.Tools.Common;
 
 Options? options = Options.Parse(args);
 if (options == null) return 1;
@@ -51,6 +52,11 @@ Console.Error.WriteLine($"{roms.Length} roms from {cfgDir}");
 Console.Error.WriteLine($"Resolving against {options.Root} as platform '{options.Platform}'...");
 
 ControllerOverlayService service = ControllerOverlayFactory.Create(options.Root);
+
+// Platform renders resolve with no cfg pack, unlike the rom sweep: a platform render is
+// what the data alone produces, and pointing it at an emulator pack would make that file
+// describe one machine's configuration rather than the plugin's defaults.
+var platformResolver = new ToolResolver(options.Root);
 
 List<GameLabels> games = [];
 List<(string RomName, IReadOnlyList<GameImage> Images)> renders = [];
@@ -194,33 +200,29 @@ if (options.ImagesOut.Length > 0)
 // platform is here, none of which has a rom pack to be swept the way Arcade just was.
 if (options.PlatformsOut.Length > 0)
 {
-    string platformsDir = Path.Combine(options.Root, "Defaults", "Platforms");
-    if (!Directory.Exists(platformsDir))
+    IReadOnlyList<string> platforms = SweepTargets.Platforms(options.Root);
+    if (platforms.Count == 0)
     {
-        Console.Error.WriteLine($"No platforms folder, skipping --platforms-out: {platformsDir}");
+        Console.Error.WriteLine($"No platforms under {options.Root}, skipping --platforms-out.");
         return 0;
     }
 
     List<ImageWriter.PlatformRender> platformRenders = [];
-    foreach (string dir in Directory.EnumerateDirectories(platformsDir).OrderBy(d => d, StringComparer.Ordinal))
+    foreach (string name in platforms)
     {
-        string name = Path.GetFileName(dir);
-
-        // A rom name no ControllerOverrides file or Labels entry can match, so what renders is
-        // the platform's own default and nothing a single game happened to override.
         (IReadOnlyList<GameImage> defImages, IReadOnlyList<(string, string)> defLabels) =
-            RenderOf(name, "__platform_default__");
+            RenderOf(new SweepTarget(name, ""));
 
-        // Then every game the platform's own Labels.xml names -- the only game-specific coverage
-        // a console platform can have, none of them having a rom pack. Skipped for the platform
+        // Every game the platform's own Labels.xml names -- the only game-specific coverage a
+        // console platform can have, none of them having a rom pack. Skipped for the platform
         // the rom sweep above already covered, whose thousands of games are in its own file.
         List<(string, IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>)> namedGames = [];
         if (!name.Equals(options.Platform, StringComparison.OrdinalIgnoreCase))
         {
-            foreach (string namedRom in NamedGames(Path.Combine(dir, "Labels.xml")))
+            foreach (string namedRom in SweepTargets.NamedGames(options.Root, name, Console.Error.WriteLine))
             {
                 (IReadOnlyList<GameImage> images, IReadOnlyList<(string, string)> labels) =
-                    RenderOf(name, namedRom);
+                    RenderOf(new SweepTarget(name, namedRom));
                 namedGames.Add((namedRom, images, labels));
             }
         }
@@ -266,16 +268,13 @@ return 0;
 
 // Resolves one render and reduces it to what the file records. Shared by the platform default
 // and its named games so the two can never diverge in what they capture.
-(IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>) RenderOf(string platformName, string romName)
+//
+// Resolved through a ToolResolver with no cfg pack, unlike the rom sweep above: a platform
+// render is what the data alone produces, and pointing it at an emulator pack would make the
+// file describe one machine's configuration rather than the plugin's defaults.
+(IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>) RenderOf(SweepTarget target)
 {
-    ControllerOverlayModel m = service.Resolve(new GameInfo(
-        Platform: platformName,
-        RomName: romName,
-        CloneOf: null,
-        LaunchBoxId: null,
-        EmulatorPath: null,
-        RomDirectory: null,
-        RetroArchCore: null));
+    ControllerOverlayModel m = platformResolver.Resolve(target);
 
     IReadOnlyList<GameImage> images = [.. m.RenderedImages.Select(i => new GameImage(
         Control: i.InputName is { Length: > 0 } n ? n : "(none)",
@@ -293,28 +292,4 @@ return 0;
         .Select(g => (g.Key, g.First().Text))];
 
     return (images, labels);
-}
-
-// The rom names a platform's Labels.xml declares. Read straight from the file rather than
-// through the loader: this asks what the data names, not what resolving one of them yields.
-static IReadOnlyList<string> NamedGames(string labelsPath)
-{
-    if (!File.Exists(labelsPath)) return [];
-    try
-    {
-        System.Xml.Linq.XElement? root = System.Xml.Linq.XDocument.Load(labelsPath).Root;
-        if (root == null) return [];
-
-        return [.. root.Elements("Game")
-            .Select(g => (string?)g.Attribute("romName"))
-            .Where(n => !string.IsNullOrEmpty(n))
-            .Select(n => n!)
-            .Distinct()
-            .OrderBy(n => n, StringComparer.Ordinal)];
-    }
-    catch (Exception ex)
-    {
-        Console.Error.WriteLine($"Could not read {labelsPath}: {ex.Message}");
-        return [];
-    }
 }
