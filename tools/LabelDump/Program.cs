@@ -163,22 +163,91 @@ if (options.ArtworkOut.Length > 0 && artwork.Count > 0)
 
 if (options.ImagesOut.Length > 0)
 {
-    ImageWriter.Write(options.ImagesOut, renders, """
+    ImageWriter.WriteRomShapes(options.ImagesOut, renders, """
         GENERATED - do not edit by hand.
 
-        The images the plugin renders, per ROM, from the same run that produced the label dump
-        beside it. That file answers "what text does the player read"; this one answers "what
-        does the player look at" - the half a labels-only comparison cannot see. An input
-        silently losing its platform-specific artwork and falling back to the generic leaves no
-        trace in the labels at all.
+        The images the plugin renders for the roms in the cfg pack, from the same run that
+        produced the label dump beside it. That file answers "what text does the player read";
+        this one answers "what does the player look at" - the half a labels-only comparison
+        cannot see. An input silently losing its platform-specific artwork and falling back to
+        the generic leaves no trace in the labels at all.
 
-        Position and size are omitted deliberately: they come from the template and are the same
-        for every ROM. What varies is the source file, the size and the opacity. On a platform with
-        artwork of its own - Arcade is one - every source is generic and the opacity is the whole
-        of the per-game signal, so it is what a visibility change shows up in.
+        Grouped by distinct render shape, not listed per rom. Thousands of roms produce a few
+        hundred shapes, because what varies between them is which OneOf alternative fired rather
+        than the artwork itself - a per-rom listing would be the same few hundred facts repeated
+        at forty times the size. Shapes are ordered by their first rom rather than numbered, so
+        a new one appearing does not renumber the rest.
+
+        This file covers the per-rom axis only. Bespoke artwork varies by platform, which
+        platform-images.xml beside it records.
+
+        Left and top are omitted: they come from the template and say nothing a change here
+        would not already show. Size is kept, because it is what separates a whole stick's
+        background glyph from the alternative a OneOf selected when both draw the same file.
         """, command);
     Console.Error.WriteLine($"{renders.Count} roms rendered "
                           + $"{renders.Sum(r => r.Images.Count)} images -> {options.ImagesOut}");
+}
+
+// Independent of the cfg pack: a game with no configuration of its own resolves to the
+// platform's default mapping, which is the axis bespoke artwork varies along. Every console
+// platform is here, none of which has a rom pack to be swept the way Arcade just was.
+if (options.PlatformsOut.Length > 0)
+{
+    string platformsDir = Path.Combine(options.Root, "Defaults", "Platforms");
+    if (!Directory.Exists(platformsDir))
+    {
+        Console.Error.WriteLine($"No platforms folder, skipping --platforms-out: {platformsDir}");
+        return 0;
+    }
+
+    List<(string Platform, IReadOnlyList<GameImage> Images)> platformRenders = [];
+    foreach (string dir in Directory.EnumerateDirectories(platformsDir).OrderBy(d => d, StringComparer.Ordinal))
+    {
+        string name = Path.GetFileName(dir);
+
+        // A rom name no ControllerOverrides file or Labels entry can match, so what renders is
+        // the platform's own default and nothing a single game happened to override.
+        ControllerOverlayModel model = service.Resolve(new GameInfo(
+            Platform: name,
+            RomName: "__platform_default__",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null));
+
+        platformRenders.Add((name, [.. model.RenderedImages.Select(i => new GameImage(
+            Control: i.InputName is { Length: > 0 } n ? n : "(none)",
+            Source: ImageWriter.Relative(i.Source),
+            Opacity: i.Opacity,
+            BlurRadius: i.BlurRadius,
+            Width: i.Width,
+            Height: i.Height))]));
+    }
+
+    ImageWriter.WritePlatforms(options.PlatformsOut, platformRenders, """
+        GENERATED - do not edit by hand.
+
+        What the template draws for each platform under its default mapping - a game with no
+        config, no remap and no per-game override, so what is left is the platform's own
+        Controllers.xml and Labels.xml defaults.
+
+        This is the axis bespoke artwork varies along. A control resolves to its platform's own
+        image when a platform button drives it (Nintendo 64's C-Any drives AxisRightStick, so
+        the whole stick draws C-Any.png) and falls back to the generic when none does. That
+        fallback is silent, changes nothing about any label, and is invisible to every other
+        file here.
+
+        It is also the only bulk coverage the console platforms have: none of them ships a rom
+        pack, so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all
+        and could never have surfaced this.
+
+        Opacity reflects the default rendering mode, where showIf="auto" resolves to IsMapped
+        rather than HasLabel: a control the platform does not have is dimmed, not absent.
+        """, command);
+    Console.Error.WriteLine($"{platformRenders.Count} platforms rendered "
+                          + $"{platformRenders.Sum(p => p.Images.Count)} images -> {options.PlatformsOut}");
 }
 
 return 0;
