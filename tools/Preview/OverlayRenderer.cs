@@ -86,9 +86,7 @@ public static class OverlayRenderer
         using SKBitmap? source = SKBitmap.Decode(image.Source);
         if (source == null) return;
 
-        float w = double.IsNaN(image.Width) ? source.Width : (float)image.Width;
-        float h = double.IsNaN(image.Height) ? source.Height : (float)image.Height;
-        var dest = SKRect.Create((float)image.Left, (float)image.Top, w, h);
+        SKRect dest = Fit(source, image);
 
         using var paint = new SKPaint
         {
@@ -103,6 +101,47 @@ public static class OverlayRenderer
         }
 
         canvas.DrawBitmap(source, dest, paint);
+    }
+
+    /// <summary>
+    /// Places an image inside the slot the layout gave it, scaled proportionally and centred.
+    ///
+    /// <para>The theme's <c>&lt;Image&gt;</c> sets no <c>Stretch</c>, so WPF applies its default
+    /// of <c>Uniform</c>: the declared width and height are a bounding box, not the drawn size.
+    /// That distinction only shows when an image's own proportions differ from its slot's, which
+    /// is exactly what happens once a remap moves one — a square face button landing in the
+    /// shoulder's 64×42 slot draws 42×42 and centred on Windows, where filling the box would
+    /// squash it.</para>
+    ///
+    /// <para>A dimension the layout leaves unset is taken from the other and the image's own
+    /// aspect; with neither set the image draws at its natural size, as WPF does.</para>
+    /// </summary>
+    private static SKRect Fit(SKBitmap source, RenderedImage image)
+    {
+        bool hasW = !double.IsNaN(image.Width), hasH = !double.IsNaN(image.Height);
+        float aspect = source.Height == 0 ? 1f : (float)source.Width / source.Height;
+
+        float w, h;
+        switch (hasW, hasH)
+        {
+            case (false, false): (w, h) = (source.Width, source.Height); break;
+            case (true, false): (w, h) = ((float)image.Width, (float)image.Width / aspect); break;
+            case (false, true): (w, h) = ((float)image.Height * aspect, (float)image.Height); break;
+            default:
+                float boxW = (float)image.Width, boxH = (float)image.Height;
+                float scale = Math.Min(boxW / source.Width, boxH / source.Height);
+                (w, h) = (source.Width * scale, source.Height * scale);
+                break;
+        }
+
+        // Centred in the box, which is where Uniform leaves it: the element occupies the full
+        // declared size and the scaled content sits in the middle of it.
+        float boxWidth = hasW ? (float)image.Width : w;
+        float boxHeight = hasH ? (float)image.Height : h;
+        return SKRect.Create(
+            (float)image.Left + ((boxWidth - w) / 2),
+            (float)image.Top + ((boxHeight - h) / 2),
+            w, h);
     }
 
     /// <summary>
