@@ -1,0 +1,1039 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  GENERATED - do not edit by hand.
+
+  What the template draws for each platform under its default mapping - a game with no
+  config, no remap and no per-game override, so what is left is the platform's own
+  Controllers.xml and Labels.xml defaults.
+
+  This is the axis bespoke artwork varies along. A control resolves to its platform's own
+  image when a platform button drives it (Nintendo 64's C-Any drives AxisRightStick, so
+  the whole stick draws C-Any.png) and falls back to the generic when none does. That
+  fallback is silent, changes nothing about any label, and is invisible to every other
+  file here.
+
+  It is also the only bulk coverage the console platforms have: none of them ships a rom
+  pack, so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all
+  and could never have surfaced this.
+
+  Opacity reflects the default rendering mode, where showIf="auto" resolves to IsMapped
+  rather than HasLabel: a control the platform does not have is dimmed, not absent.
+-->
+<?regenerate dotnet run --project tools/LabelDump -- --root assets --cfg romcontrols --out label-sources/arcade-pipeline-sorted.xml ?>
+<Platforms>
+    <Platform name="3DO Interactive Multiplayer">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="3DO Interactive Multiplayer\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="3DO Interactive Multiplayer\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="3DO Interactive Multiplayer\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="3DO Interactive Multiplayer\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="3DO Interactive Multiplayer\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Arcade">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="ButtonA.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="ButtonB.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Atari 2600">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="Atari 2600\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="ButtonB.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Atari 5200">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Atari 5200\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="ButtonB.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Atari 7800">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Atari 7800\One.png" w="44" h="44" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Atari 7800\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonA" src="Line_ButtonA.png" opacity="0.3" blur="8" />
+        <Image control="ButtonB" src="Atari 7800\Two.png" w="44" h="44" opacity="0.3" blur="8" />
+        <Image control="ButtonB" src="Atari 7800\Two.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Line_ButtonB.png" opacity="0.3" blur="8" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="44" h="44" opacity="0.3" blur="8" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonX" src="Line_ButtonX.png" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Line_ButtonY.png" opacity="1" />
+    </Platform>
+    <Platform name="Atari Jaguar">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Atari Jaguar\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Atari Jaguar\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Atari Jaguar\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Atari Lynx">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="ButtonA.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="ButtonB.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="GCE Vectrex">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="GCE Vectrex\Three.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="GCE Vectrex\Four.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="0.3" blur="8" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonX" src="GCE Vectrex\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="GCE Vectrex\Two.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="NEC PC Engine">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="NEC PC Engine\6-Button\VI.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="NEC PC Engine\6-Button\II.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="NEC PC Engine\6-Button\I.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="NEC PC Engine\6-Button\V.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="NEC PC Engine\6-Button\III.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="NEC PC Engine\6-Button\IV.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="NEC PC Engine SuperGrafx">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="NEC PC Engine SuperGrafx\6-Button\VI.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="NEC PC Engine SuperGrafx\6-Button\II.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="NEC PC Engine SuperGrafx\6-Button\I.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="NEC PC Engine SuperGrafx\6-Button\V.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="NEC PC Engine SuperGrafx\6-Button\III.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="NEC PC Engine SuperGrafx\6-Button\IV.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="NEC PC Engine-CD">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="NEC PC Engine-CD\6-Button\VI.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="NEC PC Engine-CD\6-Button\II.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="NEC PC Engine-CD\6-Button\I.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="NEC PC Engine-CD\6-Button\V.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="NEC PC Engine-CD\6-Button\III.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="NEC PC Engine-CD\6-Button\IV.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="NEC TurboGrafx-16">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="NEC TurboGrafx-16\6-Button\VI.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="NEC TurboGrafx-16\6-Button\II.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="NEC TurboGrafx-16\6-Button\I.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="NEC TurboGrafx-16\6-Button\V.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="NEC TurboGrafx-16\6-Button\III.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="NEC TurboGrafx-16\6-Button\IV.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="NEC TurboGrafx-CD">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="NEC TurboGrafx-CD\6-Button\VI.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="NEC TurboGrafx-CD\6-Button\II.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="NEC TurboGrafx-CD\6-Button\I.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="NEC TurboGrafx-CD\6-Button\V.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="NEC TurboGrafx-CD\6-Button\III.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="NEC TurboGrafx-CD\6-Button\IV.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Nintendo 64">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="Nintendo 64\C-Any.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Nintendo 64\Z.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Nintendo 64\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo 64\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Nintendo 64\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo 64\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo 64DD">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="Nintendo 64DD\C-Any.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Nintendo 64DD\Z.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Nintendo 64DD\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo 64DD\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Nintendo 64DD\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo 64DD\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo DS">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="64" h="64" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="Line_AxisRightStick.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="Nintendo DS\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo DS\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Nintendo DS\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftStick" src="ButtonLeftStick.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonLeftStick" src="Line_ButtonLeftStick.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo DS\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightStick" src="ButtonRightStick.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonRightStick" src="Line_ButtonRightStick.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Nintendo DS\Y.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Nintendo DS\X.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Nintendo Entertainment System">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Entertainment System\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Entertainment System\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Famicom">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Famicom\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Famicom\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Famicom Disk System">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Famicom Disk System\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Famicom Disk System\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Game Boy">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Game Boy\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Game Boy\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Game Boy Advance">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Game Boy Advance\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Game Boy Advance\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Game Boy Color">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Game Boy Color\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Game Boy Color\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Nintendo Gamecube">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Nintendo Gamecube\L.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Nintendo Gamecube\R.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Nintendo Gamecube\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Gamecube\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo Gamecube\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Nintendo Gamecube\X.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Nintendo Gamecube\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Nintendo Satellaview">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Satellaview\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Satellaview\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Nintendo Satellaview\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo Satellaview\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Nintendo Satellaview\Y.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Nintendo Satellaview\X.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Nintendo Virtual Boy">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Nintendo Virtual Boy\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Nintendo Virtual Boy\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Nintendo Virtual Boy\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Nintendo Virtual Boy\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="SNK Neo Geo AES">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="SNK Neo Geo AES\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="SNK Neo Geo AES\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="SNK Neo Geo AES\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="SNK Neo Geo AES\D.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="SNK Neo Geo CD">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="SNK Neo Geo CD\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="SNK Neo Geo CD\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="SNK Neo Geo CD\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="SNK Neo Geo CD\D.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="SNK Neo Geo Pocket">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="SNK Neo Geo Pocket\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="SNK Neo Geo Pocket\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="SNK Neo Geo Pocket Color">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="SNK Neo Geo Pocket Color\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="SNK Neo Geo Pocket Color\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Sega 32X">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega 32X\6-Button\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega 32X\6-Button\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sega 32X\6-Button\X.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sega 32X\6-Button\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega 32X\6-Button\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega 32X\6-Button\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega CD">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega CD\6-Button\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega CD\6-Button\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sega CD\6-Button\X.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sega CD\6-Button\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega CD\6-Button\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega CD\6-Button\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega Dreamcast">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Sega Dreamcast\L.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Sega Dreamcast\R.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Sega Dreamcast\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Dreamcast\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega Dreamcast\X.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega Dreamcast\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega Game Gear">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega Game Gear\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Game Gear\Two.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Sega Genesis">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega Genesis\6-Button\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Genesis\6-Button\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sega Genesis\6-Button\X.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sega Genesis\6-Button\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega Genesis\6-Button\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega Genesis\6-Button\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega Mark III">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega Mark III\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Mark III\Two.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Sega Master System">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega Master System\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Master System\Two.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Sega Megadrive (Japan)">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega Megadrive (Japan)\6-Button\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Megadrive (Japan)\6-Button\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sega Megadrive (Japan)\6-Button\X.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sega Megadrive (Japan)\6-Button\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega Megadrive (Japan)\6-Button\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega Megadrive (Japan)\6-Button\Y.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega Naomi">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="ButtonA.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="ButtonB.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sega SG-1000">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sega SG-1000\One.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega SG-1000\Two.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="0.3" blur="8" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Sega Saturn">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Sega Saturn\L.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Sega Saturn\R.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Sega Saturn\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sega Saturn\C.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sega Saturn\Y.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sega Saturn\Z.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sega Saturn\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sega Saturn\X.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sony PSP">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sony PSP\Cross.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sony PSP\Circle.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sony PSP\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sony PSP\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sony PSP\Square.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sony PSP\Triangle.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sony PSP Minis">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Sony PSP Minis\Cross.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sony PSP Minis\Circle.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sony PSP Minis\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sony PSP Minis\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sony PSP Minis\Square.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sony PSP Minis\Triangle.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sony Playstation">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Sony Playstation\L2.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Sony Playstation\R2.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Sony Playstation\Cross.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sony Playstation\Circle.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sony Playstation\L1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sony Playstation\R1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sony Playstation\Square.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sony Playstation\Triangle.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sony Playstation 2">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Sony Playstation 2\L2.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Sony Playstation 2\R2.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Sony Playstation 2\Cross.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sony Playstation 2\Circle.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sony Playstation 2\L1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sony Playstation 2\R1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sony Playstation 2\Square.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sony Playstation 2\Triangle.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Sony Playstation 3">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Sony Playstation 3\L2.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="Sony Playstation 3\R2.png" w="65" h="65" opacity="1" />
+        <Image control="ButtonA" src="Sony Playstation 3\Cross.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Sony Playstation 3\Circle.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Sony Playstation 3\L1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Sony Playstation 3\R1.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Sony Playstation 3\Square.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Sony Playstation 3\Triangle.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Super Famicom">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Super Famicom\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Super Famicom\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Super Famicom\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Super Famicom\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Super Famicom\Y.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Super Famicom\X.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Super Nintendo Entertainment System">
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+        <Image control="ButtonA" src="Super Nintendo Entertainment System\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Super Nintendo Entertainment System\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Super Nintendo Entertainment System\L.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Super Nintendo Entertainment System\R.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="Super Nintendo Entertainment System\Y.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonY" src="Super Nintendo Entertainment System\X.png" w="64" h="64" opacity="1" />
+    </Platform>
+    <Platform name="Wonderswan">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="Wonderswan\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Wonderswan\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="0.3" blur="6" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+    <Platform name="Wonderswan Color">
+        <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+        <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+        <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+        <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="1" />
+        <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="1" />
+        <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+        <Image control="ButtonA" src="Wonderswan Color\B.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonB" src="Wonderswan Color\A.png" w="64" h="64" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="1" />
+        <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+        <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+        <Image control="ButtonLeftShoulder" src="ButtonLeftShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="1" />
+        <Image control="ButtonRightShoulder" src="ButtonRightShoulder.png" w="64" h="42" opacity="1" />
+        <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="1" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="0.3" blur="6" />
+        <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+        <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+    </Platform>
+</Platforms>
