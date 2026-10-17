@@ -53,10 +53,10 @@ public record Options(
           --images-out <f>    also write the images the roms rendered, grouped by distinct
                               render shape, as a baseline for changes that never touch a label.
                               Default: label-sources/arcade-pipeline-images.xml
-          --platforms-out <f> also write what every platform draws under its default mapping.
-                              The axis bespoke artwork varies along, and the only bulk coverage
-                              the console platforms have.
-                              Default: label-sources/platform-images.xml
+          --platforms-out <f> also write what every platform draws - its default mapping, plus
+                              each game its Labels.xml names. Images and labels together; the
+                              only coverage the console platforms have.
+                              Default: label-sources/platform-renders.xml
 
         e.g. dotnet run --project tools/LabelDump -- --cfg romcontrols
         """;
@@ -75,7 +75,7 @@ public record Options(
         string artwork = "label-sources/arcade-artwork.xml";
         string artworkOut = "label-sources/arcade-artwork-sorted.xml";
         string imagesOut = "label-sources/arcade-pipeline-images.xml";
-        string platformsOut = "label-sources/platform-images.xml";
+        string platformsOut = "label-sources/platform-renders.xml";
 
         for (int i = 0; i < args.Length; i++)
         {

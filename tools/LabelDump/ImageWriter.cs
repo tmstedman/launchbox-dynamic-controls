@@ -79,30 +79,62 @@ public static class ImageWriter
     }
 
     /// <summary>
-    /// Writes one block per platform: what the template draws for a game with no configuration
-    /// of its own, which is the platform's default mapping and nothing else. The axis along which
-    /// bespoke artwork actually varies, and the only bulk coverage the console platforms have —
-    /// none of them has a ROM pack to run against.
+    /// Everything one platform renders: its default — a game with no configuration of its own —
+    /// and one block per game its Labels.xml names. Images and labels together, because for a
+    /// platform they are one render and there is no transcription to keep either diffable
+    /// against separately, which is the only reason the ROM sweep splits them.
+    /// </summary>
+    /// <param name="Games">Named renders beyond the default, keyed by ROM name. Empty for most
+    /// platforms; the only game-specific coverage any of them has, none having a ROM pack.</param>
+    public record PlatformRender(
+        string Platform,
+        IReadOnlyList<GameImage> Images,
+        IReadOnlyList<(string Control, string Text)> Labels,
+        IReadOnlyList<(string RomName, IReadOnlyList<GameImage> Images,
+                       IReadOnlyList<(string Control, string Text)> Labels)> Games);
+
+    /// <summary>
+    /// Writes one block per platform. The axis along which bespoke artwork actually varies, and
+    /// the only bulk coverage the console platforms have — none of them has a ROM pack to run
+    /// against, so without this their renders are unmeasured entirely.
     /// </summary>
     public static void WritePlatforms(
         string path,
-        IReadOnlyList<(string Platform, IReadOnlyList<GameImage> Images)> platforms,
+        IReadOnlyList<PlatformRender> platforms,
         string header,
         string command)
     {
         var sb = new StringBuilder();
         AppendPrologue(sb, header, command, "Platforms");
 
-        foreach ((string platform, IReadOnlyList<GameImage> images) in
-                 platforms.OrderBy(p => p.Platform, StringComparer.Ordinal))
+        foreach (PlatformRender p in platforms.OrderBy(p => p.Platform, StringComparer.Ordinal))
         {
-            sb.Append($"    <Platform name=\"{Escape(platform)}\">\n");
-            AppendImages(sb, images, "        ");
+            sb.Append($"    <Platform name=\"{Escape(p.Platform)}\">\n");
+            AppendImages(sb, p.Images, "        ");
+            AppendLabels(sb, p.Labels, "        ");
+
+            foreach ((string romName, IReadOnlyList<GameImage> images,
+                      IReadOnlyList<(string Control, string Text)> labels) in
+                     p.Games.OrderBy(g => g.RomName, StringComparer.Ordinal))
+            {
+                sb.Append($"        <Game romName=\"{Escape(romName)}\">\n");
+                AppendImages(sb, images, "            ");
+                AppendLabels(sb, labels, "            ");
+                sb.Append("        </Game>\n");
+            }
+
             sb.Append("    </Platform>\n");
         }
 
         sb.Append("</Platforms>\n");
         Save(path, sb.ToString());
+    }
+
+    private static void AppendLabels(
+        StringBuilder sb, IReadOnlyList<(string Control, string Text)> labels, string indent)
+    {
+        foreach ((string control, string text) in labels.OrderBy(l => l.Control, StringComparer.Ordinal))
+            sb.Append($"{indent}<Label control=\"{Escape(control)}\">{Escape(text)}</Label>\n");
     }
 
     /// <summary>

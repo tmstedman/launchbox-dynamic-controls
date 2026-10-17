@@ -15,7 +15,7 @@
   a new one appearing does not renumber the rest.
 
   This file covers the per-rom axis only. Bespoke artwork varies by platform, which
-  platform-images.xml beside it records.
+  platform-renders.xml beside it records.
 
   Left and top are omitted: they come from the template and say nothing a change here
   would not already show. Size is kept, because it is what separates a whole stick's

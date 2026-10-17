@@ -2,9 +2,9 @@
 <!--
   GENERATED - do not edit by hand.
 
-  What the template draws for each platform under its default mapping - a game with no
-  config, no remap and no per-game override, so what is left is the platform's own
-  Controllers.xml and Labels.xml defaults.
+  What the template draws for each platform: first its default - a game with no config, no
+  remap and no per-game override, so what is left is the platform's own Controllers.xml and
+  Labels.xml defaults - then one block per game that Labels.xml names.
 
   This is the axis bespoke artwork varies along. A control resolves to its platform's own
   image when a platform button drives it (Nintendo 64's C-Any drives AxisRightStick, so
@@ -12,12 +12,19 @@
   fallback is silent, changes nothing about any label, and is invisible to every other
   file here.
 
-  It is also the only bulk coverage the console platforms have: none of them ships a rom
-  pack, so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all
-  and could never have surfaced this.
+  It is also the only coverage the console platforms have: none of them ships a rom pack,
+  so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all and
+  could never have surfaced this. Arcade's own games are skipped here for that reason,
+  being covered in full by the files beside this one.
+
+  Images and labels sit together, unlike the rom sweep which splits them. That split exists
+  only so the label half stays diffable against the artwork transcription, and no such
+  transcription exists for a platform.
 
   Opacity reflects the default rendering mode, where showIf="auto" resolves to IsMapped
-  rather than HasLabel: a control the platform does not have is dimmed, not absent.
+  rather than HasLabel: a control the platform does not have is dimmed, not absent. A
+  platform's named games render in the game-specific mode instead, where it resolves to
+  HasLabel, so an unlabelled control dims there even when the platform has it.
 -->
 <?regenerate dotnet run --project tools/LabelDump -- --root assets --cfg romcontrols --out label-sources/arcade-pipeline-sorted.xml ?>
 <Platforms>
@@ -63,6 +70,8 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="1" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="1" />
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="ButtonStart">Start</Label>
     </Platform>
     <Platform name="Atari 2600">
         <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
@@ -86,6 +95,12 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Label control="AxisTriggerLeft">Left Difficulty B</Label>
+        <Label control="AxisTriggerRight">Right Difficulty B</Label>
+        <Label control="ButtonBack">Select</Label>
+        <Label control="ButtonLeftShoulder">Left Difficulty A</Label>
+        <Label control="ButtonRightShoulder">Right Difficulty A</Label>
+        <Label control="ButtonStart">Reset</Label>
     </Platform>
     <Platform name="Atari 5200">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -137,6 +152,11 @@
         <Image control="ButtonY" src="ButtonY.png" w="44" h="44" opacity="1" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="1" />
         <Image control="ButtonY" src="Line_ButtonY.png" opacity="1" />
+        <Label control="ButtonBack">Select</Label>
+        <Label control="ButtonLeftShoulder">Left Difficulty</Label>
+        <Label control="ButtonRightShoulder">Right Difficulty</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonY">Reset</Label>
     </Platform>
     <Platform name="Atari Jaguar">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -180,6 +200,10 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Label control="ButtonBack">Rotate Screen</Label>
+        <Label control="ButtonLeftShoulder">Option 1</Label>
+        <Label control="ButtonRightShoulder">Option 2</Label>
+        <Label control="ButtonStart">Start</Label>
     </Platform>
     <Platform name="GCE Vectrex">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -320,6 +344,47 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Game romName="Super Mario 64">
+            <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+            <Image control="AxisLeftStick" src="AxisLeftStick.png" w="64" h="64" opacity="1" />
+            <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+            <Image control="AxisLeftStick" src="Line_AxisLeftStick.png" opacity="1" />
+            <Image control="AxisRightStick" src="Line_AxisRightStick.png" opacity="1" />
+            <Image control="AxisRightStick" src="Nintendo 64\C-Any.png" w="64" h="64" opacity="1" />
+            <Image control="AxisRightStick" src="Nintendo 64\C-Any.png" w="124" h="124" opacity="1" />
+            <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="1" />
+            <Image control="AxisTriggerRight" src="Nintendo 64\Z.png" w="65" h="65" opacity="1" />
+            <Image control="ButtonA" src="Line_ButtonA.png" opacity="1" />
+            <Image control="ButtonA" src="Nintendo 64\B.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonA" src="Nintendo 64\B.png" w="64" h="64" opacity="1" />
+            <Image control="ButtonB" src="Line_ButtonB.png" opacity="1" />
+            <Image control="ButtonB" src="Nintendo 64\A.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonB" src="Nintendo 64\A.png" w="64" h="64" opacity="1" />
+            <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="0.3" blur="6" />
+            <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="0.3" blur="6" />
+            <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="0.3" blur="8" />
+            <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+            <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+            <Image control="ButtonLeftShoulder" src="Nintendo 64\L.png" w="64" h="42" opacity="0.3" blur="8" />
+            <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+            <Image control="ButtonRightShoulder" src="Nintendo 64\R.png" w="64" h="42" opacity="0.3" blur="8" />
+            <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonX" src="ButtonX.png" w="44" h="44" opacity="0.3" blur="8" />
+            <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
+            <Image control="ButtonX" src="Line_ButtonX.png" opacity="0.3" blur="8" />
+            <Image control="ButtonY" src="ButtonY.png" w="44" h="44" opacity="0.3" blur="8" />
+            <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+            <Image control="ButtonY" src="Line_ButtonY.png" opacity="0.3" blur="8" />
+            <Label control="AxisLeftStick">Move</Label>
+            <Label control="AxisRightStick">Camera</Label>
+            <Label control="AxisTriggerRight">Crouch</Label>
+            <Label control="ButtonA">Punch</Label>
+            <Label control="ButtonB">Jump</Label>
+            <Label control="ButtonStart">Start</Label>
+        </Game>
     </Platform>
     <Platform name="Nintendo 64DD">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -369,6 +434,13 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="Nintendo DS\Y.png" w="64" h="64" opacity="1" />
         <Image control="ButtonY" src="Nintendo DS\X.png" w="64" h="64" opacity="1" />
+        <Label control="AxisRightStick">Move touch joystick</Label>
+        <Label control="AxisTriggerLeft">Make microphone noise</Label>
+        <Label control="AxisTriggerRight">Swap screens</Label>
+        <Label control="ButtonBack">Select</Label>
+        <Label control="ButtonLeftStick">Close lid</Label>
+        <Label control="ButtonRightStick">Toggle touch joystick</Label>
+        <Label control="ButtonStart">Start</Label>
     </Platform>
     <Platform name="Nintendo Entertainment System">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -729,6 +801,58 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="Sega Genesis\6-Button\A.png" w="64" h="64" opacity="1" />
         <Image control="ButtonY" src="Sega Genesis\6-Button\Y.png" w="64" h="64" opacity="1" />
+        <Game romName="OutRun">
+            <Image control="(none)" src="Line_AxisLeftStick_Multi.png" opacity="1" />
+            <Image control="(none)" src="Line_ButtonDpad_Multi.png" opacity="1" />
+            <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
+            <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
+            <Image control="AxisLeftStickDown" src="AxisLeftStickDown.png" w="34" h="34" opacity="1" />
+            <Image control="AxisLeftStickLeft" src="AxisLeftStickLeft.png" w="34" h="34" opacity="1" />
+            <Image control="AxisLeftStickRight" src="AxisLeftStickRight.png" w="34" h="34" opacity="1" />
+            <Image control="AxisLeftStickUp" src="AxisLeftStickUp.png" w="34" h="34" opacity="1" />
+            <Image control="AxisRightStick" src="AxisRightStick.png" w="124" h="124" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerLeft" src="AxisTriggerLeft.png" w="65" h="65" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerLeft" src="Line_AxisTriggerLeft.png" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerRight" src="AxisTriggerRight.png" w="65" h="65" opacity="0.3" blur="8" />
+            <Image control="AxisTriggerRight" src="Line_AxisTriggerRight.png" opacity="0.3" blur="8" />
+            <Image control="ButtonA" src="Line_ButtonA.png" opacity="1" />
+            <Image control="ButtonA" src="Sega Genesis\6-Button\B.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonA" src="Sega Genesis\6-Button\B.png" w="64" h="64" opacity="1" />
+            <Image control="ButtonB" src="Line_ButtonB.png" opacity="0.3" blur="8" />
+            <Image control="ButtonB" src="Sega Genesis\6-Button\C.png" w="44" h="44" opacity="0.3" blur="8" />
+            <Image control="ButtonB" src="Sega Genesis\6-Button\C.png" w="64" h="64" opacity="0.3" blur="8" />
+            <Image control="ButtonBack" src="ButtonBack.png" w="34" h="34" opacity="0.3" blur="6" />
+            <Image control="ButtonBack" src="ButtonBack.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonDpad" src="ButtonDpad.png" w="135" h="135" opacity="1" />
+            <Image control="ButtonDpadDown" src="ButtonDpadDown.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonDpadLeft" src="ButtonDpadLeft.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonDpadRight" src="ButtonDpadRight.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonDpadUp" src="ButtonDpadUp.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonGuide" src="ButtonGuide.png" w="68" h="68" opacity="0.3" blur="8" />
+            <Image control="ButtonLeftShoulder" src="Line_ButtonLeftShoulder.png" opacity="0.3" blur="8" />
+            <Image control="ButtonLeftShoulder" src="Sega Genesis\6-Button\X.png" w="64" h="42" opacity="0.3" blur="8" />
+            <Image control="ButtonRightShoulder" src="Line_ButtonRightShoulder.png" opacity="0.3" blur="8" />
+            <Image control="ButtonRightShoulder" src="Sega Genesis\6-Button\Z.png" w="64" h="42" opacity="0.3" blur="8" />
+            <Image control="ButtonStart" src="ButtonStart.png" w="34" h="34" opacity="1" />
+            <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonX" src="Line_ButtonX.png" opacity="1" />
+            <Image control="ButtonX" src="Sega Genesis\6-Button\A.png" w="44" h="44" opacity="1" />
+            <Image control="ButtonX" src="Sega Genesis\6-Button\A.png" w="64" h="64" opacity="1" />
+            <Image control="ButtonY" src="Line_ButtonY.png" opacity="0.3" blur="8" />
+            <Image control="ButtonY" src="Sega Genesis\6-Button\Y.png" w="44" h="44" opacity="0.3" blur="8" />
+            <Image control="ButtonY" src="Sega Genesis\6-Button\Y.png" w="64" h="64" opacity="0.3" blur="8" />
+            <Label control="AxisLeftStickDown">High gear</Label>
+            <Label control="AxisLeftStickLeft">Steer</Label>
+            <Label control="AxisLeftStickRight">Steer</Label>
+            <Label control="AxisLeftStickUp">Low gear</Label>
+            <Label control="ButtonA">Accelerate</Label>
+            <Label control="ButtonDpadDown">High gear</Label>
+            <Label control="ButtonDpadLeft">Steer</Label>
+            <Label control="ButtonDpadRight">Steer</Label>
+            <Label control="ButtonDpadUp">Low gear</Label>
+            <Label control="ButtonStart">Pause</Label>
+            <Label control="ButtonX">Brake</Label>
+        </Game>
     </Platform>
     <Platform name="Sega Mark III">
         <Image control="AxisLeftStick" src="AxisLeftStick.png" w="124" h="124" opacity="1" />
@@ -1012,6 +1136,7 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Label control="ButtonBack">Rotate screen &amp; Swap d-pads</Label>
     </Platform>
     <Platform name="Wonderswan Color">
         <Image control="(none)" src="Line_MetaButtons.png" opacity="1" />
@@ -1035,5 +1160,6 @@
         <Image control="ButtonStart" src="ButtonStart.png" w="44" h="44" opacity="1" />
         <Image control="ButtonX" src="ButtonX.png" w="64" h="64" opacity="0.3" blur="8" />
         <Image control="ButtonY" src="ButtonY.png" w="64" h="64" opacity="0.3" blur="8" />
+        <Label control="ButtonBack">Rotate screen &amp; Swap d-pads</Label>
     </Platform>
 </Platforms>

@@ -179,7 +179,7 @@ if (options.ImagesOut.Length > 0)
         a new one appearing does not renumber the rest.
 
         This file covers the per-rom axis only. Bespoke artwork varies by platform, which
-        platform-images.xml beside it records.
+        platform-renders.xml beside it records.
 
         Left and top are omitted: they come from the template and say nothing a change here
         would not already show. Size is kept, because it is what separates a whole stick's
@@ -201,37 +201,39 @@ if (options.PlatformsOut.Length > 0)
         return 0;
     }
 
-    List<(string Platform, IReadOnlyList<GameImage> Images)> platformRenders = [];
+    List<ImageWriter.PlatformRender> platformRenders = [];
     foreach (string dir in Directory.EnumerateDirectories(platformsDir).OrderBy(d => d, StringComparer.Ordinal))
     {
         string name = Path.GetFileName(dir);
 
         // A rom name no ControllerOverrides file or Labels entry can match, so what renders is
         // the platform's own default and nothing a single game happened to override.
-        ControllerOverlayModel model = service.Resolve(new GameInfo(
-            Platform: name,
-            RomName: "__platform_default__",
-            CloneOf: null,
-            LaunchBoxId: null,
-            EmulatorPath: null,
-            RomDirectory: null,
-            RetroArchCore: null));
+        (IReadOnlyList<GameImage> defImages, IReadOnlyList<(string, string)> defLabels) =
+            RenderOf(name, "__platform_default__");
 
-        platformRenders.Add((name, [.. model.RenderedImages.Select(i => new GameImage(
-            Control: i.InputName is { Length: > 0 } n ? n : "(none)",
-            Source: ImageWriter.Relative(i.Source),
-            Opacity: i.Opacity,
-            BlurRadius: i.BlurRadius,
-            Width: i.Width,
-            Height: i.Height))]));
+        // Then every game the platform's own Labels.xml names -- the only game-specific coverage
+        // a console platform can have, none of them having a rom pack. Skipped for the platform
+        // the rom sweep above already covered, whose thousands of games are in its own file.
+        List<(string, IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>)> namedGames = [];
+        if (!name.Equals(options.Platform, StringComparison.OrdinalIgnoreCase))
+        {
+            foreach (string namedRom in NamedGames(Path.Combine(dir, "Labels.xml")))
+            {
+                (IReadOnlyList<GameImage> images, IReadOnlyList<(string, string)> labels) =
+                    RenderOf(name, namedRom);
+                namedGames.Add((namedRom, images, labels));
+            }
+        }
+
+        platformRenders.Add(new ImageWriter.PlatformRender(name, defImages, defLabels, namedGames));
     }
 
     ImageWriter.WritePlatforms(options.PlatformsOut, platformRenders, """
         GENERATED - do not edit by hand.
 
-        What the template draws for each platform under its default mapping - a game with no
-        config, no remap and no per-game override, so what is left is the platform's own
-        Controllers.xml and Labels.xml defaults.
+        What the template draws for each platform: first its default - a game with no config, no
+        remap and no per-game override, so what is left is the platform's own Controllers.xml and
+        Labels.xml defaults - then one block per game that Labels.xml names.
 
         This is the axis bespoke artwork varies along. A control resolves to its platform's own
         image when a platform button drives it (Nintendo 64's C-Any drives AxisRightStick, so
@@ -239,15 +241,80 @@ if (options.PlatformsOut.Length > 0)
         fallback is silent, changes nothing about any label, and is invisible to every other
         file here.
 
-        It is also the only bulk coverage the console platforms have: none of them ships a rom
-        pack, so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all
-        and could never have surfaced this.
+        It is also the only coverage the console platforms have: none of them ships a rom pack,
+        so the per-rom sweep reaches Arcade alone - which has no artwork of its own at all and
+        could never have surfaced this. Arcade's own games are skipped here for that reason,
+        being covered in full by the files beside this one.
+
+        Images and labels sit together, unlike the rom sweep which splits them. That split exists
+        only so the label half stays diffable against the artwork transcription, and no such
+        transcription exists for a platform.
 
         Opacity reflects the default rendering mode, where showIf="auto" resolves to IsMapped
-        rather than HasLabel: a control the platform does not have is dimmed, not absent.
+        rather than HasLabel: a control the platform does not have is dimmed, not absent. A
+        platform's named games render in the game-specific mode instead, where it resolves to
+        HasLabel, so an unlabelled control dims there even when the platform has it.
         """, command);
-    Console.Error.WriteLine($"{platformRenders.Count} platforms rendered "
-                          + $"{platformRenders.Sum(p => p.Images.Count)} images -> {options.PlatformsOut}");
+    Console.Error.WriteLine(
+        $"{platformRenders.Count} platforms + {platformRenders.Sum(p => p.Games.Count)} named games "
+      + $"rendered {platformRenders.Sum(p => p.Images.Count + p.Games.Sum(g => g.Images.Count))} images, "
+      + $"{platformRenders.Sum(p => p.Labels.Count + p.Games.Sum(g => g.Labels.Count))} labels "
+      + $"-> {options.PlatformsOut}");
 }
 
 return 0;
+
+// Resolves one render and reduces it to what the file records. Shared by the platform default
+// and its named games so the two can never diverge in what they capture.
+(IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>) RenderOf(string platformName, string romName)
+{
+    ControllerOverlayModel m = service.Resolve(new GameInfo(
+        Platform: platformName,
+        RomName: romName,
+        CloneOf: null,
+        LaunchBoxId: null,
+        EmulatorPath: null,
+        RomDirectory: null,
+        RetroArchCore: null));
+
+    IReadOnlyList<GameImage> images = [.. m.RenderedImages.Select(i => new GameImage(
+        Control: i.InputName is { Length: > 0 } n ? n : "(none)",
+        Source: ImageWriter.Relative(i.Source),
+        Opacity: i.Opacity,
+        BlurRadius: i.BlurRadius,
+        Width: i.Width,
+        Height: i.Height))];
+
+    // Same grouping the rom sweep applies: a template may draw one input's label in several
+    // places, which is one label as far as this file is concerned.
+    IReadOnlyList<(string, string)> labels = [.. m.InputLabels
+        .Where(l => !string.IsNullOrEmpty(l.InputName) && !string.IsNullOrEmpty(l.Text))
+        .GroupBy(l => l.InputName!)
+        .Select(g => (g.Key, g.First().Text))];
+
+    return (images, labels);
+}
+
+// The rom names a platform's Labels.xml declares. Read straight from the file rather than
+// through the loader: this asks what the data names, not what resolving one of them yields.
+static IReadOnlyList<string> NamedGames(string labelsPath)
+{
+    if (!File.Exists(labelsPath)) return [];
+    try
+    {
+        System.Xml.Linq.XElement? root = System.Xml.Linq.XDocument.Load(labelsPath).Root;
+        if (root == null) return [];
+
+        return [.. root.Elements("Game")
+            .Select(g => (string?)g.Attribute("romName"))
+            .Where(n => !string.IsNullOrEmpty(n))
+            .Select(n => n!)
+            .Distinct()
+            .OrderBy(n => n, StringComparer.Ordinal)];
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Could not read {labelsPath}: {ex.Message}");
+        return [];
+    }
+}
