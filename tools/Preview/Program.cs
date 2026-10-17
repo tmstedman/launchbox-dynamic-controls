@@ -25,7 +25,7 @@ const string Usage = """
 
 // A rom name nothing can match, so no ControllerOverrides file and no Labels entry applies and
 // what resolves is the platform's own default -- the same synthetic game LabelDump's platform
-// sweep uses, so a render and the row in platform-images.xml describe the same thing.
+// sweep uses, so a render and the row in platform-renders.xml describe the same thing.
 const string PlatformDefaultRom = "__platform_default__";
 
 string root = "assets", platform = "", rom = "", output = "", cfgPack = "", fontPath = "", bg = "101014";
