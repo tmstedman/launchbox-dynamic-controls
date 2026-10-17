@@ -12,7 +12,8 @@ const string Usage = """
       --platform <name>  platform to resolve as. Required.
       --rom <name>       rom name. Omit for the platform's default mapping.
       --no-labels        draw the buttons alone, with no label text.
-      --out <file>       PNG to write. Default: preview/{platform}-{rom}.png
+      --out <file>       PNG to write. Default: preview/games/{platform}/{rom}.png,
+                         or preview/platforms/{platform}.png when --rom is omitted.
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
       --bg <hex>         canvas colour behind the controller. Default: 101014
@@ -66,10 +67,16 @@ if (!Directory.Exists(root))
 
 bool platformDefault = rom.Length == 0;
 if (platformDefault) rom = PlatformDefaultRom;
+
+// Platform renders sit together so the set can be scanned side by side; game renders nest under
+// their platform, which is the only grouping that stays legible once a platform has more than a
+// handful. A re-render overwrites: the name says what was drawn, not how, so the same game with
+// and without labels is one file -- pass --out to keep both.
 if (output.Length == 0)
 {
-    string stem = platformDefault ? "default" : Sanitise(rom);
-    output = Path.Combine("preview", $"{Sanitise(platform)}-{stem}{(noLabels ? "-unlabelled" : "")}.png");
+    output = platformDefault
+        ? Path.Combine("preview", "platforms", $"{Sanitise(platform)}.png")
+        : Path.Combine("preview", "games", Sanitise(platform), $"{Sanitise(rom)}.png");
 }
 
 // --- resolve ---------------------------------------------------------------------------------
