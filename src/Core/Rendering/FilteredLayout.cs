@@ -31,20 +31,22 @@ public record FilteredLayout(
 /// surrounding Condition only ever decided whether a loose label/overlay exists at all this game
 /// — it still carries its own ShowIf governing its own opacity, exactly as if it had been a
 /// direct child.</para>
+///
+/// <para>All three are <b>required</b>, deliberately. They were optional, defaulting to empty,
+/// which made the three-argument construction that preceded this type still compile — and
+/// silently render an input with no labels at all, since the renderers read these rather than
+/// <see cref="Input"/>'s own sets. Defaulting them to the Input's own sets would compile too and
+/// hide the merge this type exists to perform. Requiring them makes every caller say which it
+/// means, which is the only reading that cannot be wrong by omission.</para>
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record LayoutInput(
     InputDefinition Input,
     double YOffset,
     VisibilityFlags Flags,
-    IReadOnlyList<InputImageDefinition>? Images = null,
-    IReadOnlyList<LabelDefinition>? Labels = null,
-    IReadOnlyList<OverlayDefinition>? Overlays = null)
-{
-    public IReadOnlyList<InputImageDefinition> Images { get; init; } = Images ?? [];
-    public IReadOnlyList<LabelDefinition> Labels { get; init; } = Labels ?? [];
-    public IReadOnlyList<OverlayDefinition> Overlays { get; init; } = Overlays ?? [];
-}
+    IReadOnlyList<InputImageDefinition> Images,
+    IReadOnlyList<LabelDefinition> Labels,
+    IReadOnlyList<OverlayDefinition> Overlays);
 
 /// <summary>
 /// A group-level overlay selected for rendering, paired with the group's aggregate visibility

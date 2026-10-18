@@ -24,6 +24,12 @@ public class InputRenderingServiceTests
     private readonly IInputLabelRenderer _labelRenderer = Substitute.For<IInputLabelRenderer>();
     private readonly InputRenderingService _underTest;
 
+    // Carries the input's own sets through, which is what these tests mean: the renderers are
+    // stubbed here, so only the identity matters -- but LayoutInput requires all three, so that
+    // an input can never render nothing by omission.
+    private static LayoutInput Layout(InputDefinition input, double yOffset = 0) =>
+        new(input, yOffset, VisibilityFlags.None, input.InputImages, input.Labels, input.Overlays);
+
     public InputRenderingServiceTests()
     {
         _underTest = new InputRenderingService(_layoutFilter, _labelRenderer, _imageRenderer);
@@ -66,8 +72,8 @@ public class InputRenderingServiceTests
         // given two inputs, each emitting an image and a label from their respective renderers
         var inputA = Input("ButtonA");
         var inputB = Input("ButtonB");
-        var liA = new LayoutInput(inputA, YOffset: 0, Flags: VisibilityFlags.None);
-        var liB = new LayoutInput(inputB, YOffset: 0, Flags: VisibilityFlags.None);
+        var liA = Layout(inputA);
+        var liB = Layout(inputB);
         StubFilter(liA, liB);
 
         var imageA = new RenderedImage(Source: "a.png");
@@ -93,8 +99,8 @@ public class InputRenderingServiceTests
         // given a label text dictionary that only covers one of the two inputs
         var inputA = Input("ButtonA");
         var inputB = Input("ButtonB");
-        var liA = new LayoutInput(inputA, YOffset: 0, Flags: VisibilityFlags.None);
-        var liB = new LayoutInput(inputB, YOffset: 0, Flags: VisibilityFlags.None);
+        var liA = Layout(inputA);
+        var liB = Layout(inputB);
         StubFilter(liA, liB);
 
         // when the service renders with labels for ButtonA only
@@ -112,7 +118,7 @@ public class InputRenderingServiceTests
         // (the service shifts labels here; the image renderer is expected to have already baked
         // YOffset into its image positions, so the service does not touch image Top)
         var input = Input("ButtonA");
-        var li = new LayoutInput(input, YOffset: -40, Flags: VisibilityFlags.None);
+        var li = Layout(input, yOffset: -40);
         StubFilter(li);
 
         var label = new RenderedLabel(Left: 0, Top: 100, Text: "A", Alignment: "Left", FontSize: 12);
