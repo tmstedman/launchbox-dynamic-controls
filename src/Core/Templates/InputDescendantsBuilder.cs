@@ -55,6 +55,12 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                     PopulateDescendants(alt, descendants);
                 }
                 break;
+            case ConditionElement condition:
+                foreach (ILayoutElement child in condition.Children)
+                {
+                    PopulateDescendants(child, descendants);
+                }
+                break;
             case InputDefinition def:
                 var defDescendants = new List<InputDefinition>();
                 foreach (ILayoutElement child in def.Children)
@@ -99,6 +105,12 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                 foreach (ILayoutElement alt in oneOf.Alternatives)
                 {
                     CollectDescendants(alt, output);
+                }
+                break;
+            case ConditionElement condition:
+                foreach (ILayoutElement child in condition.Children)
+                {
+                    CollectDescendants(child, output);
                 }
                 break;
             default:

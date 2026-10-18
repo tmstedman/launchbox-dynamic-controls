@@ -95,9 +95,11 @@ public class WholeInputCollapseSubsystemTests
         labels.LabelText["ButtonDpadRight"].ShouldBe("Move");
 
         // The left stick is untouched by the swap -- all four of its directions still agree, so
-        // it still collapses onto the whole exactly as WholeInputDeriver's own suite expects.
+        // the whole also reads "Move" exactly as WholeInputDeriver's own suite expects, alongside
+        // each individual direction (kept, not removed, so the layout's Condition can still tell
+        // "all four agree" apart from a partial subset).
         labels.LabelText["AxisLeftStick"].ShouldBe("Move");
-        labels.LabelText.ContainsKey("AxisLeftStickUp").ShouldBeFalse();
+        labels.LabelText["AxisLeftStickUp"].ShouldBe("Move");
     }
 
     [Fact]
@@ -138,7 +140,10 @@ public class WholeInputCollapseSubsystemTests
         ResolvedLabels labels = LoadLabels(game, mapping);
 
         labels.LabelText.ShouldBeDictionaryOf(
-            ("ButtonDpad", "Move"),
-            ("AxisLeftStick", "Move"));
+            ("ButtonDpad", "Move"), ("AxisLeftStick", "Move"),
+            ("ButtonDpadUp", "Move"), ("AxisLeftStickUp", "Move"),
+            ("ButtonDpadDown", "Move"), ("AxisLeftStickDown", "Move"),
+            ("ButtonDpadLeft", "Move"), ("AxisLeftStickLeft", "Move"),
+            ("ButtonDpadRight", "Move"), ("AxisLeftStickRight", "Move"));
     }
 }

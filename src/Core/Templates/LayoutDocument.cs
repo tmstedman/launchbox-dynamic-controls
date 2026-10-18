@@ -155,6 +155,31 @@ public record OneOfNode : ILayoutNode
 }
 
 /// <summary>
+/// Raw DTO for a &lt;Condition&gt; element — gates its children on an explicit check over named
+/// generic inputs, evaluated directly rather than by folding in structural descendants. Exactly
+/// one of <see cref="Any"/>, <see cref="All"/>, <see cref="None"/> is set, each a space-separated
+/// list of generic input names (the same convention as a combination &lt;Input name="A B"&gt;).
+/// </summary>
+public record ConditionNode : ILayoutNode
+{
+    /// <summary>Space-separated generic input names; true when at least one matches.</summary>
+    public string? Any { get; set; }
+
+    /// <summary>Space-separated generic input names; true only when every one matches.</summary>
+    public string? All { get; set; }
+
+    /// <summary>Space-separated generic input names; true when none match.</summary>
+    public string? None { get; set; }
+
+    /// <summary>"label" or "mapping" — what "matches" means for each name. Defaults to "label".</summary>
+    public string? Match { get; set; }
+
+    /// <summary>Nested layout children — Input, Group, Stack, OneOf, or another Condition in
+    /// document order. Rendered only when the condition evaluates true.</summary>
+    public List<ILayoutNode> Children { get; set; } = [];
+}
+
+/// <summary>
 /// Raw DTO for a single named input within Layout.xml (e.g. ButtonA, AxisLeftStick).
 /// Contains unparsed render, overlay, and label child elements as read from XML.
 /// Nested within LayoutDocument or GroupNode; consumed by TemplateService

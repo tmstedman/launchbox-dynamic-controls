@@ -88,6 +88,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                     return selected.Count == 0
                         || selected.All(leaf => _evaluator.AllImagesZeroOpacity(leaf, template.Layout.DefaultMinOpacity, ctx));
                 case InputGroup:
+                case ConditionElement:
                     return false; // Stack-as-slot: never considered hidden, so it never vacates.
                 default:
                     throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");
@@ -122,6 +123,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                             cumulativeOffset -= gap;
                         break;
                     case InputGroup:
+                    case ConditionElement:
                         // Stack-as-slot: collapse adjustments not currently computed for these.
                         break;
                     default:
@@ -181,6 +183,15 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                     }
                 }
                 break;
+            case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
+                foreach (ILayoutElement child in condition.Children)
+                {
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, ctx);
+                }
+                break;
+            case ConditionElement:
+                // Condition evaluated false: drop it and everything inside, same as an excluded Group.
+                break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {element.GetType().Name}");
         }
@@ -194,6 +205,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         InputDefinition input => [input],
         InputGroup group => group.Children.SelectMany(CollectInputLeaves),
         OneOf oneOf => oneOf.Alternatives.SelectMany(CollectInputLeaves),
+        ConditionElement condition => condition.Children.SelectMany(CollectInputLeaves),
         _ => throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}")
     };
 }

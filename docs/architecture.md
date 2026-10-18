@@ -110,6 +110,8 @@ Every entry in that `<Defaults>` block is inheritable. When a game *does* have i
 
 The `IsGameSpecific` flag tells the renderer "the game contributed at least one of its own label entries." This flips the meaning of `showIf="auto"` on a template — see below.
 
+One more pass, `CollapseWholeDirections`, reconciles a whole-control generic (`ButtonDpad`, `AxisLeftStick`, `AxisRightStick`) against its four individual directions in both directions: a direct whole-only mapping with no per-direction breakdown copies the whole's text onto all four directions; 2, 3, or 4 directions that already agree on identical text (with the rest genuinely blank) copy that shared text back onto the whole's own key. Individual entries are never removed. This is what lets `Layout.xml` express "some directions are labelled, merge them" via `<Condition>` without the template needing to special-case "whole-only" versus "all-four-agree" — both leave the same signal on the whole's key.
+
 Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-specific loaders are pluggable — see [Plugin architecture](#plugin-architecture).
 
 ### 4. Template resolution
@@ -118,7 +120,7 @@ Namespace: `src/Core/Labels/`. Entry point: `InputLabelsService`. Emulator-speci
 
 `TemplateService` leans on three pieces:
 
-1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`. Pure XML deserialisation.
+1. **`TemplateLoader`** parses `Templates/{templateName}/Layout.xml` into a raw `LayoutDocument` — a tree of `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`, `ConditionNode`. Pure XML deserialisation.
 
 2. **`LayoutResolver`** transforms the raw config into `ResolvedLayout` — the same tree but resolved: relative coordinates → absolute canvas positions, image filenames derived from input names, overlay paths resolved via `TemplateImageResolver`, style chains flattened, `showIf` strings parsed to enum, a Stack's `vAlign` shifting its origin by its own fixed slot count before slots are laid out, collapsing-Stack metadata stamped. It also precomputes two lookup tables off the resolved tree (`InputDescendants` for visibility fan-out and `CollapseInfo` for render-time slot adjustments) so the renderer can run without re-walking the tree.
 
@@ -140,6 +142,7 @@ The internal flow is two passes:
 - `InputGroup` with `AlwaysInclude=true` (a Stack) → always rendered; children handle their own visibility
 - `InputGroup` with `AlwaysInclude=false` (a plain Group) → rendered only when any descendant has a visible render; otherwise the whole group's inputs are dropped from `inputsToRender`
 - `OneOf` → only the first alternative with a visible render is rendered; the rest are dropped
+- `ConditionElement` → rendered only when its explicit `all`/`any`/`none` check against named inputs' label/mapping state passes — a direct dictionary lookup, not a fold-in over its own descendants, so it can gate on a name its children never render themselves
 
 `showIf` modes: `label` (show when this input has a label), `mapping` (show when a platform button drives it), `auto` (label-mode if the game contributed its own labels, else mapping-mode), or omitted (always).
 
@@ -223,6 +226,10 @@ Each render decision asks "should this be visible *now*" with explicit modes (`l
 
 `<Stack>` is normally a vertical layout of always-visible elements. Adding `collapse="true"` switches it into a mode where invisible (zero-opacity) members vacate their slot and subsequent members shift up. This produces a clean look when only some inputs from a cluster (e.g. arcade buttons) have labels — instead of seeing five labelled spots interspersed with empty space, you see the labelled spots tightly stacked. The data structure for this (`CollapseInfo`) is keyed by reference identity to handle the case where the same `OneOf` slot contains multiple `InputDefinition` alternatives.
 
+### Explicit conditions over implicit descendant fold-in
+
+`<Group>` and `<OneOf>` both decide their own visibility from `AnyVisible` — "does anything inside me have a visible render" — which only ever asks about the subtree's *own* inputs. That's fine until a subtree's visibility legitimately depends on an input it doesn't render at all: e.g. "show these per-direction icons only once *the whole control's* label agrees with them," where the whole isn't one of the icons being drawn. `<Condition>` breaks that coupling by naming the inputs to check (`all`/`any`/`none`, matched against `HasLabel` or `IsMapped` by direct dictionary lookup) independently of its children, and nests to express compound AND logic one any/all/none block at a time. It's a narrower, more explicit tool than `<Group>` — reach for `<Group>`/`<OneOf>` first, and only add `<Condition>` where the visibility check genuinely needs to name something the subtree doesn't already contain.
+
 ### Coordinate origins as a stack
 
 Coordinates in `Layout.xml` can be absolute (`x="100"`) or relative (`x="+5"`, `x="-10"`). `Coordinate.Resolve(origin)` applies the origin if relative, ignores it if absolute. The `LayoutResolver` threads the current origin (canvas → input → render) through the build context, so authors can write coordinates relative to the enclosing container without manually tracking absolute positions. The resolved layout has only absolute doubles — the relativity is a compile-time concept that doesn't survive into the rendered output.
@@ -274,7 +281,7 @@ Make a folder under `Templates/{templateName}/`. Drop a `BaseImage.png` for the 
 
 ### Add a new layout container
 
-Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutNodes.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter` to handle the new type during visibility evaluation. The existing `<Group>`, `<Stack>`, `<OneOf>` types are good templates for the pattern.
+Create a `*Node` raw DTO under `Templates/LayoutDocument.cs`, a resolved `ILayoutElement` type under `Templates/LayoutElements.cs`, parsing in `TemplateLoader`, and a `Build*` method in `LayoutResolver`. Update `LayoutFilter`, `VisibilityEvaluator`, `InputDescendantsBuilder`, and `CollapseGroupBuilder` to handle the new type. The existing `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` types are good templates for the pattern.
 
 ### Add a new render condition
 
