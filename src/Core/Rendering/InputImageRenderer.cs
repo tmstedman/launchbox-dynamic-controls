@@ -47,7 +47,7 @@ public class InputImageRenderer(IInputImageResolver imageResolver) : IInputImage
                 BlurRadius: x.visible ? 0.0 : x.image.InactiveBlurRadius ?? template.Layout.DefaultInactiveBlurRadius,
                 InputName: li.Input.Name));
 
-        IEnumerable<RenderedImage> overlays = li.Input.Overlays
+        IEnumerable<RenderedImage> overlays = li.Overlays
             .Select(overlay => (overlay, visible: li.Flags.IsVisible(overlay.ShowIf, isGameSpecific)))
             .Select(x => (x.overlay, x.visible, opacity: x.visible ? 1.0 : x.overlay.MinOpacity ?? template.Layout.DefaultMinOpacity))
             .Where(x => x.opacity > 0)

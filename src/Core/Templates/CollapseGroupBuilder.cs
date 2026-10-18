@@ -83,7 +83,8 @@ internal static class CollapseGroupBuilder
                 }
                 break;
             case LabelElement:
-                // Takes no slot, same as an Overlay.
+            case OverlayElement:
+                // Neither takes a slot.
                 break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}");
@@ -124,7 +125,8 @@ internal static class CollapseGroupBuilder
                 }
                 break;
             case LabelElement:
-                // Leaf, not an InputDefinition -- no collapse metadata to record.
+            case OverlayElement:
+                // Leaves, not InputDefinitions -- no collapse metadata to record.
                 break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");

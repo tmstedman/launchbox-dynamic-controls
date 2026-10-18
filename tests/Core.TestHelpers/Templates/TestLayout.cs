@@ -107,6 +107,13 @@ internal class TestLayout
         build?.Invoke(b);
         return b.Node;
     }
+
+    internal static OverlayNode BuildOverlay(string src, Action<OverlayBuilder>? build)
+    {
+        var b = new OverlayBuilder(src);
+        build?.Invoke(b);
+        return b.Node;
+    }
 }
 
 internal class InputBuilder(string name)
@@ -174,6 +181,7 @@ internal class ContainerBuilder
     public ContainerBuilder OneOf(Action<OneOfBuilder> build)                     { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public ContainerBuilder Condition(Action<ConditionBuilder> build)             { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
     public ContainerBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
+    public ContainerBuilder LooseOverlay(string src, Action<OverlayBuilder>? build = null) { Node.Children.Add(TestLayout.BuildOverlay(src, build)); return this; }
     #pragma warning restore format
 
     public ContainerBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
@@ -195,6 +203,7 @@ internal class OneOfBuilder
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
     public OneOfBuilder Condition(Action<ConditionBuilder> build)              { Node.Alternatives.Add(TestLayout.BuildCondition(build));   return this; }
     public OneOfBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Alternatives.Add(TestLayout.BuildLabel(build));        return this; }
+    public OneOfBuilder LooseOverlay(string src, Action<OverlayBuilder>? build = null) { Node.Alternatives.Add(TestLayout.BuildOverlay(src, build)); return this; }
     #pragma warning restore format
 }
 
@@ -213,6 +222,7 @@ internal class ConditionBuilder
     public ConditionBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public ConditionBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
     public ConditionBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
+    public ConditionBuilder LooseOverlay(string src, Action<OverlayBuilder>? build = null) { Node.Children.Add(TestLayout.BuildOverlay(src, build)); return this; }
     #pragma warning restore format
 }
 

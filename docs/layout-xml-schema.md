@@ -133,7 +133,7 @@ Two distinct uses, distinguished by the presence of `name`:
 
 ### `<Body>` — display layout
 
-The container for everything the renderer cares about. Direct children are `<Input>`, `<Container>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose `<Label>`](#loose-label)).
+The container for everything the renderer cares about. Direct children are `<Input>`, `<Container>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose `<Label>`](#loose-label)). A bare `<Overlay>` also parses here, but does **not** error — with no enclosing `<Input>`/`<Container>` at all it simply renders unconditionally (see [Loose `<Overlay>`](#loose-overlay)).
 
 ### `<Input>` — a generic input
 
@@ -240,7 +240,27 @@ An arbitrary image rendered at a position, with no implicit relationship to the 
 | `minOpacity` | double | no | Same |
 | `inactiveBlurRadius` | double | no | Same |
 
-**Placement**: Overlays can be children of `<Input>` (visibility inherits from the Input) or `<Container>` (rendered once whenever the container itself is reached — see [`<Container>`](#container--positioned-cluster)), or anywhere a render-context exists.
+**Placement**: Overlays can be direct children of `<Input>` (visibility inherits from the Input) or `<Container>` (rendered once whenever the container itself is reached — see [`<Container>`](#container--positioned-cluster)), or loose — see [Loose `<Overlay>`](#loose-overlay).
+
+### Loose `<Overlay>`
+
+An `<Overlay>` doesn't have to be a *direct* child of its own `<Input>`/`<Container>` — like a loose `<Label>`, it can also appear inside a `<Container>`, `<OneOf>`, or `<Condition>` reached some other way, most usefully nested inside a `<Condition>` to gate an extra decoration independently of its owner's other content:
+
+```xml
+<Input name="ButtonA" showIf="mapping">
+    <Condition any="ButtonA" match="mapping">
+        <Overlay src="extra-glow.png" x="+5" y="+5" />
+    </Condition>
+</Input>
+```
+
+Ownership resolves in strict priority order, the same recursive walk that finds a loose `<Label>`'s owning `<Input>`:
+
+1. **An ambient `<Input>`** — if one is reached on the way down (nested inside it directly, or via `<Container>`/`<OneOf>`/`<Condition>` between), the loose `<Overlay>` joins that Input's own `Overlays`, rendered with that Input's own visibility flags, exactly as if it had been a direct child. A `<Container for="SomeInput">` that successfully resolves counts as supplying this too — everything inside it sees `SomeInput` as ambient, the same as if it had an enclosing `<Input>` the ordinary way.
+2. **Else an ambient `<Container>`** — if no `<Input>` is ambient (no enclosing one, and no `for=` that resolved), but a `<Container>` is, the loose `<Overlay>` joins that Container's own `Overlays`, folded into the same aggregate-flagged group-overlay emission its direct children already get.
+3. **Else neither** — a bare `<Overlay>` sitting directly under `<Body>`, or inside a `<OneOf>`/`<Condition>` with no `<Input>`/`<Container>` ancestor at all, renders unconditionally. Unlike a loose `<Label>` in the same position, this is **not** a template-authoring error: an Overlay's position never depended on an owner to begin with (it resolves against whatever origin is ambient, same as always — see [Coordinates](#coordinates)), and there's simply no fold-in target for visibility, so it renders as its own template-level overlay. Its own `showIf` still governs its own opacity — with no flags to check, only `showIf="always"` (the default) ever actually shows something.
+
+Whether it's reached at all is decided the same way as everything else: a `<Condition>` that fails drops it along with everything else inside, before any of the above ownership logic runs.
 
 ### `<Label>` — label text position
 
@@ -269,10 +289,12 @@ A vertical list of inputs, each spaced `gap` pixels below the last. Which slot s
 - **As a `<OneOf>` alternative**: a bare `<Container>` can never be selected at all — `AnyVisible` has no case for it, so it always reports "not visible" and the `<OneOf>` skips past it. Wrap it in a `<Condition>` naming whatever should make it eligible (see the fallback alternative in the directional-input example below).
 - **As a top-level element** (or anywhere else reached unconditionally): with no wrapping `<Condition>`, the `<Container>` and its members always render — each member individually faded per its own `showIf` rather than the whole cluster disappearing. If you want the old "gone entirely when nothing's labelled" behaviour, wrap it in an explicit `<Condition>` naming its members (see the face-buttons example below).
 
-Two purposes remain, always in force together:
+Two purposes remain:
 
 1. **Shared overlays**: an `<Overlay>` declared at the container level renders once whenever the container itself is reached, instead of being repeated on every member.
 2. **Shared style**: `style`/`showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` declared on the Container flow to its member Inputs and Overlay children the same way an Input's own attributes flow to its Labels and Overlays — see [Style cascade](#style-cascade), including the one exception that applies only here (an *empty* Container doesn't relay a wrapping Input's own ambient value through to members).
+
+**These two don't always compose for free.** A direct-child `<Overlay>` cascades style from the Container exactly like a member Input does — so if the overlay sets no `showIf`/`minOpacity`/`inactiveBlurRadius` of its own (the common case for a decorative line/frame), it silently starts inheriting whatever style you hoist onto the Container for the *members'* sake. If that's not what you want, move the `<Overlay>` to sit *outside* the Container instead — as a loose `<Overlay>` sibling (see [Loose `<Overlay>`](#loose-overlay)), still inside the same wrapping `<Condition>` so its existence-gating is unchanged. Position is unaffected if it's already absolute; a relative one needs converting, since it'll resolve against a different ambient origin outside the Container.
 
 ```xml
 <!-- Explicit Condition replaces the old <Group>'s implicit "any member visible" check -->
@@ -317,7 +339,7 @@ A Container with only one slot renders identically under every `vAlign` value, s
 
 An unrecognized `vAlign` value logs an error and falls back to `top`.
 
-**Children** can be `<Input>`, `<Container>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)).
+**Children** can be `<Input>`, `<Container>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)) or a loose `<Overlay>` reached through a nested `<OneOf>`/`<Condition>` (see [Loose `<Overlay>`](#loose-overlay)) — a direct-child `<Overlay>` still always lands on this Container's own `Overlays` list, never the loose path.
 
 **How children occupy slots** — each child takes one position in the vertical list, except:
 
@@ -351,7 +373,7 @@ A container where only the first alternative whose visibility check passes is re
 </OneOf>
 ```
 
-No attributes — a `<OneOf>` is pure control-flow (alternative selection), unrelated to identity or position. Children: `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Label>` parses here too (see [Loose `<Label>`](#loose-label)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose label it carries, never for "winning" the `<OneOf>`.
+No attributes — a `<OneOf>` is pure control-flow (alternative selection), unrelated to identity or position. Children: `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Label>` or `<Overlay>` parses here too (see [Loose `<Label>`](#loose-label)/[Loose `<Overlay>`](#loose-overlay)), but either is a degenerate alternative — neither ever counts as visible on its own (see below), so an alternative that's just a loose Label/Overlay is only useful for what it carries, never for "winning" the `<OneOf>`.
 
 **Visibility check per alternative**:
 - `<Input>` — "any-render-visible" (its own image passes its `showIf`, or recursively, one of its structural children does)
@@ -384,7 +406,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
-No positional attributes — a `<Condition>` is transparent for coordinates and slot counting (unlike a nested `<Container>`, which never is — see the tables above). Children: `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)) — the most common reason to nest one directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Container>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way `<Container>` does, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Container>` inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting (unlike a nested `<Container>`, which never is — see the tables above). Children: `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)) or a loose `<Overlay>` (see [Loose `<Overlay>`](#loose-overlay)) — the most common reason to nest either directly in a `<Condition>` rather than inside a wrapping `<Input>`/`<Container>`. Unlike `<Container>`, a `<Condition>` has **no** `Overlays` list of its own — but a bare `<Overlay>` placed directly inside one is not an error: it's parsed the same loose way a bare `<Label>` is, and joins whichever `<Input>`/`<Container>` is ambient once one is actually reached.
 
 **Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
 

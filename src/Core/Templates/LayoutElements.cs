@@ -23,11 +23,14 @@ public interface ILayoutElement;
 /// </summary>
 /// <param name="Children">Nested layout children — InputDefinition, Container, or OneOf in
 /// document order.</param>
-/// <param name="Overlays">Overlays declared at the container level. Rendered once whenever the
-/// container itself is reached — no per-overlay visibility, and no gating of their own; an
-/// enclosing Condition decides whether the container (and so these overlays) exists at all this
-/// game. Lets a cluster declare shared overlay artwork (e.g. dpad lines) once rather than
-/// repeating it on every member.</param>
+/// <param name="Overlays">Overlays declared as direct children of the container. Rendered once
+/// whenever the container itself is reached — no per-overlay visibility, and no gating of their
+/// own; an enclosing Condition decides whether the container (and so these overlays) exists at
+/// all this game. Lets a cluster declare shared overlay artwork (e.g. dpad lines) once rather
+/// than repeating it on every member. <see cref="Rendering.LayoutFilter"/> additionally folds in
+/// any loose overlays discovered deeper in this container's subtree (see
+/// <see cref="OverlayElement"/>) alongside these when it computes the aggregate flags — this
+/// field alone is only the static, direct-child set.</param>
 /// <param name="DeclaredOriginY">The container's own declared Y, before any <paramref
 /// name="VAlign"/> shift — i.e. the value a bare `y` attribute resolved to. Together with
 /// <paramref name="Gap"/>/<paramref name="VAlign"/>/<paramref name="Collapse"/>, this is
@@ -134,6 +137,23 @@ public enum ConditionMatch
 public record LabelElement(LabelDefinition Label) : ILayoutElement;
 
 /// <summary>
+/// A single overlay image that lives outside its owning Input's or Container's own direct
+/// children — e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Container&gt;/&lt;OneOf&gt;/
+/// &lt;Condition&gt; rather than directly inside an &lt;Input&gt; or &lt;Container&gt;. Carries no
+/// owner reference of its own, for the same reason <see cref="LabelElement"/> doesn't: the owner
+/// can't be baked in at resolve time, so <see cref="Rendering.LayoutFilter"/> discovers it during
+/// its own tree walk instead — an ambient Input if one is reached, else an ambient Container, else
+/// (no owner at all) rendered unconditionally as its own template-level overlay, since there's no
+/// fold-in target to gate against; its own ShowIf still governs its own opacity either way, the
+/// same as a direct child always has.
+/// </summary>
+/// <param name="Overlay">The resolved overlay, already positioned against whichever origin was
+/// ambient when this overlay was parsed — unlike a loose Label, position never depends on which
+/// owner (if any) is later discovered.</param>
+[ExcludeFromCodeCoverage]
+public record OverlayElement(OverlayDefinition Overlay) : ILayoutElement;
+
+/// <summary>
 /// Fully resolved layout data for a single generic input within a Template.
 /// Built by TemplateService from InputNode; all positions are resolved at build time.
 /// Image paths are deferred to render time via InputImageResolver.
@@ -149,7 +169,11 @@ public record LabelElement(LabelDefinition Label) : ILayoutElement;
 /// is underway you have a <see cref="Rendering.LayoutInput"/>, not a bare InputDefinition —
 /// prefer its own <see cref="Rendering.LayoutInput.Images"/> there for symmetry with
 /// <see cref="Rendering.LayoutInput.Labels"/>, though for images the two are always identical.</param>
-/// <param name="Overlays">Overlay images associated with this input (e.g. dotted lines).</param>
+/// <param name="Overlays">Overlay images associated with this input (e.g. dotted lines) — this
+/// Input's own static set only. Once a render pass is underway, prefer
+/// <see cref="Rendering.LayoutInput.Overlays"/> instead, which additionally includes any loose
+/// Condition-gated overlays that survived for the current game (see <see cref="OverlayElement"/>);
+/// reading this field directly at that point would silently miss those.</param>
 /// <param name="Labels">Positions where the label text is rendered — this Input's own static set
 /// only. Once a render pass is underway, prefer <see cref="Rendering.LayoutInput.Labels"/>
 /// instead, which additionally includes any loose Condition-gated labels that survived for the

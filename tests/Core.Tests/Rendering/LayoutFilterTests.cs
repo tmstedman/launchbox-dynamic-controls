@@ -306,6 +306,68 @@ public class LayoutFilterTests
         li.Labels.ShouldBeEmpty();
     }
 
+    // ---- loose Overlay under Condition ----
+
+    [Fact]
+    public void Filter_OverlayElementInsidePassedCondition_AttachesToAmbientInput()
+    {
+        // given a bare Overlay reached through a Condition nested inside an Input -- it joins
+        // that Input's own Overlays, exactly as if it had been a direct child
+        var overlay = Overlay("dpad-lines.png");
+        var overlayElement = new OverlayElement(overlay);
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        InputDefinition owner = Input("ButtonDpad", children: [condition]);
+        Template template = TemplateOf(elements: [owner]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpad");
+        li.Overlays.ShouldBe([overlay]);
+    }
+
+    [Fact]
+    public void Filter_OverlayElementInsidePassedCondition_JoinsAmbientContainer_WhenNoInputIsAmbient()
+    {
+        // given a top-level Container (no enclosing Input) wrapping a Condition that wraps a
+        // bare Overlay -- with no ambient Input reached, the overlay joins the Container's own
+        // aggregate-flagged overlays instead, exactly as if it had been a direct child of the
+        // Container
+        var overlay = Overlay("dpad-lines.png");
+        var overlayElement = new OverlayElement(overlay);
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        InputDefinition member = Input("ButtonA");
+        Container container = Container(children: [member, condition]);
+        Template template = TemplateOf(elements: [container]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+        _evaluator.AggregateFlags(container, Arg.Any<VisibilityContext>())
+            .Returns(new VisibilityFlags(HasLabel: false, IsMapped: true));
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.GroupOverlays.Select(o => o.Overlay).ShouldBe([overlay]);
+        result.GroupOverlays[0].Flags.IsMapped.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Filter_OverlayElementWithNoAmbientOwnerAtAll_RendersUnconditionallyWithNoFlags()
+    {
+        // given a bare Overlay reached with no enclosing Input or Container at all -- unlike a
+        // loose Label, this isn't a template error: it renders unconditionally, tagged with
+        // VisibilityFlags.None since there's no fold-in target (only its own ShowIf=Always would
+        // ever actually show anything)
+        var overlay = Overlay("background.png");
+        var overlayElement = new OverlayElement(overlay);
+        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        Template template = TemplateOf(elements: [condition]);
+        _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        result.GroupOverlays.Select(o => o.Overlay).ShouldBe([overlay]);
+        result.GroupOverlays[0].Flags.ShouldBe(VisibilityFlags.None);
+    }
+
     // ---- collapse adjustments ----
 
     [Fact]

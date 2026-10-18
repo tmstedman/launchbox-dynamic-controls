@@ -1004,5 +1004,41 @@ public class TemplateLayoutResolverTests
         nestedGroup.Overlays.ShouldBeEmpty();
     }
 
+    [Fact]
+    public void Resolve_LooseOverlay_ResolvesPositionAgainstAmbientOrigin()
+    {
+        // given a bare Overlay nested inside a Container, with relative (+5,+10) coordinates —
+        // unlike a loose Label, position never depends on which owner (if any) is later
+        // discovered at render time, so it resolves the same way a direct child would
+        TestLayout config = new TestLayout()
+            .Container(c => c.At(100, 200)
+                .LooseOverlay("lines.png", o => o.Offset(5, 10)));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the overlay's position is the container origin plus its offset
+        OverlayElement overlay = result.FirstContainer().Children.FirstOverlayElement();
+        overlay.Overlay.X.ShouldBe(105);
+        overlay.Overlay.Y.ShouldBe(210);
+    }
+
+    [Fact]
+    public void Resolve_LooseOverlay_NullSrc_LogsAndReturnsPlaceholder()
+    {
+        // given a bare Overlay with no src attribute, nested where TryParseLayoutChild would
+        // never actually produce one (the real parser already filters this at load time) --
+        // exercising the resolver's own defensive fallback directly
+        var config = new LayoutDocument();
+        config.Elements.Add(new ContainerNode { Children = [new OverlayNode { Src = null }] });
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then it's logged and a harmless placeholder is returned rather than throwing
+        result.FirstContainer().Children.FirstOverlayElement().Overlay.Source.ShouldBe("");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Overlay") && s.Contains("src")));
+    }
+
     private record UnknownNode : ILayoutNode;
 }
