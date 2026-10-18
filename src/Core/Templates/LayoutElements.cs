@@ -158,7 +158,7 @@ public record LabelElement(LabelDefinition Label) : ILayoutElement;
 /// <param name="Children">Nested layout elements — Container, OneOf, or Condition in document
 /// order (nesting another InputDefinition directly is unusual, and the shipped template no
 /// longer does it at all). A whole control's own <c>showIf="auto"</c> fan-out does <b>not</b>
-/// come from here — see <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>.</param>
+/// come from here — see <see cref="DynamicControls.WholeInputs.PartsOf"/>.</param>
 [ExcludeFromCodeCoverage]
 public record InputDefinition(
     string Name,

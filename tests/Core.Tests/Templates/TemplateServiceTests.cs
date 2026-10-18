@@ -24,7 +24,6 @@ public class TemplateServiceTests
 
     private static ResolvedLayout EmptyResolvedLayout() => new(
         Elements: [],
-        InputDescendants: new Dictionary<InputDefinition, IReadOnlyList<string>>(),
         CollapseInfo: new Dictionary<InputDefinition, CollapseInfo>(),
         DefaultFontSize: 28,
         DefaultMinOpacity: 0,
@@ -43,10 +42,6 @@ public class TemplateServiceTests
             Children: []);
         var resolvedLayout = new ResolvedLayout(
             Elements: [input],
-            InputDescendants: new Dictionary<InputDefinition, IReadOnlyList<string>>
-            {
-                [input] = [],
-            },
             CollapseInfo: new Dictionary<InputDefinition, CollapseInfo>(),
             DefaultFontSize: 22,
             DefaultMinOpacity: 0.4,
