@@ -12,8 +12,9 @@ namespace DynamicControls.Core.Tests.Rendering;
 /// names supplied via VisibilityContext.InputDescendants (a whole control's direction names in
 /// production, an arbitrary override here), including the IsMapped fallback through
 /// NaturalInputToButton that lets remapped inputs still count as mapped; (2) AnyVisible dispatch
-/// — InputDefinitions resolve via their own renders or their structural Children, InputGroups OR
-/// across children, OneOfs OR across alternatives; (3) AllImagesZeroOpacity — the gate the
+/// — InputDefinitions resolve via their own renders or their structural Children, OneOfs OR
+/// across alternatives, Containers have no case of their own (they never decide their own
+/// visibility); (3) AllImagesZeroOpacity — the gate the
 /// collapse-stack logic uses to decide whether a slot vacates, honouring per-image MinOpacity
 /// over the template default.
 /// </summary>
@@ -195,30 +196,6 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void AnyVisible_GroupWithOneVisibleChild_ReturnsTrue()
-    {
-        // given a group with one hidden and one visible child
-        var hidden = Input(
-            name: "ButtonX",
-            images: [Image(ShowIfCondition.Mapped)]);
-        var shown = Input(
-            name: "ButtonY",
-            images: [Image(ShowIfCondition.Always)]);
-        var group = new InputGroup(
-            Children: [hidden, shown],
-            Overlays: []);
-        VisibilityContext ctx = Ctx(descendants: Descendants(
-            (hidden, []),
-            (shown, [])));
-
-        // when AnyVisible runs on the group
-        bool visible = _underTest.AnyVisible(group, ctx);
-
-        // then the OR across children carries it
-        visible.ShouldBeTrue();
-    }
-
-    [Fact]
     public void AnyVisible_OneOfWithOneVisibleAlternative_ReturnsTrue()
     {
         // given a OneOf with one hidden and one visible alternative
@@ -242,26 +219,19 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void AnyVisible_GroupWithAllHiddenChildren_ReturnsFalse()
+    public void AnyVisible_Container_AlwaysReturnsFalse_SinceItNeverDecidesItsOwnVisibility()
     {
-        // given a group whose every child needs a mapping, and no mapping exists
-        var a = Input(
-            name: "ButtonA",
-            images: [Image(ShowIfCondition.Mapped)]);
-        var b = Input(
-            name: "ButtonB",
-            images: [Image(ShowIfCondition.Mapped)]);
-        var group = new InputGroup(
-            Children: [a, b],
-            Overlays: []);
-        VisibilityContext ctx = Ctx(descendants: Descendants(
-            (a, []),
-            (b, [])));
+        // given a Container with a child that would itself report visible -- unlike the <Group>
+        // it replaced, AnyVisible has no case for it at all any more (it falls to the same
+        // default arm as any other unhandled type): whether a Container exists at all is now
+        // exclusively an enclosing Condition's job, never something asked of the Container
+        // directly, so this is never actually consulted for it in practice
+        var shown = Input(name: "ButtonY", images: [Image(ShowIfCondition.Always)]);
+        var group = new Container(Children: [shown], Overlays: []);
+        VisibilityContext ctx = Ctx(descendants: Descendants((shown, [])));
 
-        // when AnyVisible runs
         bool visible = _underTest.AnyVisible(group, ctx);
 
-        // then nothing passes
         visible.ShouldBeFalse();
     }
 
@@ -468,11 +438,11 @@ public class VisibilityEvaluatorTests
     // ---- AggregateFlags ----
 
     [Fact]
-    public void AggregateFlags_InputGroupWithLabelledChild_ReturnsHasLabel()
+    public void AggregateFlags_ContainerWithLabelledChild_ReturnsHasLabel()
     {
         // given a group whose only child has a label
         var child = Input(name: "ButtonA");
-        var group = new InputGroup(Children: [child], Overlays: []);
+        var group = new Container(Children: [child], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonA"] = "Punch" },
             descendants: Descendants((child, [])));
@@ -484,12 +454,12 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void AggregateFlags_InputGroupMultipleChildren_OrReducesFlags()
+    public void AggregateFlags_ContainerMultipleChildren_OrReducesFlags()
     {
         // given a group with one labelled child and one mapped child
         var labelled = Input(name: "ButtonA");
         var mapped = Input(name: "ButtonB");
-        var group = new InputGroup(Children: [labelled, mapped], Overlays: []);
+        var group = new Container(Children: [labelled, mapped], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonA"] = "Punch" },
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["ButtonB"] = "X" }),
@@ -508,7 +478,7 @@ public class VisibilityEvaluatorTests
         // Walk must recurse into the parent's Children list to collect the grandchild's flags
         var grandchild = Input(name: "AxisLeft");
         var parent = Input(name: "LeftStick", children: [grandchild]);
-        var group = new InputGroup(Children: [parent], Overlays: []);
+        var group = new Container(Children: [parent], Overlays: []);
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["AxisLeft"] = "Left" }),
             descendants: Descendants((parent, []), (grandchild, [])));
@@ -526,7 +496,7 @@ public class VisibilityEvaluatorTests
         var invisible = Input(name: "ButtonX");  // no images → AnyRenderVisible false
         var visible = Input(name: "ButtonY", images: [Image(ShowIfCondition.Always)]);
         var oneOf = new OneOf(Alternatives: [invisible, visible]);
-        var group = new InputGroup(Children: [oneOf], Overlays: []);
+        var group = new Container(Children: [oneOf], Overlays: []);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["ButtonY"] = "Jump" },
             descendants: Descendants((invisible, []), (visible, [])));
@@ -545,7 +515,7 @@ public class VisibilityEvaluatorTests
         var a = Input(name: "ButtonA");
         var b = Input(name: "ButtonB");
         var oneOf = new OneOf(Alternatives: [a, b]);
-        var group = new InputGroup(Children: [oneOf], Overlays: []);
+        var group = new Container(Children: [oneOf], Overlays: []);
         VisibilityContext ctx = Ctx(descendants: Descendants((a, []), (b, [])));
 
         VisibilityFlags result = _underTest.AggregateFlags(group, ctx);

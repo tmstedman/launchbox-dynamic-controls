@@ -11,8 +11,10 @@ public interface IVisibilityEvaluator
 {
     /// <summary>
     /// Dispatches to the appropriate visibility check for any node type. InputDefinitions
-    /// delegate to AnyRenderVisible; InputGroups pass when any child passes; OneOfs pass
-    /// when any alternative passes.
+    /// delegate to AnyRenderVisible; OneOfs pass when any alternative passes; Conditions pass
+    /// on their own explicit check. A Container has no case of its own — unlike the &lt;Group&gt;
+    /// it replaced, it never decides its own visibility, so it's never reached as a bare
+    /// alternative to ask this of directly (see <see cref="Templates.Container"/>'s doc comment).
     /// </summary>
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
@@ -34,7 +36,7 @@ public interface IVisibilityEvaluator
     /// <summary>
     /// OR-reduces <see cref="VisibilityFlags"/> across every <see cref="InputDefinition"/>
     /// reachable through <paramref name="element"/>, following the same selection rules as
-    /// <see cref="ILayoutFilter"/>: InputGroups are transparent (all children contribute),
+    /// <see cref="ILayoutFilter"/>: Containers are transparent (all children contribute),
     /// OneOfs contribute only the first alternative whose <see cref="AnyVisible"/> check passes.
     /// </summary>
     VisibilityFlags AggregateFlags(ILayoutElement element, VisibilityContext ctx);
@@ -46,7 +48,6 @@ public class VisibilityEvaluator : IVisibilityEvaluator
     public bool AnyVisible(ILayoutElement element, VisibilityContext ctx) => element switch
     {
         InputDefinition input => AnyRenderVisible(input, ctx),
-        InputGroup group => group.Children.Any(c => AnyVisible(c, ctx)),
         OneOf oneOf => oneOf.Alternatives.Any(a => AnyVisible(a, ctx)),
         ConditionElement condition => AnyVisibleCondition(condition, ctx),
         _ => false
@@ -56,7 +57,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
     /// A <see cref="ConditionElement"/> is visible when its own check passes <b>and</b>, if any of
     /// its direct children is itself a nested <see cref="ConditionElement"/> (the compound-AND
     /// idiom — see <c>docs/layout-xml-schema.md</c>), that nested check also passes. Non-Condition
-    /// children (Input/Group/Stack/Overlay) are deliberately *not* consulted here — that's
+    /// children (Input/Container/Overlay) are deliberately *not* consulted here — that's
     /// <see cref="EvaluateCondition"/>'s whole point, to bypass <see cref="GetVisibilityFlags"/>'s
     /// descendant fold-in. Without this recursion, a <c>OneOf</c> choosing between alternatives
     /// would see only the outer check and could pick an alternative whose nested check then fails
@@ -114,7 +115,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
     /// <summary>
     /// True if any of the input's renders is visible under its ShowIf in the given context,
     /// or if any structural descendant has a visible render. Used by AnyVisible to resolve
-    /// InputDefinitions in the group pre-pass.
+    /// InputDefinitions reached as a OneOf alternative or Condition child.
     /// </summary>
     private bool AnyRenderVisible(InputDefinition input, VisibilityContext ctx)
     {
@@ -138,8 +139,8 @@ public class VisibilityEvaluator : IVisibilityEvaluator
                     foreach (ILayoutElement child in input.Children)
                         Walk(child);
                     break;
-                case InputGroup g:
-                    foreach (ILayoutElement child in g.Children)
+                case Container c:
+                    foreach (ILayoutElement child in c.Children)
                         Walk(child);
                     break;
                 case OneOf o:

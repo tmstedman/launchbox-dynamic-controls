@@ -4,13 +4,13 @@ using static DynamicControls.Core.TestHelpers.Templates.LayoutElements;
 namespace DynamicControls.Core.Tests.Templates;
 
 /// <summary>
-/// Unit tests for <see cref="CollapseGroupBuilder"/>. The builder walks a collapsing group's
+/// Unit tests for <see cref="CollapseGroupBuilder"/>. The builder walks a collapsing container's
 /// children to identify slot-level nodes (one slot per InputDefinition, one slot per nested
-/// Group/OneOf) and then writes a <see cref="CollapseInfo"/> entry to the output dictionary for
-/// every InputDefinition leaf reachable from those slots — including leaves nested inside a
-/// Group or OneOf slot, which SetMetadata recurses through regardless. The shared-list identity
-/// inside CollapseInfo.Group is load-bearing — render-time collapse logic compares against that
-/// list to vacate or shift slots.
+/// Container/OneOf) and then writes a <see cref="CollapseInfo"/> entry to the output dictionary
+/// for every InputDefinition leaf reachable from those slots — including leaves nested inside a
+/// Container or OneOf slot, which SetMetadata recurses through regardless. The shared-list
+/// identity inside CollapseInfo.Group is load-bearing — render-time collapse logic compares
+/// against that list to vacate or shift slots.
 /// </summary>
 public class CollapseGroupBuilderTests
 {
@@ -70,7 +70,7 @@ public class CollapseGroupBuilderTests
         // given a Group containing another Group of two Inputs
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
-        InputGroup inner = Group(a, b);
+        Container inner = Container(a, b);
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
         // when the builder runs
@@ -109,7 +109,7 @@ public class CollapseGroupBuilderTests
         InputDefinition c = Input("C");
         InputDefinition d = Input("D");
         InputDefinition e = Input("E");
-        InputGroup group = Group(b, c);
+        Container group = Container(b, c);
         OneOf oneOf = OneOf(d, e);
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
@@ -132,7 +132,7 @@ public class CollapseGroupBuilderTests
         InputDefinition primary = Input("Primary");
         InputDefinition fa = Input("FA");
         InputDefinition fb = Input("FB");
-        InputGroup fallbackGroup = Group(fa, fb);
+        Container fallbackGroup = Container(fa, fb);
         OneOf oneOf = OneOf(primary, fallbackGroup);
         Dictionary<InputDefinition, CollapseInfo> output = NewOutput();
 
@@ -159,7 +159,7 @@ public class CollapseGroupBuilderTests
     {
         // CollectSlots adds the Group itself as a slot without inspecting its children;
         // SetMetadata then recurses into the Group's children and hits the unknown type.
-        InputGroup group = Group(new UnknownElement());
+        Container group = Container(new UnknownElement());
 
         Should.Throw<InvalidOperationException>(() =>
             CollapseGroupBuilder.Build(children: [group], gap: 50, NewOutput()))

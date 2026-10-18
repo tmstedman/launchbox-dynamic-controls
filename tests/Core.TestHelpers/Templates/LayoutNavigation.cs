@@ -5,7 +5,7 @@ namespace DynamicControls.Core.TestHelpers.Templates;
 /// <summary>
 /// Test helpers for navigating a <see cref="ResolvedLayout"/>'s element tree. Extensions live
 /// on both <see cref="ResolvedLayout"/> and <see cref="IEnumerable{T}"/> of <see cref="ILayoutElement"/>
-/// so lookups chain uniformly: <c>result.FirstInput().Children.FirstInputGroup()...</c>.
+/// so lookups chain uniformly: <c>result.FirstInput().Children.FirstContainer()...</c>.
 /// </summary>
 public static class LayoutNavigation
 {
@@ -13,9 +13,9 @@ public static class LayoutNavigation
     public static InputDefinition FirstInput(this ResolvedLayout result) =>
         result.Elements.FirstInput();
 
-    /// <summary>Returns the first top-level <see cref="InputGroup"/> in document order.</summary>
-    public static InputGroup FirstInputGroup(this ResolvedLayout result) =>
-        result.Elements.FirstInputGroup();
+    /// <summary>Returns the first top-level <see cref="Container"/> in document order.</summary>
+    public static Container FirstContainer(this ResolvedLayout result) =>
+        result.Elements.FirstContainer();
 
     /// <summary>Returns the first top-level <see cref="OneOf"/> in document order.</summary>
     public static OneOf FirstOneOf(this ResolvedLayout result) =>
@@ -30,9 +30,9 @@ public static class LayoutNavigation
     public static InputDefinition FirstInput(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<InputDefinition>().First();
 
-    /// <summary>Returns the first <see cref="InputGroup"/> in the sequence.</summary>
-    public static InputGroup FirstInputGroup(this IEnumerable<ILayoutElement> elements) =>
-        elements.OfType<InputGroup>().First();
+    /// <summary>Returns the first <see cref="Container"/> in the sequence.</summary>
+    public static Container FirstContainer(this IEnumerable<ILayoutElement> elements) =>
+        elements.OfType<Container>().First();
 
     /// <summary>Returns the first <see cref="OneOf"/> in the sequence.</summary>
     public static OneOf FirstOneOf(this IEnumerable<ILayoutElement> elements) =>
@@ -48,19 +48,18 @@ public static class LayoutNavigation
         elements.OfType<LabelElement>().First();
 
     /// <summary>Depth-first walk over a layout element tree, yielding every element and recursing
-    /// through <see cref="InputGroup.Children"/> and <see cref="ConditionElement.Children"/>.
-    /// Useful for assertions that need to reach inputs nested inside transparent Groups (e.g. a
-    /// Stack containing a Group of Inputs) or gated behind a Condition, without caring about the
-    /// intermediate container shape.</summary>
+    /// through <see cref="Container.Children"/> and <see cref="ConditionElement.Children"/>.
+    /// Useful for assertions that need to reach inputs nested inside transparent Containers or
+    /// gated behind a Condition, without caring about the intermediate container shape.</summary>
     public static IEnumerable<ILayoutElement> Flatten(this IEnumerable<ILayoutElement> elements)
     {
         foreach (ILayoutElement e in elements)
         {
             yield return e;
-            if (e is InputGroup g)
-                foreach (ILayoutElement c in g.Children.Flatten()) yield return c;
+            if (e is Container c)
+                foreach (ILayoutElement child in c.Children.Flatten()) yield return child;
             if (e is ConditionElement cond)
-                foreach (ILayoutElement c in cond.Children.Flatten()) yield return c;
+                foreach (ILayoutElement child in cond.Children.Flatten()) yield return child;
         }
     }
 }
