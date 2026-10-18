@@ -113,8 +113,9 @@
                 </Condition>
                 <!-- Two or three directions share one label, the rest genuinely blank: only the
                      present directions render, each at full brightness, with one shared label.
-                     The label lives loose inside the Group, so it centers against the Group's own
-                     declared vAlign="center" position with no hand-tuned offset. -->
+                     The label lives loose inside the Group, so it always centers on however many
+                     directions actually survive this game, for any vAlign — the y="+17" below is
+                     a small manual nudge on top of that computed center, not a replacement for it. -->
                 <Condition any="AxisLeftStick" match="label">
                     <Group x="312" y="358.5" gap="45" collapse="true" vAlign="center">
                         <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
@@ -169,9 +170,9 @@
                         </Input>
                     </Condition>
                 </Condition>
-                <!-- Two or three directions share one label, the rest genuinely blank: the label
-                     lives loose inside the Group, so it centers against the Group's own declared
-                     vAlign="center" position with no hand-tuned offset, same as AxisLeftStick above. -->
+                <!-- Two or three directions share one label, the rest genuinely blank: same
+                     mechanism as AxisLeftStick above, but this Group has no vAlign (defaults to
+                     "top"), and its y="+15" is its own manual nudge on top of the computed center. -->
                 <Condition any="AxisRightStick" match="label">
                     <Group x="882" y="772" gap="45" collapse="true">
                         <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
