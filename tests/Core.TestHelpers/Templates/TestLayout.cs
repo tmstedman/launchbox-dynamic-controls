@@ -4,7 +4,7 @@ namespace DynamicControls.Core.TestHelpers.Templates;
 
 /// <summary>
 /// Fluent builder for <see cref="LayoutDocument"/> in tests. Lets a test declare a layout
-/// tree (Input/Group/Stack/OneOf with Renders/Labels/Overlays) without the verbose record-init
+/// tree (Input/Group/OneOf with Renders/Labels/Overlays) without the verbose record-init
 /// syntax of the raw DTOs. Concrete-cast at the end with <see cref="ToConfig"/>, or via the
 /// implicit conversion when a method already expects a <see cref="LayoutDocument"/>.
 /// </summary>
@@ -51,12 +51,6 @@ internal class TestLayout
         return this;
     }
 
-    public TestLayout Stack(Action<StackBuilder> build)
-    {
-        _config.Elements.Add(BuildStack(build));
-        return this;
-    }
-
     public TestLayout Group(Action<GroupBuilder> build)
     {
         _config.Elements.Add(BuildGroup(build));
@@ -83,13 +77,6 @@ internal class TestLayout
     {
         var b = new InputBuilder(name);
         build?.Invoke(b);
-        return b.Node;
-    }
-
-    internal static StackNode BuildStack(Action<StackBuilder> build)
-    {
-        var b = new StackBuilder();
-        build(b);
         return b.Node;
     }
 
@@ -173,39 +160,9 @@ internal class InputBuilder(string name)
         return this;
     }
 
-    public InputBuilder ChildStack(Action<StackBuilder> build) { Node.Children.Add(TestLayout.BuildStack(build)); return this; }
     public InputBuilder ChildGroup(Action<GroupBuilder> build) { Node.Children.Add(TestLayout.BuildGroup(build)); return this; }
     public InputBuilder ChildOneOf(Action<OneOfBuilder> build) { Node.Children.Add(TestLayout.BuildOneOf(build)); return this; }
     public InputBuilder ChildCondition(Action<ConditionBuilder> build) { Node.Children.Add(TestLayout.BuildCondition(build)); return this; }
-}
-
-internal class StackBuilder
-{
-    public StackNode Node { get; } = new();
-
-    #pragma warning disable format
-    public StackBuilder At(double x, double y)       { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
-    public StackBuilder Offset(double dx, double dy) { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
-    public StackBuilder Gap(double v)                { Node.Gap = v;       return this; }
-    public StackBuilder Collapse()                   { Node.Collapse = true; return this; }
-    public StackBuilder VAlign(string v)             { Node.VAlign = v;    return this; }
-
-    public StackBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
-    public StackBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
-    public StackBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
-    public StackBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
-    public StackBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
-    public StackBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
-    public StackBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
-    #pragma warning restore format
-
-    public StackBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
-    {
-        var ob = new OverlayBuilder(src);
-        build?.Invoke(ob);
-        Node.Overlays.Add(ob.Node);
-        return this;
-    }
 }
 
 internal class GroupBuilder
@@ -213,12 +170,17 @@ internal class GroupBuilder
     public GroupNode Node { get; } = new();
 
     #pragma warning disable format
+    public GroupBuilder At(double x, double y)       { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
+    public GroupBuilder Offset(double dx, double dy) { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
+    public GroupBuilder Gap(double v)                { Node.Gap = v;       return this; }
+    public GroupBuilder Collapse()                   { Node.Collapse = true; return this; }
+    public GroupBuilder VAlign(string v)             { Node.VAlign = v;    return this; }
+
     public GroupBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
-    public GroupBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
-    public GroupBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
-    public GroupBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
-    public GroupBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
-    public GroupBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
+    public GroupBuilder Group(Action<GroupBuilder> build)                     { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
+    public GroupBuilder OneOf(Action<OneOfBuilder> build)                     { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
+    public GroupBuilder Condition(Action<ConditionBuilder> build)             { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
+    public GroupBuilder LooseRender(Action<RenderBuilder>? build = null)      { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
     public GroupBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
     #pragma warning restore format
 
@@ -238,7 +200,6 @@ internal class OneOfBuilder
     #pragma warning disable format
     public OneOfBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Alternatives.Add(TestLayout.BuildInput(name, build)); return this; }
     public OneOfBuilder Group(Action<GroupBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildGroup(build));       return this; }
-    public OneOfBuilder Stack(Action<StackBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildStack(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
     public OneOfBuilder Condition(Action<ConditionBuilder> build)              { Node.Alternatives.Add(TestLayout.BuildCondition(build));   return this; }
     public OneOfBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Alternatives.Add(TestLayout.BuildRender(build));       return this; }
@@ -257,7 +218,6 @@ internal class ConditionBuilder
     public ConditionBuilder Match(string value) { Node.Match = value; return this; }
 
     public ConditionBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
-    public ConditionBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
     public ConditionBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public ConditionBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public ConditionBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }

@@ -15,7 +15,7 @@ namespace DynamicControls.Core.Tests.Rendering;
 /// is covered by <see cref="VisibilityEvaluatorTests"/>, and their integration by
 /// <c>InputRenderingSubsystemTests</c>. Pins three things: (1) structural selection — top-level
 /// InputDefinitions and their structural Children always render, InputGroups gate on
-/// any-child-visible (unless AlwaysInclude), OneOfs pick the first visible alternative;
+/// any-child-visible, OneOfs pick the first visible alternative;
 /// (2) group overlays — included only when the group is included, tagged with the group's
 /// aggregated visibility flags; (3) collapse adjustments — zero-opacity slots vacate and shift
 /// later slots up by the stack's gap, including the OneOf-no-visible case.
@@ -44,10 +44,9 @@ public class LayoutFilterTests
             Children: children ?? []);
 
     private static InputGroup Group(
-        bool alwaysInclude,
         IReadOnlyList<ILayoutElement> children,
         IReadOnlyList<OverlayDefinition>? overlays = null) =>
-        new(AlwaysInclude: alwaysInclude, Children: children, Overlays: overlays ?? []);
+        new(Children: children, Overlays: overlays ?? []);
 
     private static OverlayDefinition Overlay(string source = "overlay.png") =>
         new(X: 0, Y: 0, Source: source);
@@ -108,7 +107,7 @@ public class LayoutFilterTests
     {
         // given a plain group whose only child is invisible (default substitute return)
         InputDefinition gated = Input("ButtonA");
-        InputGroup group = Group(alwaysInclude: false, children: [gated]);
+        InputGroup group = Group(children: [gated]);
         Template template = TemplateOf(elements: [group]);
 
         // when filtering
@@ -124,7 +123,7 @@ public class LayoutFilterTests
         // given a plain group with one visible and one invisible member
         InputDefinition visible = Input("ButtonA");
         InputDefinition gated = Input("ButtonB");
-        InputGroup group = Group(alwaysInclude: false, children: [visible, gated]);
+        InputGroup group = Group(children: [visible, gated]);
         Template template = TemplateOf(elements: [group]);
         _evaluator.AnyVisible(visible, Arg.Any<VisibilityContext>()).Returns(true);
 
@@ -137,27 +136,12 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_GroupAlwaysInclude_RendersMembersEvenWithNoneVisible()
-    {
-        // given an AlwaysInclude group (a <Stack>) whose only child is invisible
-        InputDefinition gated = Input("ButtonA");
-        InputGroup stack = Group(alwaysInclude: true, children: [gated]);
-        Template template = TemplateOf(elements: [stack]);
-
-        // when filtering (evaluator.AnyVisible never consulted for AlwaysInclude)
-        FilteredLayout result = _underTest.Filter(template, Ctx());
-
-        // then the member still renders — AlwaysInclude bypasses the any-visible check
-        result.Inputs.Select(i => i.Input.Name).ShouldBe(["ButtonA"]);
-    }
-
-    [Fact]
     public void Filter_GroupOverlays_IncludedWhenGroupVisibleWithAggregatedFlags()
     {
         // given a group with one mapped child and a group-level overlay
         InputDefinition mapped = Input("ButtonA");
         OverlayDefinition overlay = Overlay("dpad-lines.png");
-        InputGroup group = Group(alwaysInclude: false, children: [mapped], overlays: [overlay]);
+        InputGroup group = Group(children: [mapped], overlays: [overlay]);
         Template template = TemplateOf(elements: [group]);
         _evaluator.AnyVisible(mapped, Arg.Any<VisibilityContext>()).Returns(true);
         _evaluator.AggregateFlags(group, Arg.Any<VisibilityContext>())
@@ -176,7 +160,7 @@ public class LayoutFilterTests
     {
         // given an invisible group with a group-level overlay
         InputDefinition gated = Input("ButtonA");
-        InputGroup group = Group(alwaysInclude: false, children: [gated], overlays: [Overlay()]);
+        InputGroup group = Group(children: [gated], overlays: [Overlay()]);
         Template template = TemplateOf(elements: [group]);
 
         // when filtering
@@ -530,7 +514,7 @@ public class LayoutFilterTests
         // given a collapsing stack whose first slot is an InputGroup (Stack-as-slot — a known
         // gap: adjustments for these are not yet computed), followed by a plain slot
         InputDefinition child = Input("ButtonA");
-        InputGroup inputGroupSlot = Group(alwaysInclude: true, children: [child]);
+        InputGroup inputGroupSlot = Group(children: [child]);
         InputDefinition plain = Input("ButtonB");
         ILayoutElement[] group = [inputGroupSlot, plain];
         var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
@@ -539,6 +523,7 @@ public class LayoutFilterTests
             [plain] = new(group, Gap: 50),
         };
         Template template = TemplateOf(elements: [inputGroupSlot, plain], collapseInfo: collapseInfo);
+        _evaluator.AnyVisible(child, Arg.Any<VisibilityContext>()).Returns(true);
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
 
@@ -582,7 +567,7 @@ public class LayoutFilterTests
         // InputGroup — CollectInputLeaves must recurse into the InputGroup to find the leaf
         // InputDefinitions (the InputGroup arm of CollectInputLeaves)
         InputDefinition inner = Input("Inner");
-        InputGroup groupAlt = Group(alwaysInclude: true, children: [inner]);
+        InputGroup groupAlt = Group(children: [inner]);
         var oneOf = new OneOf(Alternatives: [groupAlt]);
         InputDefinition tail = Input("Tail");
         ILayoutElement[] collapseGroup = [oneOf, tail];
@@ -594,6 +579,7 @@ public class LayoutFilterTests
         // groupAlt in the main elements so its leaf (inner) enters inputsToRender — the
         // collapse group's oneOf slot is not in the main elements, only in CollapseInfo.Group
         Template template = TemplateOf(elements: [groupAlt, tail], collapseInfo: collapseInfo);
+        _evaluator.AnyVisible(inner, Arg.Any<VisibilityContext>()).Returns(true);
 
         // when filtering
         FilteredLayout result = _underTest.Filter(template, Ctx());
