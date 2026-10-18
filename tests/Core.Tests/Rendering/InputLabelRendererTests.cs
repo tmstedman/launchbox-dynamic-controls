@@ -20,8 +20,14 @@ public class InputLabelRendererTests
         _underTest = new InputLabelRenderer(_logger);
     }
 
-    private static LayoutInput Input(string name, params LabelDefinition[] labels) =>
-        new(LayoutElements.Input(name), YOffset: 0, Flags: VisibilityFlags.None, Labels: labels);
+    // The three collections are required, so a label-only test still states the other two —
+    // which is the point: nothing renders by omission.
+    private static LayoutInput Input(string name, params LabelDefinition[] labels)
+    {
+        InputDefinition input = LayoutElements.Input(name);
+        return new(input, YOffset: 0, Flags: VisibilityFlags.None,
+                   Images: input.InputImages, Labels: labels, Overlays: input.Overlays);
+    }
 
     [Theory]
     [InlineData(null)]
