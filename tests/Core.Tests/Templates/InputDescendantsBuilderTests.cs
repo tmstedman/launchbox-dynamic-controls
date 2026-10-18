@@ -7,7 +7,7 @@ namespace DynamicControls.Core.Tests.Templates;
 /// Unit tests for <see cref="InputDescendantsBuilder"/>. The builder keys every
 /// <see cref="InputDefinition"/> reachable in the tree to its whole-control part names (from
 /// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>, by the Input's own name) —
-/// tree shape decides *which* Inputs get an entry (treating <see cref="InputGroup"/> and
+/// tree shape decides *which* Inputs get an entry (treating <see cref="Container"/> and
 /// <see cref="OneOf"/> as transparent containers, traversed but not keyed), but never *what* that
 /// entry contains. The map uses reference equality so structurally identical instances stay
 /// distinct.
@@ -75,12 +75,12 @@ public class InputDescendantsBuilderTests
     }
 
     [Fact]
-    public void Build_InputGroup_IsTransparent_NotKeyed_ButChildrenAre()
+    public void Build_Container_IsTransparent_NotKeyed_ButChildrenAre()
     {
-        // given a top-level InputGroup wrapping two Inputs
+        // given a top-level Container wrapping two Inputs
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
-        InputGroup group = Group(a, b);
+        Container group = Container(a, b);
 
         // when building the index
         IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>> index = _underTest.Build([group]);
@@ -105,12 +105,12 @@ public class InputDescendantsBuilderTests
     }
 
     [Fact]
-    public void Build_GroupNestedUnderInput_GroupMembersAreStillKeyedIndependently()
+    public void Build_ContainerNestedUnderInput_ContainerMembersAreStillKeyedIndependently()
     {
-        // given an Input whose Children list contains a Group of two Inputs (transparent container)
+        // given an Input whose Children list contains a Container of two Inputs (transparent container)
         InputDefinition a = Input("A");
         InputDefinition b = Input("B");
-        InputDefinition parent = Input("Parent", Group(a, b));
+        InputDefinition parent = Input("Parent", Container(a, b));
 
         // when building the index
         IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>> index = _underTest.Build([parent]);

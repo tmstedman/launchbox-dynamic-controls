@@ -153,15 +153,15 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="10" y="100" gap="45">
+                <Container x="10" y="100" gap="45">
                   <Input name="ButtonA" width="34" height="34" />
                   <Input name="ButtonB" width="34" height="34" />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
         var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         inputs[0].InputImages.Single().Y.ShouldBe(100);
@@ -176,15 +176,15 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="10" y="100" gap="45" vAlign="bottom">
+                <Container x="10" y="100" gap="45" vAlign="bottom">
                   <Input name="ButtonA" width="34" height="34" />
                   <Input name="ButtonB" width="34" height="34" />
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
         var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         inputs[0].InputImages.Single().Y.ShouldBe(55);
@@ -297,16 +297,16 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="0" y="0" gap="10">
+                <Container x="0" y="0" gap="10">
                   <Input name="ButtonA" x="0" y="0" width="44" height="44"></Input>
                   <Input name="ButtonB" x="0" y="50" width="44" height="44"></Input>
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        // A body-level Group lands directly as the sole InputGroup in Elements (no wrapper).
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        // A body-level Group lands directly as the sole Container in Elements (no wrapper).
+        var group = t.Layout.Elements.OfType<Container>().Single();
         group.Children.OfType<InputDefinition>().Select(i => i.Name).ShouldBe(["ButtonA", "ButtonB"]);
     }
 
@@ -318,9 +318,9 @@ public class TemplateSubsystemTests
               <Body>
                 <Input name="ButtonDpad" x="0" y="0" width="135" height="135">
                   <OneOf>
-                    <Group>
+                    <Container>
                       <Input name="ButtonDpadUp" width="34" height="34"></Input>
-                    </Group>
+                    </Container>
                     <Input name="ButtonDpad" x="0" y="0" useImage="ButtonDpadUp" width="34" height="34" />
                   </OneOf>
                 </Input>
@@ -331,7 +331,7 @@ public class TemplateSubsystemTests
         var dpad = t.Layout.Elements.OfType<InputDefinition>().Single();
         var oneOf = dpad.Children.OfType<OneOf>().Single();
         oneOf.Alternatives.Count.ShouldBe(2);
-        oneOf.Alternatives[0].ShouldBeOfType<InputGroup>();
+        oneOf.Alternatives[0].ShouldBeOfType<Container>();
         oneOf.Alternatives[1].ShouldBeOfType<InputDefinition>();
     }
 
@@ -345,18 +345,18 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="0" y="100" gap="50">
+                <Container x="0" y="100" gap="50">
                   <OneOf>
                     <Input name="ButtonDpadUp" width="34" height="34"></Input>
                     <Input name="ButtonDpad" width="34" height="34"></Input>
                   </OneOf>
                   <Input name="ButtonStart" width="34" height="34"></Input>
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
         var oneOf = group.Children.OfType<OneOf>().Single();
         var altAbsoluteYs = oneOf.Alternatives
             .OfType<InputDefinition>()
@@ -439,15 +439,15 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="0" y="0" gap="45" collapse="true">
+                <Container x="0" y="0" gap="45" collapse="true">
                   <Input name="ButtonA" width="34" height="34"></Input>
                   <Input name="ButtonB" width="34" height="34"></Input>
-                </Group>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
         var inputs = group.Children.OfType<InputDefinition>().ToList();
 
         t.Layout.CollapseInfo.Keys.ShouldContain(inputs[0], ReferenceEqualityComparer.Instance);
@@ -458,7 +458,7 @@ public class TemplateSubsystemTests
     [Fact]
     public void Load_CollapsingGroup_RegistersInputsNestedInAnotherGroup()
     {
-        // A nested <Group> occupies one opaque slot in the outer group's slot list, but
+        // A nested <Container> occupies one opaque slot in the outer group's slot list, but
         // CollapseGroupBuilder's SetMetadata still recurses through its children — every leaf
         // Input reachable from a slot is stamped with that slot's CollapseInfo (same gap, same
         // shared slot list), regardless of whether the slot is itself an Input, a nested Group,
@@ -466,19 +466,19 @@ public class TemplateSubsystemTests
         var t = Load("""
             <ControllerTemplate>
               <Body>
-                <Group x="0" y="0" gap="40" collapse="true">
+                <Container x="0" y="0" gap="40" collapse="true">
                   <Input name="ButtonA" width="34" height="34"></Input>
-                  <Group>
+                  <Container>
                     <Input name="ButtonB" width="34" height="34"></Input>
                     <Input name="ButtonC" width="34" height="34"></Input>
-                  </Group>
-                </Group>
+                  </Container>
+                </Container>
               </Body>
             </ControllerTemplate>
             """);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
-        var inner = group.Children.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
+        var inner = group.Children.OfType<Container>().Single();
         InputDefinition a = group.Children.OfType<InputDefinition>().Single();
         var nested = inner.Children.OfType<InputDefinition>().ToList();
 
@@ -502,20 +502,20 @@ public class TemplateSubsystemTests
             <Style name="dim" showIf="mapping" minOpacity="0.4" />
           </Head>
           <Body>
-            <Group x="100" y="200" gap="40" collapse="true">
+            <Container x="100" y="200" gap="40" collapse="true">
               <Input name="ButtonA" style="dim" width="34" height="34">
                 <Label x="+50" y="+5" />
               </Input>
-              <Group>
+              <Container>
                 <Input name="ButtonB" style="dim" width="34" height="34" />
-              </Group>
+              </Container>
               <OneOf>
                 <Input name="ButtonDpadUp" width="34" height="34"></Input>
                 <Input name="ButtonDpad" width="34" height="34">
                   <Input name="ButtonDpadDown" width="34" height="34"></Input>
                 </Input>
               </OneOf>
-            </Group>
+            </Container>
           </Body>
         </ControllerTemplate>
         """;
@@ -528,7 +528,7 @@ public class TemplateSubsystemTests
         // unnamed Head Style. All four cascades fire together.
         var t = Load(ScenarioXml);
 
-        var group = t.Layout.Elements.OfType<InputGroup>().Single();
+        var group = t.Layout.Elements.OfType<Container>().Single();
         InputDefinition buttonA = group.Children.OfType<InputDefinition>().Single(i => i.Name == "ButtonA");
 
         InputImageDefinition render = buttonA.InputImages.Single();
@@ -540,7 +540,7 @@ public class TemplateSubsystemTests
     }
 
     [Fact]
-    public void Scenario_CollapseInfo_SpansInputGroupAndOneOfSlots()
+    public void Scenario_CollapseInfo_SpansContainerAndOneOfSlots()
     {
         // CollapseGroupBuilder must register every Input reachable as a slot leaf: ButtonA
         // (direct child), ButtonB (nested one level inside its own single-child Group, which
@@ -586,7 +586,7 @@ public class TemplateSubsystemTests
                     yield return input;
                     foreach (InputDefinition d in AllInputs(input.Children)) yield return d;
                     break;
-                case InputGroup group:
+                case Container group:
                     foreach (InputDefinition d in AllInputs(group.Children)) yield return d;
                     break;
                 case OneOf oneOf:
