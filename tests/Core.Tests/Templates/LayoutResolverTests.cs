@@ -836,16 +836,22 @@ public class TemplateLayoutResolverTests
         render.Image.Y.ShouldBe(60);
     }
 
-    // --- Loose Label centering against its enclosing Group ---
+    // --- Loose Label origin resolution ---
+    //
+    // Phase 1 (this resolver) no longer computes any Group-anchor-aware centering for a loose
+    // Label -- which of a Group's slots actually survive collapse is a per-game fact this
+    // build-time pass has no way to know, so centering is computed entirely by LayoutFilter at
+    // render time instead (see LayoutFilterTests's "loose Label centering" section, and
+    // InputGroup's/LayoutFilter.ResolveLooseLabel's doc comments). A loose Label here just
+    // resolves against whatever plain origin is ambient, the same as if it weren't inside a
+    // Group at all.
 
     [Fact]
-    public void Resolve_LooseLabelInVAlignCenterGroup_ResolvesToDeclaredCenter_NotTheShiftedTopSlot()
+    public void Resolve_LooseLabelInsideGroup_ResolvesAgainstThePlainShiftedOrigin()
     {
         // given a vAlign="center" Group of 4 slots (gap=40) declared at y=300 -- the shifted
-        // top-slot position members actually render at is 300 - (3*40/2) = 240, but a loose
-        // Label should resolve against the Group's own declared 300, landing "half-way up".
-        // The Group needs an enclosing Input for the loose Label's ambient identity, same
-        // requirement as any other loose Render/Label -- unrelated to this feature.
+        // origin members actually render from is 300 - (3*40/2) = 240. A loose Label just
+        // resolves against that plain origin, unaffected by the fact it's inside a Group.
         TestLayout config = new TestLayout()
             .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
                 .Input("A", a => a.Render())
@@ -857,46 +863,7 @@ public class TemplateLayoutResolverTests
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstLabelElement();
-        label.Label.Y.ShouldBe(300);
-    }
-
-    [Fact]
-    public void Resolve_LooseLabelInVAlignBottomGroup_ResolvesToDeclaredBottomSlot()
-    {
-        // vAlign="bottom" names a different slot (the last one) -- the loose Label follows
-        // whatever the Group's own vAlign points at, not always "centered"
-        TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("bottom")
-                .Input("A", a => a.Render())
-                .Input("B", b => b.Render())
-                .LooseLabel(l => l.Offset(0, 0))));
-
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstLabelElement();
-        label.Label.Y.ShouldBe(300);
-    }
-
-    [Fact]
-    public void Resolve_LooseLabelReachedThroughNestedGroup_UsesTheNestedGroupsOwnAnchor()
-    {
-        // unlike OneOf/Condition, a nested Group is never transparent — it always establishes
-        // its own frame with its own declared position, so a loose Label directly inside it
-        // anchors to THAT Group's position (its own slot in the outer Group, y=380: outer's
-        // vAlign="center" shift for 5 slots is (5-1)*40/2=80, so slot 4 lands at
-        // 300-80+4*40=380), shadowing the outer Group's own anchor (300) entirely
-        TestLayout config = new TestLayout()
-            .Input("Whole", i => i.ChildGroup(s => s.At(100, 300).Gap(40).VAlign("center")
-                .Input("A", a => a.Render())
-                .Input("B", b => b.Render())
-                .Input("C", c => c.Render())
-                .Input("D", d => d.Render())
-                .Group(g => g.LooseLabel(l => l.Offset(0, 0)))));
-
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        LabelElement label = result.FirstInput().Children.FirstInputGroup().Children.FirstInputGroup().Children.FirstLabelElement();
-        label.Label.Y.ShouldBe(380);
+        label.Label.Y.ShouldBe(240);
     }
 
     [Fact]
@@ -915,29 +882,6 @@ public class TemplateLayoutResolverTests
 
         InputDefinition a = result.FirstInputGroup().Children.FirstInput();
         a.Labels.Single().Y.ShouldBe(a.InputImages.Single().Y + 5);
-    }
-
-    [Fact]
-    public void Resolve_LooseLabelInsideGroupMembersOwnCondition_DoesNotInheritTheOuterGroupsAnchor()
-    {
-        // a group member's own loose content (reached through its own nested Condition) must
-        // resolve against *its own* slot origin -- not the outer group it happens to be a
-        // member of. A is the first of 4 slots (vAlign=center, gap=40, declared y=300), so its
-        // own (shifted) slot position is 300 - (3*40/2) = 240 -- clearly distinct from the
-        // outer group's own anchor (300), so the two can't be confused for one another.
-        TestLayout config = new TestLayout()
-            .Group(s => s.At(100, 300).Gap(40).VAlign("center")
-                .Input("A", i => i.Render().ChildCondition(c => c.Any("X").LooseLabel(l => l.Offset(0, 0))))
-                .Input("B", i => i.Render())
-                .Input("C", i => i.Render())
-                .Input("D", i => i.Render()));
-
-        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
-
-        InputDefinition a = result.FirstInputGroup().Children.FirstInput();
-        LabelElement label = a.Children.FirstCondition().Children.FirstLabelElement();
-        label.Label.Y.ShouldBe(a.InputImages.Single().Y);
-        label.Label.Y.ShouldBe(240);
     }
 
     // --- Overlay path resolution ---
