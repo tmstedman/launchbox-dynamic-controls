@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Shared by the developer tools under tools/, and like them absent from both .slnx files and
-    from everything CI builds, so the shipped plugin stays exactly what it was.
+    Shared by the developer tools under tools/. Like them it is referenced by nothing CI runs,
+    so it cannot reach the shipped plugin: every workflow step names a csproj directly.
 
     It exists for one reason: LabelDump and Preview must agree on which games they sweep and how
     they resolve each one, because a PNG and a row in platform-renders.xml are meant to describe

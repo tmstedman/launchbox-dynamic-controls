@@ -1,13 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!--
-    Developer tool, not part of the shipped plugin. Deliberately absent from both .slnx files
-    and from every csproj CI builds, so the release stays exactly two DLLs and this project's
-    existence can never affect coverage, packaging, or the LaunchBox publish. Run it via
-    "dotnet run" against this project; see Options.cs for the arguments and an example.
+    Developer tool, not part of the shipped plugin. Nothing CI runs references it: every workflow
+    step names a csproj directly: the two test projects, then "dotnet publish src/LaunchBox",
+    so coverage, packaging and the release artifact are all decided without it. Being listed in a
+    .slnx is therefore an editor convenience and nothing more; what keeps the tool out of the
+    release is that no shipped project references it.
+
+    Running "dotnet test DynamicControls.Core.slnx" does build it, since that builds the whole
+    solution. A compile error here will fail that command, which is the one cost of listing it.
 
     SkiaSharp is why this lives under tools/ rather than beside the renderer: src/ carries no
-    NuGet dependencies at all, which is what keeps the shipped plugin to two DLLs.
+    NuGet dependencies at all, which is what keeps the shipped plugin to two DLLs. Listing this
+    project in a solution pulls that restore, native assets included, into any build of it.
+
+    Run it with "dotnet run" against this project; see the Usage text for the arguments.
   -->
   <PropertyGroup>
     <OutputType>Exe</OutputType>
