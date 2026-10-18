@@ -437,6 +437,29 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_Container_DirectChildOverlay_DoesNotAlsoLeakIntoChildren()
+    {
+        // Regression guard: now that Overlay is also a valid loose child of Container/OneOf/
+        // Condition (and therefore routes through the same TryParseLayoutChild use), an Overlay
+        // that's a *direct* child of its own Container must still land exclusively on that
+        // Container's own Overlays list, never on the generic Children list too.
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Container>
+                  <Overlay src='lines.png' />
+                </Container>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        ContainerNode group = _underTest.LoadLayout("x")!.Elements.OfType<ContainerNode>().Single();
+
+        group.Overlays.Count.ShouldBe(1);
+        group.Children.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void LoadLayout_ContainerWithInvalidChild_IsLoggedAndSkipped()
     {
         // given a Container containing an unrecognised element
@@ -753,6 +776,66 @@ public class TemplateLoaderTests
         LabelNode label = condition.Children.OfType<LabelNode>().Single();
         label.Align.ShouldBe("right");
         label.Y.ShouldBe(Coordinate.Relative(4));
+    }
+
+    [Fact]
+    public void LoadLayout_Condition_BareOverlay_ParsesAsLooseChild()
+    {
+        // given a Condition wrapping a bare Overlay — no enclosing Input or Container of its own
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition any='A'>
+                  <Overlay src='lines.png' x='+5' y='+10' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        ConditionNode condition = result.Elements.OfType<ConditionNode>().Single();
+        OverlayNode overlay = condition.Children.OfType<OverlayNode>().Single();
+        overlay.Src.ShouldBe("lines.png");
+        overlay.Y.ShouldBe(Coordinate.Relative(10));
+    }
+
+    [Fact]
+    public void LoadLayout_OneOf_BareOverlay_ParsesAsAlternative()
+    {
+        // given a OneOf with a bare Overlay alongside an Input alternative
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <OneOf>
+                  <Input name='A' />
+                  <Overlay src='lines.png' />
+                </OneOf>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        OneOfNode oneOf = result.Elements.OfType<OneOfNode>().Single();
+        oneOf.Alternatives.OfType<OverlayNode>().Single().Src.ShouldBe("lines.png");
+    }
+
+    [Fact]
+    public void LoadLayout_Body_BareOverlay_ParsesAsTopLevelElement()
+    {
+        // given a bare Overlay directly under Body — no Input or Container ancestor at all
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Overlay src='background.png' />
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<OverlayNode>().Single().Src.ShouldBe("background.png");
     }
 
     [Fact]

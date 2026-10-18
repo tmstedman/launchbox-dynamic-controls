@@ -56,6 +56,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
         ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
         LabelNode labelXml => BuildLooseLabel(labelXml, ctx),
+        OverlayNode overlayXml => BuildLooseOverlay(overlayXml, ctx),
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -228,6 +229,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         OneOfNode => 1,
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
         LabelNode => 0,
+        OverlayNode => 0,
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -291,6 +293,9 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             case LabelNode labelXml:
                 // Takes no slot, same as an Overlay.
                 return BuildLooseLabel(labelXml, ctx);
+            case OverlayNode overlayXml:
+                // Takes no slot, same as a Label.
+                return BuildLooseOverlay(overlayXml, ctx);
             default:
                 throw new InvalidOperationException($"Unknown node type: {node.GetType()}");
         }
@@ -397,6 +402,26 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             return new LabelElement(new LabelDefinition(X: 0, Y: 0));
         }
         return new LabelElement(BuildLabelDefinition(labelXml, ctx));
+    }
+
+    /// <summary>
+    /// Resolves an &lt;Overlay&gt; found somewhere other than as a direct child of its own
+    /// &lt;Input&gt;/&lt;Container&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a
+    /// &lt;Container&gt;/&lt;OneOf&gt;/&lt;Condition&gt;, or a bare top-level child of
+    /// &lt;Body&gt;). Unlike a loose Label, position never depends on an ambient owner — X/Y still
+    /// resolve against whatever origin is ambient in <paramref name="ctx"/> regardless, so there's
+    /// no missing-owner error case to guard here. Which owner (an Input, a Container, or none at
+    /// all) governs its visibility is a per-game fact <see cref="Rendering.LayoutFilter"/>
+    /// discovers during its own walk instead — this method only builds the definition itself.
+    /// </summary>
+    private OverlayElement BuildLooseOverlay(OverlayNode overlayXml, BuildContext ctx)
+    {
+        if (overlayXml.Src == null)
+        {
+            _logger.Error("Skipping <Overlay>: missing 'src' attribute");
+            return new OverlayElement(new OverlayDefinition(X: 0, Y: 0, Source: ""));
+        }
+        return new OverlayElement(BuildOverlayDefinition(overlayXml, ctx));
     }
 
     /// <summary>

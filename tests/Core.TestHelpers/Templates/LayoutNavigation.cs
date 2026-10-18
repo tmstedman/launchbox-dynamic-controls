@@ -47,6 +47,11 @@ public static class LayoutNavigation
     public static LabelElement FirstLabelElement(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<LabelElement>().First();
 
+    /// <summary>Returns the first bare <see cref="OverlayElement"/> in the sequence (one found
+    /// somewhere other than as a direct child of its own Input/Container).</summary>
+    public static OverlayElement FirstOverlayElement(this IEnumerable<ILayoutElement> elements) =>
+        elements.OfType<OverlayElement>().First();
+
     /// <summary>Depth-first walk over a layout element tree, yielding every element and recursing
     /// through <see cref="Container.Children"/> and <see cref="ConditionElement.Children"/>.
     /// Useful for assertions that need to reach inputs nested inside transparent Containers or
