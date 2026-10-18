@@ -24,6 +24,39 @@ public class TemplateLayoutResolverTests
         _underTest = new LayoutResolver(_logger);
     }
 
+    // --- nested collapsing containers ---
+
+    [Fact]
+    public void Resolve_CollapsingContainerInsideAnother_KeepsTheInnerGroupForItsOwnMembers()
+    {
+        // given a collapsing container whose own child is another collapsing container.
+        // Children resolve before their parent registers its group, so the outer Build runs
+        // last -- and SetMetadata recurses into a nested container's children, so without a
+        // guard the outer group's entry overwrites the inner one for every input inside it.
+        TestLayout config = new TestLayout()
+            .Container(outer => outer
+                .At(0, 0).Gap(50).Collapse()
+                .Input("ButtonA")
+                .Container(inner => inner
+                    .At(0, 200).Gap(10).Collapse()
+                    .Input("ButtonX")
+                    .Input("ButtonY")));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the inner container's members keep their own group, not the outer's. Taking the
+        // outer's would hand them a gap they do not sit at and a slot list they are not in,
+        // leaving them unadjusted at render time while appearing to be handled.
+        InputDefinition Find(string name) =>
+            result.Elements.Flatten().OfType<InputDefinition>().Single(i => i.Name == name);
+        InputDefinition x = Find("ButtonX"), y = Find("ButtonY"), a = Find("ButtonA");
+
+        result.CollapseInfo[x].Gap.ShouldBe(10);
+        result.CollapseInfo[y].Gap.ShouldBe(10);
+        result.CollapseInfo[x].Group.ShouldBeSameAs(result.CollapseInfo[y].Group);
+        result.CollapseInfo[x].Group.ShouldNotBeSameAs(result.CollapseInfo[a].Group);
+    }
+
     // --- Style defaults from <Head><Style> ---
 
     [Fact]

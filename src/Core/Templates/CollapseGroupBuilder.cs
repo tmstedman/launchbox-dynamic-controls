@@ -43,6 +43,26 @@ internal static class CollapseGroupBuilder
     }
 
     /// <summary>
+    /// Records <paramref name="info"/> for <paramref name="input"/> unless a nearer container
+    /// already claimed it.
+    ///
+    /// <para>A container resolves its children before registering its own group, so an inner
+    /// collapsing container's entries land first and the outer one's would overwrite them.
+    /// That matters because <see cref="SetMetadata"/> walks a nested container's children while
+    /// <see cref="CollectSlots"/> treats that container as a single opaque slot: the outer group
+    /// would claim inputs it has no slot for, leaving them unadjusted at render time while
+    /// appearing to be handled. The innermost claim is the correct one — it is the container
+    /// whose gap and slot list those inputs actually sit in.</para>
+    /// </summary>
+    private static void Claim(
+        InputDefinition input,
+        CollapseInfo info,
+        Dictionary<InputDefinition, CollapseInfo> output)
+    {
+        if (!output.ContainsKey(input)) output[input] = info;
+    }
+
+    /// <summary>
     /// Flattens <paramref name="children"/> into its slot-level nodes — the same walk <see
     /// cref="Build"/> uses to populate <see cref="CollapseInfo.Group"/>, exposed so <see
     /// cref="Rendering.LayoutFilter"/> can compute a loose Label's true center from a container's
@@ -104,7 +124,7 @@ internal static class CollapseGroupBuilder
         switch (slot)
         {
             case InputDefinition input:
-                output[input] = info;
+                Claim(input, info, output);
                 break;
             case Container container:
                 foreach (ILayoutElement child in container.Children)
