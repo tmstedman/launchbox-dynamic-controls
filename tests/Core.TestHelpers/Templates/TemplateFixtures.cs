@@ -16,8 +16,7 @@ public static class TemplateFixtures
         double defaultFontSize = 12,
         ITemplateImageSource? imageSource = null,
         IReadOnlyList<ILayoutElement>? elements = null,
-        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
-        IReadOnlyDictionary<InputDefinition, IReadOnlyList<string>>? inputDescendants = null)
+        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null)
     {
         IReadOnlyList<ILayoutElement> elementList = elements ?? [];
         return new(
@@ -25,7 +24,6 @@ public static class TemplateFixtures
             BaseImage: null,
             Layout: new ResolvedLayout(
                 Elements: elementList,
-                InputDescendants: inputDescendants ?? new InputDescendantsBuilder().Build(elementList),
                 CollapseInfo: collapseInfo ?? new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance),
                 DefaultFontSize: defaultFontSize,
                 DefaultMinOpacity: defaultMinOpacity,
