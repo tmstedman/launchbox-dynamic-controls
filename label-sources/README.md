@@ -80,6 +80,25 @@ python3 ~/.work/dynamic-controls/scripts/check_artwork.py
 It verifies control names, duplicates, missing images and clusters labelled both ways. It cannot
 tell you a label is wrong — only that the file is a usable transcription.
 
+## `arcade-artwork copy.xml`
+
+The transcription as first read, kept deliberately. `arcade-artwork.xml` is corrected whenever a
+re-read finds the original reading wrong — After Burner's d-pad was transcribed with a movement
+label neither cabinet has, and a steering wheel was paired onto controls it never reached — and
+this file is what those corrections can be measured against. Without it there is no way to tell a
+fix from a drift, because the images are not re-read every time.
+
+Not generated and not an input to anything. Leave it where it is; the name is unfortunate but
+changing it would break the one thing it is for, which is being the version that predates the
+edits.
+
+## Generated files
+
+`arcade-artwork-sorted.xml`, `arcade-pipeline-sorted.xml`, `arcade-pipeline-images.xml` and
+`platform-renders.xml` are written by `tools/LabelDump` and carry the command that rebuilds them.
+Do not edit them: the first is `arcade-artwork.xml` re-emitted in a fixed order, and the rest are
+what the pipeline actually renders, recorded so a change can be diffed against what came before.
+
 ## Where the judgements live
 
 [`docs/label-import.md`](../docs/label-import.md) holds the rules for turning sources into
