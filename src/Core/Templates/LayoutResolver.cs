@@ -307,11 +307,25 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         (frame.OriginX, frame.OriginY + (frame.SlotIndex++ * frame.Gap));
 
     /// <summary>Resolves a OneOfNode DTO into a OneOf, recursively building each
-    /// alternative branch (Input, Condition, or nested OneOf).</summary>
+    /// alternative branch (Input, Container, Condition, or nested OneOf).</summary>
     private OneOf BuildOneOf(OneOfNode oneOfXml, BuildContext ctx)
     {
         var oneOf = new OneOf(
             Alternatives: [.. oneOfXml.Alternatives.Select(a => BuildNode(a, ctx))]);
+
+        // A bare Container states no condition and always renders once reached, so it matches
+        // unconditionally -- useful as a trailing default, and fatal to anything after it. The
+        // parser cannot object, a Container being valid in this position, and the symptom is an
+        // alternative that silently never fires, which reads as missing data rather than a
+        // template fault. Wrap it in a Condition, or move it last.
+        int defaultAt = oneOf.Alternatives.ToList().FindIndex(a => a is Container);
+        if (defaultAt >= 0 && defaultAt < oneOf.Alternatives.Count - 1)
+        {
+            _logger.Error($"OneOf alternative {defaultAt + 1} is a bare Container, which always "
+                        + $"matches, so the {oneOf.Alternatives.Count - defaultAt - 1} after it are "
+                        + "unreachable; wrap it in a <Condition> or move it last.");
+        }
+
         _logger.Debug($"OneOf: alternatives={oneOf.Alternatives.Count}");
         return oneOf;
     }

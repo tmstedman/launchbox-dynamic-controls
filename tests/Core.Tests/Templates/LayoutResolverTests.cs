@@ -57,6 +57,40 @@ public class TemplateLayoutResolverTests
         result.CollapseInfo[x].Group.ShouldNotBeSameAs(result.CollapseInfo[a].Group);
     }
 
+    // --- a Container as a OneOf default ---
+
+    [Fact]
+    public void Resolve_BareContainerIsNotTheLastAlternative_ReportsTheUnreachableOnes()
+    {
+        // given a OneOf whose first alternative is a bare Container. A Container always renders
+        // once reached and states no condition, so it matches unconditionally -- which makes it
+        // a default, and makes everything after it dead. Valid XML either way, so only the
+        // resolver is placed to say so.
+        TestLayout config = new TestLayout()
+            .OneOf(oneOf => oneOf
+                .Container(c => c.At(0, 0).Input("ButtonA"))
+                .Input("ButtonB"));
+
+        _underTest.Resolve(config, _imageSource);
+
+        _logger.Received().Error(Arg.Is<string>(s =>
+            s.Contains("Container") && s.Contains("unreachable")));
+    }
+
+    [Fact]
+    public void Resolve_BareContainerIsTheLastAlternative_IsNotReported()
+    {
+        // the useful shape: try the conditional alternatives, otherwise draw this.
+        TestLayout config = new TestLayout()
+            .OneOf(oneOf => oneOf
+                .Input("ButtonA")
+                .Container(c => c.At(0, 0).Input("ButtonB")));
+
+        _underTest.Resolve(config, _imageSource);
+
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
     // --- Style defaults from <Head><Style> ---
 
     [Fact]

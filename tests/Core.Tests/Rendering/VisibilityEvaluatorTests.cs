@@ -208,20 +208,25 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void AnyVisible_Container_AlwaysReturnsFalse_SinceItNeverDecidesItsOwnVisibility()
+    public void AnyVisible_Container_IsTrueWhateverItHolds_SoAOneOfCanUseOneAsItsDefault()
     {
-        // given a Container with a child that would itself report visible -- unlike the <Group>
-        // it replaced, AnyVisible has no case for it at all any more (it falls to the same
-        // default arm as any other unhandled type): whether a Container exists at all is now
-        // exclusively an enclosing Condition's job, never something asked of the Container
-        // directly, so this is never actually consulted for it in practice
-        var shown = Input(name: "ButtonY", images: [Image(ShowIfCondition.Always)]);
-        var group = new Container(Children: [shown], Overlays: []);
+        // A Container states no condition and always renders once reached, so there is nothing
+        // for it to answer no to. Answering yes is what lets a OneOf use a bare one as a
+        // trailing default -- try the conditional alternatives, otherwise draw this -- where
+        // answering no made it silently unselectable in the one place anything asks.
+        //
+        // Unconditional, not derived from its children: alternatives holding the same inputs and
+        // differing only in when they apply cannot be told apart by content, so a content-based
+        // answer would pick the first of them every time. That is <Condition>'s job, and
+        // inferring it from descendants is what <Group> did and Container exists to drop. Both
+        // cases below answer the same.
+        var withVisibleChild = new Container(
+            Children: [Input(name: "ButtonY", images: [Image(ShowIfCondition.Always)])], Overlays: []);
+        var empty = new Container(Children: [], Overlays: []);
         VisibilityContext ctx = Ctx();
 
-        bool visible = _underTest.AnyVisible(group, ctx);
-
-        visible.ShouldBeFalse();
+        _underTest.AnyVisible(withVisibleChild, ctx).ShouldBeTrue();
+        _underTest.AnyVisible(empty, ctx).ShouldBeTrue();
     }
 
     [Fact]
