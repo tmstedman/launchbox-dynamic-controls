@@ -331,6 +331,61 @@ public class InputRenderingSubsystemTests
         result.Images.Single(i => i.Source == "group-highlight.png").InputName.ShouldBeNull();
     }
 
+    [Fact]
+    public void Render_StickOneOfWithNestedCondition_PartialDirectionAgreement_FallsThroughToMergedAlternative()
+    {
+        // Regression test for a real production bug (crusnexo's left stick on Arcade): a OneOf's
+        // first alternative is an outer Condition ("the whole has a label") wrapping an inner one
+        // ("all four directions individually agree") gating a single glyph -- the compound-AND
+        // idiom used by AxisLeftStick/AxisRightStick in Xbox Series X's Layout.xml. Left/Right
+        // agree on "Steering" (so InputLabelsService would write that onto AxisLeftStick's own
+        // key), but Up/Down have no label at all -- the outer check alone passes, but the inner
+        // "all four" check doesn't. Before the fix, AnyVisible only consulted the outer check, so
+        // OneOf picked this alternative and rendered nothing once the inner check dropped
+        // everything inside, stranding the whole stick with no image or label at all instead of
+        // falling through to the merged per-direction alternative.
+        var up = Input(name: "AxisLeftStickUp", images: [new InputImageDefinition(0, 0, "AxisLeftStickUp.png", ShowIf: Label)]);
+        var down = Input(name: "AxisLeftStickDown", images: [new InputImageDefinition(0, 0, "AxisLeftStickDown.png", ShowIf: Label)]);
+        var left = Input(name: "AxisLeftStickLeft", images: [new InputImageDefinition(0, 0, "AxisLeftStickLeft.png", ShowIf: Label)]);
+        var right = Input(name: "AxisLeftStickRight", images: [new InputImageDefinition(0, 0, "AxisLeftStickRight.png", ShowIf: Label)]);
+        var glyph = Input(name: "AxisLeftStick", images: [new InputImageDefinition(0, 0, "AxisLeftStick-glyph.png", ShowIf: Label)]);
+
+        var singleGlyphAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
+        [
+            new ConditionElement(ConditionMode.All,
+                ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"],
+                ConditionMatch.Label, [glyph])
+        ]);
+        var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
+        [
+            new InputGroup(AlwaysInclude: true, Children: [up, left, right, down], Overlays: [])
+        ]);
+        var oneOf = new OneOf([singleGlyphAlternative, mergedAlternative]);
+
+        _images.With(src: "AxisLeftStickUp.png", generic: "AxisLeftStickUp.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickDown.png", generic: "AxisLeftStickDown.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickLeft.png", generic: "AxisLeftStickLeft.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStickRight.png", generic: "AxisLeftStickRight.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisLeftStick-glyph.png", generic: "AxisLeftStick-glyph.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([oneOf]);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisLeftStick", "Steering"), ("AxisLeftStickLeft", "Steering"), ("AxisLeftStickRight", "Steering"));
+
+        // when the service renders
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        // then the merged alternative's four directions rendered -- not a total blackout, and not
+        // the single glyph (whose inner "all four" check correctly never passed)
+        result.Images.ShouldContain(i => i.InputName == "AxisLeftStickLeft");
+        result.Images.ShouldContain(i => i.InputName == "AxisLeftStickRight");
+        result.Images.ShouldContain(i => i.InputName == "AxisLeftStickUp");
+        result.Images.ShouldContain(i => i.InputName == "AxisLeftStickDown");
+        result.Images.ShouldNotContain(i => i.InputName == "AxisLeftStick");
+        result.Images.Single(i => i.InputName == "AxisLeftStickLeft").Opacity.ShouldBe(1.0);
+        result.Images.Single(i => i.InputName == "AxisLeftStickUp").Opacity.ShouldBe(0.3);
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(
