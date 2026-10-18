@@ -768,6 +768,58 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_Condition_BareRenderAndLabel_ParseAsLooseChildren()
+    {
+        // given a Condition wrapping a bare Render and Label — no enclosing Input of their own
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition any='A'>
+                  <Render useImage='Stick.png' x='+1' y='+2' />
+                  <Label x='+3' y='+4' align='right' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        ConditionNode condition = result.Elements.OfType<ConditionNode>().Single();
+        RenderNode render = condition.Children.OfType<RenderNode>().Single();
+        render.UseImage.ShouldBe("Stick.png");
+        render.X.ShouldBe(Coordinate.Relative(1));
+
+        LabelNode label = condition.Children.OfType<LabelNode>().Single();
+        label.Align.ShouldBe("right");
+        label.Y.ShouldBe(Coordinate.Relative(4));
+    }
+
+    [Fact]
+    public void LoadLayout_Input_DirectChildRenderAndLabel_DoNotAlsoLeakIntoChildren()
+    {
+        // Regression guard: now that Render/Label are also valid loose children of Condition (and
+        // therefore route through the same TryParseLayoutChild Group/Stack/OneOf/Condition use),
+        // a Render/Label that's a *direct* child of its own Input must still land exclusively on
+        // that Input's own Renders/Labels lists, never on the generic Children list too.
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Input name='ButtonA'>
+                  <Render />
+                  <Label />
+                </Input>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        InputNode input = _underTest.LoadLayout("x")!.Elements.OfType<InputNode>().Single();
+
+        input.Renders.Count.ShouldBe(1);
+        input.Labels.Count.ShouldBe(1);
+        input.Children.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void LoadLayout_InvalidBodyChild_IsLoggedAndSkipped()
     {
         // given a body with an unrecognized element alongside a valid one

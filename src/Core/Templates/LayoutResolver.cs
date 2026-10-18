@@ -59,6 +59,8 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         StackNode stackXml => BuildInputStack(stackXml, ctx),
         OneOfNode oneOfXml => BuildOneOf(oneOfXml, ctx),
         ConditionNode conditionXml => BuildCondition(conditionXml, ctx),
+        RenderNode renderXml => BuildLooseRender(renderXml, ctx),
+        LabelNode labelXml => BuildLooseLabel(labelXml, ctx),
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -82,44 +84,29 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         double inputOriginX = inputXml.X.Resolve(ctx.OriginX);
         double inputOriginY = inputXml.Y.Resolve(ctx.OriginY);
 
-        // Build a context carrying this input's effective inherited values. Renders and overlays
-        // on this input read from inputCtx; nested child inputs start fresh from ctx (no cascade).
+        // Build a context carrying this input's effective inherited values and identity. Renders,
+        // labels, and overlays on this input read from inputCtx; nested children also receive
+        // inputCtx (rather than a fresh ctx) so a *loose* Render/Label reached through
+        // Group/Stack/OneOf/Condition can inherit it exactly like a true direct child would — a
+        // nested <Input> is unaffected, since it always overrides Inherited* from its own
+        // ShowIf/Style/FontSize rather than falling through to whatever's ambient.
         BuildContext inputCtx = ctx with
         {
             InheritedShowIf = inputXml.ShowIf ?? namedStyle?.ShowIf,
             InheritedMinOpacity = inputXml.MinOpacity ?? namedStyle?.MinOpacity,
             InheritedInactiveBlurRadius = inputXml.InactiveBlurRadius ?? namedStyle?.InactiveBlurRadius,
+            InheritedFontSize = inputXml.FontSize ?? namedStyle?.FontSize,
             OriginX = inputOriginX,
-            OriginY = inputOriginY
+            OriginY = inputOriginY,
+            CurrentInputName = name
         };
 
-        var labels = new List<LabelDefinition>();
-        foreach (LabelNode labelXml in inputXml.Labels)
-        {
-            var label = new LabelDefinition(
-                X: labelXml.X.Resolve(inputOriginX),
-                Y: labelXml.Y.Resolve(inputOriginY),
-                Alignment: labelXml.Align,
-                FontSize: labelXml.FontSize ?? inputXml.FontSize ?? namedStyle?.FontSize ?? ctx.DefaultFontSize);
-            labels.Add(label);
-            _logger.Debug($"Label position: {name} at ({labelXml.X},{labelXml.Y}) align={labelXml.Align} fontSize={label.FontSize}");
-        }
+        var labels = inputXml.Labels.Select(labelXml => BuildLabelDefinition(labelXml, inputCtx)).ToList();
 
         var images = new List<InputImageDefinition>();
         foreach (RenderNode renderXml in inputXml.Renders)
         {
-            ShowIfCondition showIf = ParseShowIf(renderXml.ShowIf ?? inputCtx.InheritedShowIf);
-            images.Add(new InputImageDefinition(
-                X: renderXml.X.Resolve(inputOriginX),
-                Y: renderXml.Y.Resolve(inputOriginY),
-                ImageFile: $"{name}.png",
-                Width: renderXml.Width,
-                Height: renderXml.Height,
-                UseImageFile: renderXml.UseImage != null ? $"{renderXml.UseImage}.png" : null,
-                ShowIf: showIf,
-                MinOpacity: renderXml.MinOpacity ?? inputCtx.InheritedMinOpacity,
-                InactiveBlurRadius: renderXml.InactiveBlurRadius ?? inputCtx.InheritedInactiveBlurRadius));
-            _logger.Debug($"Render position: ({renderXml.X},{renderXml.Y}) showIf={showIf}");
+            images.Add(BuildImageDefinition(renderXml, name, inputCtx));
         }
 
         var overlays = new List<OverlayDefinition>();
@@ -130,7 +117,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         }
 
         var children = inputXml.Children
-            .Select(c => BuildNode(c, ctx with { OriginX = inputOriginX, OriginY = inputOriginY }))
+            .Select(c => BuildNode(c, inputCtx))
             .ToList();
 
         return new InputDefinition(
@@ -217,6 +204,7 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         OneOfNode => 1,
         GroupNode plainGroupXml => CountSlots(plainGroupXml.Children),
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
+        RenderNode or LabelNode => 0,
         _ => throw new InvalidOperationException($"Unknown node type: {node.GetType()}")
     };
 
@@ -294,6 +282,11 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
                 }
                 return BuildConditionElement(conditionXml, children);
             }
+            case RenderNode renderXml:
+                // Takes no slot, same as an Overlay.
+                return BuildLooseRender(renderXml, ctx);
+            case LabelNode labelXml:
+                return BuildLooseLabel(labelXml, ctx);
             default:
                 throw new InvalidOperationException($"Unknown node type: {node.GetType()}");
         }
@@ -357,6 +350,75 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     }
 
     /// <summary>
+    /// Resolves a RenderNode DTO into an InputImageDefinition, resolving coordinates against
+    /// <paramref name="ctx"/>'s origin and inheriting showIf/opacity/blur from it. Shared by
+    /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseRender"/>
+    /// — <paramref name="ownerName"/> is <c>ctx.CurrentInputName</c> in the loose case, and the
+    /// same Input's own name (redundantly, since <c>inputCtx.CurrentInputName</c> is already set
+    /// to it) in the direct-child case.
+    /// </summary>
+    private InputImageDefinition BuildImageDefinition(RenderNode renderXml, string ownerName, BuildContext ctx)
+    {
+        ShowIfCondition showIf = ParseShowIf(renderXml.ShowIf ?? ctx.InheritedShowIf);
+        var image = new InputImageDefinition(
+            X: renderXml.X.Resolve(ctx.OriginX),
+            Y: renderXml.Y.Resolve(ctx.OriginY),
+            ImageFile: $"{ownerName}.png",
+            Width: renderXml.Width,
+            Height: renderXml.Height,
+            UseImageFile: renderXml.UseImage != null ? $"{renderXml.UseImage}.png" : null,
+            ShowIf: showIf,
+            MinOpacity: renderXml.MinOpacity ?? ctx.InheritedMinOpacity,
+            InactiveBlurRadius: renderXml.InactiveBlurRadius ?? ctx.InheritedInactiveBlurRadius);
+        _logger.Debug($"Render position: ({renderXml.X},{renderXml.Y}) showIf={showIf}");
+        return image;
+    }
+
+    /// <summary>
+    /// Resolves a LabelNode DTO into a LabelDefinition. Shared by
+    /// <see cref="BuildInputDefinition"/>'s own direct-child loop and <see cref="BuildLooseLabel"/>.
+    /// </summary>
+    private LabelDefinition BuildLabelDefinition(LabelNode labelXml, BuildContext ctx)
+    {
+        var label = new LabelDefinition(
+            X: labelXml.X.Resolve(ctx.OriginX),
+            Y: labelXml.Y.Resolve(ctx.OriginY),
+            Alignment: labelXml.Align,
+            FontSize: labelXml.FontSize ?? ctx.InheritedFontSize ?? ctx.DefaultFontSize);
+        _logger.Debug($"Label position: {ctx.CurrentInputName} at ({labelXml.X},{labelXml.Y}) align={labelXml.Align} fontSize={label.FontSize}");
+        return label;
+    }
+
+    /// <summary>
+    /// Resolves a &lt;Render&gt; found somewhere other than as a direct child of its own
+    /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;Stack&gt;/
+    /// &lt;OneOf&gt;/&lt;Condition&gt;) against whichever Input is ambient in <paramref name="ctx"/>.
+    /// A missing ambient Input is a template-authoring error — logged once, here, at load time,
+    /// same as a missing required attribute elsewhere in this file — rather than silently
+    /// rendering nothing or throwing.
+    /// </summary>
+    private RenderElement BuildLooseRender(RenderNode renderXml, BuildContext ctx)
+    {
+        if (ctx.CurrentInputName is null)
+        {
+            _logger.Error("Skipping <Render>: not nested inside any <Input>, directly or ambiently");
+            return new RenderElement(new InputImageDefinition(X: 0, Y: 0, ImageFile: "", MinOpacity: 0));
+        }
+        return new RenderElement(BuildImageDefinition(renderXml, ctx.CurrentInputName, ctx));
+    }
+
+    /// <summary>See <see cref="BuildLooseRender"/> — same reasoning, for &lt;Label&gt;.</summary>
+    private LabelElement BuildLooseLabel(LabelNode labelXml, BuildContext ctx)
+    {
+        if (ctx.CurrentInputName is null)
+        {
+            _logger.Error("Skipping <Label>: not nested inside any <Input>, directly or ambiently");
+            return new LabelElement(new LabelDefinition(X: 0, Y: 0));
+        }
+        return new LabelElement(BuildLabelDefinition(labelXml, ctx));
+    }
+
+    /// <summary>
     /// Resolves an OverlayNode DTO into an OverlayDefinition. Inherited showIf/opacity/blur
     /// values flow in via ctx — input-level overlays pass inputCtx (with inherited values set);
     /// group-level overlays pass ctx (inherited values null).
@@ -401,8 +463,18 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
     /// accumulator) alongside the inherited visibility values that flow from an Input down to
     /// its own renders and overlays. The CollapseInfo dictionary is a single shared reference
     /// across all <c>with</c> clones — mutations are visible to every BuildInputStack call.
-    /// Use <c>with</c> to produce an inputCtx with the inherited values set; child inputs receive
-    /// the original ctx (no cascade across structural levels).
+    /// Use <c>with</c> to produce an inputCtx with the inherited values set; nested Inputs
+    /// receive that same inputCtx too — but since a nested Input always overrides Inherited* from
+    /// its own ShowIf/Style/FontSize (never falling through to whatever was ambient), it's a
+    /// no-op for that case, and only ever actually matters for a bare Render/Label found while
+    /// descending through Group/Stack/OneOf/Condition on the way to one — letting a loose Render
+    /// inherit exactly what a true direct child of the same Input would.
+    /// <c>CurrentInputName</c> similarly tracks whichever Input is ambient at this point in the
+    /// tree, reset whenever a new one is entered, for a bare Render/Label's default image
+    /// filename and coordinate origin — <see cref="Rendering.LayoutFilter"/> separately
+    /// rediscovers the same Input during its own per-game walk, since the resolved
+    /// <see cref="InputDefinition"/> a loose render belongs to doesn't exist as an object yet at
+    /// the point its own children are being built.
     /// </summary>
     private record BuildContext(
         ITemplateImageSource ImageSource,
@@ -412,8 +484,10 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         string? InheritedShowIf = null,
         double? InheritedMinOpacity = null,
         double? InheritedInactiveBlurRadius = null,
+        double? InheritedFontSize = null,
         double OriginX = 0,
-        double OriginY = 0);
+        double OriginY = 0,
+        string? CurrentInputName = null);
 
     /// <summary>
     /// Mutable iteration state for one stack's slot loop. SlotIndex advances as children consume
