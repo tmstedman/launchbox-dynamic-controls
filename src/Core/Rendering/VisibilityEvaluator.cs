@@ -46,8 +46,48 @@ public class VisibilityEvaluator : IVisibilityEvaluator
         InputDefinition input => AnyRenderVisible(input, ctx),
         InputGroup group => group.Children.Any(c => AnyVisible(c, ctx)),
         OneOf oneOf => oneOf.Alternatives.Any(a => AnyVisible(a, ctx)),
+        ConditionElement condition => AnyVisibleCondition(condition, ctx),
         _ => false
     };
+
+    /// <summary>
+    /// A <see cref="ConditionElement"/> is visible when its own check passes <b>and</b>, if any of
+    /// its direct children is itself a nested <see cref="ConditionElement"/> (the compound-AND
+    /// idiom — see <c>docs/layout-xml-schema.md</c>), that nested check also passes. Non-Condition
+    /// children (Input/Group/Stack/Overlay) are deliberately *not* consulted here — that's
+    /// <see cref="EvaluateCondition"/>'s whole point, to bypass <see cref="GetVisibilityFlags"/>'s
+    /// descendant fold-in. Without this recursion, a <c>OneOf</c> choosing between alternatives
+    /// would see only the outer check and could pick an alternative whose nested check then fails
+    /// once rendered, stranding that slot with no fallback — the outer check alone isn't the full
+    /// truth of whether this alternative has anything to show.
+    /// </summary>
+    private bool AnyVisibleCondition(ConditionElement condition, VisibilityContext ctx) =>
+        EvaluateCondition(condition, ctx)
+        && condition.Children.OfType<ConditionElement>().All(child => AnyVisibleCondition(child, ctx));
+
+    /// <summary>
+    /// Evaluates a <see cref="ConditionElement"/> directly against the named inputs in
+    /// <see cref="ConditionElement.Names"/> — a raw dictionary/mapping lookup by name, never
+    /// <see cref="GetVisibilityFlags"/>'s descendant fold-in. This is what lets a Condition gate
+    /// on a name that isn't (or isn't only) one of its own children's names.
+    /// </summary>
+    private bool EvaluateCondition(ConditionElement condition, VisibilityContext ctx)
+    {
+        bool Matches(string name) => condition.Match switch
+        {
+            ConditionMatch.Label => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name)),
+            ConditionMatch.Mapped => IsMapped(ctx.Mapping, name),
+            _ => throw new InvalidOperationException($"Unhandled ConditionMatch: {condition.Match}")
+        };
+
+        return condition.Mode switch
+        {
+            ConditionMode.All => condition.Names.Count > 0 && condition.Names.All(Matches),
+            ConditionMode.Any => condition.Names.Any(Matches),
+            ConditionMode.None => condition.Names.All(n => !Matches(n)),
+            _ => throw new InvalidOperationException($"Unhandled ConditionMode: {condition.Mode}")
+        };
+    }
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)
     {
@@ -108,6 +148,13 @@ public class VisibilityEvaluator : IVisibilityEvaluator
                             Walk(alt);
                             break;
                         }
+                    }
+                    break;
+                case ConditionElement condition:
+                    if (AnyVisible(condition, ctx))
+                    {
+                        foreach (ILayoutElement child in condition.Children)
+                            Walk(child);
                     }
                     break;
                 default:

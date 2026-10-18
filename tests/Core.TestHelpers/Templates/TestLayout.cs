@@ -69,6 +69,12 @@ internal class TestLayout
         return this;
     }
 
+    public TestLayout Condition(Action<ConditionBuilder> build)
+    {
+        _config.Elements.Add(BuildCondition(build));
+        return this;
+    }
+
     public LayoutDocument ToConfig() => _config;
 
     public static implicit operator LayoutDocument(TestLayout l) => l._config;
@@ -97,6 +103,13 @@ internal class TestLayout
     internal static OneOfNode BuildOneOf(Action<OneOfBuilder> build)
     {
         var b = new OneOfBuilder();
+        build(b);
+        return b.Node;
+    }
+
+    internal static ConditionNode BuildCondition(Action<ConditionBuilder> build)
+    {
+        var b = new ConditionBuilder();
         build(b);
         return b.Node;
     }
@@ -149,6 +162,7 @@ internal class InputBuilder(string name)
     public InputBuilder ChildStack(Action<StackBuilder> build) { Node.Children.Add(TestLayout.BuildStack(build)); return this; }
     public InputBuilder ChildGroup(Action<GroupBuilder> build) { Node.Children.Add(TestLayout.BuildGroup(build)); return this; }
     public InputBuilder ChildOneOf(Action<OneOfBuilder> build) { Node.Children.Add(TestLayout.BuildOneOf(build)); return this; }
+    public InputBuilder ChildCondition(Action<ConditionBuilder> build) { Node.Children.Add(TestLayout.BuildCondition(build)); return this; }
 }
 
 internal class StackBuilder
@@ -166,6 +180,7 @@ internal class StackBuilder
     public StackBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
     public StackBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public StackBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
+    public StackBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
     #pragma warning restore format
 
     public StackBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
@@ -186,6 +201,7 @@ internal class GroupBuilder
     public GroupBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
     public GroupBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public GroupBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
+    public GroupBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
     #pragma warning restore format
 
     public GroupBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
@@ -206,6 +222,25 @@ internal class OneOfBuilder
     public OneOfBuilder Group(Action<GroupBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildGroup(build));       return this; }
     public OneOfBuilder Stack(Action<StackBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildStack(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
+    public OneOfBuilder Condition(Action<ConditionBuilder> build)              { Node.Alternatives.Add(TestLayout.BuildCondition(build));   return this; }
+    #pragma warning restore format
+}
+
+internal class ConditionBuilder
+{
+    public ConditionNode Node { get; } = new();
+
+    #pragma warning disable format
+    public ConditionBuilder Any(string names)   { Node.Any = names;  return this; }
+    public ConditionBuilder All(string names)   { Node.All = names;  return this; }
+    public ConditionBuilder None(string names)  { Node.None = names; return this; }
+    public ConditionBuilder Match(string value) { Node.Match = value; return this; }
+
+    public ConditionBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
+    public ConditionBuilder Stack(Action<StackBuilder> build)                      { Node.Children.Add(TestLayout.BuildStack(build));       return this; }
+    public ConditionBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
+    public ConditionBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
+    public ConditionBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
     #pragma warning restore format
 }
 

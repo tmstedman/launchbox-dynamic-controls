@@ -13,7 +13,7 @@ Types that exist as XML deserialisation targets. They mirror the on-disk schema 
 - Mutable: `public T Property { get; set; }`
 - Collection fields use mutable `List<T>` / `Dictionary<K, V>` with default empty initialisers
 - Naming suffix — set by which file the DTO comes from:
-  - **`*Node`** — a node of the `Layout.xml` parse tree. That is the one config file with a real tree, so it takes AST vocabulary: `TemplateLoader` is the parser, `LayoutDocument` is the tree it returns, `LayoutResolver` binds it. Every element in the file is a `*Node` — `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`, `RenderNode`, `OverlayNode`, `LabelNode`, `HeadNode`, `StyleNode` — whether or not it is drawn.
+  - **`*Node`** — a node of the `Layout.xml` parse tree. That is the one config file with a real tree, so it takes AST vocabulary: `TemplateLoader` is the parser, `LayoutDocument` is the tree it returns, `LayoutResolver` binds it. Every element in the file is a `*Node` — `InputNode`, `GroupNode`, `StackNode`, `OneOfNode`, `ConditionNode`, `RenderNode`, `OverlayNode`, `LabelNode`, `HeadNode`, `StyleNode` — whether or not it is drawn.
   - **`*Config`** — a DTO for one of the settings files, which are flat or list-shaped rather than trees: `GlobalConfig`, `PlatformControllersConfig`, `ControllerConfig`, `InputMappingConfig`, `InputLabelsConfig`.
   - **`*Entry`** — a name/value leaf: `MappingEntry`, `LabelEntry`.
 

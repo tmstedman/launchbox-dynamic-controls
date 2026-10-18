@@ -665,6 +665,108 @@ public class TemplateLoaderTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("OneOf")));
     }
 
+    // --- Condition ---
+
+    [Fact]
+    public void LoadLayout_Condition_ParsesAnyAttributeAndChildren()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition any='AxisLeftStick' match='label'>
+                  <Input name='AxisLeftStick' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        ConditionNode condition = result.Elements.OfType<ConditionNode>().Single();
+        condition.Any.ShouldBe("AxisLeftStick");
+        condition.All.ShouldBeNull();
+        condition.None.ShouldBeNull();
+        condition.Match.ShouldBe("label");
+        condition.Children.OfType<InputNode>().Single().Name.ShouldBe("AxisLeftStick");
+    }
+
+    [Fact]
+    public void LoadLayout_Condition_MatchOmitted_IsNull()
+    {
+        // given a Condition with no match attribute — LayoutResolver defaults it to "label"
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition all='A B'>
+                  <Input name='A' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ConditionNode>().Single().Match.ShouldBeNull();
+    }
+
+    [Fact]
+    public void LoadLayout_Condition_MoreThanOneOfAnyAllNone_SkippedAndLogged()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition any='A' all='B'>
+                  <Input name='A' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ConditionNode>().ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("any") && s.Contains("all") && s.Contains("none")));
+    }
+
+    [Fact]
+    public void LoadLayout_Condition_NoneOfAnyAllNone_SkippedAndLogged()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition>
+                  <Input name='A' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ConditionNode>().ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("any") && s.Contains("all") && s.Contains("none")));
+    }
+
+    [Fact]
+    public void LoadLayout_Condition_InvalidChild_IsLoggedAndSkipped()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition any='A'>
+                  <Input name='A' />
+                  <Bogus />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ConditionNode>().Single().Children.Count.ShouldBe(1);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Bogus") && s.Contains("Condition")));
+    }
+
     [Fact]
     public void LoadLayout_InvalidBodyChild_IsLoggedAndSkipped()
     {
