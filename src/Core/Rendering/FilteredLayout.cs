@@ -19,12 +19,26 @@ public record FilteredLayout(
 /// collapsing stack where one or more earlier slots vacated — either an InputDefinition with
 /// all zero-opacity images, or a OneOf with no visible alternative. Flags are pre-computed
 /// here so downstream stages don't recompute them per image.
+/// <para><see cref="Images"/>/<see cref="Labels"/> are already the full set for this render
+/// pass — <see cref="Input"/>'s own static <c>InputImages</c>/<c>Labels</c> concatenated with
+/// whatever bare Render/Label elements survived a wrapping Condition/Group/OneOf this game (see
+/// <see cref="Templates.RenderElement"/>/<see cref="Templates.LabelElement"/>), merged once here
+/// by <see cref="LayoutFilter"/> so renderers never need to know two sources existed. A
+/// surrounding Condition only ever decided whether one of the latter exists at all this game —
+/// each still carries its own ShowIf governing its own opacity, exactly as if it had been a
+/// direct child.</para>
 /// </summary>
 [ExcludeFromCodeCoverage]
 public record LayoutInput(
     InputDefinition Input,
     double YOffset,
-    VisibilityFlags Flags);
+    VisibilityFlags Flags,
+    IReadOnlyList<InputImageDefinition>? Images = null,
+    IReadOnlyList<LabelDefinition>? Labels = null)
+{
+    public IReadOnlyList<InputImageDefinition> Images { get; init; } = Images ?? [];
+    public IReadOnlyList<LabelDefinition> Labels { get; init; } = Labels ?? [];
+}
 
 /// <summary>
 /// A group-level overlay selected for rendering, paired with the group's aggregate visibility

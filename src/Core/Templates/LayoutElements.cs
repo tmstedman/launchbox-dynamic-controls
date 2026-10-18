@@ -92,6 +92,29 @@ public enum ConditionMatch
 }
 
 /// <summary>
+/// A single image render that lives outside its owning Input's own direct children — e.g. nested
+/// inside a &lt;Condition&gt; wrapping a &lt;Group&gt;/&lt;Stack&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
+/// rather than directly inside an &lt;Input&gt;. Carries no owner reference of its own: the owning
+/// InputDefinition can't be baked in at resolve time (it's still being constructed while its own
+/// children, including this one, are being built), so <see cref="Rendering.LayoutFilter"/>
+/// discovers the owner itself during its own tree walk, the same way <see cref="Image"/>'s
+/// coordinates were resolved against an ambient origin at resolve time.
+/// </summary>
+/// <param name="Image">The resolved image, already positioned against whichever Input's origin
+/// was ambient when this render was parsed.</param>
+[ExcludeFromCodeCoverage]
+public record RenderElement(InputImageDefinition Image) : ILayoutElement;
+
+/// <summary>
+/// A single label render that lives outside its owning Input's own direct children. See
+/// <see cref="RenderElement"/> for why it carries no owner reference of its own.
+/// </summary>
+/// <param name="Label">The resolved label, already positioned against whichever Input's origin
+/// was ambient when this label was parsed.</param>
+[ExcludeFromCodeCoverage]
+public record LabelElement(LabelDefinition Label) : ILayoutElement;
+
+/// <summary>
 /// Fully resolved layout data for a single generic input within a Template.
 /// Built by TemplateService from InputNode; all positions are resolved at build time.
 /// Image paths are deferred to render time via InputImageResolver.
@@ -101,9 +124,17 @@ public enum ConditionMatch
 /// identity, rather than as fields on this type.
 /// </summary>
 /// <param name="Name">Generic input name (e.g. "ButtonA").</param>
-/// <param name="InputImages">Positions where the button image is rendered.</param>
+/// <param name="InputImages">Positions where the button image is rendered — this Input's own
+/// static set only, exactly as declared in Layout.xml, identical for every game that uses this
+/// template. Once a render pass is underway you have a <see cref="Rendering.LayoutInput"/>, not
+/// a bare InputDefinition — prefer its own <see cref="Rendering.LayoutInput.Images"/> there
+/// instead, which additionally includes any loose Condition-gated renders that survived for the
+/// current game (see <see cref="RenderElement"/>); reading this field directly at that point
+/// would silently miss those.</param>
 /// <param name="Overlays">Overlay images associated with this input (e.g. dotted lines).</param>
-/// <param name="Labels">Positions where the label text is rendered.</param>
+/// <param name="Labels">Positions where the label text is rendered — same caveat as
+/// <paramref name="InputImages"/>: prefer <see cref="Rendering.LayoutInput.Labels"/> once you
+/// have one.</param>
 /// <param name="Children">Nested layout elements — either InputDefinitions or InputGroups in
 /// document order. Structural nesting is how parent/child relationships are expressed: a parent
 /// Input's renders fan out to every InputDefinition in its structural descendant set

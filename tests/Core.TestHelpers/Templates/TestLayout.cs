@@ -113,6 +113,20 @@ internal class TestLayout
         build(b);
         return b.Node;
     }
+
+    internal static RenderNode BuildRender(Action<RenderBuilder>? build)
+    {
+        var b = new RenderBuilder();
+        build?.Invoke(b);
+        return b.Node;
+    }
+
+    internal static LabelNode BuildLabel(Action<LabelBuilder>? build)
+    {
+        var b = new LabelBuilder();
+        build?.Invoke(b);
+        return b.Node;
+    }
 }
 
 internal class InputBuilder(string name)
@@ -181,6 +195,8 @@ internal class StackBuilder
     public StackBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public StackBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public StackBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
+    public StackBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
+    public StackBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
     #pragma warning restore format
 
     public StackBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
@@ -202,6 +218,8 @@ internal class GroupBuilder
     public GroupBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public GroupBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public GroupBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
+    public GroupBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
+    public GroupBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
     #pragma warning restore format
 
     public GroupBuilder Overlay(string src, Action<OverlayBuilder>? build = null)
@@ -223,6 +241,8 @@ internal class OneOfBuilder
     public OneOfBuilder Stack(Action<StackBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildStack(build));       return this; }
     public OneOfBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Alternatives.Add(TestLayout.BuildOneOf(build));       return this; }
     public OneOfBuilder Condition(Action<ConditionBuilder> build)              { Node.Alternatives.Add(TestLayout.BuildCondition(build));   return this; }
+    public OneOfBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Alternatives.Add(TestLayout.BuildRender(build));       return this; }
+    public OneOfBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Alternatives.Add(TestLayout.BuildLabel(build));        return this; }
     #pragma warning restore format
 }
 
@@ -241,6 +261,8 @@ internal class ConditionBuilder
     public ConditionBuilder Group(Action<GroupBuilder> build)                      { Node.Children.Add(TestLayout.BuildGroup(build));       return this; }
     public ConditionBuilder OneOf(Action<OneOfBuilder> build)                      { Node.Children.Add(TestLayout.BuildOneOf(build));       return this; }
     public ConditionBuilder Condition(Action<ConditionBuilder> build)              { Node.Children.Add(TestLayout.BuildCondition(build));   return this; }
+    public ConditionBuilder LooseRender(Action<RenderBuilder>? build = null)       { Node.Children.Add(TestLayout.BuildRender(build));      return this; }
+    public ConditionBuilder LooseLabel(Action<LabelBuilder>? build = null)        { Node.Children.Add(TestLayout.BuildLabel(build));       return this; }
     #pragma warning restore format
 }
 

@@ -61,6 +61,9 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                     PopulateDescendants(child, descendants);
                 }
                 break;
+            case RenderElement or LabelElement:
+                // Leaf, not an InputDefinition -- nothing to register or descend into.
+                break;
             case InputDefinition def:
                 var defDescendants = new List<InputDefinition>();
                 foreach (ILayoutElement child in def.Children)
@@ -112,6 +115,9 @@ public class InputDescendantsBuilder : IInputDescendantsBuilder
                 {
                     CollectDescendants(child, output);
                 }
+                break;
+            case RenderElement or LabelElement:
+                // Leaf, not an InputDefinition -- doesn't count as a descendant.
                 break;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {element.GetType().Name}");

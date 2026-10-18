@@ -157,6 +157,10 @@ public class VisibilityEvaluator : IVisibilityEvaluator
                             Walk(child);
                     }
                     break;
+                case RenderElement or LabelElement:
+                    // Leaf, not an InputDefinition -- contributes no flags of its own; its
+                    // owning Input's flags are already counted when Walk reaches it structurally.
+                    break;
                 default:
                     throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {node.GetType().Name}");
             }

@@ -143,6 +143,7 @@ The internal flow is two passes:
 - `InputGroup` with `AlwaysInclude=false` (a plain Group) → rendered only when any descendant has a visible render; otherwise the whole group's inputs are dropped from `inputsToRender`
 - `OneOf` → only the first alternative with a visible render is rendered; the rest are dropped
 - `ConditionElement` → rendered only when its explicit `all`/`any`/`none` check against named inputs' label/mapping state passes — a direct dictionary lookup, not a fold-in over its own descendants, so it can gate on a name its children never render themselves
+- `RenderElement`/`LabelElement` (a loose `<Render>`/`<Label>` found somewhere other than as a direct child of its own `<Input>`, most usefully under a `<Condition>`) → since it can only be reached by having already recursed through every wrapping `Condition`/`Group`/`OneOf` above it, no further check happens here; it's added to whichever `InputDefinition` was ambient when `LayoutFilter` reached it (tracked during its own walk — see `Templates/LayoutResolver`'s matching `BuildContext.CurrentInputName`, used to resolve the same ambient identity at template-load time, one layer earlier) and rendered on equal footing with that Input's own static `InputImages`/`Labels`
 
 `showIf` modes: `label` (show when this input has a label), `mapping` (show when a platform button drives it), `auto` (label-mode if the game contributed its own labels, else mapping-mode), or omitted (always).
 

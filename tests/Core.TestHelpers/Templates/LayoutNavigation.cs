@@ -44,6 +44,15 @@ public static class LayoutNavigation
     public static ConditionElement FirstCondition(this IEnumerable<ILayoutElement> elements) =>
         elements.OfType<ConditionElement>().First();
 
+    /// <summary>Returns the first bare <see cref="RenderElement"/> in the sequence (one found
+    /// somewhere other than as a direct child of its own Input).</summary>
+    public static RenderElement FirstRenderElement(this IEnumerable<ILayoutElement> elements) =>
+        elements.OfType<RenderElement>().First();
+
+    /// <summary>Returns the first bare <see cref="LabelElement"/> in the sequence.</summary>
+    public static LabelElement FirstLabelElement(this IEnumerable<ILayoutElement> elements) =>
+        elements.OfType<LabelElement>().First();
+
     /// <summary>Depth-first walk over a layout element tree, yielding every element and recursing
     /// through <see cref="InputGroup.Children"/> and <see cref="ConditionElement.Children"/>.
     /// Useful for assertions that need to reach inputs nested inside transparent Groups (e.g. a

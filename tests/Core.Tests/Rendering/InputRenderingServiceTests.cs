@@ -30,7 +30,7 @@ public class InputRenderingServiceTests
 
         // Default to empty enumerables so tests that only care about what gets called don't have
         // to stub explicit returns to keep the pipeline from null-deref-ing on .Select().
-        _labelRenderer.Render(Arg.Any<InputDefinition>(), Arg.Any<string?>())
+        _labelRenderer.Render(Arg.Any<LayoutInput>(), Arg.Any<string?>())
             .Returns(_ => []);
         _imageRenderer.Render(Arg.Any<LayoutInput>(), Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), Arg.Any<bool>())
             .Returns(_ => []);
@@ -76,8 +76,8 @@ public class InputRenderingServiceTests
         var labelB = new RenderedLabel(0, 0, "B-text", "Left", 12);
         _imageRenderer.Render(liA, Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), Arg.Any<bool>()).Returns([imageA]);
         _imageRenderer.Render(liB, Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), Arg.Any<bool>()).Returns([imageB]);
-        _labelRenderer.Render(inputA, Arg.Any<string?>()).Returns([labelA]);
-        _labelRenderer.Render(inputB, Arg.Any<string?>()).Returns([labelB]);
+        _labelRenderer.Render(liA, Arg.Any<string?>()).Returns([labelA]);
+        _labelRenderer.Render(liB, Arg.Any<string?>()).Returns([labelB]);
 
         // when the service renders
         var result = _underTest.Render(TemplateOf(), EmptyMapping(), LabelsOf());
@@ -101,8 +101,8 @@ public class InputRenderingServiceTests
         _underTest.Render(TemplateOf(), EmptyMapping(), LabelsOf(entries: ("ButtonA", "Jump")));
 
         // then the label renderer receives the matched text for A and null for B
-        _labelRenderer.Received(1).Render(inputA, "Jump");
-        _labelRenderer.Received(1).Render(inputB, null);
+        _labelRenderer.Received(1).Render(liA, "Jump");
+        _labelRenderer.Received(1).Render(liB, null);
     }
 
     [Fact]
@@ -117,7 +117,7 @@ public class InputRenderingServiceTests
 
         var label = new RenderedLabel(Left: 0, Top: 100, Text: "A", Alignment: "Left", FontSize: 12);
         var image = new RenderedImage(Source: "a.png", Top: 50); // pretend image renderer already baked YOffset
-        _labelRenderer.Render(input, Arg.Any<string?>()).Returns([label]);
+        _labelRenderer.Render(li, Arg.Any<string?>()).Returns([label]);
         _imageRenderer.Render(li, Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), Arg.Any<bool>()).Returns([image]);
 
         // when the service renders
