@@ -45,11 +45,29 @@ public interface IVisibilityEvaluator
 
 public class VisibilityEvaluator : IVisibilityEvaluator
 {
+    /// <summary>
+    /// Whether <paramref name="element"/> has anything to show — the question a
+    /// <see cref="OneOf"/> asks of each alternative before choosing one.
+    ///
+    /// <para>A <see cref="Container"/> answers yes unconditionally. It states no condition and
+    /// always renders once reached, so there is nothing for it to answer no to, and a OneOf can
+    /// use a bare one as a trailing default: try the conditional alternatives, otherwise draw
+    /// this. Anything after such an alternative is unreachable, which
+    /// <c>LayoutResolver.BuildOneOf</c> reports at load time.</para>
+    ///
+    /// <para>Deliberately unconditional rather than derived from its children. Alternatives that
+    /// hold the same inputs and differ only in <em>when</em> they apply — a merged directional
+    /// label against four separate ones — cannot be told apart by what they contain, so a
+    /// content-based answer would make the first of them win every time. Distinguishing those is
+    /// exactly what <see cref="ConditionElement"/> is for, and inferring it from descendants is
+    /// the behaviour <c>&lt;Group&gt;</c> had and Container exists to drop.</para>
+    /// </summary>
     public bool AnyVisible(ILayoutElement element, VisibilityContext ctx) => element switch
     {
         InputDefinition input => AnyRenderVisible(input, ctx),
         OneOf oneOf => oneOf.Alternatives.Any(a => AnyVisible(a, ctx)),
         ConditionElement condition => AnyVisibleCondition(condition, ctx),
+        Container => true,
         _ => false
     };
 
