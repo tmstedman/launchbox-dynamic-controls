@@ -241,10 +241,12 @@ public record InputNode : ILayoutNode
 
 /// <summary>
 /// Raw DTO for a Render child element in Layout.xml, specifying where a button image is drawn.
-/// Nested within InputNode; consumed by TemplateService,
-/// which maps it to an InputImageDefinition.
+/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/StackNode/
+/// OneOfNode/ConditionNode, attaching to whichever Input is ambient at that point in the tree
+/// (see LayoutResolver.BuildContext.CurrentInputName). Consumed by TemplateService, which maps it
+/// to an InputImageDefinition, wrapped in a RenderElement for the loose case.
 /// </summary>
-public record RenderNode
+public record RenderNode : ILayoutNode
 {
     /// <summary>Left position. Absolute or relative (+ / - prefix) to the enclosing container's slot origin. Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);
@@ -311,10 +313,11 @@ public record OverlayNode
 
 /// <summary>
 /// Raw DTO for a Label child element in Layout.xml, specifying label text position, alignment, and font size.
-/// Nested within InputNode; consumed by TemplateService,
-/// which maps it to a LabelDefinition.
+/// Usually nested directly within InputNode; may also appear "loose" inside a GroupNode/StackNode/
+/// OneOfNode/ConditionNode — see the equivalent note on <see cref="RenderNode"/>. Consumed by
+/// TemplateService, which maps it to a LabelDefinition, wrapped in a LabelElement for the loose case.
 /// </summary>
-public record LabelNode
+public record LabelNode : ILayoutNode
 {
     /// <summary>Left position. Absolute or relative (+ / - prefix) to the enclosing container's slot origin. Defaults to +0.</summary>
     public Coordinate X { get; set; } = Coordinate.Relative(0);

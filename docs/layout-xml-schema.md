@@ -130,7 +130,7 @@ Two distinct uses, distinguished by the presence of `name`:
 
 ### `<Body>` — display layout
 
-The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, and `<Condition>`, in document order.
+The container for everything the renderer cares about. Direct children are `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Render>`/`<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose Render/Label](#loose-renderlabel)).
 
 ### `<Input>` — a generic input
 
@@ -163,6 +163,23 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 **Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's renders fan out to the child's renders for image fallback (a child input that can't find its own image uses the parent's). A common pattern is the four-direction nested inputs under an `AxisLeftStick` — `AxisLeftStickUp`, `AxisLeftStickDown`, etc.
 
 **Strict-self render position**: A duplicate top-level `<Input>` with no nested children expresses "render the parent input's image at this position, independent of its descendants" — used by some templates to put an extra render in a different slot.
+
+### Loose `<Render>`/`<Label>`
+
+A `<Render>` or `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can also appear inside a `<Group>`, `<Stack>`, `<OneOf>`, or `<Condition>` that's itself somewhere inside that Input, most usefully nested inside a `<Condition>` to gate a single render or label independently of its Input's other renders:
+
+```xml
+<Input name="ButtonDpad">
+    <Render height="135" width="135" />
+    <Condition any="SomeOtherInput" match="label">
+        <Render height="34" width="34" />
+    </Condition>
+</Input>
+```
+
+The loose `<Render>`/`<Label>` attaches to whichever `<Input>` is ambient at that point in the tree — here, `ButtonDpad`, even though it's several levels of `<Condition>` away — for its default image filename and its coordinate origin, exactly as if it had been written as a direct child. Entering a *nested* `<Input>` resets this ambient identity to the nested one; entering `<Group>`/`<Stack>`/`<OneOf>`/`<Condition>` does not, since those are transparent wrappers rather than a new Input's own boundary.
+
+Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, loose renders included, before render-specific concerns (its own `showIf`, opacity, image-file resolution) ever come into play. A loose `<Render>`/`<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered.
 
 ### `<Render>` — image render position
 
@@ -241,7 +258,7 @@ A wrapper around a cluster of related inputs. Two purposes:
 </Group>
 ```
 
-No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
+No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) attaching to whichever `<Input>` is ambient wherever the Group itself sits.
 
 A Group inside a `<Stack>` is *transparent* to slot counting — each Input in the Group consumes its own stack slot.
 
@@ -282,7 +299,7 @@ A Stack with only one slot renders identically under every `vAlign` value, since
 
 An unrecognized `vAlign` value logs an error and falls back to `top`.
 
-**Children** can be `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order.
+**Children** can be `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>`, `<Overlay>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)).
 
 **How children occupy slots** — each child takes one position in the vertical list, except:
 
@@ -294,6 +311,7 @@ An unrecognized `vAlign` value logs an error and falls back to `top`.
 | `<OneOf>` | Takes one slot; all its alternatives share that same position |
 | `<Condition>` | Transparent — like `<Group>`, its children each take their own slot |
 | `<Overlay>` | Takes no slot — positioned at its own coordinates regardless |
+| `<Render>` / `<Label>` (loose) | Takes no slot, same as `<Overlay>` |
 
 **Collapse** (`collapse="true"`) removes the gap left by hidden children. When a child's renders are all invisible, it vacates its slot and everything below shifts up by `gap`. Without collapse, slots are always fixed — a hidden child leaves a faded image or blank space.
 
@@ -314,12 +332,13 @@ A container where only the first alternative whose visibility check passes is re
 </OneOf>
 ```
 
-No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant).
+No attributes. Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in document order (the first-match-wins ordering is significant). A bare `<Render>`/`<Label>` parses here too (see [Loose Render/Label](#loose-renderlabel)), but is a degenerate alternative — it never counts as visible on its own (see below), so it's only useful for the loose render/label it carries, never for "winning" the `<OneOf>`.
 
 **Visibility check per alternative**:
 - `<Input>` — "any-render-visible" (at least one of the input's renders passes its `showIf`)
 - `<Group>` — "any-member-visible" (recursively, the same check on at least one descendant)
 - `<Condition>` — its own `all`/`any`/`none` check against its named inputs (see below), ignoring what its children render
+- `<Render>`/`<Label>` (loose) — always false; it isn't a visibility-bearing alternative in its own right
 
 If no alternative passes, the OneOf renders nothing — all alternatives are dropped.
 
@@ -346,7 +365,7 @@ A container whose children render only when an explicit `all`/`any`/`none` check
 
 Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
 
-No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in any order. Unlike `<Group>`/`<Stack>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way those two do, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` (or `<Stack>`) inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
+No positional attributes — a `<Condition>` is transparent for coordinates and slot counting, exactly like `<Group>` (see the tables above). Children: `<Input>`, `<Group>`, `<Stack>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) — the most common reason to nest one of these directly in a `<Condition>` rather than inside a wrapping `<Input>`. Unlike `<Group>`/`<Stack>`, a `<Condition>` has **no** `Overlays` list of its own — it has no dedicated parsing branch for `<Overlay>` the way those two do, so a bare `<Overlay>` placed directly inside one is logged as an invalid element and dropped. To attach a shared overlay to content a `<Condition>` gates, nest a `<Group>` (or `<Stack>`) inside the `<Condition>` and put the `<Overlay>` there instead — the pattern every shipped template already uses.
 
 **Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
 
@@ -372,6 +391,7 @@ The parser emits errors to the configured `ILogger` for:
 - `<Render showIf="X">` where `X` isn't a known mode
 - `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
 - `<Condition match="X">` where `X` isn't `label` or `mapping` (falls back to `label`)
+- A loose `<Render>`/`<Label>` (see [Loose Render/Label](#loose-renderlabel)) with no enclosing `<Input>` at all, ambient or otherwise
 
 Errors don't abort the load — the bad element is skipped (or, for coordinate problems, replaced with `+0`), the rest of the template parses normally. Check the log file after a problem template to see what was dropped.
 
