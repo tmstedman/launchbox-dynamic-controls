@@ -4,9 +4,9 @@ using DynamicControls.Templates;
 namespace DynamicControls.Composition;
 
 /// <summary>
-/// Wires the template subsystem: builds the loader, image resolver, configurer, and descendants
-/// index builder into a <see cref="TemplateService"/>. Used by the root composer in production
-/// and by service-level functional tests against a fixture tree.
+/// Wires the template subsystem: builds the loader, image resolver, and configurer into a
+/// <see cref="TemplateService"/>. Used by the root composer in production and by service-level
+/// functional tests against a fixture tree.
 /// </summary>
 [ExcludeFromCodeCoverage]
 internal static class TemplateFactory
@@ -28,8 +28,7 @@ internal static class TemplateFactory
 
         var templateLoader = new TemplateLoader(logger, fs, rootDir);
         imageResolver ??= new TemplateImageResolver(logger, fs, new ImageHeader(), rootDir);
-        var descendantsBuilder = new InputDescendantsBuilder();
-        var templateConfigurer = new LayoutResolver(logger, descendantsBuilder);
+        var templateConfigurer = new LayoutResolver(logger);
 
         return new TemplateService(
             templateLoader,

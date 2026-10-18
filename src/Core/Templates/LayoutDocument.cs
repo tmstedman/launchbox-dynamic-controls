@@ -293,7 +293,7 @@ public record InputNode : ILayoutNode, IStyledNode
     /// (nesting another &lt;Input&gt; directly is unusual — see the style-cascade fallthrough
     /// this still enables — and the shipped template no longer does it at all). A whole
     /// control's own <c>showIf="auto"</c> fan-out does <b>not</b> come from here any more — see
-    /// <see cref="DynamicControls.InputMapping.WholeInputs.PartsOf"/>.</summary>
+    /// <see cref="DynamicControls.WholeInputs.PartsOf"/>.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
 }
 

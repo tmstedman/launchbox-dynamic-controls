@@ -66,7 +66,7 @@ The functions that turn raw configs into resolved domain types.
 - Compute derived indexes during the build, not on-demand after
 - Inject collaborator builders via DI rather than calling static helpers — keeps tests targetable
 
-Example: `LayoutResolver.Resolve` builds a `List<ILayoutElement>` locally, computes the descendants index via an injected `IInputDescendantsBuilder`, and returns one `ResolvedLayout` with everything settled.
+Example: `LayoutResolver.Resolve` builds a `List<ILayoutElement>` locally, accumulates the collapse-info map through a shared dictionary threaded by `BuildContext`, and returns one `ResolvedLayout` with everything settled.
 
 > **Rule**: builders work locally with mutable collections, hand back one immutable result. No "rebuild" / "sync" pattern.
 

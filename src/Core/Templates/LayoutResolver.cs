@@ -3,27 +3,25 @@ namespace DynamicControls.Templates;
 /// <summary>
 /// Converts a <see cref="LayoutDocument"/> into a <see cref="ResolvedLayout"/>: resolves style
 /// defaults, builds the element tree with absolute coordinates and resolved styles, and
-/// precomputes the <c>InputDescendants</c> and <c>CollapseInfo</c> lookup tables. Pure
-/// transformation — no file I/O, no caching.
+/// precomputes the <c>CollapseInfo</c> lookup table. Pure transformation — no file I/O, no
+/// caching.
 /// </summary>
 public interface ILayoutResolver
 {
     /// <summary>
     /// Resolves style defaults from <paramref name="config"/>, builds the element tree, and
-    /// precomputes both the descendants index and the collapse-info map from the resolved tree.
+    /// precomputes the collapse-info map from the resolved tree.
     /// </summary>
     ResolvedLayout Resolve(LayoutDocument config, ITemplateImageSource imageSource);
 }
 
 /// <summary>
-/// Production implementation: delegates the descendants pre-pass to
-/// <see cref="IInputDescendantsBuilder"/>; collapse-info accumulation runs inline through a
-/// shared dictionary threaded by <c>BuildContext</c>.
+/// Production implementation: collapse-info accumulation runs inline through a shared
+/// dictionary threaded by <c>BuildContext</c>.
 /// </summary>
-public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendantsBuilder) : ILayoutResolver
+public class LayoutResolver(ILogger logger) : ILayoutResolver
 {
     private readonly ILogger _logger = logger;
-    private readonly IInputDescendantsBuilder _descendantsBuilder = descendantsBuilder;
 
     /// <inheritdoc />
     public ResolvedLayout Resolve(
@@ -45,7 +43,6 @@ public class LayoutResolver(ILogger logger, IInputDescendantsBuilder descendants
         var elements = config.Elements.Select(e => BuildNode(e, ctx)).ToList();
         return new ResolvedLayout(
             Elements: elements,
-            InputDescendants: _descendantsBuilder.Build(elements),
             CollapseInfo: collapseInfo,
             DefaultFontSize: defaultFontSize,
             DefaultMinOpacity: defaultMinOpacity,

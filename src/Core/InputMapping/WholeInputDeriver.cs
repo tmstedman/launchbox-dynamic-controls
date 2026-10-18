@@ -1,3 +1,5 @@
+using DynamicControls;
+
 namespace DynamicControls.InputMapping;
 
 /// <summary>
