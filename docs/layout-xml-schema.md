@@ -181,6 +181,24 @@ The loose `<Render>`/`<Label>` attaches to whichever `<Input>` is ambient at tha
 
 Whether it renders at all is decided once, structurally, the same way a `<Group>`'s members or a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, loose renders included, before render-specific concerns (its own `showIf`, opacity, image-file resolution) ever come into play. A loose `<Render>`/`<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Group>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered.
 
+**A loose `<Label>` centers itself against an enclosing `<Stack>`.** Placed directly inside a `<Stack>` (or reached through a `<Group>`/`<OneOf>`/`<Condition>` nested in it), its `y` resolves against that Stack's own *declared* position — whatever slot `vAlign` names — rather than the shifted per-slot origin the Stack's own members use:
+
+```xml
+<Input name="AxisLeftStick">
+    <Condition any="AxisLeftStick" match="label">
+        <Stack x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+            <Input name="AxisLeftStickUp" style="small-label-vacate"><Render height="34" width="34" /></Input>
+            <Input name="AxisLeftStickLeft" style="small-label-vacate"><Render height="34" width="34" /></Input>
+            <Input name="AxisLeftStickRight" style="small-label-vacate"><Render height="34" width="34" /></Input>
+            <Input name="AxisLeftStickDown" style="small-label-vacate"><Render height="34" width="34" /></Input>
+            <Label x="-24" align="right" />
+        </Stack>
+    </Condition>
+</Input>
+```
+
+With `vAlign="center"`, this lands the label "half-way up the stack" — and, crucially, it stays there regardless of how many of the four directions are actually present this game: a collapsing Stack's declared position already tracks the visual center of whatever's left after collapse (see [`<Stack>`](#stack--positioned-cluster)), so the label needs no per-game recalculation of its own — it's resolved once, at template load, and rides the same guarantee. `vAlign="top"`/`"bottom"` instead put the label at that end. A direct child `<Label>` on one of the Stack's own *members* is unaffected by any of this — it keeps resolving against that member's own slot position, exactly as if the Stack weren't there, since a nested `<Input>` (a nested Stack too) resets the ambient anchor to its own.
+
 ### `<Render>` — image render position
 
 Where to draw an input image. Multiple `<Render>` children produce multiple visual copies of the input.
@@ -294,6 +312,8 @@ Unlike `<Group>`, a Stack is always included in the layout — it never hides it
 The slot count used for this is the template's fixed slot count (the same one in the table below), computed once when the template loads and cached from then on — not how many children happen to be visible at render time. On its own that's exactly right, since without `collapse` every slot always renders (just possibly faded), so the fixed count and the actual count never differ.
 
 Combined with `collapse`, they can differ — a vacated slot means fewer are actually left than `vAlign` was anchored against. Rather than drift toward `top` as slots vacate, the anchor is corrected at render time: the same `vAlign` shift is re-derived against however many slots collapse has actually left, and the difference from the fixed-count shift is folded uniformly into every remaining child's position, on top of collapse's own per-vacancy shift. The net effect: `bottom`/`center` stay pinned to the declared `y` no matter how many children are actually showing.
+
+This is exactly what makes a loose `<Label>` placed directly in the Stack useful for a single label shared across a collapsing cluster — see [Loose Render/Label](#loose-renderlabel) — its position is the declared `(x, y)` itself (never shifted), so it inherits this same no-drift guarantee for free, with no per-game recalculation of its own.
 
 A Stack with only one slot renders identically under every `vAlign` value, since there's nothing to distribute around.
 
