@@ -12,16 +12,14 @@ namespace DynamicControls.Templates;
 public interface ILayoutElement;
 
 /// <summary>
-/// A wrapper around a cluster of related inputs (i.e. a &lt;Group&gt; or &lt;Stack&gt;). 
-/// When <paramref name="AlwaysInclude"/> is false (a plain &lt;Group&gt;), the entire 
-/// group is included only when any contained input has at least one render visible under
-/// its own ShowIf — otherwise every member is excluded from inputsToRender (semantic exclusion,
-/// not just visual fading). When true (a &lt;Stack&gt;), the group is always included; children 
-/// handle their own visibility.
+/// A wrapper around a cluster of related inputs (i.e. a &lt;Group&gt;), positioned and gated on
+/// visibility. Included at render time only when any contained input has at least one render
+/// visible under its own ShowIf — otherwise every member (and any Overlay this group carries) is
+/// excluded from rendering entirely (semantic exclusion, not just visual fading). Members still
+/// handle their own individual visibility via showIf when the group itself is included; when
+/// nested inside another group, an InputGroup always occupies one slot as an opaque block (see
+/// <see cref="Templates.CollapseGroupBuilder"/>) — its own inner traversal is independent.
 /// </summary>
-/// <param name="AlwaysInclude">Set for Stack elements; false for plain Group elements. When
-/// true the group renders unconditionally; children's own showIf still controls their
-/// individual opacity.</param>
 /// <param name="Children">Nested layout children — InputDefinition, InputGroup, or OneOf in
 /// document order.</param>
 /// <param name="Overlays">Overlays declared at the group level. Rendered once when the group is
@@ -30,7 +28,6 @@ public interface ILayoutElement;
 /// member.</param>
 [ExcludeFromCodeCoverage]
 public record InputGroup(
-    bool AlwaysInclude,
     IReadOnlyList<ILayoutElement> Children,
     IReadOnlyList<OverlayDefinition> Overlays) : ILayoutElement;
 
