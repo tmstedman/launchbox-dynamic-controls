@@ -7,6 +7,9 @@
         <Style name="small-label-vacate" showIf="label" inactiveBlurRadius="6" fontSize="22" />
         <Style name="input-label" showIf="label" minOpacity="0.3" inactiveBlurRadius="8" />
         <Style name="show-if-label" showIf="label" />
+        <Whole name="ButtonDpad" parts="ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight" />
+        <Whole name="AxisLeftStick" parts="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" />
+        <Whole name="AxisRightStick" parts="AxisRightStickUp AxisRightStickDown AxisRightStickLeft AxisRightStickRight" />
     </Head>
     <Body>
         <Input name="ButtonGuide" style="auto-blur" x="771" y="262" height="68" width="68" />
