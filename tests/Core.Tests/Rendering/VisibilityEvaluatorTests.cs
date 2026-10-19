@@ -654,4 +654,96 @@ public class VisibilityEvaluatorTests
         // then "all" means all — one visible image keeps the slot occupied
         result.ShouldBeFalse();
     }
+
+    // ---- Condition: match="agree" ----
+    //
+    // Counting cannot separate four directions each saying something different from four all
+    // saying the same thing: both leave every name labelled, and they are drawn completely
+    // differently -- four labels of their own against one merged one. "agree" says the second
+    // directly, and the "rest carry none" clause is what stops a direction with genuinely
+    // different text being smoothed into a shared label it never had.
+
+    private static ConditionElement Agree(int atLeast, params string[] names) =>
+        new(ConditionMode.AtLeast, names, ConditionMatch.Agree, [], AtLeast: atLeast);
+
+    private static VisibilityContext Labelled(params (string Name, string Text)[] labels) =>
+        Ctx(labelText: labels.ToDictionary(l => l.Name, l => l.Text));
+
+    [Fact]
+    public void Agree_EveryNameCarriesTheSameText_Passes()
+    {
+        VisibilityContext ctx = Labelled(
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Move"), ("AxisLeftStickRight", "Move"));
+
+        _underTest.AnyVisible(Agree(0, "AxisLeftStick"), ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Agree_NamesCarryDifferentText_Fails()
+    {
+        // Four labels, same as the agreeing case -- only the text tells them apart.
+        VisibilityContext ctx = Labelled(
+            ("AxisLeftStickUp", "Up"), ("AxisLeftStickDown", "Down"),
+            ("AxisLeftStickLeft", "Left"), ("AxisLeftStickRight", "Right"));
+
+        _underTest.AnyVisible(Agree(0, "AxisLeftStick"), ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Agree_NoAtLeast_RequiresEveryPart()
+    {
+        // The composite expands to its parts and the threshold defaults to all of them, so three
+        // agreeing directions are not enough for the single-glyph alternative.
+        VisibilityContext ctx = Labelled(
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Move"));
+
+        _underTest.AnyVisible(Agree(0, "AxisLeftStick"), ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Agree_AtLeastTwo_EnoughAgreeAndTheRestAreBlank_Passes()
+    {
+        VisibilityContext ctx = Labelled(
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"));
+
+        _underTest.AnyVisible(Agree(2, "AxisLeftStick"), ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Agree_AtLeastTwo_EnoughAgreeButAnotherDisagrees_Fails()
+    {
+        // The "rest carry none" clause: Left has its own text, so there is no shared label here
+        // and merging would paper over a real per-direction remap.
+        VisibilityContext ctx = Labelled(
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Fire"));
+
+        _underTest.AnyVisible(Agree(2, "AxisLeftStick"), ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Agree_FewerCarryTextThanRequired_Fails()
+    {
+        VisibilityContext ctx = Labelled(("AxisLeftStickUp", "Move"));
+
+        _underTest.AnyVisible(Agree(2, "AxisLeftStick"), ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Agree_NoneCarryAnyText_Fails()
+    {
+        _underTest.AnyVisible(Agree(2, "AxisLeftStick"), Ctx()).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Agree_OnNamesTheTemplateDoesNotCallAComposite_ChecksThoseNamesThemselves()
+    {
+        // A name with no <Whole> declaration stands for itself, so this asks about the two
+        // buttons named and nothing else.
+        VisibilityContext ctx = Labelled(("ButtonA", "Kick"), ("ButtonB", "Kick"));
+
+        _underTest.AnyVisible(Agree(0, "ButtonA", "ButtonB"), ctx).ShouldBeTrue();
+    }
 }

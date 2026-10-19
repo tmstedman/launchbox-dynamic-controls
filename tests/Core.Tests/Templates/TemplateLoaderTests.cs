@@ -755,6 +755,27 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_Condition_AtLeastAlongsideNone_SkippedAndLogged()
+    {
+        // "none of these, but at least two of them" is not a thing anyone means, so it is
+        // refused rather than silently resolved as one or the other.
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Condition none='A B' atLeast='2'>
+                  <Input name='A' />
+                </Condition>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ConditionNode>().ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("atLeast") && s.Contains("none")));
+    }
+
+    [Fact]
     public void LoadLayout_Condition_MoreThanOneOfAnyAllNone_SkippedAndLogged()
     {
         StubLayoutXml("""
