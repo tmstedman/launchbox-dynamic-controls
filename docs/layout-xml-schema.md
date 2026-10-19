@@ -147,12 +147,13 @@ Declares that one input name stands for several at once — a stick, a D-pad, a 
 
 A `<Whole>` missing either attribute, or naming a single part, is logged and skipped. A repeated `name` is logged and the first declaration kept — taking either silently would make a composite's parts depend on document order.
 
-Two things read these declarations, and nothing else does:
+Three things read these declarations, and nothing else does:
 
 - **`showIf="auto"` fan-out** — the composite's own `<Input>` lights up when *any* of its parts has a label or mapping, which is what makes a stick glow as a unit despite never being mapped itself.
 - **`<Condition inputs="…">`** — naming a composite expands to its parts at evaluation time, so `<Condition inputs="AxisLeftStick" atLeast="2" match="agree">` reads as a statement about the stick rather than a list of four names.
+- **Label reconciliation** — `WholeLabelCollapser` folds agreeing part labels onto the composite's own key, and fans a composite-only label out onto its parts. This is what gives a merged `<Label>` on the composite its text; see [architecture.md](architecture.md#5-rendering).
 
-A template declaring no `<Whole>` gets neither, and every input is simply itself. This is also why the direction inputs are **siblings** of their composite's `<Input>` rather than nested inside it — see [Nested Input semantics](#input--a-generic-input).
+A template declaring no `<Whole>` gets none of them, and every input is simply itself — a composite-only label stays on the composite, and parts that agree stay four separate labels. This is also why the direction inputs are **siblings** of their composite's `<Input>` rather than nested inside it — see [Nested Input semantics](#input--a-generic-input).
 
 ### `<Body>` — display layout
 

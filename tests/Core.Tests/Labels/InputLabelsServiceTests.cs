@@ -529,15 +529,12 @@ public class InputLabelsServiceTests
         ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
 
         // the stick is Stick-Any's own binding and only a mirrored one for Dpad-Any, so it keeps
-        // its own label rather than being overwritten. Neither whole has any per-direction
-        // breakdown, so each also copies its own text onto its four directions individually.
+        // its own label rather than being overwritten. Fanning each composite's text out onto its
+        // directions belongs to WholeLabelCollapser, at render time where a template declares
+        // which inputs are composites -- see WholeLabelCollapserTests.
         labels.LabelText.ShouldBeDictionaryOf(
             ("AxisLeftStick", "Look"),
-            ("AxisLeftStickUp", "Look"), ("AxisLeftStickDown", "Look"),
-            ("AxisLeftStickLeft", "Look"), ("AxisLeftStickRight", "Look"),
-            ("ButtonDpad", "Move"),
-            ("ButtonDpadUp", "Move"), ("ButtonDpadDown", "Move"),
-            ("ButtonDpadLeft", "Move"), ("ButtonDpadRight", "Move"));
+            ("ButtonDpad", "Move"));
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
@@ -620,7 +617,7 @@ public class InputLabelsServiceTests
     }
 
     [Fact]
-    public void Load_ThreeOfFourDirectionsAgree_FourthGenuinelyBlank_WriteSharedTextOntoWholeToo()
+    public void Load_ThreePortsEachDriveTheirOwnDirection_EachKeepsItsOwnEntry()
     {
         // three real, independent ports agree; the fourth (Down) has no port driving it at all --
         // genuinely blank, not merely differently labelled
@@ -637,36 +634,12 @@ public class InputLabelsServiceTests
 
         ResolvedLabels labels = BuildTestFixture.Load(Game("knckhead"), mapping);
 
-        // ButtonDpad also reads "Jump" -- the layout's Condition tells this apart from "all four
-        // agree" by checking whether ButtonDpadDown individually has a label too (it doesn't here)
+        // Folding the three agreeing directions back onto ButtonDpad is WholeLabelCollapser's
+        // job now -- see WholeLabelCollapserTests. Here each port simply reaches its own.
         labels.LabelText.ShouldBeDictionaryOf(
-            ("ButtonDpad", "Jump"),
             ("ButtonDpadUp", "Jump"),
             ("ButtonDpadLeft", "Jump"),
             ("ButtonDpadRight", "Jump"));
-    }
-
-    [Fact]
-    public void Load_WholeMappedDirectly_NoPerDirectionBreakdown_CopiesOntoAllFour()
-    {
-        // the N64 shape: Dpad-Any names the whole control directly, with no separate ports for
-        // its four directions at all -- none of them have any label or mapping of their own
-        ResolvedMapping mapping = Mapping(platform: "Nintendo 64", buttonToInput: new()
-        {
-            ["Dpad-Any"] = ["ButtonDpad"],
-        });
-        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(("Dpad-Any", "Move")));
-
-        ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
-
-        // each direction gets its own copy of "Move" so its icon renders at full brightness --
-        // nothing in the data ever distinguished one direction from another
-        labels.LabelText.ShouldBeDictionaryOf(
-            ("ButtonDpad", "Move"),
-            ("ButtonDpadUp", "Move"),
-            ("ButtonDpadDown", "Move"),
-            ("ButtonDpadLeft", "Move"),
-            ("ButtonDpadRight", "Move"));
     }
 
     [Fact]

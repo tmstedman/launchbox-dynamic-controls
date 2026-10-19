@@ -26,20 +26,28 @@ public interface IInputRenderingService
 public class InputRenderingService(
     ILayoutFilter layoutFilter,
     IInputLabelRenderer labelRenderer,
-    IInputImageRenderer imageRenderer) : IInputRenderingService
+    IInputImageRenderer imageRenderer,
+    WholeLabelCollapser wholeLabelCollapser) : IInputRenderingService
 {
     private readonly ILayoutFilter _layoutFilter = layoutFilter;
     private readonly IInputLabelRenderer _labelRenderer = labelRenderer;
     private readonly IInputImageRenderer _imageRenderer = imageRenderer;
+    private readonly WholeLabelCollapser _wholeLabelCollapser = wholeLabelCollapser;
 
     public RenderResult Render(
         Template template,
         ResolvedMapping mapping,
         ResolvedLabels labels)
     {
+        // Reconcile composite labels against their parts' here rather than during label
+        // resolution: this is the first point a template has been chosen, and the template is
+        // what declares which of its inputs are composites.
+        IReadOnlyDictionary<string, string> labelText =
+            _wholeLabelCollapser.Collapse(labels.LabelText, template.Layout.Wholes);
+
         var ctx = new VisibilityContext(
             Mapping: mapping,
-            LabelText: labels.LabelText,
+            LabelText: labelText,
             IsGameSpecific: labels.IsGameSpecific,
             Wholes: template.Layout.Wholes);
         FilteredLayout layout = _layoutFilter.Filter(template, ctx);
@@ -49,7 +57,7 @@ public class InputRenderingService(
 
         foreach (LayoutInput li in layout.Inputs)
         {
-            string? labelValue = labels.LabelText.GetValueOrDefault(li.Input.Name);
+            string? labelValue = labelText.GetValueOrDefault(li.Input.Name);
             allImages.AddRange(_imageRenderer.Render(li, template, mapping, labels.IsGameSpecific));
             allLabels.AddRange(_labelRenderer.Render(li, labelValue)
                 .Select(l => li.YOffset == 0 ? l : l with { Top = l.Top + li.YOffset }));
