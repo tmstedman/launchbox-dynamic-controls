@@ -111,10 +111,14 @@ rebuilt from a clean checkout.
 ## The analysis files are a paused thread, not debris
 
 `review-notes.md`, `judgement-calls.md`, `button-duplicates-triage.md`,
-`button-duplicates-cross-checked.md`, `arcade-labels-review.md` and the
-`cfg-cross-reference-*` pair are what a data-quality pass found. The work stopped rather than
-finished: 22 `<Note>` questions are still open, and more than half the flagged button duplicates
-are still duplicated in the transcription.
+`button-duplicates-cross-checked.md` and `arcade-labels-review.md` are what a data-quality pass
+found. The work stopped rather than finished: 22 `<Note>` questions are still open, and more
+than half the flagged button duplicates are still duplicated in the transcription.
+
+That pass also produced a `cfg-cross-reference` pair, listing ports a cfg binds that nothing
+labelled. Those are deleted — almost every ROM they flagged now has an entry, and the only part
+worth keeping was the second exclusion below. `git log -- label-sources/cfg-cross-reference-*`
+finds them if the detail is ever wanted.
 
 **The A/B comparison cannot replace them, and will never surface what they hold.** It measures
 whether the pipeline renders what the artwork says — so when the artwork labels two distinct
