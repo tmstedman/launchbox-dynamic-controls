@@ -18,6 +18,10 @@
         <Mapping name="SwapScreens" input="AxisTriggerRight" />
         <Mapping name="CloseLid" input="ButtonLeftStick" />
         <Mapping name="ToggleTouchStick" input="ButtonRightStick" />
-        <Mapping name="MoveTouchStick" input="AxisRightStick" />
+        <Alias name="MoveTouchStick" mappings="MoveTouchStick-Up MoveTouchStick-Down MoveTouchStick-Left MoveTouchStick-Right" />
+        <Mapping name="MoveTouchStick-Up" input="AxisRightStickUp" />
+        <Mapping name="MoveTouchStick-Down" input="AxisRightStickDown" />
+        <Mapping name="MoveTouchStick-Left" input="AxisRightStickLeft" />
+        <Mapping name="MoveTouchStick-Right" input="AxisRightStickRight" />
     </Controller>
 </Controllers>
