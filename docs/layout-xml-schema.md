@@ -107,12 +107,13 @@ No attributes.
 
 ### `<Head>` — metadata
 
-Template-wide metadata. Currently the only child element type is `<Style>`. Future non-display configuration would go here.
+Template-wide metadata. Child element types are `<Style>` and `<Whole>`. Future non-display configuration would go here.
 
 ```xml
 <Head>
     <Style fontSize="24" inactiveBlurRadius="8" />
     <Style name="auto-blur" showIf="auto" minOpacity="0.3" />
+    <Whole name="AxisLeftStick" parts="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" />
 </Head>
 ```
 
@@ -130,6 +131,28 @@ Two distinct uses, distinguished by the presence of `name`:
 | `fontSize` | double | no | |
 | `minOpacity` | double | no | Opacity when `showIf` condition is not met; `0` = hidden, `1` = always full opacity |
 | `inactiveBlurRadius` | double | no | Blur radius when `showIf` condition is not met; `0` = no blur |
+
+### `<Whole>` — a composite control
+
+Declares that one input name stands for several at once — a stick, a D-pad, a C-button cluster. The template says which, because the template is what draws the controller: whether `AxisLeftStick` is four directions or something else is a fact about the chassis in the artwork, not about the engine.
+
+```xml
+<Whole name="AxisLeftStick" parts="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" />
+```
+
+| Attribute | Type | Required | Notes |
+|---|---|---|---|
+| `name` | string | yes | The composite's own input name — the one an `<Input>`/`<Container for>` draws and a `<Condition>` can name |
+| `parts` | space-separated names | yes | The inputs it is made of. Must name **more than one**; a composite of one would silently behave as that input |
+
+A `<Whole>` missing either attribute, or naming a single part, is logged and skipped. A repeated `name` is logged and the first declaration kept — taking either silently would make a composite's parts depend on document order.
+
+Two things read these declarations, and nothing else does:
+
+- **`showIf="auto"` fan-out** — the composite's own `<Input>` lights up when *any* of its parts has a label or mapping, which is what makes a stick glow as a unit despite never being mapped itself.
+- **`<Condition inputs="…">`** — naming a composite expands to its parts at evaluation time, so `<Condition inputs="AxisLeftStick" atLeast="2" match="agree">` reads as a statement about the stick rather than a list of four names.
+
+A template declaring no `<Whole>` gets neither, and every input is simply itself. This is also why the direction inputs are **siblings** of their composite's `<Input>` rather than nested inside it — see [Nested Input semantics](#input--a-generic-input).
 
 ### `<Body>` — display layout
 
@@ -168,7 +191,7 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 
 **Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's `showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` are what the child falls through to via the [style cascade](#style-cascade) when the child sets none of its own — same as a `<Label>`/`<Overlay>` reachable from the parent would. Nesting one `<Input>` inside another is unusual in practice, though — the shipped template no longer does it at all.
 
-**This is *not* how a whole control's `showIf="auto"` fan-out works, even though it used to be.** `ButtonDpad`/`AxisLeftStick`/`AxisRightStick` light up when any of their four direction inputs has a label or mapping, but that fan-out is sourced from a fixed name-to-parts table (`WholeInputs.PartsOf` in the engine), not from `Children` nesting — so the direction inputs live as top-level *siblings* of their whole's own bare `<Input>`, not nested inside it:
+**This is *not* how a composite control's `showIf="auto"` fan-out works, even though it used to be.** A control declared as a [`<Whole>`](#whole--a-composite-control) lights up when any of its parts has a label or mapping, but that fan-out is sourced from that declaration, not from `Children` nesting — so the direction inputs live as top-level *siblings* of their composite's own bare `<Input>`, not nested inside it:
 
 ```xml
 <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
@@ -187,7 +210,7 @@ A `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can 
 
 ```xml
 <Input name="ButtonDpad" height="135" width="135">
-    <Condition any="SomeOtherInput" match="label">
+    <Condition inputs="SomeOtherInput" match="label">
         <Label x="+0" y="+72" />
     </Condition>
 </Input>
@@ -202,7 +225,7 @@ Whether it renders at all is decided once, structurally, the same way a `<OneOf>
 ```xml
 <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
 <OneOf>
-    <Condition any="AxisLeftStick" match="label">
+    <Condition inputs="AxisLeftStick" atLeast="2" match="agree">
         <Container for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
             <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
@@ -248,7 +271,7 @@ An `<Overlay>` doesn't have to be a *direct* child of its own `<Input>`/`<Contai
 
 ```xml
 <Input name="ButtonA" showIf="mapping">
-    <Condition any="ButtonA" match="mapping">
+    <Condition inputs="ButtonA" match="mapping">
         <Overlay src="extra-glow.png" x="+5" y="+5" />
     </Condition>
 </Input>
@@ -298,7 +321,7 @@ Two purposes remain:
 
 ```xml
 <!-- Explicit Condition replaces the old <Group>'s implicit "any member visible" check -->
-<Condition any="ButtonDpadUp ButtonDpadLeft ButtonDpadRight ButtonDpadDown" match="label">
+<Condition inputs="ButtonDpad" atLeast="1" match="label">
     <Container x="312" y="291" gap="45" collapse="true">
         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
         <Input name="ButtonDpadUp">...</Input>
@@ -360,7 +383,7 @@ A container where only the first alternative whose visibility check passes is re
 
 ```xml
 <OneOf>
-    <Condition any="ButtonDpadUp ButtonDpadDown" match="label">
+    <Condition inputs="ButtonDpadUp ButtonDpadDown" atLeast="1" match="label">
         <Container>
             <!-- a labelled cluster -->
             <Input name="ButtonDpadUp">...</Input>
@@ -377,7 +400,7 @@ No attributes — a `<OneOf>` is pure control-flow (alternative selection), unre
 
 **Visibility check per alternative**:
 - `<Input>` — "any-render-visible" (its own image passes its `showIf`, or recursively, one of its structural children does)
-- `<Condition>` — its own `all`/`any`/`none` check against its named inputs (see below), ignoring what its children render
+- `<Condition>` — its own `inputs`/`atLeast`/`none` check against its named inputs (see below), ignoring what its children render
 - `<Container>` — **never visible on its own** (see [`<Container>`](#container--positioned-cluster)) — a bare `<Container>` alternative can never be selected; wrap it in a `<Condition>` naming whatever should make it eligible
 - `<Label>` (loose) — always false; it isn't a visibility-bearing alternative in its own right
 
@@ -385,30 +408,41 @@ If no alternative passes, the OneOf renders nothing — all alternatives are dro
 
 ### `<Condition>` — explicit named-input gate
 
-A container whose children render only when an explicit `all`/`any`/`none` check passes against named generic inputs' label or mapping state. `<Condition>` names its own inputs and checks them directly, by dictionary lookup, regardless of what its children are — this is what lets it gate a subtree on an input that isn't (or isn't only) one of that subtree's own inputs. It's also the *only* inclusion-deciding mechanism in the schema now: a `<Container>` has no implicit visibility check of its own (see [`<Container>`](#container--positioned-cluster)), so anything that needs to exist conditionally — a `<OneOf>` alternative, a top-level cluster — wraps it in an explicit `<Condition>` rather than relying on any structural fold-in.
+A container whose children render only when an explicit check passes against named generic inputs' label or mapping state. `<Condition>` names its own inputs and checks them directly, by dictionary lookup, regardless of what its children are — this is what lets it gate a subtree on an input that isn't (or isn't only) one of that subtree's own inputs. It's also the *only* inclusion-deciding mechanism in the schema now: a `<Container>` has no implicit visibility check of its own (see [`<Container>`](#container--positioned-cluster)), so anything that needs to exist conditionally — a `<OneOf>` alternative, a top-level cluster — wraps it in an explicit `<Condition>` rather than relying on any structural fold-in.
 
 ```xml
-<Condition any="AxisLeftStick" match="label">
-    <Condition all="AxisLeftStickUp AxisLeftStickLeft AxisLeftStickRight AxisLeftStickDown" match="label">
-        <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
-            <!-- single glyph, shown only when all four directions individually agree -->
-        </Input>
-    </Condition>
+<Condition inputs="AxisLeftStick" match="agree">
+    <Input name="AxisLeftStick" style="show-if-label" x="307" y="339">
+        <!-- single glyph, shown only when all four directions carry the same label -->
+    </Input>
 </Condition>
 ```
 
 | Attribute | Type | Required | Notes |
 |---|---|---|---|
-| `any` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *at least one* named input matches |
-| `all` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *every* named input matches. An empty name list is always false, never vacuously true |
-| `none` | string (space-separated generic input names) | one of `any`/`all`/`none` | True when *no* named input matches |
-| `match` | `label` \| `mapping` \| `auto` | no | What "matches" means for each name — `label` checks `HasLabel`, `mapping` checks `IsMapped`, `auto` checks `HasLabel` when the game contributed its own labels and `IsMapped` otherwise (mirrors `showIf="auto"` — see [`showIf` modes](#showif-modes)). Default `label` |
+| `inputs` | string (space-separated generic input names) | one of `inputs`/`none` | The inputs to check. A [`<Whole>`](#whole--a-composite-control) name expands to its parts, so one name can ask about a whole stick |
+| `atLeast` | positive integer | no | How many of them must match. Default: **all of them**. `atLeast="1"` is the old `any`; omitting it is the old `all` |
+| `none` | string (space-separated generic input names) | one of `inputs`/`none` | True when *no* named input matches. `atLeast` does not apply |
+| `match` | `label` \| `mapping` \| `auto` \| `agree` | no | What "matches" means for each name — see below. Default `label` |
 
-Exactly one of `any`/`all`/`none` must be present; zero or more than one is logged and the whole `<Condition>` (and its children) is skipped.
+**`match` modes**:
+
+| Mode | Passes when |
+|---|---|
+| `label` | The named input has non-empty label text (`HasLabel`) |
+| `mapping` | The named input is mapped (`IsMapped`) |
+| `auto` | `label` when the game contributed its own labels, `mapping` otherwise — mirrors `showIf="auto"` (see [`showIf` modes](#showif-modes)) |
+| `agree` | At least `atLeast` of the names carry label text, **all of it identical**, and the rest carry none at all |
+
+`agree` exists because counting cannot tell two different pictures apart. A stick whose directions read Up/Down/Left/Right separately has four labels; one labelled once as a unit also has four — identical ones. Both satisfy `match="label"` with every name, and they are drawn completely differently: one merged label against four of their own. The "rest carry none" clause is what stops a direction with its own genuinely different text from being smoothed into a shared label it never had — that's a real per-direction remap and keeps what it says.
+
+So `<Condition inputs="AxisLeftStick" atLeast="2" match="agree">` reads directly as *two or more of this stick's directions say the same thing, and nothing contradicts them* — the case where one merged label is the honest render.
+
+Exactly one of `inputs`/`none` must be present; zero or both is logged and the whole `<Condition>` (and its children) is skipped, as is `atLeast` alongside `none` ("none of these, but at least two of them" is not a thing anyone means). An `atLeast` that isn't a positive whole number is logged and every input required instead. An empty name list is always false, never vacuously true.
 
 No positional attributes — a `<Condition>` is transparent for coordinates and slot counting (unlike a nested `<Container>`, which never is — see the tables above). Children: `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` in any order, plus a loose `<Label>` (see [Loose `<Label>`](#loose-label)) or a loose `<Overlay>` (see [Loose `<Overlay>`](#loose-overlay)) — the most common reason to nest either directly in a `<Condition>` rather than inside a wrapping `<Input>`/`<Container>`. Unlike `<Container>`, a `<Condition>` has **no** `Overlays` list of its own — but a bare `<Overlay>` placed directly inside one is not an error: it's parsed the same loose way a bare `<Label>` is, and joins whichever `<Input>`/`<Container>` is ambient once one is actually reached.
 
-**Nesting for compound AND logic**: a `<Condition>` only expresses one any/all/none check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The example above uses this to distinguish "the whole stick collapsed to one shared label" from "all four directions happen to be individually labelled but disagree" — both leave every direction with *some* label, so the inner check alone can't tell them apart; the outer check (whether the whole control's own label exists) is what disambiguates.
+**Nesting for compound AND logic**: a `<Condition>` expresses one check, so an AND of two independent checks is one `<Condition>` nested inside another — the outer gates on one fact, the inner on another, and both must pass for the innermost children to render. The shipped template no longer needs this for the sticks: distinguishing "collapsed to one shared label" from "individually labelled but disagreeing" used to take a nested pair of `label` checks, and `match="agree"` now says it in one.
 
 If no `<Condition>` (nor any other) alternative in an enclosing `<OneOf>` passes, and there's no unconditional fallback, nothing renders — same as any other `<OneOf>` with no matching alternative.
 
@@ -430,8 +464,11 @@ The parser emits errors to the configured `ILogger` for:
 - Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Overlay>`, `<Label>`, `<Container>`, `<OneOf>`, `<Condition>` was expected
 - `style="X"` (on `<Input>`, `<Container>`, `<Overlay>`, or `<Label>`) where `X` isn't a `<Style name="X">` in `<Head>`
 - `<Input showIf="X">` (or `<Container>`/`<Overlay>`) where `X` isn't a known mode
-- `<Condition>` with zero, or more than one, of `any`/`all`/`none` set (the whole `<Condition>` is skipped)
-- `<Condition match="X">` where `X` isn't `label`, `mapping`, or `auto` (falls back to `label`)
+- `<Condition>` with zero, or both, of `inputs`/`none` set, or `atLeast` alongside `none` (the whole `<Condition>` is skipped)
+- `<Condition atLeast="X">` where `X` isn't a positive whole number (every named input is required instead)
+- `<Condition match="X">` where `X` isn't `label`, `mapping`, `auto`, or `agree` (falls back to `label`)
+- `<Whole>` without `name`, or with `parts` naming fewer than two inputs (the declaration is skipped)
+- `<Whole>` repeating a `name` already declared (the first declaration is kept)
 - A loose `<Label>` (see [Loose `<Label>`](#loose-label)) with no enclosing `<Input>` at all, ambient or otherwise
 
 Errors don't abort the load — the bad element is skipped (or, for coordinate problems, replaced with `+0`), the rest of the template parses normally. Check the log file after a problem template to see what was dropped.

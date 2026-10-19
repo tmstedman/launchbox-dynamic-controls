@@ -315,9 +315,10 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     }
 
     /// <summary>
-    /// Parses a &lt;Condition&gt; element. Exactly one of `any`/`all`/`none` must be present;
-    /// missing or having more than one is logged and the element is skipped entirely (rather than
-    /// guessing which was meant). `match` defaults to "label" when absent.
+    /// Parses a &lt;Condition&gt; element. Exactly one of `inputs`/`none` must be present;
+    /// missing or having both is logged and the element is skipped entirely (rather than guessing
+    /// which was meant). `atLeast` is only meaningful alongside `inputs`; `match` defaults to
+    /// "label" when absent.
     /// </summary>
     private ConditionNode? ParseConditionNode(XmlElement node)
     {

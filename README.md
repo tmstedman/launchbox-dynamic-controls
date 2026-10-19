@@ -78,6 +78,19 @@ The plugin works in terms of **platform button names** - the names printed on th
 
 Generic input names (`ButtonA`, `ButtonB`, `ButtonX`, `ButtonY`, `ButtonLeftShoulder`, `ButtonDpad`, `AxisLeftStick`, …) are the shared vocabulary that connects every part of the plugin. The full list is in [`docs/templates.md`](docs/templates.md#generic-input-names). Controllers.xml maps platform buttons *to* them; RetroArch and MAME integration resolves *to* them; and the controller template defines a slot *for* each one, with a corresponding button image and position. So the Genesis `B` button maps to `ButtonA`, which the template renders at the A-button position — but using the platform-specific `B.png` artwork from the `Sega Genesis` subfolder, so the player sees the original hardware button label rather than the Xbox one. If no platform-specific image exists, it falls back to the generic `ButtonA.png`. This file ships for ~50 platforms.
 
+A control that works as a unit — a stick, a D-pad, a C-button cluster — also gets an `<Alias>`, naming the buttons it is made of:
+
+```xml
+<!-- Defaults\Platforms\Nintendo 64\Controllers.xml (excerpt) -->
+<Alias name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
+<Mapping name="C-Up"    input="AxisRightStickUp" />
+<Mapping name="C-Down"  input="AxisRightStickDown" />
+<Mapping name="C-Left"  input="AxisRightStickLeft" />
+<Mapping name="C-Right" input="AxisRightStickRight" />
+```
+
+`C-Any` reaches whatever those four reach, so a label written against it describes the cluster as a whole — "Camera" on the C-buttons rather than four copies of it. It is resolved *after* your emulator's own configuration is read, which is what keeps that label correct when the emulator has moved the individual directions somewhere else.
+
 The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the relevant `Platforms\{Platform}\Controllers.xml` to `User\Platforms\{Platform}\` and edit it to match your configuration.
 
 ### Game-specific overrides

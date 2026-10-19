@@ -55,6 +55,12 @@ The generic inputs used by the shipped Xbox Series X template:
 
 A new template only needs to provide images for the inputs it uses — any generic input without a corresponding file simply won't render.
 
+The composite names in that table (`AxisLeftStick`, `AxisRightStick`, `ButtonDpad`) have no special
+meaning to the engine. A template says which of its inputs are composites, and what they are made
+of, with `<Whole>` in `<Head>` — see
+[layout-xml-schema.md](layout-xml-schema.md#whole--a-composite-control). A template that declares
+none has no composites.
+
 ## Adding images for a new platform
 
 > **Recommended:** Before modifying a shipped template, copy it to a new folder under `Templates\` and update `DefaultTemplate` in `User\GlobalConfig.xml` to point to the copy. Changes to the shipped `Xbox Series X` folder are overwritten when you update the plugin.
@@ -97,6 +103,45 @@ inherits from `2-Button`). A variant's own mappings override any inherited entry
     </Controller>
 </Controllers>
 ```
+
+#### `<Alias>` — one button standing for several
+
+A control that works as a unit — a stick, a D-pad, a C-button cluster — gets an `<Alias>` naming
+the buttons it is made of. The alias then reaches whatever those buttons reach:
+
+```xml
+<!-- Defaults\Platforms\Nintendo 64\Controllers.xml -->
+<Controller name="Pad" default="true">
+    <Alias name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
+    <Mapping name="C-Up"    input="AxisRightStickUp" />
+    <Mapping name="C-Down"  input="AxisRightStickDown" />
+    <Mapping name="C-Left"  input="AxisRightStickLeft" />
+    <Mapping name="C-Right" input="AxisRightStickRight" />
+</Controller>
+```
+
+| Attribute | Required | Notes |
+|---|---|---|
+| `name` | yes | The platform button being declared — the one a `Labels.xml` entry can name |
+| `mappings` | yes | Space-separated platform button names it stands for |
+
+Two things make this worth the indirection rather than just writing `input="AxisRightStick"`:
+
+- **It resolves last**, after any emulator config and any per-game override. A cfg binds directions
+  one at a time and has no way to name a control as a unit, so a button that *does* name one has to
+  be re-read against wherever its members actually ended up. Naming the generic input directly
+  would fix it at the moment the file was written, and the label would be lost on every game whose
+  cfg had moved the directions beneath it.
+- **It says something about the physical controller**, which is why it lives next to the mappings
+  it describes rather than in the template. Whether a platform has a C-cluster is a fact about its
+  pad.
+
+An alias is appended, never displacing: a button that drives an input directly outranks one that
+merely stands for buttons reaching it, so a direct binding keeps the reverse lookup and decides
+which image the player is shown. An alias whose members are all unbound reaches nothing and is
+skipped.
+
+Aliases are inherited by `inheritFrom` alongside mappings, under the same override-by-`name` rule.
 
 ### Sharing one definition across platforms
 
