@@ -254,11 +254,13 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         // is always stated in one place.
         var aliases = new List<AliasEntry>();
         for (int i = chain.Count - 1; i >= 0; i--)
+        {
             foreach (AliasEntry a in chain[i].OwnAliases)
             {
                 int at = aliases.FindIndex(x => string.Equals(x.Name, a.Name, StringComparison.Ordinal));
                 if (at >= 0) aliases[at] = a; else aliases.Add(a);
             }
+        }
 
         return (mappings, aliases);
     }
@@ -294,6 +296,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
                 case "Alias":
                     AliasEntry? alias = ParseAliasEntry(child, path);
                     if (alias != null) ownAliases.Add(alias);
+                    break;
+                default:
+                    // Silently skipping a typo'd element is how a whole button goes missing with
+                    // nothing to read afterwards -- the same shape as an unrecognised <Head> child.
+                    _logger.Error($"Invalid element <{child.Name}> in <Controller name=\"{name}\"> in {path}");
                     break;
             }
         }

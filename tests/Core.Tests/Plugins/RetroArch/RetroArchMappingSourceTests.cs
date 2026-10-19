@@ -23,7 +23,10 @@ public class RetroArchMappingSourceTests
         Substitute.For<IRetroArchGameOverridesResolver>();
     private readonly RetroArchMappingSource _underTest;
 
-    public RetroArchMappingSourceTests() => _underTest = new RetroArchMappingSource(_logger, _overrides);
+    public RetroArchMappingSourceTests()
+    {
+        _underTest = new RetroArchMappingSource(_logger, _overrides);
+    }
 
     // ---- fixtures ----
 

@@ -322,6 +322,27 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_UnrecognisedElementInController_SkippedWithError()
+    {
+        // A typo'd element used to be dropped without a word, which is how a whole button goes
+        // missing with nothing to read afterwards.
+        string path = Path.Combine(DefaultsDir, "Platforms", "Nintendo 64", "Controllers.xml");
+        StubXml(path, """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='C-Up' input='AxisRightStickUp' />
+                <Mappping name='C-Down' input='AxisRightStickDown' />
+              </Controller>
+            </Controllers>
+            """);
+
+        var result = _underTest.LoadPlatformMapping("Nintendo 64")!;
+
+        result.Controllers[0].Mappings.ShouldHaveSingleItem().Name.ShouldBe("C-Up");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Mappping") && s.Contains("Pad")));
+    }
+
+    [Fact]
     public void LoadPlatformMapping_Alias_InheritsAndIsReplacedByNameLikeAMapping()
     {
         // A descendant redeclaring an alias replaces it outright rather than adding members, so

@@ -62,8 +62,12 @@ public class AliasResolver(ILogger logger)
             // and the order is the author's rather than a dictionary's.
             var reached = new List<string>();
             foreach (string member in alias.Mappings)
+            {
                 foreach (string input in buttonToInput.GetValueOrDefault(member, []))
+                {
                     if (!reached.Contains(input)) reached.Add(input);
+                }
+            }
 
             if (reached.Count == 0)
             {
