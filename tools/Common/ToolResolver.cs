@@ -12,9 +12,14 @@ namespace DynamicControls.Tools.Common;
 /// <c>Templates/</c>.</param>
 /// <param name="cfgPack">Directory containing <c>cfg/{rom}.cfg</c>, or empty for none. Also
 /// stands in as the emulator directory.</param>
-public sealed class ToolResolver(string root, string cfgPack = "")
+/// <param name="toolName">The tool doing the resolving, e.g. "Preview". Decides where the
+/// pipeline writes <c>Logs/debug.log</c> — the tool's own output directory rather than
+/// <paramref name="root"/>, so running against the repository's <c>assets/</c> does not leave
+/// diagnostics inside the folder that gets packaged. See <see cref="ToolPaths"/>.</param>
+public sealed class ToolResolver(string root, string toolName, string cfgPack = "")
 {
-    private readonly ControllerOverlayService _service = ControllerOverlayFactory.Create(root);
+    private readonly ControllerOverlayService _service =
+        ControllerOverlayFactory.Create(root, ToolPaths.Output(toolName));
 
     /// <summary>
     /// A path nothing opens. <c>MameEmulator.IsMameExecutable</c> gates the whole MAME chain on

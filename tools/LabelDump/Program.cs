@@ -3,6 +3,8 @@ using DynamicControls.Composition;
 using DynamicControls.LabelDump;
 using DynamicControls.Tools.Common;
 
+const string ToolName = "LabelDump";
+
 Options? options = Options.Parse(args);
 if (options == null) return 1;
 
@@ -18,12 +20,6 @@ if (!Directory.Exists(cfgDir))
     Console.Error.WriteLine($"No cfg folder in the pack: {cfgDir}");
     return 1;
 }
-
-// A synthetic path: nothing opens it, but MameEmulator.IsMameExecutable gates the whole MAME
-// chain on the filename starting with "mame", and MameInputMappingSource derives the cfg
-// folder from its directory. Placing it in the pack root is what points the pipeline at
-// {pack}/cfg -- the same relationship a real install has between mame.exe and its cfg folder.
-string emulatorPath = Path.Combine(options.CfgPack, "mame.exe");
 
 string[] roms = [.. Directory.EnumerateFiles(cfgDir, "*.cfg")
     .Select(Path.GetFileNameWithoutExtension)
@@ -51,12 +47,14 @@ if (options.Artwork.Length > 0)
 Console.Error.WriteLine($"{roms.Length} roms from {cfgDir}");
 Console.Error.WriteLine($"Resolving against {options.Root} as platform '{options.Platform}'...");
 
-ControllerOverlayService service = ControllerOverlayFactory.Create(options.Root);
+// Resolves every rom against the cfg pack; the platform sweep below uses its own resolver
+// with no pack, a platform render being what the data alone produces.
+var romResolver = new ToolResolver(options.Root, ToolName, options.CfgPack);
 
 // Platform renders resolve with no cfg pack, unlike the rom sweep: a platform render is
 // what the data alone produces, and pointing it at an emulator pack would make that file
 // describe one machine's configuration rather than the plugin's defaults.
-var platformResolver = new ToolResolver(options.Root);
+var platformResolver = new ToolResolver(options.Root, ToolName);
 
 List<GameLabels> games = [];
 List<(string RomName, IReadOnlyList<GameImage> Images)> renders = [];
@@ -65,16 +63,7 @@ List<string> conflicting = [];
 
 foreach (string rom in roms)
 {
-    var game = new GameInfo(
-        Platform: options.Platform,
-        RomName: rom,
-        CloneOf: null,
-        LaunchBoxId: null,
-        EmulatorPath: emulatorPath,
-        RomDirectory: null,
-        RetroArchCore: null);
-
-    ControllerOverlayModel model = service.Resolve(game);
+    ControllerOverlayModel model = romResolver.Resolve(new SweepTarget(options.Platform, rom));
 
     // One RenderedLabel per label slot the layout draws, so the same input legitimately
     // repeats when a template gives it several positions. Group to one entry per control.
@@ -145,7 +134,7 @@ ArtworkWriter.Write(options.Out, games, """
 
 Console.Error.WriteLine($"{games.Count} roms wrote at least one label -> {options.Out}");
 Console.Error.WriteLine($"{empty.Count} roms produced none (no labels, or the pipeline errored "
-                      + $"-- check {Path.Combine(options.Root, "Logs")})");
+                      + $"-- check {Path.Combine(ToolPaths.Output(ToolName), "Logs")})");
 foreach (string c in conflicting) Console.Error.WriteLine($"CONFLICT {c}");
 
 // Same writer, same ordering, so the only differences left between the two files are the

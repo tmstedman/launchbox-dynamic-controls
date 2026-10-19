@@ -6,6 +6,8 @@ using SkiaSharp;
 
 // --- arguments -------------------------------------------------------------------------------
 
+const string ToolName = "Preview";
+
 const string Usage = """
     Renders what the pause screen would draw for one game, to a PNG, without WPF or LaunchBox.
 
@@ -17,8 +19,8 @@ const string Usage = """
       --no-labels        draw the buttons alone, with no label text. For a game render where
                          the artwork is the question; most platform defaults carry no labels
                          anyway, so it changes nothing on a sweep.
-      --out <file>       PNG to write. Default: preview/games/{platform}/{rom}.png,
-                         or preview/platforms/{platform}.png when --rom is omitted.
+      --out <file>       PNG to write. Default: tools/Preview/output/games/{platform}/{rom}.png,
+                         or .../output/platforms/{platform}.png when --rom is omitted.
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
       --bg <hex>         canvas colour behind the controller. Default: 101014
@@ -85,7 +87,7 @@ if (!noLabels && !typeface.FamilyName.StartsWith("Segoe UI", StringComparison.Or
                           + "may not match Windows.");
 }
 
-var resolver = new ToolResolver(root, cfgPack);
+var resolver = new ToolResolver(root, ToolName, cfgPack);
 
 // --- sweep -----------------------------------------------------------------------------------
 
@@ -121,7 +123,7 @@ if (all)
             if (Draw(new SweepTarget(name, namedRom))) drawn++; else empty++;
     }
 
-    Console.Error.WriteLine($"{drawn} rendered, {empty} with nothing to draw -> preview/");
+    Console.Error.WriteLine($"{drawn} rendered, {empty} with nothing to draw -> {ToolPaths.Output(ToolName)}/");
     return 0;
 }
 
@@ -137,8 +139,8 @@ return Draw(new SweepTarget(platform, rom), output) ? 0 : 1;
 // and without labels is one file -- pass --out to keep both.
 static string DefaultPath(SweepTarget target) =>
     target.IsPlatformDefault
-        ? Path.Combine("preview", "platforms", $"{Sanitise(target.Platform)}.png")
-        : Path.Combine("preview", "games", Sanitise(target.Platform), $"{Sanitise(target.RomName)}.png");
+        ? Path.Combine(ToolPaths.Output(ToolName), "platforms", $"{Sanitise(target.Platform)}.png")
+        : Path.Combine(ToolPaths.Output(ToolName), "games", Sanitise(target.Platform), $"{Sanitise(target.RomName)}.png");
 
 // Resolves one game and writes its PNG. False when there was nothing to draw, which a sweep
 // counts and a single render turns into a non-zero exit.
@@ -152,7 +154,7 @@ bool Draw(SweepTarget target, string explicitPath = "")
         // ControllerOverlayService turns every exception into an empty model, so "nothing to
         // draw" and "the pipeline threw" are indistinguishable here. Say both.
         Console.Error.WriteLine($"Nothing rendered for {target} — no mapping, or "
-                              + $"the pipeline errored. Check {Path.Combine(root, "Logs")}.");
+                              + $"the pipeline errored. Check {Path.Combine(ToolPaths.Output(ToolName), "Logs")}.");
         return false;
     }
 
