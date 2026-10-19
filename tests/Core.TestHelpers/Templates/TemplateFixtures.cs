@@ -16,7 +16,8 @@ public static class TemplateFixtures
         double defaultFontSize = 12,
         ITemplateImageSource? imageSource = null,
         IReadOnlyList<ILayoutElement>? elements = null,
-        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null)
+        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null)
     {
         IReadOnlyList<ILayoutElement> elementList = elements ?? [];
         return new(
@@ -27,7 +28,8 @@ public static class TemplateFixtures
                 CollapseInfo: collapseInfo ?? new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance),
                 DefaultFontSize: defaultFontSize,
                 DefaultMinOpacity: defaultMinOpacity,
-                DefaultInactiveBlurRadius: defaultInactiveBlurRadius),
+                DefaultInactiveBlurRadius: defaultInactiveBlurRadius,
+                Wholes: wholes),
             ImageSource: imageSource ?? new NoOpImageSource());
     }
 

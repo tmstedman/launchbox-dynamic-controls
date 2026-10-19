@@ -19,9 +19,9 @@ public interface IVisibilityEvaluator
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
     /// <summary>
-    /// Returns the visibility flags for an input, fanning out across its whole-control part
-    /// names (per <see cref="WholeInputs.PartsOf"/>, looked up by the input's own name — empty
-    /// for an input that isn't a whole). A whole is considered
+    /// Returns the visibility flags for an input, fanning out across its composite's part names
+    /// (per <see cref="VisibilityContext.Wholes"/>, looked up by the input's own name — empty
+    /// for an input the template does not declare as a composite). A whole is considered
     /// active when any of its direction names has a label or mapping — that's what makes a stick
     /// or Dpad light up as a unit even though the whole itself is never directly mapped.
     /// </summary>
@@ -115,7 +115,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)
     {
-        IEnumerable<string> names = WholeInputs.PartsOf.GetValueOrDefault(input.Name, []).Prepend(input.Name);
+        IEnumerable<string> names = ctx.Wholes.GetValueOrDefault(input.Name, []).Prepend(input.Name);
         bool hasLabel = names.Any(n => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(n)));
         bool isMapped = names.Any(n => IsMapped(ctx.Mapping, n));
         return new VisibilityFlags(hasLabel, isMapped);
@@ -210,7 +210,16 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// <see cref="WholeInputs.PartsOf"/>, needing no per-template state.
 /// </summary>
 [ExcludeFromCodeCoverage]
+/// <param name="Wholes">The composite controls the active template declares, each mapped to the
+/// inputs it is made of — see <see cref="Templates.WholeNode"/>. Carried here rather than read
+/// from a fixed table in Core, so which inputs form a stick is the template's statement about
+/// the controller it draws. Empty for a template declaring none.</param>
 public record VisibilityContext(
     ResolvedMapping Mapping,
     IReadOnlyDictionary<string, string> LabelText,
-    bool IsGameSpecific);
+    bool IsGameSpecific,
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? Wholes = null)
+{
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Wholes { get; init; } =
+        Wholes ?? new Dictionary<string, IReadOnlyList<string>>();
+}
