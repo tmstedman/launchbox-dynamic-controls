@@ -251,9 +251,11 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// directions, handling two distinct shapes the layout can't tell apart from a single "does
     /// this input have a label" check:
     ///
-    /// <para><b>No per-direction breakdown at all</b> -- a platform button names the whole
-    /// control directly (e.g. N64's <c>Dpad-Any → ButtonDpad</c>) and none of the four directions
-    /// have any label or mapping of their own. Individually gating each direction's render on its
+    /// <para><b>No per-direction breakdown at all</b> -- a platform button is bound straight at
+    /// the whole control (<c>input="ButtonDpad"</c>) and none of the four directions have any
+    /// label or mapping of their own. No shipped platform does this any more, every one of them
+    /// declaring its composites with an <c>&lt;Alias&gt;</c> over the parts instead; it remains
+    /// supported for a User override that binds a whole directly. Individually gating each direction's render on its
     /// own (nonexistent) label would wrongly dim all four; instead the whole's text is copied onto
     /// every direction, so each renders its own icon at full brightness -- there's no basis to
     /// single any one out when nothing ever distinguished them.</para>
