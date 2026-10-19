@@ -361,20 +361,28 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// mode/names/match attributes once the children are already built.</summary>
     private ConditionElement BuildConditionElement(ConditionNode conditionXml, List<ILayoutElement> children)
     {
-        (ConditionMode mode, string? names) = conditionXml switch
+        (ConditionMode mode, string? names) = conditionXml.None is { } none
+            ? (ConditionMode.None, none)
+            : (ConditionMode.AtLeast, conditionXml.Inputs);
+
+        int atLeast = 0;
+        if (conditionXml.AtLeast is { Length: > 0 } raw)
         {
-            { All: { } all } => (ConditionMode.All, all),
-            { None: { } none } => (ConditionMode.None, none),
-            _ => (ConditionMode.Any, conditionXml.Any)
-        };
+            if (!int.TryParse(raw, out atLeast) || atLeast < 1)
+            {
+                _logger.Error($"Condition: atLeast='{raw}' is not a positive whole number; requiring every input instead");
+                atLeast = 0;
+            }
+        }
 
         ConditionMatch match = ParseConditionMatch(conditionXml.Match);
         var condition = new ConditionElement(
             Mode: mode,
             Names: names?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [],
             Match: match,
-            Children: children);
-        _logger.Debug($"Condition: mode={mode}, names=[{string.Join(",", condition.Names)}], match={match}, children={children.Count}");
+            Children: children,
+            AtLeast: atLeast);
+        _logger.Debug($"Condition: mode={mode}, names=[{string.Join(",", condition.Names)}], atLeast={(atLeast > 0 ? atLeast.ToString() : "all")}, match={match}, children={children.Count}");
         return condition;
     }
 
@@ -385,6 +393,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             null or "" or "label" => ConditionMatch.Label,
             "mapping" => ConditionMatch.Mapped,
             "auto" => ConditionMatch.Auto,
+            "agree" => ConditionMatch.Agree,
             _ => LogUnknownConditionMatch(value)
         };
     }

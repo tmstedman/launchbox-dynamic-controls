@@ -821,12 +821,12 @@ public class TemplateLayoutResolverTests
     public void Resolve_ConditionAll_ParsesModeNamesAndMatch()
     {
         TestLayout config = new TestLayout()
-            .Condition(c => c.All("A B").Match("mapping").Input("A"));
+            .Condition(c => c.Inputs("A B").Match("mapping").Input("A"));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         ConditionElement condition = result.Elements.FirstCondition();
-        condition.Mode.ShouldBe(ConditionMode.All);
+        condition.Mode.ShouldBe(ConditionMode.AtLeast);
         condition.Names.ShouldBe(["A", "B"]);
         condition.Match.ShouldBe(ConditionMatch.Mapped);
         condition.Children.FirstInput().Name.ShouldBe("A");
@@ -835,11 +835,11 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_ConditionAny_ParsesMode()
     {
-        TestLayout config = new TestLayout().Condition(c => c.Any("A").Input("A"));
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Input("A"));
 
         ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
 
-        condition.Mode.ShouldBe(ConditionMode.Any);
+        condition.Mode.ShouldBe(ConditionMode.AtLeast);
         condition.Names.ShouldBe(["A"]);
     }
 
@@ -856,7 +856,7 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_ConditionMatchOmitted_DefaultsToLabel()
     {
-        TestLayout config = new TestLayout().Condition(c => c.Any("A").Input("A"));
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Input("A"));
 
         ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
 
@@ -869,7 +869,7 @@ public class TemplateLayoutResolverTests
         // Regression guard: "auto" used to be an unrecognized match value (only label/mapping
         // were), silently defaulting to label and stranding any Condition gated purely on
         // mapping for a ROM with no labels at all — see ConditionMatch.Auto's own doc comment.
-        TestLayout config = new TestLayout().Condition(c => c.Any("A").Match("auto").Input("A"));
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Match("auto").Input("A"));
 
         ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
 
@@ -880,7 +880,7 @@ public class TemplateLayoutResolverTests
     [Fact]
     public void Resolve_ConditionUnknownMatch_LogsErrorAndDefaultsToLabel()
     {
-        TestLayout config = new TestLayout().Condition(c => c.Any("A").Match("bogus").Input("A"));
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Match("bogus").Input("A"));
 
         ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
 
@@ -895,7 +895,7 @@ public class TemplateLayoutResolverTests
         // ConditionNode arm; each wrapped Input should still consume its own slot
         TestLayout config = new TestLayout()
             .Container(s => s.At(100, 200).Gap(50)
-                .Condition(c => c.Any("A")
+                .Condition(c => c.Inputs("A").AtLeast(1)
                     .Input("A")
                     .Input("B")));
 
@@ -916,7 +916,7 @@ public class TemplateLayoutResolverTests
     {
         TestLayout config = new TestLayout()
             .Input("ButtonDpad", i => i.At(300, 400)
-                .ChildCondition(c => c.Any("X").LooseLabel(l => l.Offset(-10, 20).Align("right"))));
+                .ChildCondition(c => c.Inputs("X").AtLeast(1).LooseLabel(l => l.Offset(-10, 20).Align("right"))));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
@@ -934,7 +934,7 @@ public class TemplateLayoutResolverTests
         // child would, unless it sets its own
         TestLayout config = new TestLayout()
             .Input("ButtonDpad", i => i.FontSize(22)
-                .ChildCondition(c => c.Any("X").LooseLabel()));
+                .ChildCondition(c => c.Inputs("X").AtLeast(1).LooseLabel()));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
@@ -948,7 +948,7 @@ public class TemplateLayoutResolverTests
         // given a bare Label at the top level, wrapped only in a Condition — never nested
         // inside any Input at all
         TestLayout config = new TestLayout()
-            .Condition(c => c.Any("X").LooseLabel());
+            .Condition(c => c.Inputs("X").AtLeast(1).LooseLabel());
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
@@ -964,7 +964,7 @@ public class TemplateLayoutResolverTests
         TestLayout config = new TestLayout()
             .Input("Outer", i => i.At(1, 1)
                 .Child("Inner", inner => inner.At(50, 60)
-                    .ChildCondition(c => c.Any("X").LooseLabel())));
+                    .ChildCondition(c => c.Inputs("X").AtLeast(1).LooseLabel())));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
