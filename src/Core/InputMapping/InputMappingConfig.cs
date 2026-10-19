@@ -88,6 +88,29 @@ public record ControllerConfig
     /// after inheritFrom overlay: each Name appears at most once, with the deepest descendant's
     /// entry winning.</summary>
     public List<MappingEntry> Mappings { get; set; } = [];
+
+    /// <summary>Aliases declared by this controller, resolved along inheritFrom the same way
+    /// <see cref="Mappings"/> is.</summary>
+    public List<AliasEntry> Aliases { get; set; } = [];
+}
+
+/// <summary>
+/// One platform button standing for several others:
+/// <c>&lt;Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" /&gt;</c>.
+///
+/// <para>An alias reaches whatever its members reach, resolved after the emulator's own
+/// configuration has been applied rather than fixed when the file was written. That is the whole
+/// point: a cfg binds directions one at a time, so a button naming a control as a unit has to be
+/// re-read against wherever its directions actually ended up. A list of generic input names
+/// written here instead would be decided at authoring time and could not follow a rebind.</para>
+/// </summary>
+public record AliasEntry
+{
+    /// <summary>The standing-in button's own name, as a label file or a cfg would spell it.</summary>
+    public string Name { get; set; } = null!;
+
+    /// <summary>The platform buttons it stands for.</summary>
+    public List<string> Mappings { get; set; } = [];
 }
 
 /// <summary>

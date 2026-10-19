@@ -120,7 +120,10 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
                 AnalogToDigital = pc.AnalogToDigital,
             };
 
-            controller.Mappings.AddRange(ResolveInheritedMappings(pc, byName, path));
+            (List<MappingEntry> inheritedMappings, List<AliasEntry> inheritedAliases) =
+                ResolveInheritedMappings(pc, byName, path);
+            controller.Mappings.AddRange(inheritedMappings);
+            controller.Aliases.AddRange(inheritedAliases);
             result.Controllers.Add(controller);
 
             _logger.Debug($"Controller '{controller.Name}': {controller.Mappings.Count} mappings (inheritFrom={pc.InheritFrom ?? "none"}), default={controller.IsDefault}, analogToDigital={controller.AnalogToDigital}");
@@ -216,7 +219,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// inherited unchanged. A missing base controller or an inheritFrom cycle is logged and stops
     /// the walk, so resolution never loops or throws.
     /// </summary>
-    private List<MappingEntry> ResolveInheritedMappings(
+    private (List<MappingEntry> Mappings, List<AliasEntry> Aliases) ResolveInheritedMappings(
         ParsedController pc, Dictionary<string, ParsedController> byName, string path)
     {
         // Walk from pc up towards the root, collecting the chain leaf-first.
@@ -245,7 +248,19 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         List<MappingEntry> mappings = chain[^1].OwnMappings;
         for (int i = chain.Count - 2; i >= 0; i--)
             mappings = MappingOverlay.Apply(mappings, chain[i].OwnMappings);
-        return mappings;
+
+        // Aliases inherit by the same rule, keyed on their own name: a descendant redeclaring
+        // one replaces it outright rather than adding members to it, so what a name stands for
+        // is always stated in one place.
+        var aliases = new List<AliasEntry>();
+        for (int i = chain.Count - 1; i >= 0; i--)
+            foreach (AliasEntry a in chain[i].OwnAliases)
+            {
+                int at = aliases.FindIndex(x => string.Equals(x.Name, a.Name, StringComparison.Ordinal));
+                if (at >= 0) aliases[at] = a; else aliases.Add(a);
+            }
+
+        return (mappings, aliases);
     }
 
     private ParsedController? ParseControllerRaw(XmlElement node, string path)
@@ -267,14 +282,49 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
 
         var ownMappings = new List<MappingEntry>();
+        var ownAliases = new List<AliasEntry>();
         foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
         {
-            if (child.Name != "Mapping") continue;
-            MappingEntry? entry = ParseMappingEntry(child, path);
-            if (entry != null) ownMappings.Add(entry);
+            switch (child.Name)
+            {
+                case "Mapping":
+                    MappingEntry? entry = ParseMappingEntry(child, path);
+                    if (entry != null) ownMappings.Add(entry);
+                    break;
+                case "Alias":
+                    AliasEntry? alias = ParseAliasEntry(child, path);
+                    if (alias != null) ownAliases.Add(alias);
+                    break;
+            }
         }
 
-        return new ParsedController(name, isDefault, a2d, inheritFrom, ownMappings);
+        return new ParsedController(name, isDefault, a2d, inheritFrom, ownMappings, ownAliases);
+    }
+
+    /// <summary>
+    /// Parses an &lt;Alias&gt;: one platform button standing for several others. Both attributes
+    /// are required, and the button it stands for must be more than one — a single member is that
+    /// button under another name, which the mapping entries already express.
+    /// </summary>
+    private AliasEntry? ParseAliasEntry(XmlElement node, string path)
+    {
+        string? name = node.Attributes["name"]?.Value;
+        string? mappings = node.Attributes["mappings"]?.Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _logger.Error($"Skipping <Alias> in {path}: missing 'name' attribute");
+            return null;
+        }
+
+        string[] members = mappings?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [];
+        if (members.Length < 2)
+        {
+            _logger.Error($"Skipping <Alias name=\"{name}\"> in {path}: 'mappings' must name more than one button");
+            return null;
+        }
+
+        return new AliasEntry { Name = name, Mappings = [.. members] };
     }
 
     private sealed record ParsedController(
@@ -282,7 +332,8 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         bool IsDefault,
         AnalogToDigitalMode? AnalogToDigital,
         string? InheritFrom,
-        List<MappingEntry> OwnMappings);
+        List<MappingEntry> OwnMappings,
+        List<AliasEntry> OwnAliases);
 
     private MappingEntry? ParseMappingEntry(XmlElement node, string path)
     {
