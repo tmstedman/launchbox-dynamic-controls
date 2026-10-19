@@ -1,16 +1,22 @@
 namespace DynamicControls.InputMapping;
 
 /// <summary>
-/// Fixed correspondence between generic Dpad input names and their analog-stick equivalents.
+/// Fixed correspondence between generic Dpad direction names and their analog-stick equivalents.
 /// Used when a mapping has analogToDigital set to make any platform button that drives a Dpad
-/// generic also drive its left- or right-stick equivalent — propagating labels and isMapped
+/// direction also drive its left- or right-stick equivalent — propagating labels and isMapped
 /// state without affecting image resolution.
+///
+/// <para>Directions only: the composite names (<c>ButtonDpad</c>, <c>AxisLeftStick</c>,
+/// <c>AxisRightStick</c>) are deliberately absent. Which inputs form a composite is the
+/// template's statement, declared with <c>&lt;Whole&gt;</c>, and a platform says a button stands
+/// for several with <c>&lt;Alias&gt;</c> — neither needs a name this layer knows in advance. A
+/// button declared that way reaches the four directions, so mirroring them produces the four
+/// stick directions and the composite follows from those.</para>
 /// </summary>
 public static class AnalogToDigitalMirror
 {
     private static readonly IReadOnlyDictionary<string, string> DpadToLeftStick = new Dictionary<string, string>
     {
-        ["ButtonDpad"] = "AxisLeftStick",
         ["ButtonDpadUp"] = "AxisLeftStickUp",
         ["ButtonDpadDown"] = "AxisLeftStickDown",
         ["ButtonDpadLeft"] = "AxisLeftStickLeft",
@@ -19,7 +25,6 @@ public static class AnalogToDigitalMirror
 
     private static readonly IReadOnlyDictionary<string, string> DpadToRightStick = new Dictionary<string, string>
     {
-        ["ButtonDpad"] = "AxisRightStick",
         ["ButtonDpadUp"] = "AxisRightStickUp",
         ["ButtonDpadDown"] = "AxisRightStickDown",
         ["ButtonDpadLeft"] = "AxisRightStickLeft",

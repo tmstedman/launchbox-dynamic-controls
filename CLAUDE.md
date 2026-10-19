@@ -164,7 +164,7 @@ This replaced `WholeInputDeriver`, which did the same job for a fixed set of nam
 - **MappedDefault** — platform button drives this input and it's the same button as the controller default; image resolution prefers `{platformButton}.png` over the generic
 - **Remapped** — a platform button drives this input but that button's *natural* target is a different input; image follows the physical button so the player sees what they're pressing
 
-`AnalogToDigitalMirror` appends stick generics to every `ButtonToInput` list that contains a matching Dpad generic — it affects `ButtonToInput` only, not `InputToButton`, so image resolution is unaffected. The triggering attribute lives on `<Controller>` in Controllers.xml or on `<GameMapping>` in per-game ControllerOverrides.
+`AnalogToDigitalMirror` appends stick directions to every `ButtonToInput` list that contains a matching Dpad direction — it affects `ButtonToInput` only, not `InputToButton`, so image resolution is unaffected. Directions only: the composite names are deliberately absent, since which inputs form a composite is the template's `<Whole>` statement and a button standing for several is the platform's `<Alias>` — a button declared that way reaches the four directions, so mirroring them produces the four stick directions and the composite follows. The triggering attribute lives on `<Controller>` in Controllers.xml or on `<GameMapping>` in per-game ControllerOverrides.
 
 ## MAME plugin
 
