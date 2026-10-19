@@ -272,6 +272,30 @@ public class InputImageResolverTests
     }
 
     [Fact]
+    public void Resolve_RemappedOrdinaryInput_IsClassifiedRemapped_NotMappedDefault()
+    {
+        // The two states resolve the same file -- both look up {platformButton}.png -- so every
+        // other test here passes under either classification. The diagnostic is the only place
+        // they differ, and it is what this reads.
+        //
+        // Regression guard: the composite check added alongside <Whole> was `parts.All(...)`,
+        // which is vacuously true for the empty parts list every ordinary input has. That made
+        // each one a MappedDefault and left Remapped unreachable, with nothing red to say so.
+        var input = Input("ButtonA");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png");
+        var mapping = Mapping(
+            inputToButton: new() { ["ButtonA"] = "Cross" },
+            naturalButtonToInput: new() { ["Cross"] = ["ButtonB"] });
+        StubResolve("ButtonA.png", generic: "/template/ButtonA.png");
+        StubResolve("Cross.png", generic: "/template/Cross.png", styled: "/template/styled/Cross.png");
+
+        _underTest.Resolve(image, input, mapping, TestTemplate());
+
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("ButtonA") && s.Contains("(remapped)")));
+        _logger.DidNotReceive().Debug(Arg.Is<string>(s => s.Contains("ButtonA") && s.Contains("(not remapped)")));
+    }
+
+    [Fact]
     public void Resolve_Remapped_FallsBackToGeneric_WhenNoPlatformNamedStyledFile()
     {
         // given a Remapped input but no platform-specific file

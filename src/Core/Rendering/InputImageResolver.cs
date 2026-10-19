@@ -105,7 +105,9 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
 
         if (!mapping.NaturalButtonToInput.TryGetValue(platformButton, out IReadOnlyList<string>? defaultGenerics)
             || defaultGenerics.Contains(inputName)
-            || parts.All(defaultGenerics.Contains))
+            // Guarded on there being parts at all: All() over an empty list is true, which would
+            // make every ordinary input a MappedDefault and strand Remapped as dead code.
+            || (parts.Count > 0 && parts.All(defaultGenerics.Contains)))
         {
             return new MappedDefault(platformButton);
         }
