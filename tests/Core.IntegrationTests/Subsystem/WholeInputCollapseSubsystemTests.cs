@@ -2,25 +2,30 @@ using DynamicControls.Composition;
 using DynamicControls.Config;
 using DynamicControls.InputMapping;
 using DynamicControls.Labels;
+using DynamicControls.Rendering;
 using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
+using static DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures;
 
 namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
-/// Verifies the collapse interaction between two subsystems that each have their own suite in
-/// isolation: <see cref="WholeInputDeriver"/> (extends a whole-naming platform button onto each
-/// individual direction its siblings currently reach, alongside its existing whole-level claim)
-/// feeding into <see cref="InputLabelsService"/>'s final collapse pass (folds four agreeing
-/// direction labels back onto their whole; leaves a genuine disagreement rendered per-direction).
+/// Verifies the collapse interaction across three subsystems that each have their own suite in
+/// isolation: <see cref="AliasResolver"/> (a platform button standing for several reaches
+/// whatever they currently reach), feeding <see cref="InputLabelsService"/>'s per-direction rank
+/// comparison, feeding <see cref="WholeLabelCollapser"/> (folds agreeing direction labels back
+/// onto their composite; leaves a genuine disagreement rendered per-direction).
 ///
-/// <see cref="InputMappingSubsystemTests"/> covers <see cref="WholeInputDeriver"/>'s own output
-/// shape; <see cref="InputLabelsSubsystemTests"/> deliberately supplies its
+/// <see cref="InputMappingSubsystemTests"/> covers the alias resolver's own output shape;
+/// <see cref="InputLabelsSubsystemTests"/> deliberately supplies its
 /// <see cref="ResolvedMapping"/> directly rather than wiring a real
 /// <see cref="InputMappingService"/> in. Neither exercises what the real mapping service's output
-/// does once it reaches the real labels service — specifically the case
-/// <see cref="WholeInputDeriver"/> alone could never resolve: a config that moves one direction
-/// off the whole control entirely and onto an ordinary button, which needs the labels layer's
-/// own per-direction rank comparison, not anything the mapping layer computes.
+/// does once it reaches the real labels service — specifically the case an alias alone could
+/// never resolve: a config that moves one direction off the composite entirely and onto an
+/// ordinary button, which needs the labels layer's own per-direction rank comparison, not
+/// anything the mapping layer computes.
+///
+/// The composites are passed to the collapser here the way a template declares them in its
+/// <c>&lt;Head&gt;</c>, since that is where the relation lives now.
 /// </summary>
 public class WholeInputCollapseSubsystemTests
 {
@@ -34,6 +39,10 @@ public class WholeInputCollapseSubsystemTests
     private ResolvedLabels LoadLabels(GameInfo game, ResolvedMapping mapping) =>
         InputLabelsFactory.Create(_dc.Lfs, new NullLogger(), config: new GlobalConfig())
             .Load(game, mapping);
+
+    /// <summary>Applies the real collapser with the composites the shipped template declares.</summary>
+    private static IReadOnlyDictionary<string, string> Collapse(ResolvedLabels labels) =>
+        new WholeLabelCollapser(new NullLogger()).Collapse(labels.LabelText, StandardWholes);
 
     [Fact]
     public void OneDirectionSwappedOntoAnOrdinaryButton_ThatWholeRendersPerDirection()
@@ -85,21 +94,23 @@ public class WholeInputCollapseSubsystemTests
 
         ResolvedMapping mapping = LoadMapping(transform, game);
         ResolvedLabels labels = LoadLabels(game, mapping);
+        IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
 
-        // BUTTON2's direct claim on ButtonDpadUp outranks whatever JOYSTICK's derivation reached
-        // there, so the four Dpad directions no longer all agree -- collapse refuses to fire and
-        // each direction renders its own, correct text instead of "Move" papering over "Jump".
-        labels.LabelText["ButtonDpadUp"].ShouldBe("Jump");
-        labels.LabelText["ButtonDpadDown"].ShouldBe("Move");
-        labels.LabelText["ButtonDpadLeft"].ShouldBe("Move");
-        labels.LabelText["ButtonDpadRight"].ShouldBe("Move");
+        // BUTTON2's direct claim on ButtonDpadUp outranks whatever the alias reached there, so
+        // the four Dpad directions no longer all agree -- collapse refuses to fire and each
+        // direction renders its own, correct text instead of "Move" papering over "Jump".
+        collapsed["ButtonDpadUp"].ShouldBe("Jump");
+        collapsed["ButtonDpadDown"].ShouldBe("Move");
+        collapsed["ButtonDpadLeft"].ShouldBe("Move");
+        collapsed["ButtonDpadRight"].ShouldBe("Move");
+        collapsed.ContainsKey("ButtonDpad").ShouldBeFalse();
 
         // The left stick is untouched by the swap -- all four of its directions still agree, so
-        // the whole also reads "Move" exactly as WholeInputDeriver's own suite expects, alongside
-        // each individual direction (kept, not removed, so the layout's Condition can still tell
-        // "all four agree" apart from a partial subset).
-        labels.LabelText["AxisLeftStick"].ShouldBe("Move");
-        labels.LabelText["AxisLeftStickUp"].ShouldBe("Move");
+        // the composite also reads "Move", alongside each individual direction (kept, not
+        // removed, so the layout's Condition can still tell "all four agree" apart from a
+        // partial subset).
+        collapsed["AxisLeftStick"].ShouldBe("Move");
+        collapsed["AxisLeftStickUp"].ShouldBe("Move");
     }
 
     [Fact]
@@ -139,7 +150,7 @@ public class WholeInputCollapseSubsystemTests
         ResolvedMapping mapping = LoadMapping(transform, game);
         ResolvedLabels labels = LoadLabels(game, mapping);
 
-        labels.LabelText.ShouldBeDictionaryOf(
+        Collapse(labels).ShouldBeDictionaryOf(
             ("ButtonDpad", "Move"), ("AxisLeftStick", "Move"),
             ("ButtonDpadUp", "Move"), ("AxisLeftStickUp", "Move"),
             ("ButtonDpadDown", "Move"), ("AxisLeftStickDown", "Move"),
