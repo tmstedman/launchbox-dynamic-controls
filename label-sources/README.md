@@ -80,17 +80,24 @@ python3 ~/.work/dynamic-controls/scripts/check_artwork.py
 It verifies control names, duplicates, missing images and clusters labelled both ways. It cannot
 tell you a label is wrong — only that the file is a usable transcription.
 
-## `arcade-artwork copy.xml`
+## `arcade-artwork-original.xml`
 
-The transcription as first read, kept deliberately. `arcade-artwork.xml` is corrected whenever a
-re-read finds the original reading wrong — After Burner's d-pad was transcribed with a movement
-label neither cabinet has, and a steering wheel was paired onto controls it never reached — and
-this file is what those corrections can be measured against. Without it there is no way to tell a
-fix from a drift, because the images are not re-read every time.
+The transcription exactly as first completed, before any correction. Not an input to anything —
+it exists to be diffed against `arcade-artwork.xml`, which answers "what have we changed since
+reading the cards".
 
-Not generated and not an input to anything. Leave it where it is; the name is unfortunate but
-changing it would break the one thing it is for, which is being the version that predates the
-edits.
+**The point of the diff is to separate our mistakes from the author's.** A change is either a
+misreading of a card that was right — After Burner's d-pad carries a movement label neither
+cabinet has — or a real error on the card itself. Only the second is worth telling whoever made
+the images; a list of our own misreadings is no use to them. The diff alone cannot tell them
+apart, so each change is settled by looking at the image again.
+
+```sh
+python3 ~/.work/dynamic-controls/scripts/artwork_corrections.py
+```
+
+Groups every change by rom, which a bare `diff` does not — the changes are mostly identical
+label lines, and without the rom name there is no image to look up.
 
 ## Generated files live elsewhere
 
