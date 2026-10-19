@@ -49,7 +49,7 @@ public class WholeInputCollapseSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -110,7 +110,7 @@ public class WholeInputCollapseSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />

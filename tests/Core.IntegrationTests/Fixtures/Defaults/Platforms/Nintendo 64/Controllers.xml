@@ -6,17 +6,17 @@
         <Mapping name="R" input="ButtonRightShoulder" />
         <Mapping name="Z" input="AxisTriggerRight" />
         <Mapping name="Start" input="ButtonStart" />
-        <Mapping name="Stick-Any" input="AxisLeftStick" />
+        <Alias name="Stick-Any" mappings="Stick-Up Stick-Down Stick-Left Stick-Right" />
         <Mapping name="Stick-Up" input="AxisLeftStickUp" />
         <Mapping name="Stick-Down" input="AxisLeftStickDown" />
         <Mapping name="Stick-Left" input="AxisLeftStickLeft" />
         <Mapping name="Stick-Right" input="AxisLeftStickRight" />
-        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
-        <Mapping name="C-Any" input="AxisRightStick" />
+        <Alias name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
         <Mapping name="C-Up" input="AxisRightStickUp" />
         <Mapping name="C-Down" input="AxisRightStickDown" />
         <Mapping name="C-Left" input="AxisRightStickLeft" />

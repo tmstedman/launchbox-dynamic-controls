@@ -3,7 +3,7 @@
         <Mapping name="B" input="ButtonA" />
         <Mapping name="A" input="ButtonB" />
         <Mapping name="Start" input="ButtonStart" />
-        <Mapping name="X-Any" input="ButtonDpad" />
+        <Alias name="X-Any" mappings="X-Up X-Down X-Left X-Right" />
         <Mapping name="X-Up" input="ButtonDpadUp" />
         <Mapping name="X-Down" input="ButtonDpadDown" />
         <Mapping name="X-Left" input="ButtonDpadLeft" />

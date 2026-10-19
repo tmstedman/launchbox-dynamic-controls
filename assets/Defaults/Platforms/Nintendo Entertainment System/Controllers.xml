@@ -4,7 +4,7 @@
         <Mapping name="A" input="ButtonB" />
         <Mapping name="Start" input="ButtonStart" />
         <Mapping name="Select" input="ButtonBack" />
-        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />

@@ -497,7 +497,7 @@ public class InputMappingSubsystemTests
             <Controllers>
               <Controller name="Cabinet" default="true">
                 <Mapping name="BUTTON1" input="ButtonA" />
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -526,7 +526,6 @@ public class InputMappingSubsystemTests
         // labels layer's own collapse pass tell a genuine per-direction disagreement apart from
         // the ordinary case, later).
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpad", "AxisLeftStick",
             "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
         ]);
@@ -536,7 +535,8 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);
 
         // Naturals still record the pre-transform state, so remap detection is unaffected.
-        mapping.NaturalButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        mapping.NaturalButtonToInput["JOYSTICK"].ShouldBe(
+            ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"]);
         mapping.NaturalButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp"]);
     }
 
@@ -548,7 +548,7 @@ public class InputMappingSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -567,24 +567,30 @@ public class InputMappingSubsystemTests
         // No new whole is added -- but the directions siblings currently reach still are, same
         // as any other case, including the one that moved onto the stick.
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpad", "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight",
+            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight",
         ]);
     }
 
     [Fact]
-    public void Scenario_PerGameXmlMovesJoystickDirections_WholeJoystickIsLeftAlone()
+    public void Scenario_PerGameXmlMovesJoystickDirections_TheAliasFollowsThem()
     {
-        // The gate, stated as a test. A per-game file moves every direction onto the stick and
-        // says nothing about JOYSTICK — and JOYSTICK must stay on the Dpad alone.
+        // A per-game file moves every direction onto the stick and says nothing about JOYSTICK.
+        // JOYSTICK follows them, exactly as it would follow an emulator cfg.
         //
-        // This is the one layer that is NOT derived over. Its author writes in the plugin's own
-        // vocabulary and could have said `<Mapping name="JOYSTICK" input="AxisLeftStick" />`
-        // outright; an emulator cfg cannot, which is the whole reason the derivation exists.
-        // Where an author could have spoken and did not, the silence is the instruction.
+        // The alias describes the hardware: this button IS those buttons, a fact about the
+        // cabinet rather than a mapping choice. A per-game file remaps where a button goes; it
+        // cannot change what the stick is made of. So there is nothing here for an override to
+        // override, and the alias simply re-resolves against wherever its members now point.
+        //
+        // An earlier rule read the silence of a hand-written file as an instruction to leave the
+        // whole alone, on the grounds that its author could have spoken and did not. That meant
+        // two files holding identical lines behaved differently by virtue of their directory, with
+        // nothing in either saying so — and an author who does want the whole somewhere else can
+        // now say it outright, by declaring the alias differently.
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -604,7 +610,8 @@ public class InputMappingSubsystemTests
         ResolvedMapping mapping = Build().Load(Game(platform: "Arcade", romName: "handmade"));
 
         mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["AxisLeftStickUp"]);
-        mapping.ButtonToInput["JOYSTICK"].ShouldBe(["ButtonDpad"]);
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(
+            ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"]);
     }
 
     [Fact]
@@ -618,7 +625,7 @@ public class InputMappingSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -642,11 +649,13 @@ public class InputMappingSubsystemTests
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpad", "AxisLeftStick",
             "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
         ]);
-        mapping.InputToButton["AxisLeftStick"].ShouldBe("JOYSTICK");
+        // The reverse lookup stays with the button that bound the direction directly. An alias
+        // appends and never displaces, so JOYSTICK reaching the stick does not take the entry
+        // from JOYSTICK_UP, which is what decides the image the player is shown.
+        mapping.InputToButton["AxisLeftStickUp"].ShouldBe("JOYSTICK_UP");
     }
 
     [Fact]
@@ -659,7 +668,7 @@ public class InputMappingSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -684,7 +693,6 @@ public class InputMappingSubsystemTests
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpad", "AxisLeftStick",
             "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
         ]);
@@ -706,7 +714,7 @@ public class InputMappingSubsystemTests
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Pad" default="true" analogToDigital="left">
-                <Mapping name="Dpad-Any" input="ButtonDpad" />
+                <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
                 <Mapping name="Dpad-Up" input="ButtonDpadUp" />
                 <Mapping name="Dpad-Down" input="ButtonDpadDown" />
                 <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
@@ -734,7 +742,6 @@ public class InputMappingSubsystemTests
         // reach (each direction now carries three targets: its own Dpad part, the mirror's left-
         // stick part, and this transform's right-stick part).
         mapping.ButtonToInput["Dpad-Any"].ShouldBe([
-            "ButtonDpad", "AxisLeftStick", "AxisRightStick",
             "ButtonDpadUp", "AxisRightStickUp", "AxisLeftStickUp",
             "ButtonDpadDown", "AxisRightStickDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisRightStickLeft", "AxisLeftStickLeft",
@@ -755,7 +762,7 @@ public class InputMappingSubsystemTests
               <Controller name="Cabinet" default="true">
                 <Mapping name="BUTTON1" input="ButtonA" />
                 <Mapping name="BUTTON2" input="ButtonB" />
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -790,14 +797,13 @@ public class InputMappingSubsystemTests
 
         // The derivation still found the joystick pairing in that edited reference.
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpad", "AxisLeftStick",
             "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
         ]);
     }
 
     [Fact]
-    public void Scenario_EveryDirectionMovedOffTheDpad_WholeJoystickStopsClaimingIt()
+    public void Scenario_EveryDirectionMovedOffTheDpad_TheAliasFollowsOntoTheStick()
     {
         // The other half of the whole-input problem, and the one still open. A config that binds
         // each joystick direction to a stick axis *alone* — no hat, which is what a player on a
@@ -810,7 +816,7 @@ public class InputMappingSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Mapping name="JOYSTICK" input="ButtonDpad" />
+                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -824,7 +830,6 @@ public class InputMappingSubsystemTests
             analogToDigital: baseline.AnalogToDigital,
             mappings:
             [
-                ("JOYSTICK", "ButtonDpad"),
                 ("JOYSTICK_UP", "AxisLeftStickUp"),
                 ("JOYSTICK_DOWN", "AxisLeftStickDown"),
                 ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
@@ -835,7 +840,8 @@ public class InputMappingSubsystemTests
             .Load(Game(platform: "Arcade", romName: "mslug"));
 
         // Following onto the stick is right and already works.
-        mapping.ButtonToInput["JOYSTICK"].ShouldContain("AxisLeftStick");
+        mapping.ButtonToInput["JOYSTICK"].ShouldBe(
+            ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"]);
 
         // Keeping the D-pad is the bug: no direction of it is driven any more.
         mapping.ButtonToInput["JOYSTICK"].ShouldNotContain("ButtonDpad");
