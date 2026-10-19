@@ -746,4 +746,52 @@ public class VisibilityEvaluatorTests
 
         _underTest.AnyVisible(Agree(0, "ButtonA", "ButtonB"), ctx).ShouldBeTrue();
     }
+
+    // ---- a composite is whatever the context says it is ----
+    //
+    // Every other test here takes Ctx's default set of composites, which mirrors the shipped
+    // template's, so the familiar names can read as though the evaluator recognises them. It does
+    // not: it looks the Input's own name up in VisibilityContext.Wholes and expands whatever it
+    // finds. These two say that in names the engine has never seen.
+
+    private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> Paddle =
+        new Dictionary<string, IReadOnlyList<string>> { ["Paddle"] = ["Paddle-Twist", "Paddle-Push"] };
+
+    [Fact]
+    public void GetVisibilityFlags_FansOutAcrossACompositeTheEngineHasNeverSeen()
+    {
+        var paddle = Input(name: "Paddle");
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["Paddle-Twist"] = "Steer" },
+            wholes: Paddle);
+
+        _underTest.GetVisibilityFlags(paddle, ctx).HasLabel.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void GetVisibilityFlags_NameTheContextDoesNotDeclare_IsOnlyItself()
+    {
+        // The same name, with nothing declaring it a composite: its parts' labels say nothing
+        // about it, so a template that omits the declaration gets no fan-out at all.
+        var paddle = Input(name: "Paddle");
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["Paddle-Twist"] = "Steer" },
+            wholes: new Dictionary<string, IReadOnlyList<string>>());
+
+        _underTest.GetVisibilityFlags(paddle, ctx).HasLabel.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Condition_ExpandsACompositeTheEngineHasNeverSeen()
+    {
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string>
+            {
+                ["Paddle-Twist"] = "Steer",
+                ["Paddle-Push"] = "Steer",
+            },
+            wholes: Paddle);
+
+        _underTest.AnyVisible(Agree(0, "Paddle"), ctx).ShouldBeTrue();
+    }
 }
