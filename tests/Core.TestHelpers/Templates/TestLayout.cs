@@ -27,8 +27,10 @@ internal class TestLayout
         return this;
     }
 
-    /// <summary>Declares a &lt;Whole&gt; — a composite control and the inputs it is made of.</summary>
-    public TestLayout Whole(string name, string parts)
+    /// <summary>Declares a &lt;Whole&gt; — a composite control and the inputs it is made of.
+    /// Both are nullable so a test can build the shapes <see cref="TemplateLoader"/> would have
+    /// rejected, and check that <see cref="LayoutResolver"/> does not trust its input either.</summary>
+    public TestLayout Whole(string? name, string? parts)
     {
         _config.Head.Wholes.Add(new WholeNode { Name = name, Parts = parts });
         return this;

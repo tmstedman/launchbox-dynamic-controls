@@ -116,6 +116,22 @@ public class TemplateLayoutResolverTests
         result.Wholes.ShouldBeEmpty();
     }
 
+    [Theory]
+    [InlineData(null, "ButtonDpadUp ButtonDpadDown")]
+    [InlineData("", "ButtonDpadUp ButtonDpadDown")]
+    [InlineData("ButtonDpad", null)]
+    [InlineData("ButtonDpad", "")]
+    public void Resolve_WholeMissingEitherAttribute_IsSkipped(string? name, string? parts)
+    {
+        // TemplateLoader rejects both shapes before they ever reach here, so this is the
+        // resolver declining to trust its input rather than a case a template can produce.
+        TestLayout config = new TestLayout().Whole(name, parts);
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.Wholes.ShouldBeEmpty();
+    }
+
     [Fact]
     public void Resolve_DuplicateWholeName_KeepsTheFirstAndReports()
     {
