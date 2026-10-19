@@ -42,8 +42,10 @@ public class InputMappingService(
         InputMappingConfig? transformed = _plugins.ApplyTransform(game, baseline);
 
         if (transformed == null)
+        {
             return ResolveAliases(_resolver.Resolve(game.Platform, baseline, baseline.Controller),
                                   platform, baseline.Controller);
+        }
 
         // Transforms shuffle which action a physical button drives; the source baseline is still
         // the natural state, so overwrite the snapshot with the baseline's reverse. That keeps a
