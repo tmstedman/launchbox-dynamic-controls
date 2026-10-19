@@ -40,7 +40,8 @@ public class InputRenderingService(
         var ctx = new VisibilityContext(
             Mapping: mapping,
             LabelText: labels.LabelText,
-            IsGameSpecific: labels.IsGameSpecific);
+            IsGameSpecific: labels.IsGameSpecific,
+            Wholes: template.Layout.Wholes);
         FilteredLayout layout = _layoutFilter.Filter(template, ctx);
 
         var allLabels = new List<RenderedLabel>();
