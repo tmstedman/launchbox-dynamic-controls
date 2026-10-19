@@ -246,7 +246,8 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().OrderBy(b => b, StringComparer.Ordinal));
 
     /// <summary>
-    /// Final pass over a whole control (<see cref="WholeInputs.PartsOf"/>) and its four
+    /// Final pass over a whole control (<see cref="WholeInputs.PartsOf"/> — the last fixed
+    /// vocabulary in Core, see that type for what retiring it would take) and its four
     /// directions, handling two distinct shapes the layout can't tell apart from a single "does
     /// this input have a label" check:
     ///
@@ -269,7 +270,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// merge, it already renders correctly on its own. Two directions that disagree, or where a
     /// third has its own distinct text, are also left alone -- a genuine per-direction remap
     /// renders each with its own, correct text instead of being smoothed over by whichever
-    /// whole-level claim <see cref="WholeInputDeriver"/> may separately have added.
+    /// whole-level claim an <c>&lt;Alias&gt;</c> may separately have added.
     /// </summary>
     private void CollapseWholeDirections(Dictionary<string, string> labelText)
     {

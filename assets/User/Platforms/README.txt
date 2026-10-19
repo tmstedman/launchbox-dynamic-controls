@@ -53,6 +53,32 @@ entries to match your emulator's configuration.
 
   </Controllers>
 
+A control that works as a unit — a stick, a D-pad, a C-button cluster — gets an
+<Alias> naming the buttons it is made of. The alias reaches whatever those
+buttons reach, so a label written against it describes the whole control:
+
+  <Controller name="Pad" default="true">
+
+      <Alias name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
+      <Mapping name="C-Up"    input="AxisRightStickUp" />
+      <Mapping name="C-Down"  input="AxisRightStickDown" />
+      <Mapping name="C-Left"  input="AxisRightStickLeft" />
+      <Mapping name="C-Right" input="AxisRightStickRight" />
+
+  </Controller>
+
+An alias is resolved last — after your emulator's configuration and any
+per-game override are read — because an emulator binds directions one at a
+time and has no way to name a control as a unit. Pointing the alias straight
+at a generic input instead (input="AxisRightStick") would fix it at the moment
+you wrote the file, and the label would be lost on any game whose emulator
+config had moved the directions underneath it.
+
+An alias never displaces a direct mapping: if some button drives an input
+outright, that button keeps the slot and decides which image is shown. An
+alias whose buttons are all unmapped reaches nothing and is skipped. Aliases
+are inherited by inheritFrom alongside mappings, overridden by name.
+
 Every mapping a variant uses must be reachable from that variant — either
 listed inside it or inherited via inheritFrom. There is no file-wide baseline:
 <Mapping> elements placed directly under <Controllers> are ignored.
@@ -78,6 +104,9 @@ Attributes:
                     selection is made.
   Controller/@inheritFrom     Name of another <Controller> whose mappings are
                     prepended before this variant's own.
+  Alias/@name       Platform button name being declared — usable in Labels.xml
+                    like any other.
+  Alias/@mappings   Space-separated platform button names it stands for.
   Controller/@analogToDigital="left"|"right"  Mirrors Dpad platform buttons
                     onto the named stick's generic inputs. Not inherited —
                     read from each variant's own attribute.

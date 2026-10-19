@@ -9,8 +9,8 @@ namespace DynamicControls.Core.Tests.Rendering;
 
 /// <summary>
 /// Unit tests for <see cref="VisibilityEvaluator"/>. Pins three things:
-/// (1) flag fan-out — a parent input's HasLabel/IsMapped flags OR-reduce across its whole-control
-/// part names, read directly from <see cref="WholeInputs.PartsOf"/> by the input's own name,
+/// (1) flag fan-out — a parent input's HasLabel/IsMapped flags OR-reduce across its composite's
+/// part names, looked up in <see cref="VisibilityContext.Wholes"/> by the input's own name,
 /// including the IsMapped fallback through NaturalInputToButton that lets remapped inputs still
 /// count as mapped; (2) AnyVisible dispatch — InputDefinitions resolve via their own renders or
 /// their structural Children, OneOfs OR across alternatives, Containers have no case of their own
@@ -80,8 +80,8 @@ public class VisibilityEvaluatorTests
     public void GetVisibilityFlags_DescendantHasLabel_PropagatesHasLabelToParent()
     {
         // given a parent input with a labelled descendant — the stick has no label of its own,
-        // but its Up direction does. Named for a real WholeInputs.PartsOf entry, since fan-out
-        // is now read directly from that dictionary rather than an injected override.
+        // but its Up direction does. Named for a composite Ctx declares by default, since fan-out
+        // comes from the context's Wholes rather than the Children nesting below.
         var stickUp = Input(name: "AxisLeftStickUp");
         var stick = Input(
             name: "AxisLeftStick",
@@ -167,8 +167,8 @@ public class VisibilityEvaluatorTests
     [Fact]
     public void AnyVisible_InputWithoutRenders_ButMappedDescendant_ReturnsTrue()
     {
-        // given an input with no renders of its own, but a child that's mapped. Named for a real
-        // WholeInputs.PartsOf entry, since fan-out is now read directly from that dictionary.
+        // given an input with no renders of its own, but a child that's mapped. Named for a
+        // composite Ctx declares by default, since that is where fan-out reads its parts.
         var child = Input(
             name: "AxisLeftStickUp",
             images: [Image(ShowIfCondition.Mapped)]);
