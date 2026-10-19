@@ -400,7 +400,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
 
     private ConditionMatch LogUnknownConditionMatch(string value)
     {
-        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping, auto. Defaulting to label.");
+        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping, auto, agree. Defaulting to label.");
         return ConditionMatch.Label;
     }
 

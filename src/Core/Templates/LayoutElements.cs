@@ -86,18 +86,18 @@ public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement
 /// for deciding whether a <see cref="Container"/> exists at all this game, since a Container has
 /// no implicit visibility check of its own.
 /// </summary>
-/// <param name="Mode">Whether <see cref="Names"/> must all match, any one, or none.</param>
-/// <param name="Names">The generic input names the condition checks — not necessarily
-/// descendants of <see cref="Children"/>.</param>
-/// <param name="Match">Whether a name "matches" by having a label or by being mapped.</param>
+/// <param name="Mode">Whether <see cref="AtLeast"/> of <see cref="Names"/> must match, or none
+/// of them.</param>
+/// <param name="Names">The generic inputs checked, as the template wrote them — not necessarily
+/// descendants of <see cref="Children"/>. A composite is expanded to its parts when the condition
+/// is evaluated, since only then is the template's own declaration in reach.</param>
+/// <param name="Match">Whether a name "matches" by having a label, by being mapped, or by
+/// agreeing with the others on one shared text.</param>
 /// <param name="Children">Rendered only when the condition evaluates true; dropped entirely
 /// otherwise, the same as anything else that isn't reached.</param>
-[ExcludeFromCodeCoverage]
-/// <param name="Names">The generic inputs checked, as the template wrote them. A composite is
-/// expanded to its parts when the condition is evaluated, since only then is the template's own
-/// declaration in reach.</param>
 /// <param name="AtLeast">How many must match, or 0 for "all of them" — so naming a composite and
 /// nothing else asks about the whole control, which is what a reader expects it to mean.</param>
+[ExcludeFromCodeCoverage]
 public record ConditionElement(
     ConditionMode Mode,
     IReadOnlyList<string> Names,
@@ -108,7 +108,7 @@ public record ConditionElement(
 /// <summary>How a <see cref="ConditionElement"/> combines its <see cref="ConditionElement.Names"/>.</summary>
 public enum ConditionMode
 {
-    /// <summary>True when at least <see cref="ConditionElement.Required"/> of the named inputs
+    /// <summary>True when at least <see cref="ConditionElement.AtLeast"/> of the named inputs
     /// match. Subsumes the old any/all pair: <c>atLeast="1"</c> is any, and the default — every
     /// name — is all.</summary>
     AtLeast,
@@ -205,7 +205,7 @@ public record OverlayElement(OverlayDefinition Overlay) : ILayoutElement;
 /// <param name="Children">Nested layout elements — Container, OneOf, or Condition in document
 /// order (nesting another InputDefinition directly is unusual, and the shipped template no
 /// longer does it at all). A whole control's own <c>showIf="auto"</c> fan-out does <b>not</b>
-/// come from here — see <see cref="WholeInputs.PartsOf"/>.</param>
+/// come from here — see <see cref="Rendering.VisibilityContext.Wholes"/>.</param>
 [ExcludeFromCodeCoverage]
 public record InputDefinition(
     string Name,

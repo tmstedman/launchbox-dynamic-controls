@@ -216,14 +216,13 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// <summary>
 /// Pipeline input assembled once per render pass and threaded through LayoutFilter,
 /// InputImageRenderer, and VisibilityEvaluator. Holds the mapping, label text, and game-specific
-/// flag for the current template; whole-control fan-out is read directly from
-/// <see cref="WholeInputs.PartsOf"/>, needing no per-template state.
+/// flag for the current template, plus the composite controls that template declares.
 /// </summary>
-[ExcludeFromCodeCoverage]
 /// <param name="Wholes">The composite controls the active template declares, each mapped to the
 /// inputs it is made of — see <see cref="Templates.WholeNode"/>. Carried here rather than read
 /// from a fixed table in Core, so which inputs form a stick is the template's statement about
 /// the controller it draws. Empty for a template declaring none.</param>
+[ExcludeFromCodeCoverage]
 public record VisibilityContext(
     ResolvedMapping Mapping,
     IReadOnlyDictionary<string, string> LabelText,
