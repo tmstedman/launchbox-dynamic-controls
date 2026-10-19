@@ -91,6 +91,46 @@ public class TemplateLayoutResolverTests
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
+    // --- <Whole> declarations ---
+
+    [Fact]
+    public void Resolve_WholeDeclarations_SurfaceAsANameToPartsLookup()
+    {
+        TestLayout config = new TestLayout()
+            .Whole("ButtonDpad", "ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight");
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.Wholes.Keys.ShouldContain("ButtonDpad");
+        result.Wholes["ButtonDpad"].ShouldBe(
+            ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"]);
+    }
+
+    [Fact]
+    public void Resolve_NoWholeDeclarations_LeavesAnEmptyLookupRatherThanNull()
+    {
+        // A pad drawn without sticks or a d-pad declares none, and every caller expands names
+        // through this — so it is empty rather than absent, and nobody has to ask which.
+        ResolvedLayout result = _underTest.Resolve(new TestLayout(), _imageSource);
+
+        result.Wholes.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_DuplicateWholeName_KeepsTheFirstAndReports()
+    {
+        // Taking either silently would make a composite's parts depend on document order, and
+        // nothing downstream could tell which it got.
+        TestLayout config = new TestLayout()
+            .Whole("ButtonDpad", "ButtonDpadUp ButtonDpadDown")
+            .Whole("ButtonDpad", "AxisLeftStickUp AxisLeftStickDown");
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.Wholes["ButtonDpad"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("ButtonDpad")));
+    }
+
     // --- Style defaults from <Head><Style> ---
 
     [Fact]
