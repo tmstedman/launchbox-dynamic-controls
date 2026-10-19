@@ -298,6 +298,77 @@ public class InputMappingLoaderTests
             .ShouldBe([("A", "ButtonX"), ("Start", "ButtonStart"), ("Y", "ButtonY")]);
     }
 
+    // --- <Alias>: one platform button standing for several ---
+
+    [Fact]
+    public void LoadPlatformMapping_Alias_IsParsedAlongsideMappings()
+    {
+        string path = Path.Combine(DefaultsDir, "Platforms", "Nintendo 64", "Controllers.xml");
+        StubXml(path, """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='C-Up' input='AxisRightStickUp' />
+                <Mapping name='C-Down' input='AxisRightStickDown' />
+                <Alias name='C-Any' mappings='C-Up C-Down' />
+              </Controller>
+            </Controllers>
+            """);
+
+        var result = _underTest.LoadPlatformMapping("Nintendo 64")!;
+
+        AliasEntry alias = result.Controllers[0].Aliases.ShouldHaveSingleItem();
+        alias.Name.ShouldBe("C-Any");
+        alias.Mappings.ShouldBe(["C-Up", "C-Down"]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_Alias_InheritsAndIsReplacedByNameLikeAMapping()
+    {
+        // A descendant redeclaring an alias replaces it outright rather than adding members, so
+        // what a name stands for is always stated in one place.
+        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+        StubXml(path, """
+            <Controllers>
+              <Controller name='3-Button'>
+                <Alias name='Dpad-Any' mappings='Dpad-Up Dpad-Down' />
+                <Alias name='Stick-Any' mappings='L-Up L-Down' />
+              </Controller>
+              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+                <Alias name='Dpad-Any' mappings='Dpad-Up Dpad-Down Dpad-Left Dpad-Right' />
+              </Controller>
+            </Controllers>
+            """);
+
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        result.Controllers[1].Aliases.Select(a => (a.Name, string.Join(" ", a.Mappings)))
+            .ShouldBe([("Dpad-Any", "Dpad-Up Dpad-Down Dpad-Left Dpad-Right"), ("Stick-Any", "L-Up L-Down")]);
+    }
+
+    [Theory]
+    [InlineData("<Alias mappings='A B' />", "name")]
+    [InlineData("<Alias name='X' />", "mappings")]
+    [InlineData("<Alias name='X' mappings='A' />", "mappings")]
+    public void LoadPlatformMapping_IncompleteAlias_IsLoggedAndSkipped(string alias, string expected)
+    {
+        // A single member is that button under another name, which the mappings already express.
+        string path = Path.Combine(DefaultsDir, "Platforms", "Arcade", "Controllers.xml");
+        StubXml(path, $"""
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+                {alias}
+              </Controller>
+            </Controllers>
+            """);
+
+        var result = _underTest.LoadPlatformMapping("Arcade")!;
+
+        result.Controllers[0].Aliases.ShouldBeEmpty();
+        result.Controllers[0].Mappings.ShouldHaveSingleItem();   // parsing carried on
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Alias") && s.Contains(expected)));
+    }
+
     [Fact]
     public void LoadPlatformMapping_InheritFrom_SameNameInChild_ReplacesParentEntry()
     {
