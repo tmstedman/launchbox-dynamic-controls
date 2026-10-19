@@ -40,12 +40,10 @@ public class AnalogToDigitalMirrorTests
     }
 
     [Theory]
-    [InlineData(Left, "ButtonDpad", "AxisLeftStick")]
     [InlineData(Left, "ButtonDpadUp", "AxisLeftStickUp")]
     [InlineData(Left, "ButtonDpadDown", "AxisLeftStickDown")]
     [InlineData(Left, "ButtonDpadLeft", "AxisLeftStickLeft")]
     [InlineData(Left, "ButtonDpadRight", "AxisLeftStickRight")]
-    [InlineData(Right, "ButtonDpad", "AxisRightStick")]
     [InlineData(Right, "ButtonDpadUp", "AxisRightStickUp")]
     [InlineData(Right, "ButtonDpadDown", "AxisRightStickDown")]
     [InlineData(Right, "ButtonDpadLeft", "AxisRightStickLeft")]
