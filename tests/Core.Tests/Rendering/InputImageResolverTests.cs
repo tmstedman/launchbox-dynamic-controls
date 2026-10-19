@@ -82,6 +82,33 @@ public class InputImageResolverTests
     }
 
     [Fact]
+    public void Resolve_CompositeCoveredByMoreThanOneButton_IsUnmapped()
+    {
+        // Two buttons each reach every part -- an analogToDigital mirror puts the directions
+        // under a second button alongside the first. Neither one stands for the cluster on its
+        // own, so there is nothing to borrow a picture from and the generic is right.
+        var input = Input("AxisRightStick");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStick.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStick"] = ["AxisRightStickUp", "AxisRightStickDown"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Any"] = ["AxisRightStickUp", "AxisRightStickDown"],
+                ["Dpad-Any"] = ["AxisRightStickUp", "AxisRightStickDown"],
+            });
+        _imageSource.Resolve("AxisRightStick.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisRightStick.png", "platform/AxisRightStick.png"));
+
+        string path = _underTest.Resolve(image, input, mapping, template);
+
+        path.ShouldBe("AxisRightStick.png");
+    }
+
+    [Fact]
     public void Resolve_CompositeWhosePartsSplitAcrossButtons_IsUnmapped()
     {
         // A remap moved the directions onto different buttons, so no single one stands for the
