@@ -32,8 +32,10 @@ entries to match your emulator's configuration.
       <!-- A <Controller> defines a named variant (e.g. a 3-button vs 6-button
            pad). The variant with default="true" is used unless a game's input
            mapping selects a different one.
-           analogToDigital="left" mirrors Dpad platform buttons onto the left
-           stick generic inputs so both work for directional labels. -->
+           analogToDigital="left" mirrors Dpad direction buttons onto the left
+           stick's directions so both work for directional labels. A button
+           declared with <Alias> reaches those directions, so the whole stick
+           follows from them. -->
 
       <Controller name="3-Button" analogToDigital="left" default="true">
           <Mapping name="A" input="ButtonX" />
@@ -107,9 +109,9 @@ Attributes:
   Alias/@name       Platform button name being declared — usable in Labels.xml
                     like any other.
   Alias/@mappings   Space-separated platform button names it stands for.
-  Controller/@analogToDigital="left"|"right"  Mirrors Dpad platform buttons
-                    onto the named stick's generic inputs. Not inherited —
-                    read from each variant's own attribute.
+  Controller/@analogToDigital="left"|"right"  Mirrors Dpad direction buttons
+                    onto the named stick's directions. Not inherited — read
+                    from each variant's own attribute.
   Controllers/@inheritFrom    Platform name of another platform folder whose
                     variants are pulled in and merged under this file's own.
 
