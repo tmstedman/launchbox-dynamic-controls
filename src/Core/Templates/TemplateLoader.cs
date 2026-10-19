@@ -65,28 +65,57 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         return result;
     }
 
-    /// <summary>Parses a &lt;Head&gt; element. Each &lt;Style&gt; child is either unnamed
-    /// (template-wide defaults) or named (a referenceable bundle stored in NamedStyles). Other
-    /// children are logged as errors.</summary>
+    /// <summary>Parses a &lt;Head&gt; element. A &lt;Style&gt; child is either unnamed
+    /// (template-wide defaults) or named (a referenceable bundle stored in NamedStyles); a
+    /// &lt;Whole&gt; declares a composite control. Other children are logged as errors.</summary>
     private HeadNode ParseHead(XmlElement headNode)
     {
         var head = new HeadNode();
         foreach (XmlElement child in headNode.ChildNodes.OfType<XmlElement>())
         {
-            if (child.Name != "Style")
+            switch (child.Name)
             {
-                _logger.Error($"Invalid element <{child.Name}> in <Head>");
-                continue;
+                case "Style":
+                    string? name = child.Attributes["name"]?.Value;
+                    StyleNode style = ParseStyle(child);
+                    if (string.IsNullOrEmpty(name))
+                        head.Style = style;
+                    else
+                        head.NamedStyles[name] = style;
+                    break;
+                case "Whole":
+                    if (ParseWhole(child) is WholeNode whole) head.Wholes.Add(whole);
+                    break;
+                default:
+                    _logger.Error($"Invalid element <{child.Name}> in <Head>");
+                    break;
             }
-
-            string? name = child.Attributes["name"]?.Value;
-            StyleNode style = ParseStyle(child);
-            if (string.IsNullOrEmpty(name))
-                head.Style = style;
-            else
-                head.NamedStyles[name] = style;
         }
         return head;
+    }
+
+    /// <summary>Parses a &lt;Whole&gt; element. Both attributes are required and a composite
+    /// needs more than one part — a name standing for a single input is an alias for it, which
+    /// nothing here supports and which would silently behave as the input itself. Reported and
+    /// skipped rather than refused, matching how an unrecognised vAlign degrades.</summary>
+    private WholeNode? ParseWhole(XmlElement node)
+    {
+        string? name = node.Attributes["name"]?.Value;
+        string? parts = node.Attributes["parts"]?.Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _logger.Error("Skipping <Whole>: missing 'name' attribute");
+            return null;
+        }
+        if (string.IsNullOrEmpty(parts) || parts.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length < 2)
+        {
+            _logger.Error($"Skipping <Whole name=\"{name}\">: 'parts' must name more than one input");
+            return null;
+        }
+
+        _logger.Debug($"Whole: {name} = {parts}");
+        return new WholeNode { Name = name, Parts = parts };
     }
 
     /// <summary>Parses a &lt;Style&gt; element's attributes. Each is nullable — absence means

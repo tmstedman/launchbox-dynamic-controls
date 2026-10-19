@@ -142,6 +142,61 @@ public class TemplateLoaderTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("Garbage") && s.Contains("Head")));
     }
 
+    // --- <Whole>: composite controls ---
+
+    [Fact]
+    public void LoadLayout_Whole_PopulatesHeadWholes()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Head>
+                <Whole name="ButtonDpad" parts="ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight" />
+              </Head>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        WholeNode whole = result.Head.Wholes.ShouldHaveSingleItem();
+        whole.Name.ShouldBe("ButtonDpad");
+        whole.Parts.ShouldBe("ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void LoadLayout_WholeWithoutName_IsLoggedAndSkipped()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Head><Whole parts="ButtonDpadUp ButtonDpadDown" /></Head>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Head.Wholes.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Whole") && s.Contains("name")));
+    }
+
+    [Theory]
+    [InlineData("")]                 // no parts at all
+    [InlineData("ButtonDpadUp")]     // one part is an alias for that input, not a composite
+    public void LoadLayout_WholeWithFewerThanTwoParts_IsLoggedAndSkipped(string parts)
+    {
+        // A composite standing for a single input would behave as that input, silently — nothing
+        // downstream could tell the two apart, so the declaration is refused rather than honoured.
+        StubLayoutXml($"""
+            <ControllerTemplate>
+              <Head><Whole name="ButtonDpad" parts="{parts}" /></Head>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Head.Wholes.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("ButtonDpad") && s.Contains("parts")));
+    }
+
     [Fact]
     public void LoadLayout_StyleWithoutFontSize_LeavesFontSizeNull()
     {

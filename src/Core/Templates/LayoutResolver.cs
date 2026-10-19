@@ -46,7 +46,29 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             CollapseInfo: collapseInfo,
             DefaultFontSize: defaultFontSize,
             DefaultMinOpacity: defaultMinOpacity,
-            DefaultInactiveBlurRadius: defaultInactiveBlurRadius);
+            DefaultInactiveBlurRadius: defaultInactiveBlurRadius,
+            Wholes: BuildWholes(config.Head.Wholes));
+    }
+
+    /// <summary>
+    /// Resolves the &lt;Whole&gt; declarations into a name-to-parts lookup. A repeated name is
+    /// reported and the later one ignored: silently taking either would make which parts a
+    /// composite has depend on document order, and nothing downstream could tell.
+    /// </summary>
+    private IReadOnlyDictionary<string, IReadOnlyList<string>> BuildWholes(IReadOnlyList<WholeNode> wholes)
+    {
+        var resolved = new Dictionary<string, IReadOnlyList<string>>();
+        foreach (WholeNode w in wholes)
+        {
+            if (w.Name is not { Length: > 0 } name || w.Parts is not { Length: > 0 } parts) continue;
+            if (resolved.ContainsKey(name))
+            {
+                _logger.Error($"Duplicate <Whole name=\"{name}\">; keeping the first declaration");
+                continue;
+            }
+            resolved[name] = [.. parts.Split(' ', StringSplitOptions.RemoveEmptyEntries)];
+        }
+        return resolved;
     }
 
     private ILayoutElement BuildNode(ILayoutNode node, BuildContext ctx) => node switch

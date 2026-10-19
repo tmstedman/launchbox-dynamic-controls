@@ -35,6 +35,32 @@ public record HeadNode
     /// each missing attribute from NamedStyles["X"]. Explicit attributes on the Input always
     /// win over the named-style value.</summary>
     public Dictionary<string, StyleNode> NamedStyles { get; set; } = [];
+
+    /// <summary>&lt;Whole&gt; declarations — a composite control and the direction inputs it is
+    /// made of. Empty means the template has none, which is legitimate: a pad drawn without
+    /// sticks or a d-pad needs no composites.</summary>
+    public List<WholeNode> Wholes { get; set; } = [];
+}
+
+/// <summary>
+/// Raw DTO for &lt;Whole&gt;: a control that is several inputs at once, named so the template can
+/// draw it as one thing. <c>&lt;Whole name="AxisLeftStick" parts="AxisLeftStickUp …" /&gt;</c>.
+///
+/// <para>This is where the composite vocabulary lives. It was a fixed table in Core, which the
+/// mapping layer and the renderer both read; the mapping layer stops needing it once a platform
+/// button can name several others directly, leaving the template as the only consumer — and a
+/// composite is a statement about how a controller is drawn, which is what a template is for.</para>
+/// </summary>
+public record WholeNode
+{
+    /// <summary>The composite's own name, used wherever a generic input name is accepted:
+    /// <c>&lt;Input name&gt;</c>, <c>&lt;Container for&gt;</c>, <c>&lt;Condition&gt;</c>, and to
+    /// resolve its image file. Null when the attribute is missing, which the loader reports.</summary>
+    public string? Name { get; set; }
+
+    /// <summary>Space-separated names of the inputs it is made of, in no particular order —
+    /// nothing reads them positionally.</summary>
+    public string? Parts { get; set; }
 }
 
 /// <summary>

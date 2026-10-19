@@ -27,6 +27,13 @@ internal class TestLayout
         return this;
     }
 
+    /// <summary>Declares a &lt;Whole&gt; — a composite control and the inputs it is made of.</summary>
+    public TestLayout Whole(string name, string parts)
+    {
+        _config.Head.Wholes.Add(new WholeNode { Name = name, Parts = parts });
+        return this;
+    }
+
     /// <summary>Adds a named &lt;Style&gt; referenced from Inputs via the `style` attribute.</summary>
     public TestLayout NamedStyle(
         string name,
