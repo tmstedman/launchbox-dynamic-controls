@@ -1,3 +1,5 @@
+using DynamicControls.Tools.Common;
+
 namespace DynamicControls.LabelDump;
 
 /// <summary>
@@ -43,20 +45,22 @@ public record Options(
 
           --root <dir>        plugin data root (Defaults/, User/, Templates/). Default: assets
           --cfg <dir>         directory containing cfg/{rom}.cfg. Required.
-          --out <file>        pipeline output. Default: label-sources/arcade-pipeline-sorted.xml
+          --out <file>        pipeline output.
+                              Default: tools/LabelDump/output/arcade-pipeline-sorted.xml
           --platform <name>   platform to resolve as. Default: Arcade
           --limit <n>         stop after n roms (0 = all). Default: 0
           --artwork <file>    transcription to take titles from.
                               Default: label-sources/arcade-artwork.xml
           --artwork-out <f>   also write that transcription back in canonical order, so the
-                              pair diffs cleanly. Default: label-sources/arcade-artwork-sorted.xml
+                              pair diffs cleanly.
+                              Default: tools/LabelDump/output/arcade-artwork-sorted.xml
           --images-out <f>    also write the images the roms rendered, grouped by distinct
                               render shape, as a baseline for changes that never touch a label.
-                              Default: label-sources/arcade-pipeline-images.xml
+                              Default: tools/LabelDump/output/arcade-pipeline-images.xml
           --platforms-out <f> also write what every platform draws - its default mapping, plus
                               each game its Labels.xml names. Images and labels together; the
                               only coverage the console platforms have.
-                              Default: label-sources/platform-renders.xml
+                              Default: tools/LabelDump/output/platform-renders.xml
 
         e.g. dotnet run --project tools/LabelDump -- --cfg romcontrols
         """;
@@ -66,16 +70,20 @@ public record Options(
     /// unusable. Null means "exit non-zero", not "carry on with defaults" — a typo'd flag
     /// silently falling back to a default would send the run at the wrong data.
     /// </summary>
+    /// <summary>Where every file this tool writes goes. Generated, so ignored by git — only
+    /// the hand-edited sources under <c>label-sources/</c> are tracked.</summary>
+    private static readonly string OutputDir = ToolPaths.Output("LabelDump");
+
     public static Options? Parse(string[] args)
     {
         string root = "assets", cfg = "";
-        string output = "label-sources/arcade-pipeline-sorted.xml";
+        string output = Path.Combine(OutputDir, "arcade-pipeline-sorted.xml");
         string platform = "Arcade";
         int limit = 0;
         string artwork = "label-sources/arcade-artwork.xml";
-        string artworkOut = "label-sources/arcade-artwork-sorted.xml";
-        string imagesOut = "label-sources/arcade-pipeline-images.xml";
-        string platformsOut = "label-sources/platform-renders.xml";
+        string artworkOut = Path.Combine(OutputDir, "arcade-artwork-sorted.xml");
+        string imagesOut = Path.Combine(OutputDir, "arcade-pipeline-images.xml");
+        string platformsOut = Path.Combine(OutputDir, "platform-renders.xml");
 
         for (int i = 0; i < args.Length; i++)
         {
