@@ -878,6 +878,45 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_ConditionMatchAgree_Parses()
+    {
+        // "agree" is what separates a cluster labelled once as a unit from parts that each say
+        // something different -- counting alone cannot, since both leave every part labelled.
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").Match("agree").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Match.ShouldBe(ConditionMatch.Agree);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Resolve_ConditionAtLeastOmitted_RequiresEveryName()
+    {
+        // The default is every name, so naming a composite and nothing else asks about the whole
+        // control -- which is what a reader expects it to mean.
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A B").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.AtLeast.ShouldBe(0);
+    }
+
+    [Theory]
+    [InlineData("nonsense")]
+    [InlineData("0")]
+    [InlineData("-1")]
+    public void Resolve_ConditionAtLeastNotAPositiveNumber_LogsErrorAndRequiresEveryName(string raw)
+    {
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A B").AtLeast(raw).Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.AtLeast.ShouldBe(0);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("atLeast") && s.Contains(raw)));
+    }
+
+    [Fact]
     public void Resolve_ConditionUnknownMatch_LogsErrorAndDefaultsToLabel()
     {
         TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Match("bogus").Input("A"));
