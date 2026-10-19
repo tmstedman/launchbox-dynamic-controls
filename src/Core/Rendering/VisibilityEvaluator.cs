@@ -219,7 +219,7 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// flag for the current template, plus the composite controls that template declares.
 /// </summary>
 /// <param name="Wholes">The composite controls the active template declares, each mapped to the
-/// inputs it is made of — see <see cref="Templates.WholeNode"/>. Carried here rather than read
+/// inputs it is made of — see <see cref="WholeNode"/>. Carried here rather than read
 /// from a fixed table in Core, so which inputs form a stick is the template's statement about
 /// the controller it draws. Empty for a template declaring none.</param>
 [ExcludeFromCodeCoverage]
