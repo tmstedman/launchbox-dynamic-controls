@@ -57,6 +57,6 @@ internal static class InputMappingFactory
         }
 
         var plugins = new InputMappingPlugins(logger, assembledSources, transforms, config);
-        return new InputMappingService(loader, resolver, plugins, new WholeInputDeriver(logger));
+        return new InputMappingService(loader, resolver, plugins, new AliasResolver(logger));
     }
 }
