@@ -10,7 +10,7 @@
         <Mapping name="L" input="AxisTriggerLeft" />
         <Mapping name="R" input="AxisTriggerRight" />
         <Mapping name="Start" input="ButtonStart" />
-        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
@@ -18,7 +18,7 @@
     </Controller>
 
     <Controller name="3D Control Pad" inheritFrom="Control Pad">
-        <Mapping name="L-Any" input="AxisLeftStick" />
+        <Alias name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
         <Mapping name="L-Down" input="AxisLeftStickDown" />
         <Mapping name="L-Left" input="AxisLeftStickLeft" />

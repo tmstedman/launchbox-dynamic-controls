@@ -7,7 +7,7 @@
         <Mapping name="R" input="ButtonRightShoulder" />
         <Mapping name="X" input="ButtonBack" />
         <Mapping name="P" input="ButtonStart" />
-        <Mapping name="Dpad-Any" input="ButtonDpad" />
+        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />

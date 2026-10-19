@@ -27,12 +27,12 @@ public class InputMappingService(
     IInputMappingLoader loader,
     IInputMappingResolver resolver,
     IInputMappingPlugins plugins,
-    WholeInputDeriver deriver) : IInputMappingService
+    AliasResolver aliasResolver) : IInputMappingService
 {
     private readonly IInputMappingLoader _loader = loader;
     private readonly IInputMappingResolver _resolver = resolver;
     private readonly IInputMappingPlugins _plugins = plugins;
-    private readonly WholeInputDeriver _deriver = deriver;
+    private readonly AliasResolver _aliasResolver = aliasResolver;
 
     /// <inheritdoc />
     public ResolvedMapping Load(GameInfo game)
@@ -42,7 +42,8 @@ public class InputMappingService(
         InputMappingConfig? transformed = _plugins.ApplyTransform(game, baseline);
 
         if (transformed == null)
-            return _resolver.Resolve(game.Platform, baseline, baseline.Controller);
+            return ResolveAliases(_resolver.Resolve(game.Platform, baseline, baseline.Controller),
+                                  platform, baseline.Controller);
 
         // Transforms shuffle which action a physical button drives; the source baseline is still
         // the natural state, so overwrite the snapshot with the baseline's reverse. That keeps a
@@ -64,10 +65,16 @@ public class InputMappingService(
         };
 
         // A transform came from an emulator's config, which binds individual directions and has
-        // no way to name a whole control. So a whole-input button (JOYSTICK, Dpad-Any) is left
-        // behind wherever its directions were moved to; follow it onto them. The naturals spliced
-        // in above are what the derivation reads the whole-and-parts pairing from, so this runs
-        // after that and not before.
-        return _deriver.Derive(spliced);
+        // no way to name a control as a unit. So an alias — a button that does name one — is read
+        // last, against wherever its members actually ended up.
+        return ResolveAliases(spliced, platform, transformed.Controller ?? baseline.Controller);
+    }
+
+    /// <summary>Applies the selected controller's own aliases, if it declares any.</summary>
+    private ResolvedMapping ResolveAliases(
+        ResolvedMapping mapping, PlatformControllersConfig? platform, string? controllerName)
+    {
+        ControllerConfig? controller = platform?.Resolve(controllerName);
+        return _aliasResolver.Apply(mapping, controller?.Aliases ?? []);
     }
 }
