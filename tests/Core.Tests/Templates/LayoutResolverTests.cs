@@ -860,6 +860,21 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_ConditionWithAnEmptyNoneAttribute_StillReadsInputs()
+    {
+        // TemplateLoader counts an attribute as present only when it is non-empty, so
+        // none="" leaves `inputs` as the one specified. Discriminating on null here instead
+        // would flip the whole condition to None mode over a name list that is empty, and its
+        // children would vanish with nothing logged.
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").None("").AtLeast(1).Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Mode.ShouldBe(ConditionMode.AtLeast);
+        condition.Names.ShouldBe(["A"]);
+    }
+
+    [Fact]
     public void Resolve_ConditionNone_ParsesMode()
     {
         TestLayout config = new TestLayout().Condition(c => c.None("A").Input("A"));
