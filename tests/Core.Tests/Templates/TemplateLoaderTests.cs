@@ -164,6 +164,22 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_WholeWithNoPartsAttribute_SkippedAndLogged()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Head><Whole name="ButtonDpad" /></Head>
+              <Body><Input name="ButtonDpad" /></Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Head.Wholes.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("parts")));
+    }
+
+    [Fact]
     public void LoadLayout_WholeWithoutName_IsLoggedAndSkipped()
     {
         StubLayoutXml("""
