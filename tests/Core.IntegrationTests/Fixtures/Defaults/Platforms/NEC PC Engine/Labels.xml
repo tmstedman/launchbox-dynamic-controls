@@ -8,4 +8,8 @@
     <Input name="III">Heavy Punch</Input>
     <Input name="IV">Light Kick</Input>
   </Game>
+  <Game romName="Bomberman (Japan)">
+    <Input name="I">Bomb</Input>
+    <Input name="II">Detonate</Input>
+  </Game>
 </Labels>
