@@ -108,6 +108,31 @@ Each carries the command that rebuilds it. Regenerate before trusting a diff —
 Arcade files need a local MAME cfg pack, which is not in the repository, so they cannot be
 rebuilt from a clean checkout.
 
+## The analysis files are a paused thread, not debris
+
+`review-notes.md`, `judgement-calls.md`, `button-duplicates-triage.md`,
+`button-duplicates-cross-checked.md`, `arcade-labels-review.md` and the
+`cfg-cross-reference-*` pair are what a data-quality pass found. The work stopped rather than
+finished: 22 `<Note>` questions are still open, and more than half the flagged button duplicates
+are still duplicated in the transcription.
+
+**The A/B comparison cannot replace them, and will never surface what they hold.** It measures
+whether the pipeline renders what the artwork says — so when the artwork labels two distinct
+buttons the same, the pipeline renders both that way and the comparison calls the game a perfect
+match. Most of the remaining duplicates sit inside that matching set. The comparison's ceiling is
+"faithful to the artwork"; these files are about whether the artwork is right, which is a
+different question and needs someone looking at cabinet images.
+
+**What makes them worth keeping is the exclusions, not the lists.** Both were learned by reading
+wrong answers, and re-deriving either costs a pass of noise:
+
+- A shared label across *axis or movement* ports is not a duplicate. One function legitimately
+  has several physical inputs — a stick and a button can both be Move. Only two distinct
+  pushbuttons sharing text is suspicious.
+- A direction is not unlabelled when its whole control carries a label. `P1_JOYSTICK_LEFT` with
+  no entry of its own is covered by `P1_JOYSTICK`, and counting it as a gap flags most of the
+  pack.
+
 ## Where the judgements live
 
 [`docs/label-import.md`](../docs/label-import.md) holds the rules for turning sources into
