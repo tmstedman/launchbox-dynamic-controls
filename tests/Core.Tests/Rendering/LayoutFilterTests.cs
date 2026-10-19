@@ -207,7 +207,7 @@ public class LayoutFilterTests
     {
         // given a Condition whose evaluator check passes
         InputDefinition child = Input("AxisLeftStick");
-        var condition = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [child]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Label, [child], AtLeast: 1);
         Template template = TemplateOf(elements: [condition]);
         _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
 
@@ -221,7 +221,7 @@ public class LayoutFilterTests
     {
         // given a Condition whose evaluator check fails (default substitute return)
         InputDefinition child = Input("AxisLeftStick");
-        var condition = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [child]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Label, [child], AtLeast: 1);
         Template template = TemplateOf(elements: [condition]);
 
         FilteredLayout result = _underTest.Filter(template, Ctx());
@@ -235,7 +235,7 @@ public class LayoutFilterTests
         // given a OneOf whose first alternative is a Condition (passes) wrapping mini-icons, and
         // whose second is the all-distinct fallback — mirrors the ButtonDpad/AxisLeftStick shape
         InputDefinition mini = Input("AxisLeftStickUp");
-        var merged = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label, [mini]);
+        var merged = new ConditionElement(ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Label, [mini], AtLeast: 1);
         InputDefinition fallback = Input("AxisLeftStickAllDistinct");
         var oneOf = new OneOf(Alternatives: [merged, fallback]);
         Template template = TemplateOf(elements: [oneOf]);
@@ -256,7 +256,7 @@ public class LayoutFilterTests
     {
         var label = new LabelDefinition(X: 1, Y: 2);
         var labelElement = new LabelElement(label);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [labelElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["X"], ConditionMatch.Label, [labelElement], AtLeast: 1);
         InputDefinition owner = Input("ButtonDpad", children: [condition]);
         Template template = TemplateOf(elements: [owner]);
         _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
@@ -315,7 +315,7 @@ public class LayoutFilterTests
         // that Input's own Overlays, exactly as if it had been a direct child
         var overlay = Overlay("dpad-lines.png");
         var overlayElement = new OverlayElement(overlay);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["X"], ConditionMatch.Label, [overlayElement], AtLeast: 1);
         InputDefinition owner = Input("ButtonDpad", children: [condition]);
         Template template = TemplateOf(elements: [owner]);
         _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
@@ -335,7 +335,7 @@ public class LayoutFilterTests
         // Container
         var overlay = Overlay("dpad-lines.png");
         var overlayElement = new OverlayElement(overlay);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["X"], ConditionMatch.Label, [overlayElement], AtLeast: 1);
         InputDefinition member = Input("ButtonA");
         Container container = Container(children: [member, condition]);
         Template template = TemplateOf(elements: [container]);
@@ -358,7 +358,7 @@ public class LayoutFilterTests
         // ever actually show anything)
         var overlay = Overlay("background.png");
         var overlayElement = new OverlayElement(overlay);
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [overlayElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["X"], ConditionMatch.Label, [overlayElement], AtLeast: 1);
         Template template = TemplateOf(elements: [condition]);
         _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
 
@@ -822,7 +822,7 @@ public class LayoutFilterTests
         // given a loose Label reached only through a Condition, no Group anywhere above it --
         // there is nothing to center against, so its build-time value passes through untouched
         var label = new LabelElement(new LabelDefinition(X: 0, Y: 42));
-        var condition = new ConditionElement(ConditionMode.Any, ["X"], ConditionMatch.Label, [label]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["X"], ConditionMatch.Label, [label], AtLeast: 1);
         InputDefinition owner = Input("ButtonDpad", children: [condition]);
         Template template = TemplateOf(elements: [owner]);
         _evaluator.AnyVisible(condition, Arg.Any<VisibilityContext>()).Returns(true);
