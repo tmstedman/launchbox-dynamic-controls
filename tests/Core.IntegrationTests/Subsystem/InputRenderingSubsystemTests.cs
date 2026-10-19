@@ -339,32 +339,29 @@ public class InputRenderingSubsystemTests
     [Fact]
     public void Render_StickOneOfWithNestedCondition_PartialDirectionAgreement_FallsThroughToMergedAlternative()
     {
-        // Regression test for a real production bug (crusnexo's left stick on Arcade): a OneOf's
-        // first alternative is an outer Condition ("the whole has a label") wrapping an inner one
-        // ("all four directions individually agree") gating a single glyph -- the compound-AND
-        // idiom used by AxisLeftStick/AxisRightStick in Xbox Series X's Layout.xml. Left/Right
-        // agree on "Steering" (so InputLabelsService would write that onto AxisLeftStick's own
-        // key), but Up/Down have no label at all -- the outer check alone passes, but the inner
-        // "all four" check doesn't. Before the fix, AnyVisible only consulted the outer check, so
-        // OneOf picked this alternative and rendered nothing once the inner check dropped
-        // everything inside, stranding the whole stick with no image or label at all instead of
-        // falling through to the merged per-direction alternative.
+        // Regression test for a real production bug (crusnexo's left stick on Arcade). Left and
+        // Right agree on "Steering"; Up and Down carry nothing. The single-glyph alternative asks
+        // whether every direction agrees and must say no, leaving the merged alternative -- which
+        // asks for two or more -- to draw the four small icons and one shared label.
+        //
+        // The shape this once took is the reason match="agree" exists: an outer Condition for
+        // "the whole has a label" wrapping an inner one for "all four are labelled", because
+        // neither alone could tell a cluster labelled once from four directions that disagree.
+        // AnyVisible consulted only the outer check, so the OneOf chose an alternative whose
+        // inner check then dropped everything inside it, stranding the stick with no image and no
+        // label at all. One check that asks the real question cannot fail that way.
         var up = Input(name: "AxisLeftStickUp", images: [new InputImageDefinition(0, 0, "AxisLeftStickUp.png", ShowIf: Label)]);
         var down = Input(name: "AxisLeftStickDown", images: [new InputImageDefinition(0, 0, "AxisLeftStickDown.png", ShowIf: Label)]);
         var left = Input(name: "AxisLeftStickLeft", images: [new InputImageDefinition(0, 0, "AxisLeftStickLeft.png", ShowIf: Label)]);
         var right = Input(name: "AxisLeftStickRight", images: [new InputImageDefinition(0, 0, "AxisLeftStickRight.png", ShowIf: Label)]);
         var glyph = Input(name: "AxisLeftStick", images: [new InputImageDefinition(0, 0, "AxisLeftStick-glyph.png", ShowIf: Label)]);
 
-        var singleGlyphAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
-        [
-            new ConditionElement(ConditionMode.All,
-                ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"],
-                ConditionMatch.Label, [glyph])
-        ]);
-        var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
-        [
-            new Container(Children: [up, left, right, down], Overlays: [])
-        ]);
+        // No threshold: every part of the composite must agree.
+        var singleGlyphAlternative = new ConditionElement(
+            ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Agree, [glyph]);
+        var mergedAlternative = new ConditionElement(
+            ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Agree,
+            [new Container(Children: [up, left, right, down], Overlays: [])], AtLeast: 2);
         var oneOf = new OneOf([singleGlyphAlternative, mergedAlternative]);
 
         _images.With(src: "AxisLeftStickUp.png", generic: "AxisLeftStickUp.png", platform: Genesis, controller: ThreeButton);
@@ -381,7 +378,7 @@ public class InputRenderingSubsystemTests
         RenderResult result = _service.Render(template, MappingOf(), labels);
 
         // then the merged alternative's four directions rendered -- not a total blackout, and not
-        // the single glyph (whose inner "all four" check correctly never passed)
+        // the single glyph, whose "every direction agrees" check correctly never passed
         result.Images.ShouldContain(i => i.InputName == "AxisLeftStickLeft");
         result.Images.ShouldContain(i => i.InputName == "AxisLeftStickRight");
         result.Images.ShouldContain(i => i.InputName == "AxisLeftStickUp");
@@ -404,11 +401,12 @@ public class InputRenderingSubsystemTests
         var left = Input(name: "AxisLeftStickLeft", images: [new InputImageDefinition(0, 0, "AxisLeftStickLeft.png", ShowIf: Label)]);
         var right = Input(name: "AxisLeftStickRight", images: [new InputImageDefinition(0, 0, "AxisLeftStickRight.png", ShowIf: Label)]);
 
-        var mergedAlternative = new ConditionElement(ConditionMode.Any, ["AxisLeftStick"], ConditionMatch.Label,
+        // The gate here is incidental — what is under test is where the loose Label attaches.
+        var mergedAlternative = new ConditionElement(ConditionMode.AtLeast, ["AxisLeftStick"], ConditionMatch.Label,
         [
             new Container(Children: [up, left, right, down], Overlays: []),
             new LabelElement(new LabelDefinition(X: 0, Y: 0, Alignment: "right")),
-        ]);
+        ], AtLeast: 1);
         var axisLeftStick = new InputDefinition(
             Name: "AxisLeftStick",
             InputImages: [],
@@ -510,7 +508,7 @@ public class InputRenderingSubsystemTests
         // Input needed, unlike the "strict-self render position" pattern this generalizes away:
         // an extra decoration that should only render once this specific input is mapped
         var overlayElement = new OverlayElement(new OverlayDefinition(X: 5, Y: 5, Source: "extra.png", ShowIf: Mapped));
-        var condition = new ConditionElement(ConditionMode.Any, ["ButtonA"], ConditionMatch.Mapped, [overlayElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["ButtonA"], ConditionMatch.Mapped, [overlayElement], AtLeast: 1);
         var inputA = new InputDefinition(
             Name: "ButtonA",
             InputImages: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png", ShowIf: Mapped)],
@@ -540,7 +538,7 @@ public class InputRenderingSubsystemTests
         // Overlay -- there's no fold-in target, so it renders unconditionally rather than being
         // treated as a template-authoring error the way a loose Label would be
         var overlayElement = new OverlayElement(new OverlayDefinition(X: 0, Y: 0, Source: "background.png"));
-        var condition = new ConditionElement(ConditionMode.Any, ["ButtonA"], ConditionMatch.Mapped, [overlayElement]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["ButtonA"], ConditionMatch.Mapped, [overlayElement], AtLeast: 1);
 
         Template template = TemplateOf([condition]);
 
@@ -569,8 +567,8 @@ public class InputRenderingSubsystemTests
             name: "ButtonLeftShoulder",
             images: [new InputImageDefinition(X: 0, Y: 100, ImageFile: "ButtonLeftShoulder.png")]);
         var condition = new ConditionElement(
-            ConditionMode.Any, ["AxisTriggerLeft", "ButtonLeftShoulder"], ConditionMatch.Auto,
-            [triggerLeft, shoulderLeft]);
+            ConditionMode.AtLeast, ["AxisTriggerLeft", "ButtonLeftShoulder"], ConditionMatch.Auto,
+            [triggerLeft, shoulderLeft], AtLeast: 1);
 
         _images.With(src: "AxisTriggerLeft.png", generic: "AxisTriggerLeft.png", platform: Genesis, controller: ThreeButton);
         _images.With(src: "ButtonLeftShoulder.png", generic: "ButtonLeftShoulder.png", platform: Genesis, controller: ThreeButton);
@@ -611,7 +609,8 @@ public class InputRenderingSubsystemTests
             defaultFontSize: 16,
             defaultMinOpacity: 0.3,
             defaultInactiveBlurRadius: 8,
-            collapseInfo: collapseInfo);
+            collapseInfo: collapseInfo,
+            wholes: DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures.StandardWholes);
 
     private static ResolvedMapping MappingOf(params (string PlatformButton, string Input)[] entries)
     {

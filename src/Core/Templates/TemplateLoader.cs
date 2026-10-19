@@ -321,18 +321,30 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// </summary>
     private ConditionNode? ParseConditionNode(XmlElement node)
     {
-        string? any = node.Attributes["any"]?.Value;
-        string? all = node.Attributes["all"]?.Value;
+        string? inputs = node.Attributes["inputs"]?.Value;
         string? none = node.Attributes["none"]?.Value;
+        string? atLeast = node.Attributes["atLeast"]?.Value;
 
-        int specified = new[] { any, all, none }.Count(v => !string.IsNullOrEmpty(v));
+        int specified = new[] { inputs, none }.Count(v => !string.IsNullOrEmpty(v));
         if (specified != 1)
         {
-            _logger.Error($"Skipping <Condition>: expected exactly one of 'any', 'all', 'none', found {specified}");
+            _logger.Error($"Skipping <Condition>: expected exactly one of 'inputs', 'none', found {specified}");
+            return null;
+        }
+        if (none != null && atLeast != null)
+        {
+            // "none of these, but at least two of them" is not a thing anyone means.
+            _logger.Error("Skipping <Condition>: 'atLeast' does not apply to 'none'");
             return null;
         }
 
-        var condition = new ConditionNode { Any = any, All = all, None = none, Match = node.Attributes["match"]?.Value };
+        var condition = new ConditionNode
+        {
+            Inputs = inputs,
+            None = none,
+            AtLeast = atLeast,
+            Match = node.Attributes["match"]?.Value,
+        };
 
         foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
         {
@@ -340,7 +352,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             _logger.Error($"Invalid element <{child.Name}> in <Condition>");
         }
 
-        _logger.Debug($"Condition: any={any}, all={all}, none={none}, match={condition.Match}, children={condition.Children.Count}");
+        _logger.Debug($"Condition: inputs={inputs}, none={none}, atLeast={atLeast}, match={condition.Match}, children={condition.Children.Count}");
         return condition;
     }
 

@@ -94,9 +94,15 @@ public class VisibilityEvaluator : IVisibilityEvaluator
     /// </summary>
     private bool EvaluateCondition(ConditionElement condition, VisibilityContext ctx)
     {
+        // A composite stands for the inputs it is made of. Expanded here rather than at
+        // template-load time because this is where the template's own declaration is in reach.
+        List<string> names = [.. condition.Names.SelectMany(n => ctx.Wholes.GetValueOrDefault(n, [n]))];
+        if (names.Count == 0) return false;
+
         bool Matches(string name) => condition.Match switch
         {
-            ConditionMatch.Label => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name)),
+            ConditionMatch.Label or ConditionMatch.Agree =>
+                !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name)),
             ConditionMatch.Mapped => IsMapped(ctx.Mapping, name),
             ConditionMatch.Auto => ctx.IsGameSpecific
                 ? !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name))
@@ -104,13 +110,17 @@ public class VisibilityEvaluator : IVisibilityEvaluator
             _ => throw new InvalidOperationException($"Unhandled ConditionMatch: {condition.Match}")
         };
 
-        return condition.Mode switch
-        {
-            ConditionMode.All => condition.Names.Count > 0 && condition.Names.All(Matches),
-            ConditionMode.Any => condition.Names.Any(Matches),
-            ConditionMode.None => condition.Names.All(n => !Matches(n)),
-            _ => throw new InvalidOperationException($"Unhandled ConditionMode: {condition.Mode}")
-        };
+        if (condition.Mode == ConditionMode.None) return names.All(n => !Matches(n));
+
+        int required = condition.AtLeast > 0 ? condition.AtLeast : names.Count;
+        if (condition.Match != ConditionMatch.Agree) return names.Count(Matches) >= required;
+
+        // Agreement: enough of them carry label text, all of it reads the same, and the rest
+        // carry none. The last clause is what separates a control labelled once as a unit from
+        // directions that genuinely disagree — one of those with its own different text is a real
+        // per-direction remap and keeps it, rather than being folded into a label it never had.
+        List<string> texts = [.. names.Select(n => ctx.LabelText.GetValueOrDefault(n) ?? "").Where(t => t.Length > 0)];
+        return texts.Count >= required && texts.Distinct().Count() == 1;
     }
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)

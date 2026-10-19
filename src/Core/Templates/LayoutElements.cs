@@ -93,20 +93,25 @@ public record OneOf(IReadOnlyList<ILayoutElement> Alternatives) : ILayoutElement
 /// <param name="Children">Rendered only when the condition evaluates true; dropped entirely
 /// otherwise, the same as anything else that isn't reached.</param>
 [ExcludeFromCodeCoverage]
+/// <param name="Names">The generic inputs checked, as the template wrote them. A composite is
+/// expanded to its parts when the condition is evaluated, since only then is the template's own
+/// declaration in reach.</param>
+/// <param name="AtLeast">How many must match, or 0 for "all of them" — so naming a composite and
+/// nothing else asks about the whole control, which is what a reader expects it to mean.</param>
 public record ConditionElement(
     ConditionMode Mode,
     IReadOnlyList<string> Names,
     ConditionMatch Match,
-    IReadOnlyList<ILayoutElement> Children) : ILayoutElement;
+    IReadOnlyList<ILayoutElement> Children,
+    int AtLeast = 0) : ILayoutElement;
 
 /// <summary>How a <see cref="ConditionElement"/> combines its <see cref="ConditionElement.Names"/>.</summary>
 public enum ConditionMode
 {
-    /// <summary>True only when every named input matches.</summary>
-    All,
-
-    /// <summary>True when at least one named input matches.</summary>
-    Any,
+    /// <summary>True when at least <see cref="ConditionElement.Required"/> of the named inputs
+    /// match. Subsumes the old any/all pair: <c>atLeast="1"</c> is any, and the default — every
+    /// name — is all.</summary>
+    AtLeast,
 
     /// <summary>True when no named input matches.</summary>
     None
@@ -117,6 +122,19 @@ public enum ConditionMatch
 {
     /// <summary>The name has non-empty label text.</summary>
     Label,
+
+    /// <summary>The named inputs carrying label text all carry the <b>same</b> text, enough of
+    /// them do to meet the threshold, and the rest carry none at all.
+    ///
+    /// <para>Distinct from <see cref="Label"/>, which only counts. A stick whose directions read
+    /// Up/Down/Left/Right separately has four labels and no shared one; a stick labelled once as
+    /// a unit has four identical ones. Counting cannot tell those apart, and they are drawn
+    /// differently — one merged label against four of their own.</para>
+    ///
+    /// <para>"The rest carry none" is what separates a cluster labelled once from directions that
+    /// genuinely disagree: a direction with its own different text is a real per-direction remap
+    /// and must keep it, rather than being smoothed into a shared label it never had.</para></summary>
+    Agree,
 
     /// <summary>The name is mapped (a platform button drives it, or its natural button still is).</summary>
     Mapped,

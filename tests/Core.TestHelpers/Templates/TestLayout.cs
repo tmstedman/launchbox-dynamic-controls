@@ -219,9 +219,10 @@ internal class ConditionBuilder
     public ConditionNode Node { get; } = new();
 
     #pragma warning disable format
-    public ConditionBuilder Any(string names)   { Node.Any = names;  return this; }
-    public ConditionBuilder All(string names)   { Node.All = names;  return this; }
-    public ConditionBuilder None(string names)  { Node.None = names; return this; }
+    public ConditionBuilder Inputs(string names)  { Node.Inputs = names;  return this; }
+    public ConditionBuilder AtLeast(int n)        { Node.AtLeast = n.ToString(); return this; }
+    public ConditionBuilder AtLeast(string raw)   { Node.AtLeast = raw; return this; }
+    public ConditionBuilder None(string names)    { Node.None = names; return this; }
     public ConditionBuilder Match(string value) { Node.Match = value; return this; }
 
     public ConditionBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }

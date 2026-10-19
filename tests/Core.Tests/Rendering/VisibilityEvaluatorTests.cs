@@ -290,7 +290,7 @@ public class VisibilityEvaluatorTests
     {
         VisibilityContext all = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump", ["B"] = "Jump" });
         VisibilityContext partial = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump" });
-        var condition = new ConditionElement(ConditionMode.All, ["A", "B"], ConditionMatch.Label, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A", "B"], ConditionMatch.Label, []);
 
         _underTest.AnyVisible(condition, all).ShouldBeTrue();
         _underTest.AnyVisible(condition, partial).ShouldBeFalse();
@@ -300,7 +300,7 @@ public class VisibilityEvaluatorTests
     public void AnyVisible_ConditionAny_TrueWhenAtLeastOneNameHasLabel()
     {
         VisibilityContext ctx = Ctx(labelText: new Dictionary<string, string> { ["A"] = "Jump" });
-        var condition = new ConditionElement(ConditionMode.Any, ["A", "B"], ConditionMatch.Label, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A", "B"], ConditionMatch.Label, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
@@ -309,7 +309,7 @@ public class VisibilityEvaluatorTests
     public void AnyVisible_ConditionAny_FalseWhenNoNameHasLabel()
     {
         VisibilityContext ctx = Ctx();
-        var condition = new ConditionElement(ConditionMode.Any, ["A", "B"], ConditionMatch.Label, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A", "B"], ConditionMatch.Label, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
     }
@@ -332,7 +332,7 @@ public class VisibilityEvaluatorTests
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["A"] = "Jump" },
             mapping: EmptyMapping());
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Mapped, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Mapped, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
     }
@@ -341,7 +341,7 @@ public class VisibilityEvaluatorTests
     public void AnyVisible_ConditionMatchMapped_TrueWhenInputToButtonHasIt()
     {
         VisibilityContext ctx = Ctx(mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }));
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Mapped, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Mapped, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
@@ -358,7 +358,7 @@ public class VisibilityEvaluatorTests
             labelText: new Dictionary<string, string> { ["A"] = "Jump" },
             mapping: EmptyMapping(),
             isGameSpecific: false);
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Auto, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
     }
@@ -370,7 +370,7 @@ public class VisibilityEvaluatorTests
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }),
             isGameSpecific: false);
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Auto, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
@@ -383,7 +383,7 @@ public class VisibilityEvaluatorTests
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["A"] = "BUTTON1" }),
             isGameSpecific: true);
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Auto, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
     }
@@ -395,7 +395,7 @@ public class VisibilityEvaluatorTests
             labelText: new Dictionary<string, string> { ["A"] = "Jump" },
             mapping: EmptyMapping(),
             isGameSpecific: true);
-        var condition = new ConditionElement(ConditionMode.Any, ["A"], ConditionMatch.Auto, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.Auto, [], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
@@ -406,7 +406,7 @@ public class VisibilityEvaluatorTests
         // an "all" Condition with no names would otherwise vacuously pass (LINQ All on an empty
         // sequence is true) — guarded explicitly since a template author almost certainly meant
         // something else if they left the list empty
-        var condition = new ConditionElement(ConditionMode.All, [], ConditionMatch.Label, []);
+        var condition = new ConditionElement(ConditionMode.AtLeast, [], ConditionMatch.Label, []);
 
         _underTest.AnyVisible(condition, Ctx()).ShouldBeFalse();
     }
@@ -421,7 +421,7 @@ public class VisibilityEvaluatorTests
         var child = Input(name: "Unrelated", images: [Image(ShowIfCondition.Mapped)]);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["Whole"] = "Move" });
-        var condition = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [child]);
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["Whole"], ConditionMatch.Label, [child], AtLeast: 1);
 
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
@@ -436,8 +436,8 @@ public class VisibilityEvaluatorTests
         // this alternative and then render nothing once the inner check drops everything inside,
         // stranding the slot instead of falling through to a later alternative.
         var glyph = Input(name: "Whole", images: [Image(ShowIfCondition.Label)]);
-        var inner = new ConditionElement(ConditionMode.All, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
-        var outer = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [inner]);
+        var inner = new ConditionElement(ConditionMode.AtLeast, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
+        var outer = new ConditionElement(ConditionMode.AtLeast, ["Whole"], ConditionMatch.Label, [inner], AtLeast: 1);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string> { ["Whole"] = "Steering", ["Left"] = "Steering", ["Right"] = "Steering" });
 
@@ -450,8 +450,8 @@ public class VisibilityEvaluatorTests
         // the same compound-AND shape, but all four directions genuinely agree -- both checks
         // pass, so the nested Condition alternative correctly reports itself visible
         var glyph = Input(name: "Whole", images: [Image(ShowIfCondition.Label)]);
-        var inner = new ConditionElement(ConditionMode.All, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
-        var outer = new ConditionElement(ConditionMode.Any, ["Whole"], ConditionMatch.Label, [inner]);
+        var inner = new ConditionElement(ConditionMode.AtLeast, ["Up", "Down", "Left", "Right"], ConditionMatch.Label, [glyph]);
+        var outer = new ConditionElement(ConditionMode.AtLeast, ["Whole"], ConditionMatch.Label, [inner], AtLeast: 1);
         VisibilityContext ctx = Ctx(
             labelText: new Dictionary<string, string>
             {

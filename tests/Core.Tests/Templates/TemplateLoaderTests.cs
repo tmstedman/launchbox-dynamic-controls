@@ -717,7 +717,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition any='AxisLeftStick' match='label'>
+                <Condition inputs='AxisLeftStick' atLeast='1' match='label'>
                   <Input name='AxisLeftStick' />
                 </Condition>
               </Body>
@@ -727,8 +727,9 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         ConditionNode condition = result.Elements.OfType<ConditionNode>().Single();
-        condition.Any.ShouldBe("AxisLeftStick");
-        condition.All.ShouldBeNull();
+        condition.Inputs.ShouldBe("AxisLeftStick");
+        condition.AtLeast.ShouldBe("1");
+        condition.None.ShouldBeNull();
         condition.None.ShouldBeNull();
         condition.Match.ShouldBe("label");
         condition.Children.OfType<InputNode>().Single().Name.ShouldBe("AxisLeftStick");
@@ -741,7 +742,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition all='A B'>
+                <Condition inputs='A B'>
                   <Input name='A' />
                 </Condition>
               </Body>
@@ -759,7 +760,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition any='A' all='B'>
+                <Condition inputs='A' none='B'>
                   <Input name='A' />
                 </Condition>
               </Body>
@@ -769,7 +770,7 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<ConditionNode>().ShouldBeEmpty();
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("any") && s.Contains("all") && s.Contains("none")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("inputs") && s.Contains("inputs") && s.Contains("none")));
     }
 
     [Fact]
@@ -788,7 +789,7 @@ public class TemplateLoaderTests
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
         result.Elements.OfType<ConditionNode>().ShouldBeEmpty();
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("any") && s.Contains("all") && s.Contains("none")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Condition") && s.Contains("inputs") && s.Contains("inputs") && s.Contains("none")));
     }
 
     [Fact]
@@ -797,7 +798,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition any='A'>
+                <Condition inputs='A'>
                   <Input name='A' />
                   <Bogus />
                 </Condition>
@@ -818,7 +819,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition any='A'>
+                <Condition inputs='A'>
                   <Label x='+3' y='+4' align='right' />
                 </Condition>
               </Body>
@@ -840,7 +841,7 @@ public class TemplateLoaderTests
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
-                <Condition any='A'>
+                <Condition inputs='A'>
                   <Overlay src='lines.png' x='+5' y='+10' />
                 </Condition>
               </Body>

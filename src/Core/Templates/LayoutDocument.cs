@@ -236,11 +236,13 @@ public record OneOfNode : ILayoutNode
 /// </summary>
 public record ConditionNode : ILayoutNode
 {
-    /// <summary>Space-separated generic input names; true when at least one matches.</summary>
-    public string? Any { get; set; }
+    /// <summary>Space-separated generic input names. A composite the template declares stands
+    /// for its parts, so naming one asks about the control rather than the name.</summary>
+    public string? Inputs { get; set; }
 
-    /// <summary>Space-separated generic input names; true only when every one matches.</summary>
-    public string? All { get; set; }
+    /// <summary>How many of <see cref="Inputs"/> must match. Absent means all of them, which is
+    /// what naming a composite alone should ask. Subsumes the old any/all pair: "1" is any.</summary>
+    public string? AtLeast { get; set; }
 
     /// <summary>Space-separated generic input names; true when none match.</summary>
     public string? None { get; set; }
