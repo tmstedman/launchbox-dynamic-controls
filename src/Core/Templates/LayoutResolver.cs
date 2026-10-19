@@ -361,7 +361,10 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// mode/names/match attributes once the children are already built.</summary>
     private ConditionElement BuildConditionElement(ConditionNode conditionXml, List<ILayoutElement> children)
     {
-        (ConditionMode mode, string? names) = conditionXml.None is { } none
+        // Non-empty, not merely non-null: TemplateLoader counts an attribute as specified the
+        // same way, and discriminating differently here would let none="" flip the condition to
+        // None mode over an empty name list, dropping its children with nothing logged.
+        (ConditionMode mode, string? names) = conditionXml.None is { Length: > 0 } none
             ? (ConditionMode.None, none)
             : (ConditionMode.AtLeast, conditionXml.Inputs);
 
