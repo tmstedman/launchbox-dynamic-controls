@@ -92,12 +92,21 @@ Not generated and not an input to anything. Leave it where it is; the name is un
 changing it would break the one thing it is for, which is being the version that predates the
 edits.
 
-## Generated files
+## Generated files live elsewhere
 
-`arcade-artwork-sorted.xml`, `arcade-pipeline-sorted.xml`, `arcade-pipeline-images.xml` and
-`platform-renders.xml` are written by `tools/LabelDump` and carry the command that rebuilds them.
-Do not edit them: the first is `arcade-artwork.xml` re-emitted in a fixed order, and the rest are
-what the pipeline actually renders, recorded so a change can be diffed against what came before.
+Everything here is hand-edited and tracked. What `tools/LabelDump` produces goes to
+`tools/LabelDump/output/` and is not tracked:
+
+| file | what it is |
+|---|---|
+| `arcade-artwork-sorted.xml` | `arcade-artwork.xml` re-emitted in a fixed order, so it diffs against the pipeline dump line for line |
+| `arcade-pipeline-sorted.xml` | the labels the pipeline renders for every rom in the cfg pack |
+| `arcade-pipeline-images.xml` | the images it renders, grouped by distinct render shape |
+| `platform-renders.xml` | what each platform draws under its default controller |
+
+Each carries the command that rebuilds it. Regenerate before trusting a diff — and note the
+Arcade files need a local MAME cfg pack, which is not in the repository, so they cannot be
+rebuilt from a clean checkout.
 
 ## Where the judgements live
 
