@@ -45,6 +45,69 @@ public class InputImageResolverTests
     private void StubResolve(string src, string generic, string? styled = null) =>
         _imageSource.Resolve(src, Platform, Controller).Returns(new ResolvedImagePaths(generic, styled));
 
+    // ---- a declared composite no button drives directly ----
+
+    [Fact]
+    public void Resolve_CompositeDrivenOnlyThroughItsParts_TakesTheCoveringButtonsImage()
+    {
+        // Nintendo 64's C cluster: the stick position is drawn by C-Any.png, the picture of the
+        // four C buttons, rather than a generic stick. Once a platform button reaches the four
+        // directions instead of naming the cluster, nothing drives AxisRightStick itself — and an
+        // identity render of an unmapped input falls through to the generic image, silently,
+        // because no label moves. The button whose reach covers every part stands in for it.
+        var input = Input("AxisRightStick");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStick.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStick"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Any"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
+            },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Any"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
+            });
+        _imageSource.Resolve("AxisRightStick.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisRightStick.png", null));
+        _imageSource.Resolve("C-Any.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
+
+        string path = _underTest.Resolve(image, input, mapping, template);
+
+        path.ShouldBe("platform/C-Any.png");
+    }
+
+    [Fact]
+    public void Resolve_CompositeWhosePartsSplitAcrossButtons_IsUnmapped()
+    {
+        // A remap moved the directions onto different buttons, so no single one stands for the
+        // cluster. Falling back to any of them would picture a control that is no longer there.
+        var input = Input("AxisRightStick");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStick.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStick"] = ["AxisRightStickUp", "AxisRightStickDown"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Up"] = ["AxisRightStickUp"],
+                ["C-Down"] = ["AxisRightStickDown"],
+            });
+        _imageSource.Resolve("AxisRightStick.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisRightStick.png", "platform/AxisRightStick.png"));
+
+        string path = _underTest.Resolve(image, input, mapping, template);
+
+        // Unmapped identity render: the plain generic, never the platform-styled variant
+        path.ShouldBe("AxisRightStick.png");
+    }
+
     // ---- Unmapped: input not in mapping ----
 
     [Fact]

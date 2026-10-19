@@ -34,7 +34,7 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
         ResolvedMapping mapping,
         Template template)
     {
-        MappingState state = Classify(input.Name, mapping);
+        MappingState state = Classify(input.Name, mapping, template.Layout.Wholes.GetValueOrDefault(input.Name, []));
 
         string imageFile = image.UseImageFile ?? image.ImageFile;
         ResolvedImagePaths resolved = template.ImageSource.Resolve(imageFile, mapping.Platform, mapping.Controller);
@@ -83,19 +83,48 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     /// <summary>
     /// Classifies the input's mapping state by comparing the current mapping against the
     /// selected controller's natural mapping (snapshotted on the same ResolvedMapping).
+    ///
+    /// <para>A declared composite (<paramref name="parts"/> non-empty) that no button drives
+    /// directly falls back to a button whose own reach covers every one of its parts. Nintendo
+    /// 64 is why: its <c>C-Any</c> is the cluster the four C buttons make up, and the stick it
+    /// drives draws <c>C-Any.png</c> rather than a generic one. A composite reached only through
+    /// its parts would otherwise classify as Unmapped, and an identity render of an unmapped
+    /// input falls through to the generic image — silently, since no label moves.</para>
+    ///
+    /// <para>Every part must be covered by the same button. A remap that split them across
+    /// several leaves no single button standing for the whole, which is the honest answer: there
+    /// is no longer one physical control there to picture.</para>
     /// </summary>
-    private static MappingState Classify(string inputName, ResolvedMapping mapping)
+    private static MappingState Classify(string inputName, ResolvedMapping mapping, IReadOnlyList<string> parts)
     {
         if (!mapping.InputToButton.TryGetValue(inputName, out string? platformButton))
-            return new Unmapped();
+        {
+            platformButton = parts.Count > 0 ? ButtonCovering(parts, mapping) : null;
+            if (platformButton == null) return new Unmapped();
+        }
 
         if (!mapping.NaturalButtonToInput.TryGetValue(platformButton, out IReadOnlyList<string>? defaultGenerics)
-            || defaultGenerics.Contains(inputName))
+            || defaultGenerics.Contains(inputName)
+            || parts.All(defaultGenerics.Contains))
         {
             return new MappedDefault(platformButton);
         }
 
         return new Remapped(platformButton, defaultGenerics);
+    }
+
+    /// <summary>The single platform button whose current reach includes every one of
+    /// <paramref name="parts"/>, or null when none does or several do.</summary>
+    private static string? ButtonCovering(IReadOnlyList<string> parts, ResolvedMapping mapping)
+    {
+        string? found = null;
+        foreach ((string button, IReadOnlyList<string> reaches) in mapping.ButtonToInput)
+        {
+            if (!parts.All(reaches.Contains)) continue;
+            if (found != null) return null;
+            found = button;
+        }
+        return found;
     }
 
     /// <summary>
