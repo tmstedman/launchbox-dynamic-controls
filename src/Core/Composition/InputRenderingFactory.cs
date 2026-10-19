@@ -24,6 +24,6 @@ internal static class InputRenderingFactory
         var layoutFilter = new LayoutFilter(visibilityEvaluator);
         var imageRenderer = new InputImageRenderer(inputImageResolver);
 
-        return new InputRenderingService(layoutFilter, labelRenderer, imageRenderer);
+        return new InputRenderingService(layoutFilter, labelRenderer, imageRenderer, new WholeLabelCollapser(logger));
     }
 }

@@ -32,7 +32,9 @@ public class InputRenderingServiceTests
 
     public InputRenderingServiceTests()
     {
-        _underTest = new InputRenderingService(_layoutFilter, _labelRenderer, _imageRenderer);
+        _underTest = new InputRenderingService(
+            _layoutFilter, _labelRenderer, _imageRenderer,
+            new WholeLabelCollapser(Substitute.For<ILogger>()));
 
         // Default to empty enumerables so tests that only care about what gets called don't have
         // to stub explicit returns to keep the pipeline from null-deref-ing on .Select().
