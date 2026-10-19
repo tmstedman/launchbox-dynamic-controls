@@ -388,6 +388,86 @@ public class InputRenderingSubsystemTests
         result.Images.Single(i => i.InputName == "AxisLeftStickUp").Opacity.ShouldBe(0.3);
     }
 
+    // ---- the composite label is produced here, not handed in ----
+    //
+    // Every other test in this file supplies the composite's own label text alongside its parts'.
+    // These three do not: the parts carry text and the composite's key is left absent, which is
+    // the state the labels subsystem actually hands over now that reconciling the two is a
+    // render-time concern. Bypassing the collapser leaves these three red and every other test in
+    // this suite green, which is the gap they exist to close.
+
+    private static InputDefinition DirectionIcon(string name) =>
+        Input(name: name, images: [new InputImageDefinition(0, 0, $"{name}.png", ShowIf: Label)]);
+
+    [Fact]
+    public void Render_PartsAgreeAndTheCompositeHasNoLabelOfItsOwn_TheMergedLabelStillRenders()
+    {
+        // The whole template shape depends on this: both merged alternatives hang their <Label>
+        // on the composite, and since every platform now declares its composites with an <Alias>
+        // over the parts, nothing binds the composite's own key. Its text exists only because
+        // the parts agreed.
+        var glyph = Input(
+            name: "AxisLeftStick",
+            images: [new InputImageDefinition(0, 0, "AxisLeftStick-glyph.png", ShowIf: Label)],
+            labels: [new LabelDefinition(X: 0, Y: 0, FontSize: 20)]);
+        _images.With(src: "AxisLeftStick-glyph.png", generic: "AxisLeftStick-glyph.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([glyph]);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Move"), ("AxisLeftStickRight", "Move"));
+
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        result.Labels.Single(l => l.InputName == "AxisLeftStick").Text.ShouldBe("Move");
+    }
+
+    [Fact]
+    public void Render_CompositeLabelledWithBlankParts_EveryPartRendersAtFullBrightness()
+    {
+        // The other direction, and the reason it is not merely cosmetic: each part gates its own
+        // render on its own label, so without the text being fanned out they would all dim at
+        // once while the control plainly carries a label.
+        var up = DirectionIcon("AxisLeftStickUp");
+        var down = DirectionIcon("AxisLeftStickDown");
+        foreach (string n in new[] { "AxisLeftStickUp", "AxisLeftStickDown" })
+            _images.With(src: $"{n}.png", generic: $"{n}.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([new Container(Children: [up, down], Overlays: [])]);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true, ("AxisLeftStick", "Move"));
+
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        result.Images.Single(i => i.InputName == "AxisLeftStickUp").Opacity.ShouldBe(1.0);
+        result.Images.Single(i => i.InputName == "AxisLeftStickDown").Opacity.ShouldBe(1.0);
+    }
+
+    [Fact]
+    public void Render_TemplateDeclaringNoComposites_LeavesEveryInputAsItself()
+    {
+        // A pad drawn without sticks or a d-pad declares no <Whole>, and then none of the three
+        // readers has anything to expand: no fan-out, no condition expansion, and no label
+        // reconciliation. The shipped template always declares three, so this is a shape no
+        // end-to-end fixture can reach.
+        var glyph = Input(
+            name: "AxisLeftStick",
+            images: [new InputImageDefinition(0, 0, "AxisLeftStick-glyph.png", ShowIf: Label)],
+            labels: [new LabelDefinition(X: 0, Y: 0, FontSize: 20)]);
+        _images.With(src: "AxisLeftStick-glyph.png", generic: "AxisLeftStick-glyph.png", platform: Genesis, controller: ThreeButton);
+
+        Template template = TemplateOf([glyph], wholes: new Dictionary<string, IReadOnlyList<string>>());
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisLeftStickUp", "Move"), ("AxisLeftStickDown", "Move"),
+            ("AxisLeftStickLeft", "Move"), ("AxisLeftStickRight", "Move"));
+
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        // Agreeing parts say nothing about a composite this template never declared, so the
+        // glyph has no label and its showIf="label" leaves it dimmed.
+        result.Labels.ShouldNotContain(l => l.InputName == "AxisLeftStick");
+        result.Images.Single(i => i.InputName == "AxisLeftStick").Opacity.ShouldBe(0.3);
+    }
+
     [Fact]
     public void Render_LooseLabelUnderCondition_AttachesToOwningInputWithoutADuplicateStrictSelfInput()
     {
@@ -602,7 +682,8 @@ public class InputRenderingSubsystemTests
 
     private Template TemplateOf(
         ILayoutElement[] elements,
-        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null) =>
+        IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null) =>
         TemplateFixtures.TemplateOf(
             elements: elements,
             imageSource: _images,
@@ -610,7 +691,7 @@ public class InputRenderingSubsystemTests
             defaultMinOpacity: 0.3,
             defaultInactiveBlurRadius: 8,
             collapseInfo: collapseInfo,
-            wholes: DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures.StandardWholes);
+            wholes: wholes ?? DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures.StandardWholes);
 
     private static ResolvedMapping MappingOf(params (string PlatformButton, string Input)[] entries)
     {
