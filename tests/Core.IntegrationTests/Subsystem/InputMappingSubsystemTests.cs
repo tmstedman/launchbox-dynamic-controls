@@ -357,6 +357,33 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["A"].ShouldBe(["ButtonY"]);
     }
 
+    [Fact]
+    public void Load_PerGameSelectsUnknownController_TheFallbackControllersControlsStillApply()
+    {
+        // The mappings and the controls are reached by different routes — mappings come from the
+        // baseline the source already resolved, controls from a second lookup by name. They agree
+        // only because PerGameXmlMappingSource overwrites the requested name with the resolved
+        // one. Without that, a game naming a controller that does not exist would get the default
+        // variant's buttons and no controls at all.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <GameMapping controller="DoesNotExist" />
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.Controller.ShouldBe("Pad");
+        mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
+    }
+
     // ---- CloneOf fallback ----
 
     [Fact]
