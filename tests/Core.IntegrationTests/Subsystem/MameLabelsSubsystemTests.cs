@@ -2,7 +2,9 @@ using DynamicControls.Composition;
 using DynamicControls.Config;
 using DynamicControls.InputMapping;
 using DynamicControls.Labels;
+using DynamicControls.Rendering;
 using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
+using static DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures;
 
 namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
@@ -37,6 +39,11 @@ public class MameLabelsSubsystemTests
 
     private ResolvedLabels LoadLabels(GameInfo game, ResolvedMapping mapping) =>
         InputLabelsFactory.Create(_dc.Lfs, new NullLogger(), config: new GlobalConfig()).Load(game, mapping);
+
+    /// <summary>Applies the real collapser with the composites the shipped template declares —
+    /// folding agreeing directions onto their composite is a render-time concern now.</summary>
+    private static IReadOnlyDictionary<string, string> Collapse(ResolvedLabels labels) =>
+        new WholeLabelCollapser(new NullLogger()).Collapse(labels.LabelText, StandardWholes);
 
     [Fact]
     public void Load_CfgRemapsAdStickToTheRightStick_LabelFollowsItThereNotTheStaticLeftStickDefault()
@@ -82,14 +89,15 @@ public class MameLabelsSubsystemTests
 
         ResolvedMapping mapping = LoadMapping(game);
         ResolvedLabels labels = LoadLabels(game, mapping);
+        IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
 
         // All four right-stick directions agree, so they collapse onto the whole control.
-        labels.LabelText["AxisLeftStick"].ShouldBe("Move Crosshair");
+        collapsed["AxisLeftStick"].ShouldBe("Move Crosshair");
         // Nothing claims the left stick at all -- a static JOYSTICKLEFT fallback would have shown
         // "Move" here regardless, which is exactly the stale label this cfg no longer produces.
-        labels.LabelText.ContainsKey("AxisRightStick").ShouldBeFalse();
-        labels.LabelText.ContainsKey("AxisRightStickLeft").ShouldBeFalse();
-        labels.LabelText.ContainsKey("AxisRightStickUp").ShouldBeFalse();
+        collapsed.ContainsKey("AxisRightStick").ShouldBeFalse();
+        collapsed.ContainsKey("AxisRightStickLeft").ShouldBeFalse();
+        collapsed.ContainsKey("AxisRightStickUp").ShouldBeFalse();
     }
 
     [Fact]
@@ -136,7 +144,8 @@ public class MameLabelsSubsystemTests
 
         ResolvedMapping mapping = LoadMapping(game);
         ResolvedLabels labels = LoadLabels(game, mapping);
+        IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
 
-        labels.LabelText["AxisLeftStick"].ShouldBe("TrackBall Movement");
+        collapsed["AxisLeftStick"].ShouldBe("TrackBall Movement");
     }
 }
