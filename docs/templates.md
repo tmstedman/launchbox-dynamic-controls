@@ -136,9 +136,9 @@ Two things make this worth the indirection rather than just writing `input="Axis
   it describes rather than in the template. Whether a platform has a C-cluster is a fact about its
   pad.
 
-An control is appended, never displacing: a button that drives an input directly outranks one that
+A control is appended, never displacing: a button that drives an input directly outranks one that
 merely stands for buttons reaching it, so a direct binding keeps the reverse lookup and decides
-which image the player is shown. An control whose members are all unbound reaches nothing and is
+which image the player is shown. A control whose members are all unbound reaches nothing and is
 skipped.
 
 Controls are inherited by `inheritFrom` alongside mappings, under the same override-by-`name` rule.

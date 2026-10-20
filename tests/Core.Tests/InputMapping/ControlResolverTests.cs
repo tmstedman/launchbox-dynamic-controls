@@ -12,7 +12,7 @@ namespace DynamicControls.Core.Tests.InputMapping;
 /// input directly outranks one that merely stands for buttons reaching it, so the direct binding
 /// keeps the reverse lookup — which is what decides the image the player is shown. The natural
 /// snapshot is resolved the same way against its own members, since <c>IsMapped</c> reads it and
-/// an grouped button would otherwise look unmapped however plainly the controller declares it.
+/// a button reached only through one would otherwise look unmapped however plainly the controller declares it.
 /// </summary>
 public class ControlResolverTests
 {
@@ -120,7 +120,7 @@ public class ControlResolverTests
     [Fact]
     public void NaturalMapsAreResolvedAgainstTheirOwnMembers()
     {
-        // IsMapped reads the natural snapshot, so an grouped button left out of it would look
+        // IsMapped reads the natural snapshot, so a button reached only through a control would look
         // unmapped however plainly the controller declares it.
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(("Dpad-Up", ["AxisLeftStickUp"])),
