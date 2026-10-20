@@ -780,18 +780,29 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void GetVisibilityFlags_CompositeBoundDirectly_IsMappedThroughItsOwnName()
+    public void GetVisibilityFlags_CompositeBoundDirectly_IsNotMapped_ItsPartsDecide()
     {
-        // Fan-out checks the composite's own name as well as its parts, and this is the case
-        // that needs it: a button bound straight at the composite leaves every part unmapped,
-        // so checking only the parts would dim a control something plainly drives.
-        //
-        // No shipped platform does this since each declares its composites with an <Alias> over
-        // the parts, but a User Controllers.xml still can. Until this test existed the only
-        // thing covering it was the Nintendo DS fixture happening to be written that way.
+        // A declared composite is exactly its parts, and its own name is not also checked. A
+        // platform that binds a button straight at the composite is naming something only the
+        // template declares, so it would light up on templates declaring that <Whole> and sit
+        // dead on every other one — Controllers.xml would depend on a vocabulary it does not own.
+        // Binding the directions, which every layer speaks, needs no such agreement.
         var paddle = Input(name: "Paddle");
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["Paddle"] = "Twist" }),
+            wholes: Paddle);
+
+        _underTest.GetVisibilityFlags(paddle, ctx).IsMapped.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void GetVisibilityFlags_CompositeWhosePartIsBound_IsMapped()
+    {
+        // The form that does work, and the one every shipped platform uses: an <Alias> reaches
+        // the directions, so the composite follows from them whatever the template calls it.
+        var paddle = Input(name: "Paddle");
+        VisibilityContext ctx = Ctx(
+            mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["Paddle-Twist"] = "Twist" }),
             wholes: Paddle);
 
         _underTest.GetVisibilityFlags(paddle, ctx).IsMapped.ShouldBeTrue();

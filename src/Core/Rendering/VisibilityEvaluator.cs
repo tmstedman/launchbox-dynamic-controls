@@ -19,11 +19,11 @@ public interface IVisibilityEvaluator
     bool AnyVisible(ILayoutElement element, VisibilityContext ctx);
 
     /// <summary>
-    /// Returns the visibility flags for an input, fanning out across its composite's part names
-    /// (per <see cref="VisibilityContext.Wholes"/>, looked up by the input's own name — empty
-    /// for an input the template does not declare as a composite). A whole is considered
-    /// active when any of its direction names has a label or mapping — that's what makes a stick
-    /// or Dpad light up as a unit even though the whole itself is never directly mapped.
+    /// Returns the visibility flags for an input: its own, or — when the template declares it a
+    /// composite (<see cref="VisibilityContext.Wholes"/>, looked up by the input's own name) —
+    /// those of its parts instead. A composite is active when any of its parts has a label or
+    /// mapping, which is what makes a stick or Dpad light up as a unit despite never being
+    /// mapped itself. Its own name is deliberately not also checked: see the implementation.
     /// </summary>
     VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx);
 
@@ -125,7 +125,14 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 
     public VisibilityFlags GetVisibilityFlags(InputDefinition input, VisibilityContext ctx)
     {
-        IEnumerable<string> names = ctx.Wholes.GetValueOrDefault(input.Name, []).Prepend(input.Name);
+        // A declared composite is exactly its parts — its own name is not also checked. A
+        // platform binding a button straight at the composite would otherwise light up only on
+        // templates that happen to declare that name a <Whole>, making Controllers.xml depend on
+        // a vocabulary the template owns. Binding the directions instead needs no such agreement.
+        // Matches how EvaluateCondition expands a composite.
+        IEnumerable<string> names = ctx.Wholes.TryGetValue(input.Name, out IReadOnlyList<string>? parts)
+            ? parts
+            : [input.Name];
         bool hasLabel = names.Any(n => !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(n)));
         bool isMapped = names.Any(n => IsMapped(ctx.Mapping, n));
         return new VisibilityFlags(hasLabel, isMapped);
