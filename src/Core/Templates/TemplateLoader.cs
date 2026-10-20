@@ -95,7 +95,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     }
 
     /// <summary>Parses a &lt;Whole&gt; element. Both attributes are required and a composite
-    /// needs more than one part — a name standing for a single input is an control for it, which
+    /// needs more than one part — a name standing for a single input is just another name for it, which
     /// nothing here supports and which would silently behave as the input itself. Reported and
     /// skipped rather than refused, matching how an unrecognised vAlign degrades.</summary>
     private WholeNode? ParseWhole(XmlElement node)
