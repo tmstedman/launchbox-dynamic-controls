@@ -780,6 +780,24 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
+    public void GetVisibilityFlags_CompositeBoundDirectly_IsMappedThroughItsOwnName()
+    {
+        // Fan-out checks the composite's own name as well as its parts, and this is the case
+        // that needs it: a button bound straight at the composite leaves every part unmapped,
+        // so checking only the parts would dim a control something plainly drives.
+        //
+        // No shipped platform does this since each declares its composites with an <Alias> over
+        // the parts, but a User Controllers.xml still can. Until this test existed the only
+        // thing covering it was the Nintendo DS fixture happening to be written that way.
+        var paddle = Input(name: "Paddle");
+        VisibilityContext ctx = Ctx(
+            mapping: MappingOf(inputToButton: new Dictionary<string, string> { ["Paddle"] = "Twist" }),
+            wholes: Paddle);
+
+        _underTest.GetVisibilityFlags(paddle, ctx).IsMapped.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Condition_ExpandsACompositeTheEngineHasNeverSeen()
     {
         VisibilityContext ctx = Ctx(
