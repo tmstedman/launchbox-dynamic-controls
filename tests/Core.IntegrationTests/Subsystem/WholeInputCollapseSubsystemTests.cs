@@ -10,16 +10,16 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the collapse interaction across three subsystems that each have their own suite in
-/// isolation: <see cref="AliasResolver"/> (a platform button standing for several reaches
+/// isolation: <see cref="ControlResolver"/> (a platform button standing for several reaches
 /// whatever they currently reach), feeding <see cref="InputLabelsService"/>'s per-direction rank
 /// comparison, feeding <see cref="WholeLabelCollapser"/> (folds agreeing direction labels back
 /// onto their composite; leaves a genuine disagreement rendered per-direction).
 ///
-/// <see cref="InputMappingSubsystemTests"/> covers the alias resolver's own output shape;
+/// <see cref="InputMappingSubsystemTests"/> covers the control resolver's own output shape;
 /// <see cref="InputLabelsSubsystemTests"/> deliberately supplies its
 /// <see cref="ResolvedMapping"/> directly rather than wiring a real
 /// <see cref="InputMappingService"/> in. Neither exercises what the real mapping service's output
-/// does once it reaches the real labels service — specifically the case an alias alone could
+/// does once it reaches the real labels service — specifically the case an control alone could
 /// never resolve: a config that moves one direction off the composite entirely and onto an
 /// ordinary button, which needs the labels layer's own per-direction rank comparison, not
 /// anything the mapping layer computes.
@@ -58,7 +58,7 @@ public class WholeInputCollapseSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
+                <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />
@@ -96,7 +96,7 @@ public class WholeInputCollapseSubsystemTests
         ResolvedLabels labels = LoadLabels(game, mapping);
         IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
 
-        // BUTTON2's direct claim on ButtonDpadUp outranks whatever the alias reached there, so
+        // BUTTON2's direct claim on ButtonDpadUp outranks whatever the control reached there, so
         // the four Dpad directions no longer all agree -- collapse refuses to fire and each
         // direction renders its own, correct text instead of "Move" papering over "Jump".
         collapsed["ButtonDpadUp"].ShouldBe("Jump");
@@ -121,7 +121,7 @@ public class WholeInputCollapseSubsystemTests
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
-                <Alias name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
+                <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
                 <Mapping name="JOYSTICK_LEFT" input="ButtonDpadLeft" />

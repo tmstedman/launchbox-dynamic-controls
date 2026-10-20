@@ -5,20 +5,20 @@ using static DynamicControls.Core.TestHelpers.InputMapping.MappingFixtures;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="AliasResolver"/>: a platform button standing for several others
+/// Unit tests for <see cref="ControlResolver"/>: a platform button standing for several others
 /// reaches whatever those others currently reach.
 ///
 /// The rule that matters most here is <b>appended, never displacing</b>. A button that drives an
 /// input directly outranks one that merely stands for buttons reaching it, so the direct binding
 /// keeps the reverse lookup — which is what decides the image the player is shown. The natural
 /// snapshot is resolved the same way against its own members, since <c>IsMapped</c> reads it and
-/// an aliased button would otherwise look unmapped however plainly the controller declares it.
+/// an grouped button would otherwise look unmapped however plainly the controller declares it.
 /// </summary>
-public class AliasResolverTests
+public class ControlResolverTests
 {
-    private readonly AliasResolver _underTest = new(Substitute.For<ILogger>());
+    private readonly ControlResolver _underTest = new(Substitute.For<ILogger>());
 
-    private static AliasEntry Alias(string name, params string[] members) =>
+    private static ControlEntry Control(string name, params string[] members) =>
         new() { Name = name, Mappings = [.. members] };
 
     private static Dictionary<string, IReadOnlyList<string>> Buttons(
@@ -28,7 +28,7 @@ public class AliasResolverTests
     // --- the basic reach ---
 
     [Fact]
-    public void AliasReachesTheUnionOfItsMembersTargets()
+    public void ControlReachesTheUnionOfItsMembersTargets()
     {
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(
@@ -40,13 +40,13 @@ public class AliasResolverTests
                 ["ButtonDpadDown"] = "Dpad-Down",
             });
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
 
         result.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
     }
 
     [Fact]
-    public void AliasFollowsItsMembersWhereverTheyNowPoint()
+    public void ControlFollowsItsMembersWhereverTheyNowPoint()
     {
         // The whole point of resolving after a transform: a cfg has moved the directions onto the
         // stick, and the button that names the control as a unit has to follow them there.
@@ -55,7 +55,7 @@ public class AliasResolverTests
                 ("Dpad-Up", ["AxisLeftStickUp"]),
                 ("Dpad-Down", ["AxisLeftStickDown"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
 
         result.ButtonToInput["Dpad-Any"].ShouldBe(["AxisLeftStickUp", "AxisLeftStickDown"]);
     }
@@ -70,7 +70,7 @@ public class AliasResolverTests
                 ("X", ["ButtonA", "ButtonB"]),
                 ("Y", ["ButtonB", "ButtonC"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("X-Any", "X", "Y")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("X-Any", "X", "Y")]);
 
         result.ButtonToInput["X-Any"].ShouldBe(["ButtonA", "ButtonB", "ButtonC"]);
     }
@@ -78,7 +78,7 @@ public class AliasResolverTests
     // --- appended, never displacing ---
 
     [Fact]
-    public void DirectBindingKeepsTheReverseLookup_AliasDoesNotStealIt()
+    public void DirectBindingKeepsTheReverseLookup_ControlDoesNotStealIt()
     {
         // Dpad-Up drives ButtonDpadUp outright; Dpad-Any only stands for buttons that reach it.
         // InputToButton decides which image is drawn, so the direct binding must keep it.
@@ -86,31 +86,31 @@ public class AliasResolverTests
             buttonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp"])),
             inputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Dpad-Up" });
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
 
         result.InputToButton["ButtonDpadUp"].ShouldBe("Dpad-Up");
     }
 
     [Fact]
-    public void InputNothingClaimedDirectly_FallsToTheAlias()
+    public void InputNothingClaimedDirectly_FallsToTheControl()
     {
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
 
         result.InputToButton["ButtonDpadUp"].ShouldBe("Dpad-Any");
     }
 
     [Fact]
-    public void AliasWithItsOwnDirectMapping_KeepsItAndAppendsWhatItStandsFor()
+    public void ControlWithItsOwnDirectMapping_KeepsItAndAppendsWhatItStandsFor()
     {
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(
                 ("Dpad-Any", ["ButtonDpad"]),
                 ("Dpad-Up", ["ButtonDpadUp"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
 
         result.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpad", "ButtonDpadUp"]);
     }
@@ -120,13 +120,13 @@ public class AliasResolverTests
     [Fact]
     public void NaturalMapsAreResolvedAgainstTheirOwnMembers()
     {
-        // IsMapped reads the natural snapshot, so an aliased button left out of it would look
+        // IsMapped reads the natural snapshot, so an grouped button left out of it would look
         // unmapped however plainly the controller declares it.
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(("Dpad-Up", ["AxisLeftStickUp"])),
             naturalButtonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
 
         result.ButtonToInput["Dpad-Any"].ShouldBe(["AxisLeftStickUp"]);
         result.NaturalButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp"]);
@@ -136,17 +136,17 @@ public class AliasResolverTests
     // --- nothing to do ---
 
     [Fact]
-    public void AliasWhoseMembersAreAllUnbound_ReachesNothingAndIsSkipped()
+    public void ControlWhoseMembersAreAllUnbound_ReachesNothingAndIsSkipped()
     {
         ResolvedMapping mapping = MappingOf(buttonToInput: Buttons(("A", ["ButtonA"])));
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
 
         result.ButtonToInput.ContainsKey("Dpad-Any").ShouldBeFalse();
     }
 
     [Fact]
-    public void NoAliases_ReturnsTheMappingUnchanged()
+    public void NoControls_ReturnsTheMappingUnchanged()
     {
         ResolvedMapping mapping = MappingOf(buttonToInput: Buttons(("A", ["ButtonA"])));
 
@@ -154,12 +154,12 @@ public class AliasResolverTests
     }
 
     [Fact]
-    public void PartiallyBoundAlias_ReachesOnlyTheMembersThatAreBound()
+    public void PartiallyBoundControl_ReachesOnlyTheMembersThatAreBound()
     {
         ResolvedMapping mapping = MappingOf(buttonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp"])));
 
         ResolvedMapping result = _underTest.Apply(
-            mapping, [Alias("Dpad-Any", "Dpad-Up", "Dpad-Down", "Dpad-Left", "Dpad-Right")]);
+            mapping, [Control("Dpad-Any", "Dpad-Up", "Dpad-Down", "Dpad-Left", "Dpad-Right")]);
 
         result.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp"]);
     }
@@ -171,7 +171,7 @@ public class AliasResolverTests
             buttonToInput: Buttons(("A", ["ButtonA"]), ("Dpad-Up", ["ButtonDpadUp"])),
             inputToButton: new Dictionary<string, string> { ["ButtonA"] = "A" });
 
-        ResolvedMapping result = _underTest.Apply(mapping, [Alias("Dpad-Any", "Dpad-Up")]);
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
 
         result.ButtonToInput["A"].ShouldBe(["ButtonA"]);
         result.InputToButton["ButtonA"].ShouldBe("A");

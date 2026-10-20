@@ -21,7 +21,7 @@ public class InputMappingServiceTests
 
     public InputMappingServiceTests()
     {
-        _underTest = new(_loader, _resolver, _plugins, new AliasResolver(Substitute.For<ILogger>()));
+        _underTest = new(_loader, _resolver, _plugins, new ControlResolver(Substitute.For<ILogger>()));
     }
 
     // ---- fixture builders ----

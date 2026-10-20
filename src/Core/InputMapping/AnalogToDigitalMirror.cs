@@ -9,7 +9,7 @@ namespace DynamicControls.InputMapping;
 /// <para>Directions only: the composite names (<c>ButtonDpad</c>, <c>AxisLeftStick</c>,
 /// <c>AxisRightStick</c>) are deliberately absent. Which inputs form a composite is the
 /// template's statement, declared with <c>&lt;Whole&gt;</c>, and a platform says a button stands
-/// for several with <c>&lt;Alias&gt;</c> — neither needs a name this layer knows in advance. A
+/// for several with <c>&lt;Control&gt;</c> — neither needs a name this layer knows in advance. A
 /// button declared that way reaches the four directions, so mirroring them produces the four
 /// stick directions and the composite follows from those.</para>
 /// </summary>

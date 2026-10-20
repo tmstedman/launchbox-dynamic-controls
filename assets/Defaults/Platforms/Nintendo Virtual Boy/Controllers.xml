@@ -6,12 +6,12 @@
         <Mapping name="R" input="ButtonRightShoulder" />
         <Mapping name="Start" input="ButtonStart" />
         <Mapping name="Select" input="ButtonBack" />
-        <Alias name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
+        <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="ButtonDpadUp" />
         <Mapping name="L-Down" input="ButtonDpadDown" />
         <Mapping name="L-Left" input="ButtonDpadLeft" />
         <Mapping name="L-Right" input="ButtonDpadRight" />
-        <Alias name="R-Any" mappings="R-Up R-Down R-Left R-Right" />
+        <Control name="R-Any" mappings="R-Up R-Down R-Left R-Right" />
         <Mapping name="R-Up" input="AxisRightStickUp" />
         <Mapping name="R-Down" input="AxisRightStickDown" />
         <Mapping name="R-Left" input="AxisRightStickLeft" />

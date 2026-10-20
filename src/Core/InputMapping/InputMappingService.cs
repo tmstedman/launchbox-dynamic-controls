@@ -27,12 +27,12 @@ public class InputMappingService(
     IInputMappingLoader loader,
     IInputMappingResolver resolver,
     IInputMappingPlugins plugins,
-    AliasResolver aliasResolver) : IInputMappingService
+    ControlResolver controlResolver) : IInputMappingService
 {
     private readonly IInputMappingLoader _loader = loader;
     private readonly IInputMappingResolver _resolver = resolver;
     private readonly IInputMappingPlugins _plugins = plugins;
-    private readonly AliasResolver _aliasResolver = aliasResolver;
+    private readonly ControlResolver _controlResolver = controlResolver;
 
     /// <inheritdoc />
     public ResolvedMapping Load(GameInfo game)
@@ -43,7 +43,7 @@ public class InputMappingService(
 
         if (transformed == null)
         {
-            return ResolveAliases(_resolver.Resolve(game.Platform, baseline, baseline.Controller),
+            return ResolveControls(_resolver.Resolve(game.Platform, baseline, baseline.Controller),
                                   platform, baseline.Controller);
         }
 
@@ -67,16 +67,16 @@ public class InputMappingService(
         };
 
         // A transform came from an emulator's config, which binds individual directions and has
-        // no way to name a control as a unit. So an alias — a button that does name one — is read
+        // no way to name a control as a unit. So an control — a button that does name one — is read
         // last, against wherever its members actually ended up.
-        return ResolveAliases(spliced, platform, transformed.Controller ?? baseline.Controller);
+        return ResolveControls(spliced, platform, transformed.Controller ?? baseline.Controller);
     }
 
-    /// <summary>Applies the selected controller's own aliases, if it declares any.</summary>
-    private ResolvedMapping ResolveAliases(
+    /// <summary>Applies the selected controller's own controls, if it declares any.</summary>
+    private ResolvedMapping ResolveControls(
         ResolvedMapping mapping, PlatformControllersConfig? platform, string? controllerName)
     {
         ControllerConfig? controller = platform?.Resolve(controllerName);
-        return _aliasResolver.Apply(mapping, controller?.Aliases ?? []);
+        return _controlResolver.Apply(mapping, controller?.Controls ?? []);
     }
 }

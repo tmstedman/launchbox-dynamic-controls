@@ -196,7 +196,7 @@ public class TemplateLoaderTests
 
     [Theory]
     [InlineData("")]                 // no parts at all
-    [InlineData("ButtonDpadUp")]     // one part is an alias for that input, not a composite
+    [InlineData("ButtonDpadUp")]     // one part is an control for that input, not a composite
     public void LoadLayout_WholeWithFewerThanTwoParts_IsLoggedAndSkipped(string parts)
     {
         // A composite standing for a single input would behave as that input, silently — nothing
