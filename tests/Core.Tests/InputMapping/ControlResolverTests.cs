@@ -133,6 +133,30 @@ public class ControlResolverTests
         result.NaturalInputToButton["ButtonDpadUp"].ShouldBe("Dpad-Any");
     }
 
+    // --- composition is not supported ---
+
+    [Fact]
+    public void ControlNamingAnotherControl_SeesOnlyWhatThatNameIsBoundToDirectly()
+    {
+        // Characterisation, not a requirement: Expand reads every member's targets from the
+        // mapping it was handed while writing into a copy, so one control never picks up
+        // another's expansion and the result does not depend on declaration order. Nothing
+        // shipped does this. #28 decides whether to compose or to refuse it outright; until
+        // then this pins what actually happens so a change cannot be silent.
+        ResolvedMapping mapping = MappingOf(
+            buttonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp"]), ("Dpad-Down", ["ButtonDpadDown"])));
+
+        ResolvedMapping result = _underTest.Apply(mapping,
+        [
+            Control("Dpad-Any", "Dpad-Up", "Dpad-Down"),
+            Control("Everything", "Dpad-Any", "Dpad-Up"),
+        ]);
+
+        // Dpad-Any expanded, but Everything saw Dpad-Any as unbound and reached only Dpad-Up's target.
+        result.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
+        result.ButtonToInput["Everything"].ShouldBe(["ButtonDpadUp"]);
+    }
+
     // --- nothing to do ---
 
     [Fact]
