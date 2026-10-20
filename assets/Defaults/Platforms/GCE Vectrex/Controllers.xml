@@ -4,7 +4,7 @@
         <Mapping name="Two" input="ButtonY" />
         <Mapping name="Three" input="ButtonA" />
         <Mapping name="Four" input="ButtonB" />
-        <Alias name="Joystick-Any" mappings="Joystick-Up Joystick-Down Joystick-Left Joystick-Right" />
+        <Control name="Joystick-Any" mappings="Joystick-Up Joystick-Down Joystick-Left Joystick-Right" />
         <Mapping name="Joystick-Up" input="AxisLeftStickUp" />
         <Mapping name="Joystick-Down" input="AxisLeftStickDown" />
         <Mapping name="Joystick-Left" input="AxisLeftStickLeft" />

@@ -798,7 +798,7 @@ public class VisibilityEvaluatorTests
     [Fact]
     public void GetVisibilityFlags_CompositeWhosePartIsBound_IsMapped()
     {
-        // The form that does work, and the one every shipped platform uses: an <Alias> reaches
+        // The form that does work, and the one every shipped platform uses: an <Control> reaches
         // the directions, so the composite follows from them whatever the template calls it.
         var paddle = Input(name: "Paddle");
         VisibilityContext ctx = Ctx(

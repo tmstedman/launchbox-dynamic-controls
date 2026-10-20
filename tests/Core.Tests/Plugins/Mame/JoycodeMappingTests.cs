@@ -89,7 +89,7 @@ public class JoycodeMappingTests
     [Fact]
     public void Translate_DuplicateMappedInputs_AreDeduplicated()
     {
-        // given a mapping where two distinct JOYCODEs alias the same generic input
+        // given a mapping where two distinct JOYCODEs control the same generic input
         var mapping = new JoycodeMapping(new Dictionary<string, List<string>>
         {
             ["JOYCODE_1_BUTTON1"] = ["ButtonA"],

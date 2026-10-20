@@ -104,15 +104,15 @@ inherits from `2-Button`). A variant's own mappings override any inherited entry
 </Controllers>
 ```
 
-#### `<Alias>` — one button standing for several
+#### `<Control>` — one button standing for several
 
-A control that works as a unit — a stick, a D-pad, a C-button cluster — gets an `<Alias>` naming
-the buttons it is made of. The alias then reaches whatever those buttons reach:
+A control that works as a unit — a stick, a D-pad, a C-button cluster — gets an `<Control>` naming
+the buttons it is made of. The control then reaches whatever those buttons reach:
 
 ```xml
 <!-- Defaults\Platforms\Nintendo 64\Controllers.xml -->
 <Controller name="Pad" default="true">
-    <Alias name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
+    <Control name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
     <Mapping name="C-Up"    input="AxisRightStickUp" />
     <Mapping name="C-Down"  input="AxisRightStickDown" />
     <Mapping name="C-Left"  input="AxisRightStickLeft" />
@@ -136,12 +136,12 @@ Two things make this worth the indirection rather than just writing `input="Axis
   it describes rather than in the template. Whether a platform has a C-cluster is a fact about its
   pad.
 
-An alias is appended, never displacing: a button that drives an input directly outranks one that
+An control is appended, never displacing: a button that drives an input directly outranks one that
 merely stands for buttons reaching it, so a direct binding keeps the reverse lookup and decides
-which image the player is shown. An alias whose members are all unbound reaches nothing and is
+which image the player is shown. An control whose members are all unbound reaches nothing and is
 skipped.
 
-Aliases are inherited by `inheritFrom` alongside mappings, under the same override-by-`name` rule.
+Controls are inherited by `inheritFrom` alongside mappings, under the same override-by-`name` rule.
 
 ### Sharing one definition across platforms
 
