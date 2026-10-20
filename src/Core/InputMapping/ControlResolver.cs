@@ -23,8 +23,8 @@ public class ControlResolver(ILogger logger)
     /// <summary>
     /// Returns <paramref name="mapping"/> with each control in <paramref name="controls"/> reaching
     /// the union of its members' current targets. The natural snapshot is resolved the same way
-    /// against its own members, since <c>IsMapped</c> reads it and an grouped button would
-    /// otherwise look unmapped however plainly the controller declares it.
+    /// against its own members, since <c>IsMapped</c> reads it and a button reached only
+    /// through one would otherwise look unmapped however plainly the controller declares it.
     /// </summary>
     public ResolvedMapping Apply(ResolvedMapping mapping, IReadOnlyList<ControlEntry> controls)
     {

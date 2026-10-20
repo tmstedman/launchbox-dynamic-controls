@@ -69,14 +69,14 @@ buttons reach, so a label written against it describes the whole control:
 
   </Controller>
 
-An control is resolved last — after your emulator's configuration and any
+A control is resolved last — after your emulator's configuration and any
 per-game override are read — because an emulator binds directions one at a
 time and has no way to name a control as a unit. Pointing the control straight
 at a generic input instead (input="AxisRightStick") would fix it at the moment
 you wrote the file, and the label would be lost on any game whose emulator
 config had moved the directions underneath it.
 
-An control never displaces a direct mapping: if some button drives an input
+A control never displaces a direct mapping: if some button drives an input
 outright, that button keeps the slot and decides which image is shown. An
 control whose buttons are all unmapped reaches nothing and is skipped. Controls
 are inherited by inheritFrom alongside mappings, overridden by name.

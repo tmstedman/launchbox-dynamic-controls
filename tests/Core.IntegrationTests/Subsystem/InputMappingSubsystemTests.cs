@@ -652,7 +652,7 @@ public class InputMappingSubsystemTests
             "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
             "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
         ]);
-        // The reverse lookup stays with the button that bound the direction directly. An control
+        // The reverse lookup stays with the button that bound the direction directly. A control
         // appends and never displaces, so JOYSTICK reaching the stick does not take the entry
         // from JOYSTICK_UP, which is what decides the image the player is shown.
         mapping.InputToButton["AxisLeftStickUp"].ShouldBe("JOYSTICK_UP");

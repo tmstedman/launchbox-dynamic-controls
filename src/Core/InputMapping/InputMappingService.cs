@@ -67,7 +67,7 @@ public class InputMappingService(
         };
 
         // A transform came from an emulator's config, which binds individual directions and has
-        // no way to name a control as a unit. So an control — a button that does name one — is read
+        // no way to name a control as a unit. So a control — a button that does name one — is read
         // last, against wherever its members actually ended up.
         return ResolveControls(spliced, platform, transformed.Controller ?? baseline.Controller);
     }

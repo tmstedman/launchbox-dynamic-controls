@@ -19,7 +19,7 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// <see cref="InputLabelsSubsystemTests"/> deliberately supplies its
 /// <see cref="ResolvedMapping"/> directly rather than wiring a real
 /// <see cref="InputMappingService"/> in. Neither exercises what the real mapping service's output
-/// does once it reaches the real labels service — specifically the case an control alone could
+/// does once it reaches the real labels service — specifically the case a control alone could
 /// never resolve: a config that moves one direction off the composite entirely and onto an
 /// ordinary button, which needs the labels layer's own per-direction rank comparison, not
 /// anything the mapping layer computes.

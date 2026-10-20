@@ -345,7 +345,7 @@ public class InputMappingLoaderTests
     [Fact]
     public void LoadPlatformMapping_Control_InheritsAndIsReplacedByNameLikeAMapping()
     {
-        // A descendant redeclaring an control replaces it outright rather than adding members, so
+        // A descendant redeclaring a control replaces it outright rather than adding members, so
         // what a name stands for is always stated in one place.
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """

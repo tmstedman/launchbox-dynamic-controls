@@ -98,7 +98,7 @@ public record ControllerConfig
 /// One platform button standing for several others:
 /// <c>&lt;Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" /&gt;</c>.
 ///
-/// <para>An control reaches whatever its members reach, resolved after the emulator's own
+/// <para>A control reaches whatever its members reach, resolved after the emulator's own
 /// configuration has been applied rather than fixed when the file was written. That is the whole
 /// point: a cfg binds directions one at a time, so a button naming a control as a unit has to be
 /// re-read against wherever its directions actually ended up. A list of generic input names
