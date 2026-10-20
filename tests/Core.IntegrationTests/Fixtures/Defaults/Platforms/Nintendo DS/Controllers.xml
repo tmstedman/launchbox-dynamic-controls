@@ -8,7 +8,7 @@
         <Mapping name="R" input="ButtonRightShoulder" />
         <Mapping name="Start" input="ButtonStart" />
         <Mapping name="Select" input="ButtonBack" />
-        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
+        <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
@@ -18,7 +18,7 @@
         <Mapping name="AxisTriggerRight" input="AxisTriggerRight" />
         <Mapping name="ButtonLeftStick" input="ButtonLeftStick" />
         <Mapping name="ButtonRightStick" input="ButtonRightStick" />
-        <Alias name="MoveTouchStick" mappings="MoveTouchStick-Up MoveTouchStick-Down MoveTouchStick-Left MoveTouchStick-Right" />
+        <Control name="MoveTouchStick" mappings="MoveTouchStick-Up MoveTouchStick-Down MoveTouchStick-Left MoveTouchStick-Right" />
         <Mapping name="MoveTouchStick-Up" input="AxisRightStickUp" />
         <Mapping name="MoveTouchStick-Down" input="AxisRightStickDown" />
         <Mapping name="MoveTouchStick-Left" input="AxisRightStickLeft" />

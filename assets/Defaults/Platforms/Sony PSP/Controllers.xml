@@ -6,14 +6,14 @@
         <Mapping name="Triangle" input="ButtonY" />
         <Mapping name="L" input="ButtonLeftShoulder" />
         <Mapping name="R" input="ButtonRightShoulder" />
-        <Alias name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
+        <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
         <Mapping name="L-Down" input="AxisLeftStickDown" />
         <Mapping name="L-Left" input="AxisLeftStickLeft" />
         <Mapping name="L-Right" input="AxisLeftStickRight" />
         <Mapping name="Select" input="ButtonStart" />
         <Mapping name="Share" input="ButtonBack" />
-        <Alias name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
+        <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
         <Mapping name="Dpad-Up" input="ButtonDpadUp" />
         <Mapping name="Dpad-Down" input="ButtonDpadDown" />
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />

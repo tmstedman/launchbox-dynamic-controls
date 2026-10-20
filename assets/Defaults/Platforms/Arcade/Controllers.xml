@@ -11,21 +11,21 @@
         <Mapping name="P1_BUTTON8" input="ButtonRightStick" />
 
         <!-- Standard joystick -->
-        <Alias name="P1_JOYSTICK" mappings="P1_JOYSTICK_UP P1_JOYSTICK_DOWN P1_JOYSTICK_LEFT P1_JOYSTICK_RIGHT" />
+        <Control name="P1_JOYSTICK" mappings="P1_JOYSTICK_UP P1_JOYSTICK_DOWN P1_JOYSTICK_LEFT P1_JOYSTICK_RIGHT" />
         <Mapping name="P1_JOYSTICK_UP" input="ButtonDpadUp" />
         <Mapping name="P1_JOYSTICK_DOWN" input="ButtonDpadDown" />
         <Mapping name="P1_JOYSTICK_LEFT" input="ButtonDpadLeft" />
         <Mapping name="P1_JOYSTICK_RIGHT" input="ButtonDpadRight" />
 
         <!-- Dual joystick (left) -->
-        <Alias name="P1_JOYSTICKLEFT" mappings="P1_JOYSTICKLEFT_UP P1_JOYSTICKLEFT_DOWN P1_JOYSTICKLEFT_LEFT P1_JOYSTICKLEFT_RIGHT" />
+        <Control name="P1_JOYSTICKLEFT" mappings="P1_JOYSTICKLEFT_UP P1_JOYSTICKLEFT_DOWN P1_JOYSTICKLEFT_LEFT P1_JOYSTICKLEFT_RIGHT" />
         <Mapping name="P1_JOYSTICKLEFT_UP" input="AxisLeftStickUp" />
         <Mapping name="P1_JOYSTICKLEFT_DOWN" input="AxisLeftStickDown" />
         <Mapping name="P1_JOYSTICKLEFT_LEFT" input="AxisLeftStickLeft" />
         <Mapping name="P1_JOYSTICKLEFT_RIGHT" input="AxisLeftStickRight" />
 
         <!-- Dual joystick (right) -->
-        <Alias name="P1_JOYSTICKRIGHT" mappings="P1_JOYSTICKRIGHT_UP P1_JOYSTICKRIGHT_DOWN P1_JOYSTICKRIGHT_LEFT P1_JOYSTICKRIGHT_RIGHT" />
+        <Control name="P1_JOYSTICKRIGHT" mappings="P1_JOYSTICKRIGHT_UP P1_JOYSTICKRIGHT_DOWN P1_JOYSTICKRIGHT_LEFT P1_JOYSTICKRIGHT_RIGHT" />
         <Mapping name="P1_JOYSTICKRIGHT_UP" input="AxisRightStickUp" />
         <Mapping name="P1_JOYSTICKRIGHT_DOWN" input="AxisRightStickDown" />
         <Mapping name="P1_JOYSTICKRIGHT_LEFT" input="AxisRightStickLeft" />

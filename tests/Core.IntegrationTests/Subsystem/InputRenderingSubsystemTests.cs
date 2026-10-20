@@ -403,7 +403,7 @@ public class InputRenderingSubsystemTests
     public void Render_PartsAgreeAndTheCompositeHasNoLabelOfItsOwn_TheMergedLabelStillRenders()
     {
         // The whole template shape depends on this: both merged alternatives hang their <Label>
-        // on the composite, and since every platform now declares its composites with an <Alias>
+        // on the composite, and since every platform now declares its composites with an <Control>
         // over the parts, nothing binds the composite's own key. Its text exists only because
         // the parts agreed.
         var glyph = Input(
