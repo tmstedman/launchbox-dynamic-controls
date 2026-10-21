@@ -200,6 +200,48 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
+    /// A direction above a merged pair carrying no label at all — the shape 17 shipped Genesis
+    /// games have. Its row vacates, and everything below has to close up over it: the merged pair
+    /// sits in a nested Container of its own, whose members belong to that block's collapse group
+    /// and so learn nothing about the vacancy out here unless the parent's shift is propagated in.
+    /// Left unpropagated the pair kept its uncollapsed rows, leaving half a row of slack above it.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_BlankDirectionAboveAMergedPair_ClosesTheRowItVacated()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "BlankDirectionTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        // the D-pad and its analogToDigital mirror both draw this cluster, so both must close up
+        foreach (string cluster in new[] { "ButtonDpad", "AxisLeftStick" })
+        {
+            // Up has no label of its own, so under small-label-vacate it leaves entirely
+            overlay.RenderedImages.Where(i => i.InputName == cluster + "Up").ShouldBeEmpty();
+
+            // and the three rows left behind are evenly spaced, with no slack where Up had been
+            double down = overlay.RenderedImages.Single(i => i.InputName == cluster + "Down").Top;
+            double left = overlay.RenderedImages.Single(i => i.InputName == cluster + "Left").Top;
+            double right = overlay.RenderedImages.Single(i => i.InputName == cluster + "Right").Top;
+            (left - down).ShouldBe(right - left,
+                $"{cluster} should close the row Up vacated; rows are {down}, {left}, {right}");
+
+            // and the pair's shared label stays on their midpoint rather than drifting onto a row
+            double label = overlay.InputLabels.Single(l => l.InputName == cluster + "Left").Top;
+            double midpoint = (left + right) / 2;
+            label.ShouldBeInRange(midpoint - 2, midpoint + 2,
+                $"{cluster}'s merged label should sit between {left} and {right}");
+        }
+    }
+
+    /// <summary>
     /// 6-Button default, no game-specific labels — the default rendering mode where showIf="auto"
     /// resolves to IsMapped, so all mapped inputs are active and the label-only Stack/OneOf groups drop.
     /// </summary>
