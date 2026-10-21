@@ -69,6 +69,18 @@ internal static class CollapseGroupBuilder
     /// <em>current</em> slot list without duplicating this logic (needed regardless of whether
     /// the container actually collapses — see <see cref="Container"/>'s doc comment).
     /// </summary>
+    /// <summary>
+    /// How many rows a slot occupies: one for an Input or a OneOf, and for a nested Container as
+    /// many as it draws — matching what <c>LayoutResolver.CountSlots</c> reserved for it, so the
+    /// render-time arithmetic (collapse shifts, vAlign, a loose label's center) measures the same
+    /// stack the coordinates were laid out against. Floored at one for an empty container.
+    /// </summary>
+    internal static int SpanOf(ILayoutElement slot) => slot switch
+    {
+        Container container => Math.Max(1, Flatten(container.Children).Sum(SpanOf)),
+        _ => 1
+    };
+
     internal static List<ILayoutElement> Flatten(IReadOnlyList<ILayoutElement> children)
     {
         var output = new List<ILayoutElement>();
