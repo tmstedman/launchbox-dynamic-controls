@@ -17,10 +17,16 @@ namespace DynamicControls.Composition;
 [ExcludeFromCodeCoverage]
 public static class ControllerOverlayFactory
 {
-    public static ControllerOverlayService Create(string rootDir)
+    /// <param name="rootDir">Plugin data root — the folder holding <c>Defaults/</c>,
+    /// <c>User/</c> and <c>Templates/</c>.</param>
+    /// <param name="logDir">Where to write <c>Logs/debug.log</c>. Defaults to
+    /// <paramref name="rootDir"/>, which is where an installed plugin keeps it. A developer tool
+    /// running against the repository's own <c>assets/</c> passes its own directory instead, so
+    /// its diagnostics do not accumulate inside the folder that gets packaged.</param>
+    public static ControllerOverlayService Create(string rootDir, string? logDir = null)
     {
         var fs = new SystemFileSystem();
-        var logger = Logger.ForRoot(fs, rootDir);
+        var logger = Logger.ForRoot(fs, logDir ?? rootDir);
 
         // Clear before anything is written, so the session's first diagnostics survive. Doing it
         // after loading config destroyed exactly the lines that explain a config problem.
