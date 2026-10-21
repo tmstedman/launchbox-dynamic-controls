@@ -253,6 +253,38 @@ Anything the rules above settle outright — a bare-direction collapse, a droppe
 letter label — is not a judgement call and does not belong on this list. Padding it with certain
 decisions trains reviewers to skim past the ones that actually need their attention.
 
+## The two lookup keys
+
+**`romName` is the ROM file's basename with `(...)` and `[...]` groups stripped, not the game's
+title.** For Arcade the two coincide, because the basename is the MAME short name (`1942`,
+`hwchamp`). For a console they rarely do: the file is a set name, so a subtitle is ` - ` and an
+article moves to the end — `Castlevania - Bloodlines`, `Lion King, The`. Neither is guessable
+from a manual's cover, so take the names from the `<FileName>` rows of `Files.xml` in a LaunchBox
+metadata export rather than typing them out.
+
+**`launchBoxId` is the primary key and does not depend on the filename at all**, so an entry
+carrying one survives a library named by some other convention. The IDs are the `<DatabaseID>`
+of that platform's games in the same export — `Metadata.xml`, with `Mame.xml` giving
+the title for an Arcade romset, all from a LaunchBox install rather than the repository.
+
+Matching is by title: exact first, then with punctuation, case and a leading article normalised
+away, then `<GameAlternateName>`. **An exact `<Name>` match must outrank a normalised or
+alternate-name one** — otherwise a hack's nickname beats a real game's own title, which is how
+*Streets of Rage* first resolved to *Streets of Rage Plus*. For Arcade, LaunchBox separates
+same-titled cabinets as `Title (Publisher)` or `Title (Year)`, and MAME knows both, so a romset
+whose plain title misses is asked again with its publisher — that is what tells `commando`
+(Capcom) from `commsega` (Sega).
+
+**An ID is only usable when every entry claiming it agrees.** The index is keyed by ID and the
+last entry wins, so an ID shared by entries whose labels differ would silently pick one of them.
+That is not rare on Arcade, where LaunchBox files a whole romset family as one game: 69 IDs are
+claimed by entries that disagree. Those entries keep `romName` alone, which is what they had
+before and costs nothing — an entry with no ID is not worse off, it is merely unchanged.
+
+Where entries for one game disagree, that is a data-quality finding about the transcription, not
+a reason to pick one. The A/B comparison cannot see it, for the same reason it cannot see
+duplicate labels.
+
 ## Running an import
 
 Scripts live outside the repo, in `~/.work/dynamic-controls/scripts/`, because they depend on
