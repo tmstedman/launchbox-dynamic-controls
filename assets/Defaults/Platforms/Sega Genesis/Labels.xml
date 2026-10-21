@@ -1,11 +1,808 @@
 <Labels>
-    <Game romName="OutRun">
+    <Defaults>
+        <Input name="Start">Pause</Input>
+    </Defaults>
+
+    <Game launchBoxId="118" romName="Altered Beast">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Punch</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4250" romName="Art of Fighting">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Punch</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Power Attack</Input>
+        <Input name="X">Provoke</Input>
+        <Input name="Y">Provoke</Input>
+        <Input name="Z">Provoke</Input>
+    </Game>
+
+    <Game launchBoxId="14837" romName="Ayrton Senna's Super Monaco GP II">
         <Input name="Dpad-Left">Steer</Input>
         <Input name="Dpad-Right">Steer</Input>
-        <Input name="Dpad-Up">Low gear</Input>
-        <Input name="Dpad-Down">High gear</Input>
+        <Input name="C">Pit In</Input>
+    </Game>
+
+    <Game launchBoxId="451" romName="Ballz 3D - Fighting at Its Ballziest">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Punch</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="2768" romName="Battletoads">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="1035" romName="Battletoads &amp; Double Dragon">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Action</Input>
+    </Game>
+
+    <Game launchBoxId="3872" romName="Beyond Oasis">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="X">Map</Input>
+        <Input name="Y">Weapons</Input>
+        <Input name="Z">Items</Input>
+    </Game>
+
+    <Game launchBoxId="20258" romName="Bio Hazard Battle">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fire Weapon</Input>
+        <Input name="B">Fire Weapon</Input>
+        <Input name="C">Fire Weapon</Input>
+    </Game>
+
+    <Game launchBoxId="29101" romName="Bonkers">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Action</Input>
+        <Input name="C">Action</Input>
+    </Game>
+
+    <Game launchBoxId="4292" romName="Boogerman - A Pick and Flick Adventure">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Mucous</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Gas</Input>
+    </Game>
+
+    <Game launchBoxId="459" romName="Bubsy in Claws Encounters of the Furred Kind">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Run</Input>
+        <Input name="Dpad-Right">Run</Input>
+        <Input name="A">Swoop</Input>
+        <Input name="B">Pounce</Input>
+        <Input name="C">Look</Input>
+    </Game>
+
+    <Game launchBoxId="4302" romName="Cadash">
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Squat</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="5280" romName="Captain America and the Avengers">
+        <Input name="Dpad-Any">Move</Input>
+    </Game>
+
+    <Game launchBoxId="115" romName="Castle of Illusion Starring Mickey Mouse">
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Throw</Input>
+        <Input name="B">Throw</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="2619" romName="Castlevania - Bloodlines">
+        <Input name="Dpad-Up">Move</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Attack</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Special Weapon</Input>
+    </Game>
+
+    <Game launchBoxId="3891" romName="Chakan">
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Change Weapon</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="7506" romName="Chuck Rock">
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Walk</Input>
+        <Input name="Dpad-Right">Walk</Input>
+        <Input name="B">Belly-Butt</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="465" romName="Columns">
+        <Input name="Dpad-Down">Drop Faster</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Arrange Jewels</Input>
+        <Input name="B">Arrange Jewels</Input>
+        <Input name="C">Arrange Jewels</Input>
+    </Game>
+
+    <Game launchBoxId="3487" romName="Comix Zone">
+        <Input name="Dpad-Up">Move</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Inventory</Input>
+    </Game>
+
+    <Game launchBoxId="6242" romName="Contra - Hard Corps">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Select Weapon</Input>
+        <Input name="B">Shoot</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="3897" romName="Crusader of Centy">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="A">Sword</Input>
+    </Game>
+
+    <Game launchBoxId="2487" romName="Dashin' Desperadoes">
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Dash</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Bomb</Input>
+    </Game>
+
+    <Game launchBoxId="4331" romName="Deadly Moves">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Punch</Input>
+    </Game>
+
+    <Game launchBoxId="4333" romName="DecapAttack">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">The Lab</Input>
+        <Input name="B">Punch</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="157" romName="Aladdin">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Throw</Input>
+        <Input name="B">Sword</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4345" romName="Dr. Robotnik's Mean Bean Machine">
+        <Input name="Dpad-Down">Drop Faster</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Arrange Beans</Input>
+        <Input name="B">Arrange Beans</Input>
+        <Input name="C">Arrange Beans</Input>
+    </Game>
+
+    <Game launchBoxId="4347" romName="Dragon's Fury">
+        <Input name="Dpad-Any">Left Flipper</Input>
+        <Input name="A">Shake</Input>
+        <Input name="B">Right Flipper</Input>
+    </Game>
+
+    <Game launchBoxId="4351" romName="Dynamite Headdy">
+        <Input name="A">Cancel Head</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4361" romName="ESWAT - City Under Siege">
+        <Input name="Dpad-Down">Squat</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4353" romName="Earthworm Jim">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Whip</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="1585" romName="Earthworm Jim 2">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Head Whip</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="2900" romName="Ecco the Dolphin">
+        <Input name="Dpad-Any">Swim</Input>
+        <Input name="A">Sonar</Input>
+        <Input name="B">Charge</Input>
+        <Input name="C">Speed Swim</Input>
+    </Game>
+
+    <Game launchBoxId="4354" romName="Ecco - The Tides of Time">
+        <Input name="Dpad-Any">Swim</Input>
+        <Input name="A">Sonar</Input>
+        <Input name="B">Charge</Input>
+        <Input name="C">Speed Swim</Input>
+    </Game>
+
+    <Game launchBoxId="4357" romName="Elemental Master">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fire Back</Input>
+        <Input name="B">Fire</Input>
+        <Input name="C">Select Power</Input>
+    </Game>
+
+    <Game launchBoxId="473" romName="Eternal Champions">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Snap Kick</Input>
+        <Input name="B">Thrust Kick</Input>
+        <Input name="C">Wheel Kick</Input>
+        <Input name="X">Straight Punch</Input>
+        <Input name="Y">Lunge Punch</Input>
+        <Input name="Z">Swing Punch</Input>
+    </Game>
+
+    <Game launchBoxId="4371" romName="Fatal Fury">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Punch</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Throw</Input>
+    </Game>
+
+    <Game launchBoxId="975" romName="Fatal Fury 2">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Weak Kick</Input>
+        <Input name="B">Strong Kick</Input>
+        <Input name="C">Line Attack</Input>
+        <Input name="X">Weak Punch</Input>
+        <Input name="Y">Strong Punch</Input>
+        <Input name="Z">3D Movement</Input>
+        <Input name="Mode">Taunt</Input>
+    </Game>
+
+    <Game launchBoxId="4378" romName="Flashback - The Quest for Identity">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Use</Input>
+        <Input name="C">Draw Gun</Input>
+        <Input name="Start">Inventory</Input>
+    </Game>
+
+    <Game launchBoxId="4381" romName="Forgotten Worlds">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Rotate Left</Input>
+        <Input name="B">Fire</Input>
+        <Input name="C">Rotate Right</Input>
+    </Game>
+
+    <Game launchBoxId="4385" romName="Gaiares">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Change Speed</Input>
+        <Input name="B">Shoot</Input>
+        <Input name="C">Detach TOZ</Input>
+    </Game>
+
+    <Game launchBoxId="4386" romName="Gain Ground">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Special Weapon</Input>
+        <Input name="B">Weapon</Input>
+        <Input name="C">Special Weapon</Input>
+    </Game>
+
+    <Game launchBoxId="1937" romName="Gargoyles">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Throw</Input>
+        <Input name="B">Claw Swipe</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4397" romName="Gods">
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Pick Up</Input>
+    </Game>
+
+    <Game launchBoxId="209" romName="Golden Axe">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Magic</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="967" romName="Golden Axe II">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Magic</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="138" romName="Gunstar Heroes">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Switch Weapon</Input>
+        <Input name="B">Fire</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="484" romName="Haunting Starring Polterguy">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fright 'Em</Input>
+        <Input name="B">Kick</Input>
+        <Input name="C">Use Spell</Input>
+    </Game>
+
+    <Game launchBoxId="486" romName="Herzog Zwei">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Change Form</Input>
+        <Input name="B">Fire</Input>
+    </Game>
+
+    <Game launchBoxId="4471" romName="Judge Dredd">
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Walk</Input>
+        <Input name="Dpad-Right">Walk</Input>
+        <Input name="A">Fire Weapon</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Select Ammo Forwards</Input>
+        <Input name="X">Punch/Kick/Headbutt</Input>
+        <Input name="Y">Arrest</Input>
+        <Input name="Z">Select Ammo Backwards</Input>
+    </Game>
+
+    <Game launchBoxId="537" romName="Jurassic Park">
+        <Input name="B">Fire</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="540" romName="Landstalker">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Action</Input>
+    </Game>
+
+    <Game launchBoxId="2575" romName="Light Crusader">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Cast Spell</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="543" romName="Lightening Force - Quest for the Darkstar">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Engine Setting</Input>
+        <Input name="B">Fire Weapon</Input>
+        <Input name="C">Change Weapon</Input>
+    </Game>
+
+    <Game launchBoxId="2217" romName="Mega Turrican">
+        <Input name="B">Shoot</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4501" romName="Mercs">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="B">Mega Crash</Input>
+        <Input name="C">Fire</Input>
+    </Game>
+
+    <Game launchBoxId="652" romName="Midnight Resistance">
+        <Input name="Dpad-Up">Backpack Weapon</Input>
+        <Input name="Dpad-Down">Move</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Lock Aim</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="642" romName="Mortal Kombat II">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Low Punch</Input>
+        <Input name="B">Block</Input>
+        <Input name="C">Low Kick</Input>
+        <Input name="X">High Punch</Input>
+        <Input name="Y">Block</Input>
+        <Input name="Z">High Kick</Input>
+    </Game>
+
+    <Game launchBoxId="651" romName="Mortal Kombat 3">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Walk</Input>
+        <Input name="Dpad-Right">Walk</Input>
+        <Input name="A">Low Punch</Input>
+        <Input name="B">Block</Input>
+        <Input name="C">Low Kick</Input>
+        <Input name="X">High Punch</Input>
+        <Input name="Y">Run</Input>
+        <Input name="Z">High Kick</Input>
+    </Game>
+
+    <Game launchBoxId="657" romName="NBA Jam">
+        <Input name="Dpad-Any">Move</Input>
+    </Game>
+
+    <Game launchBoxId="32809" romName="Out of This World">
+        <Input name="Dpad-Up">Move</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Run</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4541" romName="OutRun">
+        <Input name="Dpad-Left">Steer</Input>
+        <Input name="Dpad-Right">Steer</Input>
         <Input name="A">Brake</Input>
         <Input name="B">Accelerate</Input>
-        <Input name="Start">Pause</Input>
+        <Input name="C">Switch Gear</Input>
+    </Game>
+
+    <Game launchBoxId="679" romName="Phantasy Star III - Generations of Doom">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Talk</Input>
+        <Input name="B">Cancel</Input>
+        <Input name="C">Command</Input>
+    </Game>
+
+    <Game launchBoxId="666" romName="Primal Rage">
+        <Input name="A">Lower Quick</Input>
+        <Input name="B">Lower Fierce</Input>
+        <Input name="X">Upper Quick</Input>
+        <Input name="Y">Upper Fierce</Input>
+    </Game>
+
+    <Game launchBoxId="681" romName="Ranger X">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Fire Laser</Input>
+        <Input name="B">Special Weapon</Input>
+        <Input name="C">Fire Laser</Input>
+    </Game>
+
+    <Game launchBoxId="4598" romName="Road Rash">
+        <Input name="Dpad-Left">Lean</Input>
+        <Input name="Dpad-Right">Lean</Input>
+        <Input name="A">Brake</Input>
+        <Input name="B">Accelerate</Input>
+        <Input name="C">Attack</Input>
+    </Game>
+
+    <Game launchBoxId="26291" romName="Road Rash 3">
+        <Input name="Dpad-Left">Steer</Input>
+        <Input name="Dpad-Right">Steer</Input>
+        <Input name="A">Brake</Input>
+        <Input name="B">Accelerate</Input>
+        <Input name="C">Punch</Input>
+    </Game>
+
+    <Game launchBoxId="685" romName="Rocket Knight Adventures">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Attack</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Attack</Input>
+    </Game>
+
+    <Game launchBoxId="111701" romName="Rolling Thunder 2">
+        <Input name="Dpad-Up">Enter Door</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Take Agent</Input>
+        <Input name="B">Fire Weapon</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4609" romName="Samurai Shodown">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Weak Kick</Input>
+        <Input name="B">Normal Kick</Input>
+        <Input name="C">Hard Kick</Input>
+        <Input name="X">Weak Slash</Input>
+        <Input name="Y">Normal Slash</Input>
+        <Input name="Z">Hard Slash</Input>
+    </Game>
+
+    <Game launchBoxId="2597" romName="Shadow Dancer - The Secret of Shinobi">
+        <Input name="Dpad-Down">Squat</Input>
+        <Input name="Dpad-Left">Walk</Input>
+        <Input name="Dpad-Right">Walk</Input>
+        <Input name="A">Ninjutsu</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="184" romName="Shining Force II">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Status Window</Input>
+        <Input name="B">Cancel</Input>
+        <Input name="C">Talk</Input>
+    </Game>
+
+    <Game launchBoxId="697" romName="Shining in the Darkness">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Command</Input>
+        <Input name="B">Cancel</Input>
+        <Input name="C">Command</Input>
+    </Game>
+
+    <Game launchBoxId="120" romName="Shinobi III - Return of the Ninja Master">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Ninjutsu</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="733" romName="Sonic &amp; Knuckles">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="108428" romName="Sonic the Hedgehog">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Look Down</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="108429" romName="Sonic the Hedgehog 2">
+        <Input name="Dpad-Down">Spin</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="691" romName="Sonic the Hedgehog 3">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4631" romName="Spider-Man and Venom - Maximum Carnage">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="A">Punch</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Fire Web</Input>
+        <Input name="Y">Fire Swinging Line</Input>
+        <Input name="Z">Fire Line Web</Input>
+    </Game>
+
+    <Game launchBoxId="4633" romName="Splatterhouse 3">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Mutate</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="7394" romName="Street Fighter II' - Special Champion Edition">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="A">Light Kick</Input>
+        <Input name="B">Medium Kick</Input>
+        <Input name="C">Hard Kick</Input>
+        <Input name="X">Light Punch</Input>
+        <Input name="Y">Medium Punch</Input>
+        <Input name="Z">Hard Punch</Input>
+    </Game>
+
+    <Game launchBoxId="971" romName="Streets of Rage">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Special Attack</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="694" romName="Streets of Rage 2">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Special Attack</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="702" romName="Strider">
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Squat</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="695" romName="Sunset Riders">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Shoot</Input>
+        <Input name="B">Shoot</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="18747" romName="Super Monaco GP">
+        <Input name="Dpad-Left">Steer</Input>
+        <Input name="Dpad-Right">Steer</Input>
+        <Input name="C">Pit In</Input>
+    </Game>
+
+    <Game launchBoxId="2585" romName="Super Street Fighter II - The New Challengers">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="A">Light Kick</Input>
+        <Input name="B">Medium Kick</Input>
+        <Input name="C">Hard Kick</Input>
+        <Input name="X">Light Punch</Input>
+        <Input name="Y">Medium Punch</Input>
+        <Input name="Z">Hard Punch</Input>
+    </Game>
+
+    <Game launchBoxId="669" romName="Lion King, The">
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Roar</Input>
+        <Input name="B">Slash</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4673" romName="Revenge of Shinobi, The">
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Ninjitsu</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="705" romName="Sword of Vermilion">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Magic</Input>
+        <Input name="B">Erase Selection</Input>
+        <Input name="C">Sword</Input>
+    </Game>
+
+    <Game launchBoxId="1971" romName="Teenage Mutant Ninja Turtles - The Hyperstone Heist">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Attack</Input>
+        <Input name="B">Jump</Input>
+        <Input name="C">Dash</Input>
+    </Game>
+
+    <Game launchBoxId="4681" romName="Thunder Force III">
+        <Input name="A">Select Speed</Input>
+        <Input name="B">Select Weapon</Input>
+        <Input name="C">Fire Weapon</Input>
+    </Game>
+
+    <Game launchBoxId="4692" romName="Toy Story">
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Lasso</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="721" romName="Truxton">
+        <Input name="Dpad-Any">Maneuver</Input>
+        <Input name="A">Fire</Input>
+        <Input name="B">Destroyer Bomb</Input>
+        <Input name="C">Rapid Fire</Input>
+    </Game>
+
+    <Game launchBoxId="4709" romName="Vectorman">
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Run</Input>
+        <Input name="Dpad-Right">Run</Input>
+        <Input name="A">Shoot</Input>
+        <Input name="B">Shoot</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4711" romName="Virtua Racing">
+        <Input name="Dpad-Up">Shift Down</Input>
+        <Input name="Dpad-Down">Shift Up</Input>
+        <Input name="Dpad-Left">Turn</Input>
+        <Input name="Dpad-Right">Turn</Input>
+        <Input name="A">Brake</Input>
+        <Input name="B">Accelerate</Input>
+        <Input name="C">VR View 2</Input>
+        <Input name="X">VR View 1</Input>
+        <Input name="Y">VR View 3</Input>
+        <Input name="Z">VR View 4</Input>
+    </Game>
+
+    <Game launchBoxId="139" romName="World of Illusion Starring Mickey Mouse and Donald Duck">
+        <Input name="Dpad-Up">Enter Door</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Dash</Input>
+        <Input name="B">Magic</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="665" romName="X-Men">
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="A">Mutant Power</Input>
+        <Input name="B">Attack</Input>
+        <Input name="C">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="4749" romName="Zero Tolerance">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="B">Fire Weapon</Input>
+        <Input name="C">Toggle Items</Input>
+    </Game>
+
+    <Game launchBoxId="2757" romName="Zombies Ate My Neighbors">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="A">Use Weapon</Input>
+        <Input name="B">Use Special Item</Input>
+        <Input name="X">Change Weapon</Input>
+        <Input name="Y">Change Special Item</Input>
     </Game>
 </Labels>

@@ -3,6 +3,11 @@
 Inputs the shipped label files are built from. Nothing here is packaged — the release zip
 carries `assets/` only.
 
+A source is either **transcribed** into a file here, when it is bulk data a rule change would
+make us re-read (`arcade-artwork.xml`), or **recorded** in a provenance note, when it is a pile
+of scans nobody will re-derive mechanically (`genesis-manuals.md`). Both answer the same
+question — what does this label rest on — for sources too different to share one shape.
+
 ## `arcade-artwork.xml`
 
 What the controller artwork says, transcribed and nothing more. One `<Game>` per image, one
@@ -98,6 +103,25 @@ python3 ~/.work/dynamic-controls/scripts/artwork_corrections.py
 
 Groups every change by rom, which a bare `diff` does not — the changes are mostly identical
 label lines, and without the rom name there is no image to look up.
+
+## `genesis-manuals.md`
+
+Which printed manual each Sega Genesis label was read off, by PDF page, and whether the page was
+OCR'd or read as an image. A provenance note rather than a transcription: the manuals are 379
+image-only PDF scans, not redistributable and not reducible to a table that a later rule change
+could be replayed against, so what is recorded is the route back to the page.
+
+It also carries the judgements that are specific to this platform rather than general —
+chiefly that `6-Button` is the shipped default, so a manual printing both columns is read from
+the six-button one, and the two columns disagree about what A and B mean.
+
+**Finding the page and reading it are separate steps, and only the first is mechanical.**
+`locate_controls.py` scores every page of a manual on the vocabulary of a controls page and
+renders the best few; the page itself is then read as an image. OCR is reliable for *which page*
+(a question about words) and unreliable for *which button* (a question about layout) — a
+transcription derived from the OCR dump misattributed 48% of its sentences and was deleted rather
+than shipped. The note records the scorer's measured recall and what its predecessor's keyword
+filter silently threw away.
 
 ## Generated files live elsewhere
 
