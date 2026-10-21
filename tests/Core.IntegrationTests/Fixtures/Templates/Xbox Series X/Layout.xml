@@ -108,6 +108,43 @@
                     <Input name="AxisLeftStickRight" height="34" width="34" />
                 </Container>
             </Condition>
+            <!-- One axis agrees and the other doesn't: the agreeing pair becomes a nested
+                 Container of its own, so the shared label centers on that block's two rows while
+                 each direction of the other axis keeps its own label. The nested block reserves
+                 both of its rows in this container, so the pair can sit first or last without
+                 anything after it needing a hand-tuned y. -->
+            <Condition inputs="AxisLeftStickLeft AxisLeftStickRight" match="agree">
+                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Input name="AxisLeftStickUp" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickDown" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Container gap="45" collapse="true" style="small-label-vacate">
+                        <Label inputs="AxisLeftStickLeft" x="-24" y="+17" align="right" fontSize="24" />
+                        <Input name="AxisLeftStickLeft" height="34" width="34" />
+                        <Input name="AxisLeftStickRight" height="34" width="34" />
+                    </Container>
+                </Container>
+            </Condition>
+            <Condition inputs="AxisLeftStickUp AxisLeftStickDown" match="agree">
+                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Container gap="45" collapse="true" style="small-label-vacate">
+                        <Label inputs="AxisLeftStickUp" x="-24" y="+17" align="right" fontSize="24" />
+                        <Input name="AxisLeftStickUp" height="34" width="34" />
+                        <Input name="AxisLeftStickDown" height="34" width="34" />
+                    </Container>
+                    <Input name="AxisLeftStickLeft" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickRight" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Container>
+            </Condition>
             <!-- Fallback: no two directions agree — each renders its own, independent text.
                  A Container never decides its own inclusion, so this explicit Condition is what
                  replaces the old Group's implicit "any member visible" check: without it, the
@@ -153,6 +190,39 @@
                     <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34" />
                     <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
                     <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34" />
+                </Container>
+            </Condition>
+            <!-- One axis agrees and the other doesn't: see AxisLeftStick above. -->
+            <Condition inputs="AxisRightStickLeft AxisRightStickRight" match="agree">
+                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                    <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Container gap="45" collapse="true" style="small-label-vacate">
+                        <Label inputs="AxisRightStickLeft" x="+52" y="+15" fontSize="24" />
+                        <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
+                        <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34" />
+                    </Container>
+                </Container>
+            </Condition>
+            <Condition inputs="AxisRightStickUp AxisRightStickDown" match="agree">
+                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                    <Container gap="45" collapse="true" style="small-label-vacate">
+                        <Label inputs="AxisRightStickUp" x="+52" y="+15" fontSize="24" />
+                        <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34" />
+                        <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34" />
+                    </Container>
+                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
                 </Container>
             </Condition>
             <!-- Fallback: no two directions agree — each renders its own, independent text.
