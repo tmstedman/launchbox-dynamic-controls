@@ -186,24 +186,25 @@ public class Nintendo64EndToEndTests
         // then Left and Right collapse into one row carrying the left-right axis glyph, with
         // their shared "Strafe" beside it, while the vertical pair, which does not agree, keeps
         // a row and a label of its own per direction
-        overlay.ShouldHaveLabel("AxisRightStickLeft", "Strafe");
+        overlay.ShouldHaveLabel("AxisRightStickX", "Strafe");
         overlay.ShouldHaveLabel("AxisRightStickUp", "Look Up");
         overlay.ShouldHaveLabel("AxisRightStickDown", "Look Down");
         overlay.InputLabels.Where(l => l.InputName == "AxisRightStickRight").ShouldBeEmpty();
 
+        overlay.RenderedImages.Where(i => i.InputName == "AxisRightStickLeft").ShouldBeEmpty();
         overlay.RenderedImages.Where(i => i.InputName == "AxisRightStickRight").ShouldBeEmpty();
 
-        // but the glyph the template asked for does NOT reach the screen here: C-Left is this
-        // input's own default physical button and the N64 ships art for it, and MappedDefault
-        // resolves {platformButton}.png ahead of the render's own useImage, which only ever
-        // serves as the fallback. So the merged row shows one button's art while standing for
-        // two. Pinned as the behaviour that is, not the behaviour that should be - a template
-        // naming an image explicitly arguably ought to win (see the note on useImage in #33).
-        overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickLeft").Source
-            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Left.png"));
+        // and it draws the N64's own C-Any artwork rather than the generic axis glyph: the whole
+        // pair is covered by one platform button, so the axis classifies as MappedDefault against
+        // it and the platform's picture wins, as it does for every other mapped input. That is
+        // the point of naming the axis -- when the pair rendered as one of its own directions
+        // instead, the button covering it was C-Left, and the row showed a single left arrow
+        // while standing for both directions.
+        overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickX").Source
+            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Any.png"));
 
         // and the rows that remain read horizontal pair, then the vertical directions
         overlay.ShouldStackInOrder(
-            "AxisRightStickLeft", "AxisRightStickUp", "AxisRightStickDown");
+            "AxisRightStickX", "AxisRightStickUp", "AxisRightStickDown");
     }
 }
