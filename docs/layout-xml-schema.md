@@ -229,9 +229,9 @@ Whether it renders at all is decided once, structurally, the same way a `<OneOf>
     <Condition inputs="AxisLeftStick" atLeast="2" match="agree">
         <Container for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
             <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
+            <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34" />
-            <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34" />
             <Label x="-24" align="right" />
         </Container>
     </Condition>
@@ -326,9 +326,9 @@ Two purposes remain:
     <Container x="312" y="291" gap="45" collapse="true">
         <Overlay src="Line_ButtonDpad_Multi.png" x="+72" y="-45" />
         <Input name="ButtonDpadUp">...</Input>
+        <Input name="ButtonDpadDown">...</Input>
         <Input name="ButtonDpadLeft">...</Input>
         <Input name="ButtonDpadRight">...</Input>
-        <Input name="ButtonDpadDown">...</Input>
     </Container>
 </Condition>
 ```
