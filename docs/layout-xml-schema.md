@@ -157,7 +157,7 @@ A template declaring no `<Whole>` gets none of them, and every input is simply i
 
 ### `<Body>` — display layout
 
-The container for everything the renderer cares about. Direct children are `<Input>`, `<Container>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Label>` parses here too, but always errors — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose `<Label>`](#loose-label)). A bare `<Overlay>` also parses here, but does **not** error — with no enclosing `<Input>`/`<Container>` at all it simply renders unconditionally (see [Loose `<Overlay>`](#loose-overlay)).
+The container for everything the renderer cares about. Direct children are `<Input>`, `<Container>`, `<OneOf>`, and `<Condition>`, in document order. A bare `<Label>` parses here too, but errors unless it names its owner with `inputs=` — there's no enclosing `<Input>` for it to attach to at the very top of the tree (see [Loose `<Label>`](#loose-label)). A bare `<Overlay>` also parses here, but does **not** error — with no enclosing `<Input>`/`<Container>` at all it simply renders unconditionally (see [Loose `<Overlay>`](#loose-overlay)).
 
 ### `<Input>` — a generic input
 
@@ -201,7 +201,7 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 </OneOf>
 ```
 
-See [`<Container>`'s `for=`](#container--positioned-cluster) for how a loose `<Label>` inside still finds its whole with no enclosing Input to supply it ambiently.
+See [loose `<Label>`'s `inputs=`](#loose-label) for how a loose `<Label>` inside still finds its whole with no enclosing Input to supply it ambiently.
 
 **Strict-self render position**: A duplicate top-level `<Input>` with no nested children expresses "render the parent input's image at this position, independent of its descendants" — used by some templates to put an extra render in a different slot.
 
@@ -219,7 +219,17 @@ A `<Label>` doesn't have to be a *direct* child of its own `<Input>` — it can 
 
 The loose `<Label>` attaches to whichever `<Input>` is ambient at that point in the tree — here, `ButtonDpad`, even though it's several levels of `<Condition>` away — exactly as if it had been written as a direct child. Entering a *nested* `<Input>` resets this ambient identity to the nested one; entering `<Container>`/`<OneOf>`/`<Condition>` does not, since none of those are a new Input's own boundary. Its coordinate origin, though, follows whatever `<Container>` it's actually inside: `<Condition>` passes the origin through completely unchanged, and `<OneOf>` shares one slot's origin across every alternative, but a `<Container>` always establishes its own frame — see below.
 
-Whether it renders at all is decided once, structurally, the same way a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, the loose label included, before label-specific concerns (its own position, font size) ever come into play. A loose `<Label>` with **no** enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Container>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered — **unless** the nearest enclosing `<Container>` sets `for="SomeInput"`, which supplies the ambient identity explicitly for exactly this case: no enclosing `<Input>` to have supplied it the ordinary way. Deliberately not an attribute on `<OneOf>`/`<Condition>` — those are pure control-flow, unrelated to identity; `<Container>` already carries the rest of an Input's structural attributes. See [`<Container>`](#container--positioned-cluster).
+Whether it renders at all is decided once, structurally, the same way a `<OneOf>`'s alternatives are: reaching a `<Condition>` that fails drops everything inside it, the loose label included, before label-specific concerns (its own position, font size) ever come into play. **A loose `<Label>` can also name its owner outright, with `inputs=`.** That is what it does when nothing encloses it — a `<Container>` that is a `<OneOf>` sibling of the whole it describes has no `<Input>` above it to inherit from:
+
+```xml
+<Label inputs="ButtonDpadLeft ButtonDpadRight" x="-24" align="right" />
+```
+
+The names are space-separated, and **the first of them that actually renders owns the label** — its text is what the label draws, and its flags are what govern it. Naming several says "whichever of these this game draws", not "pick the best one"; if none of them render, the label simply has nothing to say and is dropped. A label that names inputs ignores the ambient one entirely, naming being the more specific statement of the two.
+
+Unlike an ambient owner, a named one needn't be anywhere near the label in the tree: it can be a top-level `<Input>`, or a member of the label's own `<Container>`, and it may be written *after* the label — ownership is matched up once the whole render pass is known, not as the tree is walked.
+
+A loose `<Label>` that names no inputs **and** has no enclosing `<Input>` at all — not even an ambient one, e.g. one sitting directly under `<Body>` or inside a top-level `<Container>`/`<Condition>` with no `<Input>` anywhere above it — is a template-authoring error, logged once at load time; nothing is rendered. Deliberately an attribute on the label rather than on `<Container>`/`<OneOf>`/`<Condition>`: whose words a label draws is a fact about the label, and a container that had to speak for a label it merely contains could only ever name a top-level Input.
 
 **A loose `<Label>` centers itself against an enclosing `<Container>`.** Placed directly inside a `<Container>` (or reached through a `<OneOf>`/`<Condition>` nested in it), its `y` resolves to the visual center of that Container's slots — the midpoint between the first and last slot that's actually showing *for the current game* — rather than the shifted per-slot origin the Container's own members use:
 
@@ -227,18 +237,18 @@ Whether it renders at all is decided once, structurally, the same way a `<OneOf>
 <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
 <OneOf>
     <Condition inputs="AxisLeftStick" atLeast="2" match="agree">
-        <Container for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center">
+        <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center">
             <Input name="AxisLeftStickUp" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickDown" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickLeft" style="small-label-vacate" height="34" width="34" />
             <Input name="AxisLeftStickRight" style="small-label-vacate" height="34" width="34" />
-            <Label x="-24" align="right" />
+            <Label inputs="AxisLeftStick" x="-24" align="right" />
         </Container>
     </Condition>
 </OneOf>
 ```
 
-The `<Container>`'s `for="AxisLeftStick"` is what makes this work with no enclosing `<Input>` at all — it supplies the ambient identity the loose `<Label>` attaches to, exactly as if it had been written as `AxisLeftStick`'s own direct child.
+The `<Label>`'s own `inputs="AxisLeftStick"` is what makes this work with no enclosing `<Input>` at all — it names the owner directly, exactly as if the label had been written as `AxisLeftStick`'s own direct child.
 
 This lands the label "half-way up the container" — and it stays there regardless of how many of the four directions are actually present this game, *for every `vAlign` value*, not only `"center"`. Which slots survive `collapse="true"` is a per-game fact (this game's mapping/labels decide it), so the center is computed at render time rather than baked in once at template load — see [`<Container>`](#container--positioned-cluster) for the container's own static shape, and the engine's `LayoutFilter.ResolveLooseLabel` for the computation itself. Without `collapse="true"`, nothing ever varies by game (slots never vacate), so the center is simply the container's full, fixed slot count every time. A direct child `<Label>` on one of the Container's own *members* is unaffected by any of this — it keeps resolving against that member's own slot position, exactly as if the Container weren't there, since a nested `<Input>` resets the ambient anchor to its own.
 
@@ -280,8 +290,8 @@ An `<Overlay>` doesn't have to be a *direct* child of its own `<Input>`/`<Contai
 
 Ownership resolves in strict priority order, the same recursive walk that finds a loose `<Label>`'s owning `<Input>`:
 
-1. **An ambient `<Input>`** — if one is reached on the way down (nested inside it directly, or via `<Container>`/`<OneOf>`/`<Condition>` between), the loose `<Overlay>` joins that Input's own `Overlays`, rendered with that Input's own visibility flags, exactly as if it had been a direct child. A `<Container for="SomeInput">` that successfully resolves counts as supplying this too — everything inside it sees `SomeInput` as ambient, the same as if it had an enclosing `<Input>` the ordinary way.
-2. **Else an ambient `<Container>`** — if no `<Input>` is ambient (no enclosing one, and no `for=` that resolved), but a `<Container>` is, the loose `<Overlay>` joins that Container's own `Overlays`, folded into the same aggregate-flagged group-overlay emission its direct children already get.
+1. **An ambient `<Input>`** — if one is reached on the way down (nested inside it directly, or via `<Container>`/`<OneOf>`/`<Condition>` between), the loose `<Overlay>` joins that Input's own `Overlays`, rendered with that Input's own visibility flags, exactly as if it had been a direct child. There is no `inputs=` on `<Overlay>`: a loose one with no owner renders unconditionally rather than being dropped, so it has never needed a way to name one.
+2. **Else an ambient `<Container>`** — if no `<Input>` is ambient, but a `<Container>` is, the loose `<Overlay>` joins that Container's own `Overlays`, folded into the same aggregate-flagged group-overlay emission its direct children already get.
 3. **Else neither** — a bare `<Overlay>` sitting directly under `<Body>`, or inside a `<OneOf>`/`<Condition>` with no `<Input>`/`<Container>` ancestor at all, renders unconditionally. Unlike a loose `<Label>` in the same position, this is **not** a template-authoring error: an Overlay's position never depended on an owner to begin with (it resolves against whatever origin is ambient, same as always — see [Coordinates](#coordinates)), and there's simply no fold-in target for visibility, so it renders as its own template-level overlay. Its own `showIf` still governs its own opacity — with no flags to check, only `showIf="always"` (the default) ever actually shows something.
 
 Whether it's reached at all is decided the same way as everything else: a `<Condition>` that fails drops it along with everything else inside, before any of the above ownership logic runs.
@@ -299,6 +309,7 @@ Where to draw the label text for this input. The text content itself comes from 
 | `x` | coordinate | no | Relative to Input's origin |
 | `y` | coordinate | no | Same |
 | `align` | enum | no | `left`, `center`, `right`. Default `left`. Lower-cased on read |
+| `inputs` | space-separated names | no | Only meaningful on a **loose** label — names the Inputs it speaks for, and the first of them that renders owns it. Required when no `<Input>` encloses the label; a label that sets it never falls back to the ambient Input. See [Loose `<Label>`](#loose-label) |
 | `style` | string | no | Named style reference, for `fontSize` only — a Label has no `minOpacity`/`inactiveBlurRadius` of its own |
 | `fontSize` | double | no | Falls through the cascade when unset — see [Style cascade](#style-cascade) |
 
@@ -345,7 +356,6 @@ Two purposes remain:
 | `minOpacity` | double | no | Same |
 | `inactiveBlurRadius` | double | no | Same |
 | `fontSize` | double | no | Same |
-| `for` | string | no | Names the Input this Container builds on behalf of, when it has no enclosing `<Input>` of its own — e.g. a top-level Container inside a `<OneOf>` sibling of the whole it describes (see [Nested Input semantics](#input--a-generic-input)). Supplies the ambient identity a loose `<Label>` placed directly inside would otherwise have needed an enclosing `<Input>` for; unnecessary (and should be left unset) when the Container is already reached through one. Unrelated to `style`/`showIf`/etc. above — those cascade visual defaults, this carries identity |
 
 **`vAlign`** shifts the container's whole origin *before* slots are laid out, so it changes where every child ends up, not just one of them:
 

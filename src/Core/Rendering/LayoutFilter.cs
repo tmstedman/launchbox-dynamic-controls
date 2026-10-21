@@ -34,18 +34,37 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>>(ReferenceEqualityComparer.Instance);
         var looseInputOverlays = new Dictionary<InputDefinition, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
         var looseContainerOverlays = new Dictionary<Container, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
-
-        // A top-level Container naming an Input via ForInputName has no enclosing Input of its
-        // own to learn "current input" from by actually entering one -- this resolves that name
-        // against the template's own top-level Inputs, once per render pass.
-        var topLevelInputsByName = template.Layout.Elements
-            .OfType<InputDefinition>()
-            .GroupBy(i => i.Name)
-            .ToDictionary(g => g.Key, g => g.Last());
+        var namedLabels = new List<(LabelDefinition Label, Container? Container, IReadOnlyList<string> Names)>();
 
         foreach (ILayoutElement element in template.Layout.Elements)
         {
-            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput: null, currentContainer: null, topLevelInputsByName, ctx);
+            CollectVisibleElement(element, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, namedLabels, currentInput: null, currentContainer: null, ctx);
+        }
+
+        // Resolved after the walk, not during it: a label naming its inputs is routinely written
+        // before them (the merged direction clusters all put their shared <Label> first), so at
+        // the moment one is reached the inputs it names may not have been collected yet. The
+        // first of them that renders owns it -- naming several is how a label says "whichever of
+        // these this game actually draws", not a request to pick the best one.
+        if (namedLabels.Count > 0)
+        {
+            var renderedByName = inputsToRender
+                .GroupBy(i => i.Name)
+                .ToDictionary(g => g.Key, g => g.First());
+            foreach ((LabelDefinition label, Container? container, IReadOnlyList<string> names) in namedLabels)
+            {
+                InputDefinition? owner = names
+                    .Select(n => renderedByName.GetValueOrDefault(n))
+                    .FirstOrDefault(i => i != null);
+                if (owner is null)
+                {
+                    // Every input it named is absent this game. Not a template error -- the
+                    // label simply has nothing to say, the same as a Condition that dropped it.
+                    continue;
+                }
+                looseLabels.TryAdd(owner, []);
+                looseLabels[owner].Add((label, container));
+            }
         }
 
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
@@ -213,10 +232,10 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// cref="OverlayElement"/> reached through Container/OneOf/Condition attaches to the right
     /// owner — it can only be reached at all by having already recursed through every wrapping
     /// Condition/Container/OneOf above it, which is what makes nested Conditions AND together for
-    /// free, with no separate "accumulate and re-check" step needed here. A top-level <see
-    /// cref="Container.ForInputName"/> overrides it outright via <paramref
-    /// name="topLevelInputsByName"/>, for a Container reached with no enclosing Input at all to
-    /// have supplied one the ordinary way.
+    /// free, with no separate "accumulate and re-check" step needed here. A <see
+    /// cref="LabelElement"/> that names its own inputs ignores the ambient one and goes to
+    /// <paramref name="namedLabels"/> instead, to be matched against the inputs that rendered
+    /// once the walk is over — see <see cref="Filter"/>.
     /// <paramref name="currentContainer"/> tracks whichever Container was most recently entered,
     /// the same way — reset on entering a nested InputDefinition or overwritten on entering a
     /// nested Container (never transparent), unaffected by OneOf/Condition — so a loose Label
@@ -240,9 +259,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>> looseLabels,
         Dictionary<InputDefinition, List<OverlayDefinition>> looseInputOverlays,
         Dictionary<Container, List<OverlayDefinition>> looseContainerOverlays,
+        List<(LabelDefinition Label, Container? Container, IReadOnlyList<string> Names)> namedLabels,
         InputDefinition? currentInput,
         Container? currentContainer,
-        Dictionary<string, InputDefinition> topLevelInputsByName,
         VisibilityContext ctx)
     {
         switch (element)
@@ -251,19 +270,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 inputsToRender.Add(input);
                 foreach (ILayoutElement child in input.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, input, currentContainer: null, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, namedLabels, input, currentContainer: null, ctx);
                 }
                 break;
             case Container container:
-                // ForInputName overrides currentInput unconditionally when set -- it's only ever
-                // set when this Container has no enclosing Input of its own to have supplied one.
-                InputDefinition? containerCurrentInput = container.ForInputName != null
-                    && topLevelInputsByName.TryGetValue(container.ForInputName, out InputDefinition? forInput)
-                        ? forInput
-                        : currentInput;
                 foreach (ILayoutElement child in container.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, containerCurrentInput, currentContainer: container, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, namedLabels, currentInput, currentContainer: container, ctx);
                 }
                 List<OverlayDefinition> containerOverlays = [.. container.Overlays, .. looseContainerOverlays.GetValueOrDefault(container, [])];
                 if (containerOverlays.Count > 0)
@@ -280,7 +293,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 {
                     if (_evaluator.AnyVisible(alt, ctx))
                     {
-                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput, currentContainer, topLevelInputsByName, ctx);
+                        CollectVisibleElement(alt, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, namedLabels, currentInput, currentContainer, ctx);
                         break;
                     }
                 }
@@ -288,20 +301,26 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             case ConditionElement condition when _evaluator.AnyVisible(condition, ctx):
                 foreach (ILayoutElement child in condition.Children)
                 {
-                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, currentInput, currentContainer, topLevelInputsByName, ctx);
+                    CollectVisibleElement(child, inputsToRender, includedGroupOverlays, looseLabels, looseInputOverlays, looseContainerOverlays, namedLabels, currentInput, currentContainer, ctx);
                 }
                 break;
             case ConditionElement:
                 // Condition evaluated false: drop it and everything inside -- the only way
                 // anything (including a Container) is ever excluded now.
                 break;
+            case LabelElement le when le.InputNames is { Count: > 0 }:
+                // Named outright: which of them owns it can only be settled once the whole walk
+                // has run, so it waits (see Filter). A label that names inputs never falls back
+                // to the ambient one -- naming is the more specific statement of the two.
+                namedLabels.Add((le.Label, currentContainer, le.InputNames));
+                break;
             case LabelElement le when currentInput != null:
                 looseLabels.TryAdd(currentInput, []);
                 looseLabels[currentInput].Add((le.Label, currentContainer));
                 break;
             case LabelElement:
-                // No ambient Input reached this point at all -- LayoutResolver already logged
-                // this as a template error when it was parsed; nothing more to do at render time.
+                // Names nothing and no ambient Input reached this point at all -- LayoutResolver
+                // already logged this as a template error when it was parsed; nothing more to do.
                 break;
             case OverlayElement oe when currentInput != null:
                 looseInputOverlays.TryAdd(currentInput, []);
