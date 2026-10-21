@@ -162,4 +162,46 @@ public class Nintendo64EndToEndTests
         overlay.ShouldHaveLabels(
             new ExpectedLabel(Input: "ButtonStart", Text: "Pause"));
     }
+    /// <summary>
+    /// The right stick's axis-pair alternative, which no other platform's fixture reaches: the
+    /// C-buttons are labelled one direction at a time instead of through C-Any, and the
+    /// horizontal pair agrees. Added because AxisRightStick carries the same alternatives as the
+    /// D-pad and the left stick but, unlike them, nothing rendered them — its own coordinates,
+    /// its own label offsets and a useImage on every member were all going untested.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_AgreeingCDirectionPair_MergesOnTheRightStick()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "CDirectionPairTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        // then Left and Right share one "Strafe" owned by Left, while the vertical pair, which
+        // does not agree, keeps a label per direction
+        overlay.ShouldHaveLabel("AxisRightStickUp", "Look Up");
+        overlay.ShouldHaveLabel("AxisRightStickDown", "Look Down");
+        overlay.ShouldHaveLabel("AxisRightStickLeft", "Strafe");
+        overlay.InputLabels.Where(l => l.InputName == "AxisRightStickRight").ShouldBeEmpty();
+
+        // and all four icons still occupy their own rows, in the template's declared order
+        overlay.ShouldStackInOrder(
+            "AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight");
+
+        // and the shared label sits on the midpoint of the pair it names, not on either row.
+        // The tolerance covers this cluster's own hand-tuned nudge, y="+15" against the other
+        // two clusters' y="+17" -- the centre is computed, the nudge sits on top of it.
+        double left = overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickLeft").Top;
+        double right = overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickRight").Top;
+        double strafe = overlay.InputLabels.Single(l => l.InputName == "AxisRightStickLeft").Top;
+        strafe.ShouldBeGreaterThan(left);
+        strafe.ShouldBeLessThan(right);
+        strafe.ShouldBeInRange(((left + right) / 2) - 4, ((left + right) / 2) + 4);
+    }
 }

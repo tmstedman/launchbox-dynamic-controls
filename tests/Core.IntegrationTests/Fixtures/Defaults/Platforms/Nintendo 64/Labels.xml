@@ -12,4 +12,13 @@
     <Input name="Dpad-Any">Move</Input>
     <Input name="C-Any">Move</Input>
   </Game>
+  <!-- C-buttons labelled one direction at a time rather than through C-Any, with the
+       horizontal pair agreeing: the only fixture that reaches AxisRightStick's axis-pair
+       alternative, since every other platform labels that control as a whole or not at all. -->
+  <Game romName="CDirectionPairTest">
+    <Input name="C-Up">Look Up</Input>
+    <Input name="C-Down">Look Down</Input>
+    <Input name="C-Left">Strafe</Input>
+    <Input name="C-Right">Strafe</Input>
+  </Game>
 </Labels>
