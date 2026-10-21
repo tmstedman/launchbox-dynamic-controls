@@ -60,13 +60,12 @@ public class SegaGenesisEndToEndTests
                 new(Input: "ButtonBack",          Src: "ButtonBack.png",          W: 34,  H: 34, Opacity: 0.3, BlurRadius: 6.0),
                 // active generic inputs (single occurrence each)
                 new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",        W: 34,  H: 34),
-                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadLeft.png",      W: 34,  H: 34),
-                new(Input: "ButtonDpadRight",     Src: "ButtonDpadRight.png",     W: 34,  H: 34),
+                // Left and Right agree, so one row draws the left-right axis glyph for both
+                new(Input: "ButtonDpadLeft",      Src: "ButtonDpadX.png",         W: 34,  H: 34),
                 new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",      W: 34,  H: 34),
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",          W: 135, H: 135),
                 new(Input: "AxisLeftStickUp",     Src: "AxisLeftStickUp.png",     W: 34,  H: 34),
-                new(Input: "AxisLeftStickLeft",   Src: "AxisLeftStickLeft.png",   W: 34,  H: 34),
-                new(Input: "AxisLeftStickRight",  Src: "AxisLeftStickRight.png",  W: 34,  H: 34),
+                new(Input: "AxisLeftStickLeft",   Src: "AxisLeftStickX.png",      W: 34,  H: 34),
                 new(Input: "AxisLeftStickDown",   Src: "AxisLeftStickDown.png",   W: 34,  H: 34),
                 new(Input: "AxisLeftStick",       Src: "AxisLeftStick.png",       W: 124, H: 124),
                 // disabled generic inputs — not on 3-Button or no label in game-specific mode
@@ -114,11 +113,12 @@ public class SegaGenesisEndToEndTests
             new(Input: "AxisLeftStickLeft",  Text: "Steer"));
             #pragma warning restore format
 
-        // and each cluster stacks its directions left, right, up, down — the horizontal pair
-        // together, then the vertical one. Both clusters are on their horizontal-pair
-        // alternative here, so that pair is the nested block and it comes first.
-        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp", "ButtonDpadDown");
-        overlay.ShouldStackInOrder("AxisLeftStickLeft", "AxisLeftStickRight", "AxisLeftStickUp", "AxisLeftStickDown");
+        // and the agreeing horizontal pair draws as one row carrying the left-right axis glyph,
+        // above the two vertical directions — so Right has no row of its own at all
+        overlay.RenderedImages.Where(i => i.InputName == "ButtonDpadRight").ShouldBeEmpty();
+        overlay.RenderedImages.Where(i => i.InputName == "AxisLeftStickRight").ShouldBeEmpty();
+        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadUp", "ButtonDpadDown");
+        overlay.ShouldStackInOrder("AxisLeftStickLeft", "AxisLeftStickUp", "AxisLeftStickDown");
     }
 
     [Fact]
@@ -182,15 +182,12 @@ public class SegaGenesisEndToEndTests
         overlay.ShouldHaveLabel("ButtonDpadLeft", "Walk");
         overlay.ShouldHaveLabel("ButtonDpadRight", "Run");
 
-        // and all four icons still occupy their own rows, in order
-        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp", "ButtonDpadDown");
-
-        // and the merged label sits between the two rows it spans, not over either of them
-        double up = overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadUp").Top;
-        double down = overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadDown").Top;
-        double climb = overlay.InputLabels.Single(l => l.InputName == "ButtonDpadUp").Top;
-        climb.ShouldBeGreaterThan(up);
-        climb.ShouldBeLessThan(down);
+        // and the agreeing vertical pair draws as one row carrying the up-down axis glyph,
+        // below the two horizontal directions -- so Down has no row of its own
+        overlay.RenderedImages.Where(i => i.InputName == "ButtonDpadDown").ShouldBeEmpty();
+        overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadUp").Source
+            .ShouldEndWith("ButtonDpadY.png");
+        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp");
 
         // and the mirrored left stick merges the same pair, since it offers the same alternative
         overlay.ShouldHaveLabel("AxisLeftStickUp", "Climb");
@@ -234,17 +231,15 @@ public class SegaGenesisEndToEndTests
                             && i.InputName.Length > cluster.Length)
                 .Select(i => i.Top)
                 .OrderBy(t => t)];
-            rows.Length.ShouldBe(3, $"{cluster} should draw three rows once Up vacates");
-            (rows[1] - rows[0]).ShouldBe(rows[2] - rows[1],
+            rows.Length.ShouldBe(2, $"{cluster} should draw the merged pair and Down once Up vacates");
+            (rows[1] - rows[0]).ShouldBe(45,
                 $"{cluster} should close the row Up vacated; rows are {string.Join(", ", rows)}");
 
-            // and the pair's shared label stays on their midpoint rather than drifting onto a row
-            double left = overlay.RenderedImages.Single(i => i.InputName == cluster + "Left").Top;
-            double right = overlay.RenderedImages.Single(i => i.InputName == cluster + "Right").Top;
+            // and the pair's shared label sits on the single row that now carries both of them
+            double glyph = overlay.RenderedImages.Single(i => i.InputName == cluster + "Left").Top;
             double label = overlay.InputLabels.Single(l => l.InputName == cluster + "Left").Top;
-            double midpoint = (left + right) / 2;
-            label.ShouldBeInRange(midpoint - 2, midpoint + 2,
-                $"{cluster}'s merged label should sit between {left} and {right}");
+            label.ShouldBeInRange(glyph - 2, glyph + 20,
+                $"{cluster}'s merged label should sit beside its glyph at {glyph}");
         }
     }
 
