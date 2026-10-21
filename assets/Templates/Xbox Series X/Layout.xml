@@ -10,6 +10,16 @@
         <Whole name="ButtonDpad" parts="ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight" />
         <Whole name="AxisLeftStick" parts="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" />
         <Whole name="AxisRightStick" parts="AxisRightStickUp AxisRightStickDown AxisRightStickLeft AxisRightStickRight" />
+        <!-- Each axis is a composite of its own two directions, so a pair that agrees is an
+             input in its own right: its artwork is its own name, its text is written onto it by
+             the label collapser exactly as it is for the four-way composites above, and a
+             Condition naming it expands to the pair. -->
+        <Whole name="ButtonDpadX" parts="ButtonDpadLeft ButtonDpadRight" />
+        <Whole name="ButtonDpadY" parts="ButtonDpadUp ButtonDpadDown" />
+        <Whole name="AxisLeftStickX" parts="AxisLeftStickLeft AxisLeftStickRight" />
+        <Whole name="AxisLeftStickY" parts="AxisLeftStickUp AxisLeftStickDown" />
+        <Whole name="AxisRightStickX" parts="AxisRightStickLeft AxisRightStickRight" />
+        <Whole name="AxisRightStickY" parts="AxisRightStickUp AxisRightStickDown" />
     </Head>
     <Body>
         <Input name="ButtonGuide" style="auto-blur" x="771" y="262" height="68" width="68" />
@@ -113,15 +123,19 @@
                  up-down one — with the shared text beside it, while each direction of the other
                  axis keeps its own icon and label. One row rather than two, so the pair needs no
                  label spanning anything and no nested block to span it: the Input that draws the
-                 glyph owns the label directly. Both orientations are spelled out because neither
+                 glyph owns the label directly. The axis is declared a <Whole> of its two
+                 directions in the Head, which is what makes it an input in its own right: the
+                 label collapser writes the pair's agreed text onto it, and a platform covering
+                 both directions with one button lends it that button's artwork, the same as for
+                 any other mapped input. Both orientations are spelled out because neither
                  implies the other; if both pairs agreed on their own separate text the first
                  would win and the second pair would fall through to its own labels, which no
                  shipped game does. -->
-            <Condition inputs="AxisLeftStickLeft AxisLeftStickRight" match="agree">
+            <Condition inputs="AxisLeftStickX" match="agree">
                 <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                 <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="AxisLeftStickLeft" useImage="AxisLeftStickX" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="AxisLeftStickX" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
                     </Input>
                     <Input name="AxisLeftStickUp" height="34" width="34">
                         <Label x="-24" y="+17" align="right" />
@@ -131,7 +145,7 @@
                     </Input>
                 </Container>
             </Condition>
-            <Condition inputs="AxisLeftStickUp AxisLeftStickDown" match="agree">
+            <Condition inputs="AxisLeftStickY" match="agree">
                 <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                 <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <Input name="AxisLeftStickLeft" height="34" width="34">
@@ -140,8 +154,8 @@
                     <Input name="AxisLeftStickRight" height="34" width="34">
                         <Label x="-24" y="+17" align="right" />
                     </Input>
-                    <Input name="AxisLeftStickUp" useImage="AxisLeftStickY" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="AxisLeftStickY" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
                     </Input>
                 </Container>
             </Condition>
@@ -193,11 +207,11 @@
                 </Container>
             </Condition>
             <!-- One axis agrees and the other doesn't: see AxisLeftStick above. -->
-            <Condition inputs="AxisRightStickLeft AxisRightStickRight" match="agree">
+            <Condition inputs="AxisRightStickX" match="agree">
                 <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
                 <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickX" height="34" width="34">
-                        <Label x="+52" y="+15" fontSize="24" />
+                    <Input name="AxisRightStickX" useImage="AxisLeftStickX" height="34" width="34">
+                        <Label x="+52" y="+15" />
                     </Input>
                     <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
                         <Label x="+52" y="+15" />
@@ -207,7 +221,7 @@
                     </Input>
                 </Container>
             </Condition>
-            <Condition inputs="AxisRightStickUp AxisRightStickDown" match="agree">
+            <Condition inputs="AxisRightStickY" match="agree">
                 <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
                 <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
                     <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
@@ -216,8 +230,8 @@
                     <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
                         <Label x="+52" y="+15" />
                     </Input>
-                    <Input name="AxisRightStickUp" useImage="AxisLeftStickY" height="34" width="34">
-                        <Label x="+52" y="+15" fontSize="24" />
+                    <Input name="AxisRightStickY" useImage="AxisLeftStickY" height="34" width="34">
+                        <Label x="+52" y="+15" />
                     </Input>
                 </Container>
             </Condition>
@@ -261,11 +275,11 @@
                  pair that actually fires on shipped data — analogToDigital mirrors these labels
                  onto AxisLeftStick, so the two columns must offer the same alternatives or the
                  same game renders merged beside one and repeated beside the other. -->
-            <Condition inputs="ButtonDpadLeft ButtonDpadRight" match="agree">
+            <Condition inputs="ButtonDpadX" match="agree">
                 <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="ButtonDpadLeft" useImage="ButtonDpadX" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="ButtonDpadX" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
                     </Input>
                     <Input name="ButtonDpadUp" height="34" width="34">
                         <Label x="-24" y="+17" align="right" />
@@ -275,7 +289,7 @@
                     </Input>
                 </Container>
             </Condition>
-            <Condition inputs="ButtonDpadUp ButtonDpadDown" match="agree">
+            <Condition inputs="ButtonDpadY" match="agree">
                 <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <Input name="ButtonDpadLeft" height="34" width="34">
@@ -284,8 +298,8 @@
                     <Input name="ButtonDpadRight" height="34" width="34">
                         <Label x="-24" y="+17" align="right" />
                     </Input>
-                    <Input name="ButtonDpadUp" useImage="ButtonDpadY" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="ButtonDpadY" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
                     </Input>
                 </Container>
             </Condition>
