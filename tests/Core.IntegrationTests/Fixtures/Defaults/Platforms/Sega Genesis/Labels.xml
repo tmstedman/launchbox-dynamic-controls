@@ -33,6 +33,14 @@
     <Input name="Dpad-Left">Walk</Input>
     <Input name="Dpad-Right">Run</Input>
   </Game>
+  <!-- Up carries no label at all, so it vacates its row while the rest of the cluster
+       stays: the shape 17 shipped Genesis games have (Castle of Illusion, Chakan, Columns,
+       Road Rash ...) and the one that tells a nested block apart from a flat one. -->
+  <Game romName="BlankDirectionTest">
+    <Input name="Dpad-Down">Duck</Input>
+    <Input name="Dpad-Left">Move</Input>
+    <Input name="Dpad-Right">Move</Input>
+  </Game>
   <Game romName="Sonic the Hedgehog">
     <Input name="A">Jump</Input>
     <Input name="B">Jump</Input>

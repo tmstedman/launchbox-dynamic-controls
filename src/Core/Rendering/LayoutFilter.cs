@@ -122,9 +122,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             if (!collapseInfo.TryGetValue(input, out CollapseInfo? info) || !processedGroups.Add(info.Group)) continue;
 
             double gap = info.Gap;
-            int visibleCount = info.Group
-                .Where(slot => !IsHidden(slot, template, ctx, renderSet))
-                .Sum(CollapseGroupBuilder.SpanOf);
+            int visibleCount = info.Group.Sum(slot => VisibleSpan(slot, template, ctx, renderSet));
             double vAlignCorrection = StackVAlign.Shift(info.VAlign, info.Group.Sum(CollapseGroupBuilder.SpanOf), gap)
                 - StackVAlign.Shift(info.VAlign, visibleCount, gap);
 
@@ -134,21 +132,34 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 switch (slot)
                 {
                     case InputDefinition slotInput:
-                        adjustments[slotInput] = cumulativeOffset;
+                        Shift(adjustments, slotInput, cumulativeOffset);
                         if (IsHidden(slotInput, template, ctx, renderSet))
                             cumulativeOffset -= gap;
                         break;
                     case OneOf oneOf:
                         foreach (InputDefinition leaf in SelectedLeaves(oneOf, renderSet))
                         {
-                            adjustments[leaf] = cumulativeOffset;
+                            Shift(adjustments, leaf, cumulativeOffset);
                         }
                         if (IsHidden(oneOf, template, ctx, renderSet))
                             cumulativeOffset -= gap;
                         break;
-                    case Container:
+                    case Container nested:
+                        // A nested block's members belong to its own collapse group, which knows
+                        // nothing about what vacated above it out here, so this stack's running
+                        // offset is added on top of whatever that group computed. Both writes are
+                        // additive for exactly that reason -- the two compose, one per level.
+                        foreach (InputDefinition leaf in CollectInputLeaves(nested).Where(renderSet.Contains))
+                        {
+                            Shift(adjustments, leaf, cumulativeOffset);
+                        }
+                        // Advance past the rows it actually draws rather than the rows it
+                        // reserved, so a vacancy inside the block is reclaimed by what follows.
+                        cumulativeOffset -= (CollapseGroupBuilder.SpanOf(nested)
+                            - VisibleSpan(nested, template, ctx, renderSet)) * gap;
+                        break;
                     case ConditionElement:
-                        // Stack-as-slot: collapse adjustments not currently computed for these.
+                        // Never reaches here: CollectSlots walks a Condition's children inline.
                         break;
                     default:
                         throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");
@@ -158,6 +169,26 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
 
         return adjustments;
     }
+
+    /// <summary>Adds <paramref name="offset"/> to an input's running adjustment. Additive rather
+    /// than assigning, because an input inside a nested block is shifted once by its own group and
+    /// again by every collapsing stack above it.</summary>
+    private static void Shift(Dictionary<InputDefinition, double> adjustments, InputDefinition input, double offset) =>
+        adjustments[input] = adjustments.GetValueOrDefault(input, 0.0) + offset;
+
+    /// <summary>
+    /// How many rows a slot actually draws this game: zero when it vacates, its full span when it
+    /// doesn't, and for a collapsing nested Container the sum over its own slots — the counterpart
+    /// to <see cref="CollapseGroupBuilder.SpanOf"/>, which answers what was reserved. A nested
+    /// container that doesn't collapse keeps every row it reserved, vacated or not.
+    /// </summary>
+    private int VisibleSpan(ILayoutElement slot, Template template, VisibilityContext ctx, HashSet<InputDefinition> renderSet) =>
+        slot switch
+        {
+            Container nested when nested.Collapse => CollapseGroupBuilder.Flatten(nested.Children)
+                .Sum(inner => VisibleSpan(inner, template, ctx, renderSet)),
+            _ => IsHidden(slot, template, ctx, renderSet) ? 0 : CollapseGroupBuilder.SpanOf(slot),
+        };
 
     /// <summary>
     /// Resolves a loose Label's final Y. Unchanged if it has no enclosing Container (nothing to
@@ -188,7 +219,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         List<ILayoutElement> slots = CollapseGroupBuilder.Flatten(entry.Container.Children);
         int nominalCount = slots.Sum(CollapseGroupBuilder.SpanOf);
         int visibleCount = entry.Container.Collapse
-            ? slots.Where(slot => !IsHidden(slot, template, ctx, renderSet)).Sum(CollapseGroupBuilder.SpanOf)
+            ? slots.Sum(slot => VisibleSpan(slot, template, ctx, renderSet))
             : nominalCount;
 
         double nominalFrameOriginY = entry.Container.DeclaredOriginY
@@ -217,7 +248,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                     || selected.All(leaf => _evaluator.AllImagesZeroOpacity(leaf, template.Layout.DefaultMinOpacity, ctx));
             case Container:
             case ConditionElement:
-                return false; // Stack-as-slot: never considered hidden, so it never vacates.
+                // A block never vacates as a single slot; how much of it actually drew is
+                // VisibleSpan's question, and that is what the parent advances past.
+                return false;
             default:
                 throw new InvalidOperationException($"Unhandled ILayoutElement subtype: {slot.GetType().Name}");
         }
