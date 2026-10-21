@@ -183,25 +183,27 @@ public class Nintendo64EndToEndTests
 
         ControllerOverlayModel overlay = _service.Resolve(game);
 
-        // then Left and Right share one "Strafe" owned by Left, while the vertical pair, which
-        // does not agree, keeps a label per direction
+        // then Left and Right collapse into one row carrying the left-right axis glyph, with
+        // their shared "Strafe" beside it, while the vertical pair, which does not agree, keeps
+        // a row and a label of its own per direction
+        overlay.ShouldHaveLabel("AxisRightStickLeft", "Strafe");
         overlay.ShouldHaveLabel("AxisRightStickUp", "Look Up");
         overlay.ShouldHaveLabel("AxisRightStickDown", "Look Down");
-        overlay.ShouldHaveLabel("AxisRightStickLeft", "Strafe");
         overlay.InputLabels.Where(l => l.InputName == "AxisRightStickRight").ShouldBeEmpty();
 
-        // and all four icons still occupy their own rows, in the template's declared order
-        overlay.ShouldStackInOrder(
-            "AxisRightStickLeft", "AxisRightStickRight", "AxisRightStickUp", "AxisRightStickDown");
+        overlay.RenderedImages.Where(i => i.InputName == "AxisRightStickRight").ShouldBeEmpty();
 
-        // and the shared label sits on the midpoint of the pair it names, not on either row.
-        // The tolerance covers this cluster's own hand-tuned nudge, y="+15" against the other
-        // two clusters' y="+17" -- the centre is computed, the nudge sits on top of it.
-        double left = overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickLeft").Top;
-        double right = overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickRight").Top;
-        double strafe = overlay.InputLabels.Single(l => l.InputName == "AxisRightStickLeft").Top;
-        strafe.ShouldBeGreaterThan(left);
-        strafe.ShouldBeLessThan(right);
-        strafe.ShouldBeInRange(((left + right) / 2) - 4, ((left + right) / 2) + 4);
+        // but the glyph the template asked for does NOT reach the screen here: C-Left is this
+        // input's own default physical button and the N64 ships art for it, and MappedDefault
+        // resolves {platformButton}.png ahead of the render's own useImage, which only ever
+        // serves as the fallback. So the merged row shows one button's art while standing for
+        // two. Pinned as the behaviour that is, not the behaviour that should be - a template
+        // naming an image explicitly arguably ought to win (see the note on useImage in #33).
+        overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickLeft").Source
+            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Left.png"));
+
+        // and the rows that remain read horizontal pair, then the vertical directions
+        overlay.ShouldStackInOrder(
+            "AxisRightStickLeft", "AxisRightStickUp", "AxisRightStickDown");
     }
 }
