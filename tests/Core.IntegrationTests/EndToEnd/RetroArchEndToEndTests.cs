@@ -198,7 +198,7 @@ public class RetroArchEndToEndTests
         // and the merged alternative stacks its directions in the same order as the all-distinct
         // one (see SegaGenesis_OutRun) — a Container of its own in the template, so a reordering
         // of one and not the other would otherwise go unnoticed
-        overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
+        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp", "ButtonDpadDown");
     }
 
     /// <summary>

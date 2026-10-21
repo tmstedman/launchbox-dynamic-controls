@@ -114,11 +114,11 @@ public class SegaGenesisEndToEndTests
             new(Input: "AxisLeftStickLeft",  Text: "Steer"));
             #pragma warning restore format
 
-        // and each cluster stacks its directions up, down, left, right — the vertical pair
-        // together, then the horizontal one. Both clusters are on their horizontal-pair
-        // alternative here, and all four icons still occupy their own rows in either.
-        overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
-        overlay.ShouldStackInOrder("AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight");
+        // and each cluster stacks its directions left, right, up, down — the horizontal pair
+        // together, then the vertical one. Both clusters are on their horizontal-pair
+        // alternative here, so that pair is the nested block and it comes first.
+        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp", "ButtonDpadDown");
+        overlay.ShouldStackInOrder("AxisLeftStickLeft", "AxisLeftStickRight", "AxisLeftStickUp", "AxisLeftStickDown");
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class SegaGenesisEndToEndTests
         overlay.ShouldHaveLabel("ButtonDpadRight", "Run");
 
         // and all four icons still occupy their own rows, in order
-        overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
+        overlay.ShouldStackInOrder("ButtonDpadLeft", "ButtonDpadRight", "ButtonDpadUp", "ButtonDpadDown");
 
         // and the merged label sits between the two rows it spans, not over either of them
         double up = overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadUp").Top;
@@ -226,14 +226,21 @@ public class SegaGenesisEndToEndTests
             // Up has no label of its own, so under small-label-vacate it leaves entirely
             overlay.RenderedImages.Where(i => i.InputName == cluster + "Up").ShouldBeEmpty();
 
-            // and the three rows left behind are evenly spaced, with no slack where Up had been
-            double down = overlay.RenderedImages.Single(i => i.InputName == cluster + "Down").Top;
-            double left = overlay.RenderedImages.Single(i => i.InputName == cluster + "Left").Top;
-            double right = overlay.RenderedImages.Single(i => i.InputName == cluster + "Right").Top;
-            (left - down).ShouldBe(right - left,
-                $"{cluster} should close the row Up vacated; rows are {down}, {left}, {right}");
+            // and the three rows left behind are evenly spaced, with no slack where Up had been.
+            // Taken in rendered order rather than named order, so this keeps measuring the gap
+            // between adjacent rows whatever order the template lists the directions in.
+            double[] rows = [.. overlay.RenderedImages
+                .Where(i => i.InputName != null && i.InputName.StartsWith(cluster)
+                            && i.InputName.Length > cluster.Length)
+                .Select(i => i.Top)
+                .OrderBy(t => t)];
+            rows.Length.ShouldBe(3, $"{cluster} should draw three rows once Up vacates");
+            (rows[1] - rows[0]).ShouldBe(rows[2] - rows[1],
+                $"{cluster} should close the row Up vacated; rows are {string.Join(", ", rows)}");
 
             // and the pair's shared label stays on their midpoint rather than drifting onto a row
+            double left = overlay.RenderedImages.Single(i => i.InputName == cluster + "Left").Top;
+            double right = overlay.RenderedImages.Single(i => i.InputName == cluster + "Right").Top;
             double label = overlay.InputLabels.Single(l => l.InputName == cluster + "Left").Top;
             double midpoint = (left + right) / 2;
             label.ShouldBeInRange(midpoint - 2, midpoint + 2,
