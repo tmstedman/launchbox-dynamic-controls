@@ -252,8 +252,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// when gating is wanted. Its style attributes (style/showIf/minOpacity/inactiveBlurRadius/
     /// fontSize) are the same shape as an Input's own — see <see cref="IStyledNode"/> — and
     /// cascade to its member Inputs and Overlay children the same way an Input's own attributes
-    /// cascade to its Labels and Overlays. <c>for</c> is unrelated to any of that — see
-    /// <see cref="ContainerNode.For"/>.
+    /// cascade to its Labels and Overlays. A Container says nothing about identity: a loose
+    /// &lt;Label&gt; inside one names its own Inputs (see <see cref="LabelNode.Inputs"/>).
     /// </summary>
     private ContainerNode ParseContainerNode(XmlElement containerNode)
     {
@@ -261,7 +261,6 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         {
             Style = containerNode.Attributes["style"]?.Value,
             ShowIf = containerNode.Attributes["showIf"]?.Value,
-            For = containerNode.GetAttribute("for") is { Length: > 0 } forName ? forName : null,
         };
 
         if (ReadCoordinate(containerNode, "x", "Container") is Coordinate cx) container.X = cx;
@@ -291,7 +290,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
             _logger.Error($"Invalid element <{child.Name}> in <Container>");
         }
 
-        _logger.Debug($"Container: x={container.X}, y={container.Y}, gap={container.Gap}, vAlign={container.VAlign}, for={container.For}, children={container.Children.Count}, overlays={container.Overlays.Count}");
+        _logger.Debug($"Container: x={container.X}, y={container.Y}, gap={container.Gap}, vAlign={container.VAlign}, children={container.Children.Count}, overlays={container.Overlays.Count}");
         return container;
     }
 
@@ -403,7 +402,8 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         var label = new LabelNode
         {
             Align = node.Attributes["align"]?.Value.ToLowerInvariant() ?? "left",
-            Style = node.Attributes["style"]?.Value
+            Style = node.Attributes["style"]?.Value,
+            Inputs = node.Attributes["inputs"]?.Value
         };
         if (ReadCoordinate(node, "x", "Label") is Coordinate x) label.X = x;
         if (ReadCoordinate(node, "y", "Label") is Coordinate y) label.Y = y;

@@ -621,33 +621,14 @@ public class TemplateLoaderTests
     }
 
     [Fact]
-    public void LoadLayout_ContainerFor_ParsedOntoNode()
+    public void LoadLayout_LooseLabelInputs_ParsedOntoNode()
     {
-        // given a top-level Container naming the Input it builds on behalf of
-        StubLayoutXml("""
-            <ControllerTemplate>
-              <Body>
-                <Container for='ButtonDpad'>
-                  <Input name='A' />
-                </Container>
-              </Body>
-            </ControllerTemplate>
-            """);
-
-        LayoutDocument result = _underTest.LoadLayout("x")!;
-
-        result.Elements.OfType<ContainerNode>().Single().For.ShouldBe("ButtonDpad");
-    }
-
-    [Fact]
-    public void LoadLayout_ContainerWithoutFor_LeavesItNull()
-    {
-        // given an ordinary Container with no for= attribute -- the common case, reached through an
-        // enclosing Input that supplies CurrentInputName the ordinary way
+        // given a loose Label naming the Inputs it speaks for
         StubLayoutXml("""
             <ControllerTemplate>
               <Body>
                 <Container>
+                  <Label inputs='ButtonDpadLeft ButtonDpadRight' />
                   <Input name='A' />
                 </Container>
               </Body>
@@ -656,7 +637,33 @@ public class TemplateLoaderTests
 
         LayoutDocument result = _underTest.LoadLayout("x")!;
 
-        result.Elements.OfType<ContainerNode>().Single().For.ShouldBeNull();
+        // then the raw attribute survives verbatim -- splitting it is the resolver's job
+        result.Elements.OfType<ContainerNode>().Single()
+            .Children.OfType<LabelNode>().Single()
+            .Inputs.ShouldBe("ButtonDpadLeft ButtonDpadRight");
+    }
+
+    [Fact]
+    public void LoadLayout_LooseLabelWithoutInputs_LeavesItNull()
+    {
+        // given an ordinary loose Label with no inputs= attribute -- the common case, reached
+        // through an enclosing Input that supplies the ambient owner the ordinary way
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body>
+                <Container>
+                  <Label />
+                  <Input name='A' />
+                </Container>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<ContainerNode>().Single()
+            .Children.OfType<LabelNode>().Single()
+            .Inputs.ShouldBeNull();
     }
 
     [Fact]

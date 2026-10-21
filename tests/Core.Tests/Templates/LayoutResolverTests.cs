@@ -756,33 +756,34 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_TopLevelGroupWithFor_CarriesForInputNameOntoTheResolvedGroup()
+    public void Resolve_LooseLabelNamingInputs_SplitsThemOntoTheResolvedElement()
     {
-        // given a top-level Group naming the Input it builds on behalf of, with no enclosing
-        // Input of its own -- LayoutFilter needs this at render time to know which Input a loose
-        // Label placed directly inside should attach to
+        // given a loose Label naming several Inputs -- LayoutFilter matches them against the
+        // inputs that rendered to pick an owner, so the resolved element has to carry the list
         TestLayout config = new TestLayout()
-            .Container(g => g.For("ButtonDpad").Input("A"));
+            .Container(g => g.LooseLabel(l => l.Inputs("ButtonDpadLeft", "ButtonDpadRight")));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        result.FirstContainer().ForInputName.ShouldBe("ButtonDpad");
+        result.FirstContainer().Children.FirstLabelElement()
+            .InputNames.ShouldBe(["ButtonDpadLeft", "ButtonDpadRight"]);
     }
 
     [Fact]
-    public void Resolve_LooseLabelUnderTopLevelGroupWithFor_ResolvesAgainstTheNamedInputInsteadOfLoggingAnError()
+    public void Resolve_LooseLabelNamingInputs_ResolvesInsteadOfLoggingAnError()
     {
-        // given a top-level Group (no enclosing Input) whose for= names the Input a loose Label
-        // placed directly inside it should attach to -- the mechanism that lets a whole control's
-        // merged-label cluster live as a sibling of its own bare Input rather than nested inside it
+        // given a top-level Container (no enclosing Input) holding a loose Label that names its
+        // own Input -- the mechanism that lets a whole control's merged-label cluster live as a
+        // sibling of its own bare Input rather than nested inside it
         TestLayout config = new TestLayout()
-            .Container(g => g.For("ButtonDpad").LooseLabel(l => l.Offset(-10, 20)));
+            .Container(g => g.LooseLabel(l => l.Inputs("ButtonDpad").Offset(-10, 20)));
 
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
         LabelElement label = result.FirstContainer().Children.FirstLabelElement();
         label.Label.X.ShouldBe(-10);
         label.Label.Y.ShouldBe(20);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
     [Fact]
