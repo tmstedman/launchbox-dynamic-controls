@@ -49,11 +49,6 @@ public interface ILayoutElement;
 /// <param name="Collapse">Whether this container's slots vacate when hidden. When false, a loose
 /// label's center always uses the full nominal slot count — nothing varies by game, since without
 /// collapse slots never vacate, hidden or not.</param>
-/// <param name="ForInputName">Name of the Input this Container builds on behalf of, when it has
-/// no enclosing Input of its own (see <see cref="ContainerNode.For"/>) — lets
-/// <see cref="Rendering.LayoutFilter"/> resolve which InputDefinition a loose Label placed
-/// directly inside should attach to, since the render-time walk otherwise only learns "current
-/// input" by actually entering one.</param>
 [ExcludeFromCodeCoverage]
 public record Container(
     IReadOnlyList<ILayoutElement> Children,
@@ -61,8 +56,7 @@ public record Container(
     double DeclaredOriginY = 0,
     double Gap = 0,
     string VAlign = "top",
-    bool Collapse = false,
-    string? ForInputName = null) : ILayoutElement;
+    bool Collapse = false) : ILayoutElement;
 
 /// <summary>
 /// A mutually-exclusive container: at render time, alternatives are evaluated in document order
@@ -148,16 +142,23 @@ public enum ConditionMatch
 /// <summary>
 /// A single label render that lives outside its owning Input's own direct children — e.g. nested
 /// inside a &lt;Condition&gt; wrapping a &lt;Container&gt;/&lt;OneOf&gt;/&lt;Condition&gt;
-/// rather than directly inside an &lt;Input&gt;. Carries no owner reference of its own: the owning
-/// InputDefinition can't be baked in at resolve time (it's still being constructed while its own
-/// children, including this one, are being built), so <see cref="Rendering.LayoutFilter"/>
-/// discovers the owner itself during its own tree walk, the same way <see cref="Label"/>'s
-/// coordinates were resolved against an ambient origin at resolve time.
+/// rather than directly inside an &lt;Input&gt;. Carries no owner <em>reference</em> of its own:
+/// the owning InputDefinition can't be baked in at resolve time (it's still being constructed
+/// while its own children, including this one, are being built), so
+/// <see cref="Rendering.LayoutFilter"/> discovers the owner itself during its own tree walk, the
+/// same way <see cref="Label"/>'s coordinates were resolved against an ambient origin at resolve
+/// time.
 /// </summary>
 /// <param name="Label">The resolved label, already positioned against whichever Input's origin
 /// was ambient when this label was parsed.</param>
+/// <param name="InputNames">Generic input names this label speaks for, from its own
+/// <c>inputs</c> attribute — empty when it relies on an ambient Input instead. The first of them
+/// that actually renders becomes the owner, so a label can name an Input it is not nested inside,
+/// including one that is a member of its own container rather than a top-level element.</param>
 [ExcludeFromCodeCoverage]
-public record LabelElement(LabelDefinition Label) : ILayoutElement;
+public record LabelElement(
+    LabelDefinition Label,
+    IReadOnlyList<string>? InputNames = null) : ILayoutElement;
 
 /// <summary>
 /// A single overlay image that lives outside its owning Input's or Container's own direct

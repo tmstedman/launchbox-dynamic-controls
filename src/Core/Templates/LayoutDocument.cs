@@ -189,15 +189,6 @@ public record ContainerNode : ILayoutNode, IStyledNode
     /// <inheritdoc />
     public double? FontSize { get; set; }
 
-    /// <summary>Optional generic input name this Container builds on behalf of, when it has no
-    /// enclosing &lt;Input&gt; of its own (e.g. a top-level Container inside a &lt;OneOf&gt;
-    /// sibling of the whole it describes). Sets the ambient <c>CurrentInputName</c> for
-    /// everything inside — in particular, a loose &lt;Label&gt; placed directly in this
-    /// Container still needs to know which Input's Labels list to merge into. Unset when the
-    /// Container is already reached through an enclosing Input, which supplies this ambiently on
-    /// its own.</summary>
-    public string? For { get; set; }
-
     /// <summary>Nested layout children — Input, Container, OneOf, or Condition in document
     /// order.</summary>
     public List<ILayoutNode> Children { get; set; } = [];
@@ -383,6 +374,14 @@ public record LabelNode : ILayoutNode
 
     /// <summary>Text alignment ("left", "center", "right"). Defaults to "left".</summary>
     public string Align { get; set; } = "left";
+
+    /// <summary>Space-separated generic input names this label speaks for, when it is loose and
+    /// has no enclosing &lt;Input&gt; of its own (e.g. placed directly in a &lt;Container&gt; that
+    /// is a &lt;OneOf&gt; sibling of the whole it describes). The first of them that actually
+    /// renders owns the label — its text is what the label draws, and its flags are what govern
+    /// it. Unset when the label is reached through an enclosing Input, which supplies that
+    /// ambiently on its own.</summary>
+    public string? Inputs { get; set; }
 
     /// <summary>Optional reference to a named &lt;Style&gt; in &lt;Head&gt;, for its fontSize
     /// only — a Label has no minOpacity/inactiveBlurRadius of its own to inherit.</summary>
