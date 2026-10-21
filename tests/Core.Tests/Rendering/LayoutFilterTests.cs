@@ -531,6 +531,91 @@ public class LayoutFilterTests
     }
 
     [Fact]
+    public void Filter_CollapseStack_NestedBlock_TakesTheParentStacksVacancyShift()
+    {
+        // given a collapsing stack of a vacating slot followed by a nested collapsing block --
+        // the block's members are keyed to the BLOCK's own group, so nothing in their own
+        // collapse pass can know that a slot vacated out in the parent
+        InputDefinition slot0 = Input("ButtonA");
+        InputDefinition inner0 = Input("ButtonB");
+        InputDefinition inner1 = Input("ButtonC");
+        var nested = new Container(Children: [inner0, inner1], Overlays: [], Gap: 100, Collapse: true);
+        ILayoutElement[] outerGroup = [slot0, nested];
+        ILayoutElement[] innerGroup = [inner0, inner1];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [slot0] = new(outerGroup, Gap: 100),
+            [inner0] = new(innerGroup, Gap: 100),
+            [inner1] = new(innerGroup, Gap: 100),
+        };
+        Template template = TemplateOf(elements: [slot0, nested], collapseInfo: collapseInfo);
+        _evaluator.AllImagesZeroOpacity(slot0, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the parent's shift reaches both members of the block, so it closes up over the
+        // vacated slot instead of staying behind at its uncollapsed rows
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 0.0), ("ButtonB", -100.0), ("ButtonC", -100.0)]);
+    }
+
+    [Fact]
+    public void Filter_CollapseStack_VacancyInsideANestedBlock_IsReclaimedByWhatFollowsIt()
+    {
+        // given a collapsing stack whose nested block comes first and loses one of its two rows,
+        // so the block reserves two slots but draws only one
+        InputDefinition inner0 = Input("ButtonA");
+        InputDefinition inner1 = Input("ButtonB");
+        InputDefinition after = Input("ButtonC");
+        var nested = new Container(Children: [inner0, inner1], Overlays: [], Gap: 100, Collapse: true);
+        ILayoutElement[] outerGroup = [nested, after];
+        ILayoutElement[] innerGroup = [inner0, inner1];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [inner0] = new(innerGroup, Gap: 100),
+            [inner1] = new(innerGroup, Gap: 100),
+            [after] = new(outerGroup, Gap: 100),
+        };
+        Template template = TemplateOf(elements: [nested, after], collapseInfo: collapseInfo);
+        _evaluator.AllImagesZeroOpacity(inner0, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the tail moves up by the one row the block didn't draw — measured by what it drew,
+        // not by the span it reserved, which would have left the tail where it started
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 0.0), ("ButtonB", -100.0), ("ButtonC", -100.0)]);
+    }
+
+    [Fact]
+    public void Filter_CollapseStack_NonCollapsingNestedBlock_KeepsEveryRowItReserved()
+    {
+        // given the same shape but a block that does NOT collapse: its blank row stays occupied,
+        // so there is nothing for the tail to reclaim
+        InputDefinition inner0 = Input("ButtonA");
+        InputDefinition inner1 = Input("ButtonB");
+        InputDefinition after = Input("ButtonC");
+        var nested = new Container(Children: [inner0, inner1], Overlays: [], Gap: 100);
+        ILayoutElement[] outerGroup = [nested, after];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [after] = new(outerGroup, Gap: 100),
+        };
+        Template template = TemplateOf(elements: [nested, after], collapseInfo: collapseInfo);
+        _evaluator.AllImagesZeroOpacity(inner0, Arg.Any<double>(), Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the tail stays put: a non-collapsing block keeps both of its rows whatever happens
+        // inside it, and its own members take no offset at all
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 0.0), ("ButtonB", 0.0), ("ButtonC", 0.0)]);
+    }
+
+    [Fact]
     public void Filter_CollapseStack_OneOfWithVisibleAlternative_AssignsOffset()
     {
         // given a collapsing stack where the first slot is a OneOf with a visible, non-zero-opacity
