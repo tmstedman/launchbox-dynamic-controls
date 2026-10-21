@@ -108,6 +108,41 @@
                     <Input name="AxisLeftStickRight" height="34" width="34" />
                 </Container>
             </Condition>
+            <!-- One axis agrees and the other doesn't: one shared label spanning the agreeing
+                 pair's two rows, while each direction of the other axis keeps its own. The pair
+                 stays two ordinary slots of this same container — only the label measures
+                 across them, via the inputs= it names — so nothing here is hand-positioned.
+                 Both orientations are spelled out because neither implies the other; if both
+                 pairs agreed on their own separate text the first would win and the second pair
+                 would fall through to its own labels, which no shipped game does. -->
+            <Condition inputs="AxisLeftStickLeft AxisLeftStickRight" match="agree">
+                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Label inputs="AxisLeftStickLeft AxisLeftStickRight" x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="AxisLeftStickUp" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickDown" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickLeft" height="34" width="34" />
+                    <Input name="AxisLeftStickRight" height="34" width="34" />
+                </Container>
+            </Condition>
+            <Condition inputs="AxisLeftStickUp AxisLeftStickDown" match="agree">
+                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Label inputs="AxisLeftStickUp AxisLeftStickDown" x="-24" y="+17" align="right" fontSize="24" />
+                    <Input name="AxisLeftStickUp" height="34" width="34" />
+                    <Input name="AxisLeftStickDown" height="34" width="34" />
+                    <Input name="AxisLeftStickLeft" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                    <Input name="AxisLeftStickRight" height="34" width="34">
+                        <Label x="-24" y="+17" align="right" />
+                    </Input>
+                </Container>
+            </Condition>
             <!-- Fallback: no two directions agree — each renders its own, independent text.
                  A Container never decides its own inclusion, so this explicit Condition is what
                  replaces the old Group's implicit "any member visible" check: without it, the
@@ -155,6 +190,35 @@
                     <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34" />
                 </Container>
             </Condition>
+            <!-- One axis agrees and the other doesn't: see AxisLeftStick above. -->
+            <Condition inputs="AxisRightStickLeft AxisRightStickRight" match="agree">
+                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                    <Label inputs="AxisRightStickLeft AxisRightStickRight" x="+52" y="+15" fontSize="24" />
+                    <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
+                    <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34" />
+                </Container>
+            </Condition>
+            <Condition inputs="AxisRightStickUp AxisRightStickDown" match="agree">
+                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
+                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                    <Label inputs="AxisRightStickUp AxisRightStickDown" x="+52" y="+15" fontSize="24" />
+                    <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34" />
+                    <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34" />
+                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                    <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
+                        <Label x="+52" y="+15" />
+                    </Input>
+                </Container>
+            </Condition>
             <!-- Fallback: no two directions agree — each renders its own, independent text.
                  See AxisLeftStick above for why this needs an explicit Condition now. -->
             <Condition inputs="AxisRightStick" atLeast="1" match="label">
@@ -191,13 +255,10 @@
                     <Input name="ButtonDpadRight" height="34" width="34" />
                 </Container>
             </Condition>
-            <!-- One axis agrees and the other doesn't: one shared label spanning the agreeing
-                 pair's two rows, while each direction of the other axis keeps its own. The pair
-                 stays two ordinary slots of this same container — only the label measures
-                 across them, via the inputs= it names — so nothing here is hand-positioned.
-                 Both orientations are spelled out because neither implies the other; if both
-                 pairs agreed on their own separate text the first would win and the second pair
-                 would fall through to its own labels, which no shipped game does. -->
+            <!-- One axis agrees and the other doesn't: see AxisLeftStick above. This is the
+                 pair that actually fires on shipped data — analogToDigital mirrors these labels
+                 onto AxisLeftStick, so the two columns must offer the same alternatives or the
+                 same game renders merged beside one and repeated beside the other. -->
             <Condition inputs="ButtonDpadLeft ButtonDpadRight" match="agree">
                 <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">

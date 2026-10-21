@@ -105,18 +105,18 @@ public class SegaGenesisEndToEndTests
             // no label of its own there - only its icon renders.
             new(Input: "ButtonDpadLeft",     Text: "Steer"),
             new(Input: "ButtonStart",        Text: "Pause"),
-            // analogToDigital="left" mirrors each Dpad label onto its left-stick equivalent; the
-            // stick has no axis-pair alternative, so both of its horizontal directions still
-            // carry their own copy
+            // analogToDigital="left" mirrors each Dpad label onto its left-stick equivalent, and
+            // the stick offers the same axis-pair alternative, so it merges identically. The two
+            // columns are drawn side by side on one screen; if only one of them merged, the same
+            // game would read "Steer" once beside the D-pad and twice beside the stick.
             new(Input: "AxisLeftStickUp",    Text: "Low gear"),
             new(Input: "AxisLeftStickDown",  Text: "High gear"),
-            new(Input: "AxisLeftStickLeft",  Text: "Steer"),
-            new(Input: "AxisLeftStickRight", Text: "Steer"));
+            new(Input: "AxisLeftStickLeft",  Text: "Steer"));
             #pragma warning restore format
 
         // and each cluster stacks its directions up, down, left, right — the vertical pair
-        // together, then the horizontal one. This is the all-distinct alternative of both the
-        // D-pad and the left stick, which are separate Containers in the template.
+        // together, then the horizontal one. Both clusters are on their horizontal-pair
+        // alternative here, and all four icons still occupy their own rows in either.
         overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
         overlay.ShouldStackInOrder("AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight");
     }
@@ -143,15 +143,15 @@ public class SegaGenesisEndToEndTests
             #pragma warning disable format
             new(Input: "ButtonX",            Text: "Brake"),
             new(Input: "ButtonA",            Text: "Accelerate"),
-            // one shared "Steer" across the agreeing horizontal pair, as in SegaGenesis_OutRun
+            // one shared "Steer" across the agreeing horizontal pair of each cluster, as in
+            // SegaGenesis_OutRun
             new(Input: "ButtonDpadLeft",     Text: "Steer"),
             new(Input: "ButtonDpadUp",       Text: "Low gear"),
             new(Input: "ButtonDpadDown",     Text: "High gear"),
             new(Input: "ButtonStart",        Text: "Pause"),
             new(Input: "AxisLeftStickUp",    Text: "Low gear"),
             new(Input: "AxisLeftStickDown",  Text: "High gear"),
-            new(Input: "AxisLeftStickLeft",  Text: "Steer"),
-            new(Input: "AxisLeftStickRight", Text: "Steer"));
+            new(Input: "AxisLeftStickLeft",  Text: "Steer"));
             #pragma warning restore format
     }
 
@@ -191,6 +191,12 @@ public class SegaGenesisEndToEndTests
         double climb = overlay.InputLabels.Single(l => l.InputName == "ButtonDpadUp").Top;
         climb.ShouldBeGreaterThan(up);
         climb.ShouldBeLessThan(down);
+
+        // and the mirrored left stick merges the same pair, since it offers the same alternative
+        overlay.ShouldHaveLabel("AxisLeftStickUp", "Climb");
+        overlay.InputLabels.Where(l => l.InputName == "AxisLeftStickDown").ShouldBeEmpty();
+        overlay.ShouldHaveLabel("AxisLeftStickLeft", "Walk");
+        overlay.ShouldHaveLabel("AxisLeftStickRight", "Run");
     }
 
     /// <summary>
