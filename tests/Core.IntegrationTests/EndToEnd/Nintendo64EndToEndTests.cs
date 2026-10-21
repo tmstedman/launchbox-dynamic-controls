@@ -192,7 +192,7 @@ public class Nintendo64EndToEndTests
 
         // and all four icons still occupy their own rows, in the template's declared order
         overlay.ShouldStackInOrder(
-            "AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight");
+            "AxisRightStickLeft", "AxisRightStickRight", "AxisRightStickUp", "AxisRightStickDown");
 
         // and the shared label sits on the midpoint of the pair it names, not on either row.
         // The tolerance covers this cluster's own hand-tuned nudge, y="+15" against the other
