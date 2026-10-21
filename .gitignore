@@ -28,3 +28,8 @@ TestResults/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Everything the developer tools under tools/ produce: rendered PNGs and the pipeline's own
+# debug log. Committed baselines live in label-sources/ instead and stay tracked, the Arcade
+# ones being unreproducible without a local MAME cfg pack that is not in the repository.
+tools/*/output/

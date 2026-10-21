@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Shared by the developer tools under tools/. Like them it is referenced by nothing CI runs,
+    so it cannot reach the shipped plugin: every workflow step names a csproj directly.
+
+    It exists for one reason: LabelDump and Preview must agree on which games they sweep and how
+    they resolve each one, because a PNG and a row in platform-renders.xml are meant to describe
+    the same render. Two copies of that logic enforced the claim by comment alone, and had
+    already begun to drift.
+
+    Deliberately holds no output code. Writing XML and drawing a PNG is where the tools genuinely
+    differ, and a shared project is the wrong place to pull SkiaSharp.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>DynamicControls.Tools.Common</RootNamespace>
+    <AssemblyName>DynamicControls.Tools.Common</AssemblyName>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable;CS8509</WarningsAsErrors>
+    <NoWarn>CS8524</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\DynamicControls.Core.csproj" />
+  </ItemGroup>
+
+</Project>

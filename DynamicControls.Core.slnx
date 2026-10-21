@@ -1,4 +1,13 @@
 <Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/" />
+  <Folder Name="/tools/" />
+  <Folder Name="/tools/Common/">
+    <Project Path="tools/Common/DynamicControls.Tools.Common.csproj" />
+  </Folder>
+  <Folder Name="/tools/Preview/">
+    <Project Path="tools/Preview/DynamicControls.Preview.csproj" />
+  </Folder>
   <Project Path="src/Core/DynamicControls.Core.csproj" />
   <Project Path="tests/Core.TestHelpers/DynamicControls.Core.TestHelpers.csproj" />
   <Project Path="tests/Core.Tests/DynamicControls.Core.Tests.csproj" />
