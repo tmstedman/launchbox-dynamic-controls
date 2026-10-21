@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Developer tool, not part of the shipped plugin. Nothing CI runs references it: every workflow
+    step names a csproj directly: the two test projects, then "dotnet publish src/LaunchBox",
+    so coverage, packaging and the release artifact are all decided without it. Being listed in a
+    .slnx is therefore an editor convenience and nothing more; what keeps the tool out of the
+    release is that no shipped project references it.
+
+    Running "dotnet test DynamicControls.Core.slnx" does build it, since that builds the whole
+    solution. A compile error here will fail that command, which is the one cost of listing it.
+
+    Run it with "dotnet run" against this project; see Options.cs for the arguments.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>DynamicControls.LabelDump</RootNamespace>
+    <AssemblyName>DynamicControls.LabelDump</AssemblyName>
+    <Nullable>enable</Nullable>
+    <WarningsAsErrors>nullable;CS8509</WarningsAsErrors>
+    <NoWarn>CS8524</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\DynamicControls.Core.csproj" />
+    <ProjectReference Include="..\Common\DynamicControls.Tools.Common.csproj" />
+  </ItemGroup>
+
+</Project>

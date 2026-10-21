@@ -5,6 +5,9 @@
   <Folder Name="/tools/Common/">
     <Project Path="tools/Common/DynamicControls.Tools.Common.csproj" />
   </Folder>
+  <Folder Name="/tools/LabelDump/">
+    <Project Path="tools/LabelDump/DynamicControls.LabelDump.csproj" />
+  </Folder>
   <Folder Name="/tools/Preview/">
     <Project Path="tools/Preview/DynamicControls.Preview.csproj" />
   </Folder>
