@@ -27,6 +27,12 @@
     <Input name="A">Brake</Input>
     <Input name="B">Accelerate</Input>
   </Game>
+  <Game romName="VerticalPairTest">
+    <Input name="Dpad-Up">Climb</Input>
+    <Input name="Dpad-Down">Climb</Input>
+    <Input name="Dpad-Left">Walk</Input>
+    <Input name="Dpad-Right">Run</Input>
+  </Game>
   <Game romName="Sonic the Hedgehog">
     <Input name="A">Jump</Input>
     <Input name="B">Jump</Input>

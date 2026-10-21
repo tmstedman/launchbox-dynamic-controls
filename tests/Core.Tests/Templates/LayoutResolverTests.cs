@@ -588,10 +588,12 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
-    public void Resolve_GroupVAlignBottom_CountsANestedGroupAsOneSlot()
+    public void Resolve_GroupVAlignBottom_CountsANestedGroupAsTheRowsItDraws()
     {
-        // given vAlign="bottom" on an outer group with 2 slots -- A, then a nested group (which
-        // counts as one slot in the OUTER group regardless of its own inner slot count)
+        // given vAlign="bottom" on an outer group holding A and then a nested group of two --
+        // the nested one reserves both of its rows in the OUTER group, so the outer has 3 slots,
+        // not 2. Reserving only one is what used to leave whatever followed a nested group
+        // landing on its second row instead of clearing its last.
         TestLayout config = new TestLayout()
             .Container(s => s.At(0, 100).Gap(50).VAlign("bottom")
                 .Input("A")
@@ -602,16 +604,41 @@ public class TemplateLayoutResolverTests
         // when the resolver runs
         ResolvedLayout result = _underTest.Resolve(config, _imageSource);
 
-        // then the outer shift is (2-1)*50=50: A lands at Y=50, the nested stack's own origin
-        // (its one slot) lands at Y=100 -- unaffected by vAlign, since only the OUTER declared
-        // it -- and its own children stack from there with their own gap.
+        // then the outer shift is (3-1)*50=100, putting its origin at 0: A lands at Y=0, the
+        // nested stack's own origin (its first reserved slot) at Y=50 -- unaffected by vAlign,
+        // since only the OUTER declared it -- and its own children stack from there with their
+        // own gap.
         Container outer = result.FirstContainer();
         var a = (InputDefinition)outer.Children[0];
         var inner = (Container)outer.Children[1];
-        a.InputImages.Single().Y.ShouldBe(50);
+        a.InputImages.Single().Y.ShouldBe(0);
         inner.Children.Cast<InputDefinition>()
             .Select(i => i.InputImages.Single().Y)
-            .ShouldBe([100.0, 110.0]);
+            .ShouldBe([50.0, 60.0]);
+    }
+
+    [Fact]
+    public void Resolve_NestedGroupFollowedByAnInput_LeavesItClearOfTheNestedRows()
+    {
+        // given a nested group of two sitting *before* another Input -- the case the old
+        // one-slot-per-block rule got wrong, since the Input landed on the nested group's second
+        // row rather than after it
+        TestLayout config = new TestLayout()
+            .Container(s => s.At(0, 0).Gap(45)
+                .Container(inner => inner.Gap(45)
+                    .Input("A")
+                    .Input("B"))
+                .Input("C"));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        Container outer = result.FirstContainer();
+        var inner = (Container)outer.Children[0];
+        var c = (InputDefinition)outer.Children[1];
+        inner.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([0.0, 45.0]);
+        c.InputImages.Single().Y.ShouldBe(90);
     }
 
     [Fact]

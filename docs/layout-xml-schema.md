@@ -254,6 +254,8 @@ This lands the label "half-way up the container" — and it stays there regardle
 
 **A *nested* `<Container>` is never transparent for this anchor**, even one with no `x`/`y`/`gap`/`vAlign` of its own: it always establishes its own frame, so a loose `<Label>` placed directly inside it centers on *that* Container's own slots — not the outer Container's. Only `<OneOf>` and `<Condition>` stay genuinely transparent for the anchor.
 
+**A nested `<Container>` reserves as many of its parent's slots as it draws rows.** A nested block of two occupies two of the outer container's slots, so whatever follows it clears its last row rather than landing on its second — which is what lets an agreeing axis pair be nested as a block whether it sits first or last among its siblings. An `<Input>` and a `<OneOf>` each still reserve exactly one, and an empty `<Container>` reserves one too.
+
 ### `<Overlay>` — additional image
 
 An arbitrary image rendered at a position, with no implicit relationship to the input's `name`. Used for connector lines (`Line_AxisLeftStick.png`, `Line_ButtonDpad_Multi.png`), background frames, decorative artwork.
