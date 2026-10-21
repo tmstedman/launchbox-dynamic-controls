@@ -109,6 +109,12 @@ public class SegaGenesisEndToEndTests
             new(Input: "AxisLeftStickLeft",  Text: "Steer"),
             new(Input: "AxisLeftStickRight", Text: "Steer"));
             #pragma warning restore format
+
+        // and each cluster stacks its directions up, down, left, right — the vertical pair
+        // together, then the horizontal one. This is the all-distinct alternative of both the
+        // D-pad and the left stick, which are separate Containers in the template.
+        overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
+        overlay.ShouldStackInOrder("AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight");
     }
 
     [Fact]

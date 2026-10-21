@@ -67,6 +67,37 @@ public static class OverlayAssertions
     }
 
     /// <summary>
+    /// Asserts that the named inputs' rendered images sit in this order, top to bottom. A
+    /// slot-stacking <c>&lt;Container&gt;</c> lays its members out in source order, so this is
+    /// what pins a cluster's arrangement — a D-pad's or a stick's four directions — against an
+    /// accidental reordering of the template. It asserts the order and not the coordinates, so
+    /// moving a cluster or changing its <c>gap</c> stays a one-line template edit.
+    ///
+    /// Each named input must render exactly once: an input drawn twice has no single row, and
+    /// silently picking one of them would leave the assertion saying nothing.
+    /// </summary>
+    public static void ShouldStackInOrder(
+        this ControllerOverlayModel overlay,
+        params string[] inputNames)
+    {
+        List<(string Input, double Top)> rows = [];
+        foreach (string name in inputNames)
+        {
+            List<RenderedImage> drawn = [.. overlay.RenderedImages.Where(i => i.InputName == name)];
+            drawn.Count.ShouldBe(1, $"{name} must render exactly once for its row to be well defined");
+            rows.Add((name, drawn[0].Top));
+        }
+
+        string stack = string.Join(", ", rows.OrderBy(r => r.Top).Select(r => $"{r.Input}@{r.Top}"));
+        for (int i = 1; i < rows.Count; i++)
+        {
+            rows[i].Top.ShouldBeGreaterThan(
+                rows[i - 1].Top,
+                $"expected {rows[i].Input} below {rows[i - 1].Input}; top to bottom the stack is {stack}");
+        }
+    }
+
+    /// <summary>
     /// Asserts that the overlay's labels exactly match <paramref name="expected"/> (order-insensitive).
     /// Fails if any expected label is missing or if the overlay carries any label not in the list.
     /// </summary>
