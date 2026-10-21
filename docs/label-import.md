@@ -46,6 +46,23 @@ else in a state neither source saw. Where a specific word could be one of severa
 context-dependent actions and nothing settles which, the database's placeholder is the safer
 choice — it never claims more than it knows.
 
+### On a console platform there is only one source
+
+No console has an artwork pack or a controls database, so the printed manual is the whole of it,
+and the three-way cross-check above has nothing to cross-check against. Two consequences, both
+borne out by the Sega Genesis pass ([`label-sources/genesis-manuals.md`](../label-sources/genesis-manuals.md)):
+
+**Read the manual, not a wiki or a search result.** Both were tried and both were wrong in ways
+that read as authoritative — a wiki search fallback answering about the wrong game in a series,
+a search summary describing moves the manual contradicts. The manual is a primary source and
+costs no more to read.
+
+**A manual with two button columns is answering a question about hardware, and the platform's
+`Controllers.xml` has already answered it.** Read the column for whichever controller that file
+makes `default`. The columns are not re-lettered versions of each other: in Street Fighter II on
+the Genesis, A is Light Punch on a three-button pad and Light Kick on a six-button pad, so
+picking by habit mislabels half the face buttons.
+
 ## Reading the artwork
 
 Every image in the pack uses one template — same chassis, same label positions — so a label's
@@ -170,6 +187,41 @@ label runs off the screen (issue #11). The artwork's own captions are almost alw
 
 Keep under about 24 characters. The shipped set's median is four.
 
+### A source is authoritative for the fact, not for the length
+
+Arcade has two label sources and the short one wins on wording. A platform with only a verbose
+source — a console's printed manual — has no such tie-break, so the compression from sentence to
+caption is a judgement nobody made for you. Two rules keep that judgement honest:
+
+**Where the source already supplies a usable short word, use that word.** Not a synonym, and
+especially not series jargon. Castlevania: Bloodlines prints "attack with special weapon", so the
+label is *Special Weapon* and not *Sub-Weapon*; Strider and Cadash both print "squat", so neither
+says *Crouch*; Gaiares prints "detach TOZ", not *Launch TOZ*. Substituting here looks like editing
+and is really guessing, because the replacement carries a meaning the source declined to claim.
+It also drifts two games apart for no reason — the Columns and Mean Bean Machine manuals both say
+"arrange", so both labels say *Arrange*.
+
+**Where the source supplies only a sentence, the wording is yours, and a second source may
+suggest it.** A wiki's control table is someone else compressing the same game into two words,
+which is exactly the artwork's role on Arcade — so it is a legitimate suggestion about *wording*
+and never about *fact*. A factual disagreement resolves to the primary source; see
+[On a console platform there is only one source](#on-a-console-platform-there-is-only-one-source)
+for what secondary sources got wrong when trusted with facts.
+
+**Find the ones this applies to mechanically**, rather than re-reading the platform:
+
+```sh
+python3 ~/.work/dynamic-controls/scripts/coined_labels.py \
+    "assets/Defaults/Platforms/{Platform}/Labels.xml" <dir of per-game source text>
+```
+
+It reports every label whose words are absent from its own source — the importer's wording rather
+than the source's — and only those are worth a second opinion. On the Genesis pack that was 22
+labels out of roughly 230, which is the difference between cross-referencing a platform and
+cross-referencing an afternoon's worth. Two confounds to expect, both benign: a page read as an
+image has no text to compare against, so everything in it reports as coined, and an OCR typo in
+the source reports a faithful label as coined.
+
 ### A label that says nothing is dropped
 
 The database marks unused controls several ways — `N/A`, `??`, `Unknown`, `(Not Used)`, `-`.
@@ -249,6 +301,33 @@ because neither is a reading failure:
   sticks that rotate rather than move. Eliminator, Star Castle and Lunar Lander all read "Move"
   on the artwork where the database says *Rotate*. Prefer the database wherever it supplies a
   whole-stick verb.
+
+### Measure what a pre-pass discards, not just what it keeps
+
+Where a source has to be *found* before it can be read — a page in a scanned manual, a region of
+an image — the finding step is a filter, and **a filter's silence is evidence about the filter,
+not about the source.** It is also the one step whose failures leave no trace in the output, so
+nothing downstream will ever flag them: a game the filter skipped looks exactly like a game whose
+manual says nothing.
+
+The Genesis pass is the worked example, and it cost two separate rounds of rework. Its page
+filter kept any page naming two or more of A/B/C/X/Y/Z, which silently discarded every page whose
+subject was the D-pad — so the first pass shipped no D-pad label at all — and wrote off 23
+manuals as unreadable. Replacing it with a scorer that weighs the vocabulary of a controls page
+(headings, D-pad tokens, pad-kind markers) found a page in 43 of the 44 games that had been
+attempted and never shipped. Exactly one manual was genuinely unusable. The full account is in
+[`label-sources/genesis-manuals.md`](../label-sources/genesis-manuals.md#ocr-finds-the-page-only-a-reading-attributes-it).
+
+Two things make this measurable rather than a matter of faith, and both are cheap:
+
+- **Score against the pages a previous pass already got right.** Recall over known-good targets
+  is a number; "the filter seems to work" is not. The Genesis locator offered 84 of 84.
+- **Report what each decision rested on.** The locator prints the tokens that earned a page its
+  score, so a call can be checked without re-running anything.
+
+Keep the two steps apart: a mechanical finder is fine and a mechanical *reader* is usually not,
+because finding asks only what a source is about while reading asks how it is laid out. The same
+Genesis OCR that located every page attributed 48% of its sentences to the wrong button.
 
 ## What is left
 
