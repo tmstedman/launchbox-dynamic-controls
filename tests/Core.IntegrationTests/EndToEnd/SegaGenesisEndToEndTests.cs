@@ -100,10 +100,14 @@ public class SegaGenesisEndToEndTests
             new(Input: "ButtonA",            Text: "Accelerate"),
             new(Input: "ButtonDpadUp",       Text: "Low gear"),
             new(Input: "ButtonDpadDown",     Text: "High gear"),
+            // Left and Right agree, so the D-pad's axis-pair alternative draws their shared
+            // "Steer" once, spanning both rows and owned by the first of the two. Right carries
+            // no label of its own there - only its icon renders.
             new(Input: "ButtonDpadLeft",     Text: "Steer"),
-            new(Input: "ButtonDpadRight",    Text: "Steer"),
             new(Input: "ButtonStart",        Text: "Pause"),
-            // analogToDigital="left" mirrors each Dpad label onto its left-stick equivalent
+            // analogToDigital="left" mirrors each Dpad label onto its left-stick equivalent; the
+            // stick has no axis-pair alternative, so both of its horizontal directions still
+            // carry their own copy
             new(Input: "AxisLeftStickUp",    Text: "Low gear"),
             new(Input: "AxisLeftStickDown",  Text: "High gear"),
             new(Input: "AxisLeftStickLeft",  Text: "Steer"),
@@ -139,8 +143,8 @@ public class SegaGenesisEndToEndTests
             #pragma warning disable format
             new(Input: "ButtonX",            Text: "Brake"),
             new(Input: "ButtonA",            Text: "Accelerate"),
+            // one shared "Steer" across the agreeing horizontal pair, as in SegaGenesis_OutRun
             new(Input: "ButtonDpadLeft",     Text: "Steer"),
-            new(Input: "ButtonDpadRight",    Text: "Steer"),
             new(Input: "ButtonDpadUp",       Text: "Low gear"),
             new(Input: "ButtonDpadDown",     Text: "High gear"),
             new(Input: "ButtonStart",        Text: "Pause"),
@@ -149,6 +153,44 @@ public class SegaGenesisEndToEndTests
             new(Input: "AxisLeftStickLeft",  Text: "Steer"),
             new(Input: "AxisLeftStickRight", Text: "Steer"));
             #pragma warning restore format
+    }
+
+    /// <summary>
+    /// The axis-pair alternative in its other orientation: the *vertical* directions agree while
+    /// the horizontal ones differ. No shipped game has this shape — every Genesis game that merges
+    /// an axis merges the horizontal one — so the fixture carries a game for it rather than leaving
+    /// the mirror branch to be discovered broken by whichever game first needs it.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_VerticalPairAgrees_MergesTheVerticalDirectionsInstead()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "VerticalPairTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        // then Up and Down share one "Climb" owned by Up, while Walk and Run stay on their own
+        // directions -- the mirror of OutRun, with no coordinate anywhere in the template changed
+        overlay.ShouldHaveLabel("ButtonDpadUp", "Climb");
+        overlay.InputLabels.Where(l => l.InputName == "ButtonDpadDown").ShouldBeEmpty();
+        overlay.ShouldHaveLabel("ButtonDpadLeft", "Walk");
+        overlay.ShouldHaveLabel("ButtonDpadRight", "Run");
+
+        // and all four icons still occupy their own rows, in order
+        overlay.ShouldStackInOrder("ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight");
+
+        // and the merged label sits between the two rows it spans, not over either of them
+        double up = overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadUp").Top;
+        double down = overlay.RenderedImages.Single(i => i.InputName == "ButtonDpadDown").Top;
+        double climb = overlay.InputLabels.Single(l => l.InputName == "ButtonDpadUp").Top;
+        climb.ShouldBeGreaterThan(up);
+        climb.ShouldBeLessThan(down);
     }
 
     /// <summary>

@@ -31,7 +31,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     {
         var inputsToRender = new List<InputDefinition>();
         var includedGroupOverlays = new List<LayoutGroupOverlay>();
-        var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>>(ReferenceEqualityComparer.Instance);
+        var looseLabels = new Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container, IReadOnlyList<string>? Names)>>(ReferenceEqualityComparer.Instance);
         var looseInputOverlays = new Dictionary<InputDefinition, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
         var looseContainerOverlays = new Dictionary<Container, List<OverlayDefinition>>(ReferenceEqualityComparer.Instance);
         var namedLabels = new List<(LabelDefinition Label, Container? Container, IReadOnlyList<string> Names)>();
@@ -63,7 +63,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                     continue;
                 }
                 looseLabels.TryAdd(owner, []);
-                looseLabels[owner].Add((label, container));
+                looseLabels[owner].Add((label, container, names));
             }
         }
 
@@ -159,8 +159,9 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
 
     /// <summary>
     /// Resolves a loose Label's final Y. Unchanged if it has no enclosing Container (nothing to
-    /// center against). Otherwise, the visual center of however many of that container's slots
-    /// actually survive for this game — reusing the exact same slot-flattening
+    /// center against). Otherwise, the visual center of the rows it spans — the members it named
+    /// with <c>inputs=</c>, when those are this container's own, and otherwise however many of
+    /// that container's slots actually survive for this game — reusing the exact same slot-flattening
     /// (<see cref="CollapseGroupBuilder.Flatten"/>) and hidden-check this class already uses for
     /// member Inputs' own Y offsets, applied instead to the container's own shape (declared Y,
     /// gap, vAlign — see <see cref="Container"/>'s doc comment for why these live directly on the
@@ -174,9 +175,16 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// already baked it into <paramref name="entry"/>'s <c>Label.Y</c> relative to the
     /// container's *nominal* (uncollapsed) frame origin, so subtracting that same nominal origin
     /// back out recovers exactly the delta the author wrote, whatever it was resolved against.</para>
+    ///
+    /// <para>Spanning a subset is what lets one label cover an agreeing axis pair while the other
+    /// two directions keep their own: the pair stays four ordinary slots in one container, so
+    /// nothing about slot counting, vacating or <c>vAlign</c> changes — only which rows the label
+    /// measures between. The named members need not be adjacent; the center is the midpoint of the
+    /// first and last of them, matching how the container-wide center is the midpoint of its own
+    /// first and last surviving slot.</para>
     /// </summary>
     private LabelDefinition ResolveLooseLabel(
-        (LabelDefinition Label, Container? Container) entry,
+        (LabelDefinition Label, Container? Container, IReadOnlyList<string>? Names) entry,
         Template template,
         VisibilityContext ctx,
         HashSet<InputDefinition> renderSet)
@@ -184,17 +192,35 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         if (entry.Container is null) return entry.Label;
 
         List<ILayoutElement> slots = CollapseGroupBuilder.Flatten(entry.Container.Children);
-        int visibleCount = entry.Container.Collapse
-            ? slots.Count(slot => !IsHidden(slot, template, ctx, renderSet))
-            : slots.Count;
+
+        // Walked rather than counted, because a label spanning a subset needs each named member's
+        // row *index* among the survivors, not just how many there are -- and a vacated slot
+        // consumes no row, so the two only coincide when nothing vacated.
+        int visibleCount = 0;
+        List<int> namedRows = [];
+        foreach (ILayoutElement slot in slots)
+        {
+            if (entry.Container.Collapse && IsHidden(slot, template, ctx, renderSet)) continue;
+            if (slot is InputDefinition member && entry.Names?.Contains(member.Name) == true)
+            {
+                namedRows.Add(visibleCount);
+            }
+            visibleCount++;
+        }
 
         double nominalFrameOriginY = entry.Container.DeclaredOriginY
             - StackVAlign.Shift(entry.Container.VAlign, slots.Count, entry.Container.Gap);
         double ownOffset = entry.Label.Y - nominalFrameOriginY;
 
-        double trueCenterY = entry.Container.DeclaredOriginY
-            - StackVAlign.Shift(entry.Container.VAlign, visibleCount, entry.Container.Gap)
-            + ((visibleCount - 1) * entry.Container.Gap / 2);
+        double renderFrameOriginY = entry.Container.DeclaredOriginY
+            - StackVAlign.Shift(entry.Container.VAlign, visibleCount, entry.Container.Gap);
+
+        // Spanning its named members when they are this container's own, and the whole container
+        // otherwise. A label naming the composite (the ordinary merged-cluster case) names nothing
+        // that is a member here, so it falls through to the container-wide center it always had.
+        double trueCenterY = namedRows.Count > 0
+            ? renderFrameOriginY + ((namedRows[0] + namedRows[^1]) * entry.Container.Gap / 2)
+            : renderFrameOriginY + ((visibleCount - 1) * entry.Container.Gap / 2);
 
         return entry.Label with { Y = trueCenterY + ownOffset };
     }
@@ -256,7 +282,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         ILayoutElement element,
         List<InputDefinition> inputsToRender,
         List<LayoutGroupOverlay> includedGroupOverlays,
-        Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container)>> looseLabels,
+        Dictionary<InputDefinition, List<(LabelDefinition Label, Container? Container, IReadOnlyList<string>? Names)>> looseLabels,
         Dictionary<InputDefinition, List<OverlayDefinition>> looseInputOverlays,
         Dictionary<Container, List<OverlayDefinition>> looseContainerOverlays,
         List<(LabelDefinition Label, Container? Container, IReadOnlyList<string> Names)> namedLabels,
@@ -316,7 +342,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                 break;
             case LabelElement le when currentInput != null:
                 looseLabels.TryAdd(currentInput, []);
-                looseLabels[currentInput].Add((le.Label, currentContainer));
+                looseLabels[currentInput].Add((le.Label, currentContainer, null));
                 break;
             case LabelElement:
                 // Names nothing and no ambient Input reached this point at all -- LayoutResolver

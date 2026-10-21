@@ -252,6 +252,8 @@ The `<Label>`'s own `inputs="AxisLeftStick"` is what makes this work with no enc
 
 This lands the label "half-way up the container" — and it stays there regardless of how many of the four directions are actually present this game, *for every `vAlign` value*, not only `"center"`. Which slots survive `collapse="true"` is a per-game fact (this game's mapping/labels decide it), so the center is computed at render time rather than baked in once at template load — see [`<Container>`](#container--positioned-cluster) for the container's own static shape, and the engine's `LayoutFilter.ResolveLooseLabel` for the computation itself. Without `collapse="true"`, nothing ever varies by game (slots never vacate), so the center is simply the container's full, fixed slot count every time. A direct child `<Label>` on one of the Container's own *members* is unaffected by any of this — it keeps resolving against that member's own slot position, exactly as if the Container weren't there, since a nested `<Input>` resets the ambient anchor to its own.
 
+**A label that names members of its container centers on *their* rows, not the container's.** `inputs="ButtonDpadLeft ButtonDpadRight"` on a loose label inside the four-direction cluster puts one shared label between those two rows, while Up and Down keep their own — the midpoint of the first and last named row, mirroring how the container-wide center is the midpoint of its first and last surviving slot. The four directions stay four ordinary slots of one `<Container>`, so slot counting, `collapse` vacating and `vAlign` are all untouched; only what the label measures between changes. The named members need not be adjacent. A label naming something that is *not* one of its container's members — the composite, as the merged-cluster alternatives do — falls through to the container-wide center it has always had.
+
 **A *nested* `<Container>` is never transparent for this anchor**, even one with no `x`/`y`/`gap`/`vAlign` of its own: it always establishes its own frame, so a loose `<Label>` placed directly inside it centers on *that* Container's own slots — not the outer Container's. Only `<OneOf>` and `<Condition>` stay genuinely transparent for the anchor.
 
 ### `<Overlay>` — additional image
@@ -309,7 +311,7 @@ Where to draw the label text for this input. The text content itself comes from 
 | `x` | coordinate | no | Relative to Input's origin |
 | `y` | coordinate | no | Same |
 | `align` | enum | no | `left`, `center`, `right`. Default `left`. Lower-cased on read |
-| `inputs` | space-separated names | no | Only meaningful on a **loose** label — names the Inputs it speaks for, and the first of them that renders owns it. Required when no `<Input>` encloses the label; a label that sets it never falls back to the ambient Input. See [Loose `<Label>`](#loose-label) |
+| `inputs` | space-separated names | no | Only meaningful on a **loose** label — names the Inputs it speaks for, and the first of them that renders owns it. Required when no `<Input>` encloses the label; a label that sets it never falls back to the ambient Input. Naming members of its own `<Container>` also makes it center across just their rows. See [Loose `<Label>`](#loose-label) |
 | `style` | string | no | Named style reference, for `fontSize` only — a Label has no `minOpacity`/`inactiveBlurRadius` of its own |
 | `fontSize` | double | no | Falls through the cascade when unset — see [Style cascade](#style-cascade) |
 
