@@ -236,7 +236,10 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     private static int CountSlots(ILayoutNode node) => node switch
     {
         InputNode => 1,
-        ContainerNode => 1,
+        // A nested Container reserves as many slots as it draws rows, so whatever follows it
+        // clears its last row instead of landing on its second. Floored at one: an empty
+        // container still occupies a slot, as every other block does.
+        ContainerNode containerXml => Math.Max(1, CountSlots(containerXml.Children)),
         OneOfNode => 1,
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
         LabelNode => 0,
@@ -264,9 +267,9 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
 
     /// <summary>
     /// Builds one layout node within a positioned container's slot loop. Inputs consume one slot
-    /// each and advance the frame's SlotIndex. Nested Containers and OneOfs consume one slot as a
-    /// block and own their own inner traversal; Conditions are transparent — their children each
-    /// advance the same counter.
+    /// each and advance the frame's SlotIndex. A OneOf consumes one slot as a block; a nested
+    /// Container consumes as many as it draws rows, and both own their own inner traversal.
+    /// Conditions are transparent — their children each advance the same counter.
     /// </summary>
     private ILayoutElement BuildNodeInStack(
         ILayoutNode node,
@@ -282,7 +285,9 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             }
             case ContainerNode containerXml:
             {
-                (double sx, double sy) = ConsumeSlot(frame);
+                // Consumes as many slots as it draws rows (see CountSlots), starting at the
+                // first of them -- the block's own frame then lays its rows out from there.
+                (double sx, double sy) = ConsumeSlot(frame, CountSlots(containerXml));
                 return BuildContainer(containerXml, ctx with { OriginX = sx, OriginY = sy });
             }
             case OneOfNode oneOfXml:
@@ -313,9 +318,14 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     }
 
     /// <summary>Computes the canvas origin for the frame's current slot and advances its
-    /// SlotIndex.</summary>
-    private static (double x, double y) ConsumeSlot(StackFrame frame) =>
-        (frame.OriginX, frame.OriginY + (frame.SlotIndex++ * frame.Gap));
+    /// SlotIndex past the <paramref name="span"/> slots this node occupies — one for an Input or
+    /// a OneOf, however many rows it draws for a nested Container.</summary>
+    private static (double x, double y) ConsumeSlot(StackFrame frame, int span = 1)
+    {
+        double y = frame.OriginY + (frame.SlotIndex * frame.Gap);
+        frame.SlotIndex += span;
+        return (frame.OriginX, y);
+    }
 
     /// <summary>Resolves a OneOfNode DTO into a OneOf, recursively building each
     /// alternative branch (Input, Container, Condition, or nested OneOf).</summary>

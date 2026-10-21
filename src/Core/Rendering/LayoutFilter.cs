@@ -122,8 +122,10 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
             if (!collapseInfo.TryGetValue(input, out CollapseInfo? info) || !processedGroups.Add(info.Group)) continue;
 
             double gap = info.Gap;
-            int visibleCount = info.Group.Count(slot => !IsHidden(slot, template, ctx, renderSet));
-            double vAlignCorrection = StackVAlign.Shift(info.VAlign, info.Group.Count, gap)
+            int visibleCount = info.Group
+                .Where(slot => !IsHidden(slot, template, ctx, renderSet))
+                .Sum(CollapseGroupBuilder.SpanOf);
+            double vAlignCorrection = StackVAlign.Shift(info.VAlign, info.Group.Sum(CollapseGroupBuilder.SpanOf), gap)
                 - StackVAlign.Shift(info.VAlign, visibleCount, gap);
 
             double cumulativeOffset = vAlignCorrection;
@@ -184,12 +186,13 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         if (entry.Container is null) return entry.Label;
 
         List<ILayoutElement> slots = CollapseGroupBuilder.Flatten(entry.Container.Children);
+        int nominalCount = slots.Sum(CollapseGroupBuilder.SpanOf);
         int visibleCount = entry.Container.Collapse
-            ? slots.Count(slot => !IsHidden(slot, template, ctx, renderSet))
-            : slots.Count;
+            ? slots.Where(slot => !IsHidden(slot, template, ctx, renderSet)).Sum(CollapseGroupBuilder.SpanOf)
+            : nominalCount;
 
         double nominalFrameOriginY = entry.Container.DeclaredOriginY
-            - StackVAlign.Shift(entry.Container.VAlign, slots.Count, entry.Container.Gap);
+            - StackVAlign.Shift(entry.Container.VAlign, nominalCount, entry.Container.Gap);
         double ownOffset = entry.Label.Y - nominalFrameOriginY;
 
         double trueCenterY = entry.Container.DeclaredOriginY
