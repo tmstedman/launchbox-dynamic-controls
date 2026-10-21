@@ -183,7 +183,6 @@ internal class ContainerBuilder
     public ContainerBuilder FontSize(double v)                  { Node.FontSize = v;             return this; }
     public ContainerBuilder MinOpacity(double v)                { Node.MinOpacity = v;           return this; }
     public ContainerBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
-    public ContainerBuilder For(string name)                    { Node.For = name;               return this; }
 
     public ContainerBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
     public ContainerBuilder Container(Action<ContainerBuilder> build)             { Node.Children.Add(TestLayout.BuildContainer(build));   return this; }
@@ -261,5 +260,6 @@ internal class LabelBuilder
     public LabelBuilder Align(string align)          { Node.Align = align;              return this; }
     public LabelBuilder Style(string name)           { Node.Style = name;               return this; }
     public LabelBuilder FontSize(double v)           { Node.FontSize = v;               return this; }
+    public LabelBuilder Inputs(params string[] names) { Node.Inputs = string.Join(' ', names);  return this; }
     #pragma warning restore format
 }

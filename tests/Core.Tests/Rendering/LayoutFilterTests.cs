@@ -268,15 +268,14 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_LabelElementInsideTopLevelGroupWithForInputName_AttachesToTheNamedTopLevelInput()
+    public void Filter_LabelElementNamingATopLevelInput_AttachesToIt()
     {
-        // given a top-level Group naming "ButtonDpad" via ForInputName -- it has no enclosing
-        // Input of its own, so this is how LayoutFilter learns which InputDefinition a loose
-        // Label placed directly inside it belongs to (the flattened whole-control cluster's own
-        // case)
+        // given a loose Label inside a top-level Container, naming "ButtonDpad" itself -- the
+        // Container has no enclosing Input of its own, so naming is the only way the label says
+        // which InputDefinition it belongs to (the flattened whole-control cluster's own case)
         var label = new LabelDefinition(X: 1, Y: 2);
-        var labelElement = new LabelElement(label);
-        var group = new Container(Children: [labelElement], Overlays: [], ForInputName: "ButtonDpad");
+        var labelElement = new LabelElement(label, ["ButtonDpad"]);
+        var group = new Container(Children: [labelElement], Overlays: []);
         InputDefinition dpad = Input("ButtonDpad");
         Template template = TemplateOf(elements: [dpad, group]);
         _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
@@ -288,14 +287,52 @@ public class LayoutFilterTests
     }
 
     [Fact]
-    public void Filter_LabelElementInsideTopLevelGroupWithUnresolvableForInputName_AttachesNowhere()
+    public void Filter_LabelElementNamingAMemberOfItsOwnContainer_AttachesToIt()
     {
-        // given a Group whose ForInputName doesn't match any top-level Input (e.g. a template
-        // authoring typo) -- degrades gracefully by dropping the label, the same as a loose
-        // Label with no ambient Input at all
+        // given a loose Label naming a direction that is its own container's member rather than a
+        // top-level Input, and written before it -- ownership can only be settled once the walk
+        // has reached that member, which is why it is resolved afterwards
         var label = new LabelDefinition(X: 1, Y: 2);
-        var labelElement = new LabelElement(label);
-        var group = new Container(Children: [labelElement], Overlays: [], ForInputName: "NoSuchInput");
+        var labelElement = new LabelElement(label, ["ButtonDpadLeft"]);
+        InputDefinition left = Input("ButtonDpadLeft");
+        var group = new Container(Children: [labelElement, left], Overlays: []);
+        Template template = TemplateOf(elements: [group]);
+        _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpadLeft");
+        li.Labels.ShouldBe([label]);
+    }
+
+    [Fact]
+    public void Filter_LabelElementNamingSeveralInputs_AttachesToTheFirstThatRenders()
+    {
+        // given a label naming two inputs where only the second renders -- naming several says
+        // "whichever of these this game draws", so the absent one is skipped rather than
+        // stranding the label
+        var label = new LabelDefinition(X: 1, Y: 2);
+        var labelElement = new LabelElement(label, ["ButtonDpadUp", "ButtonDpadDown"]);
+        var group = new Container(Children: [labelElement], Overlays: []);
+        InputDefinition down = Input("ButtonDpadDown");
+        Template template = TemplateOf(elements: [down, group]);
+        _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);
+
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        LayoutInput li = result.Inputs.Single(i => i.Input.Name == "ButtonDpadDown");
+        li.Labels.ShouldBe([label]);
+    }
+
+    [Fact]
+    public void Filter_LabelElementNamingNoInputThatRenders_AttachesNowhere()
+    {
+        // given a label whose named input isn't in the template at all (an authoring typo) or
+        // simply didn't render this game -- degrades gracefully by dropping the label, the same
+        // as a loose Label with no ambient Input at all
+        var label = new LabelDefinition(X: 1, Y: 2);
+        var labelElement = new LabelElement(label, ["NoSuchInput"]);
+        var group = new Container(Children: [labelElement], Overlays: []);
         InputDefinition dpad = Input("ButtonDpad");
         Template template = TemplateOf(elements: [dpad, group]);
         _evaluator.AnyVisible(labelElement, Arg.Any<VisibilityContext>()).Returns(true);

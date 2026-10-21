@@ -170,11 +170,6 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// directly inside this container should sit: the visual center of however many of this
     /// container's slots actually survive for the current game, which is a per-game fact this
     /// build-time pass has no way to know — see <see cref="Container"/>'s own doc comment.</para>
-    ///
-    /// <para><c>containerXml.For</c> is unrelated to any of the above — it overrides
-    /// <c>ctx.CurrentInputName</c> for this Container's own children, for a Container reached
-    /// with no enclosing Input at all to have supplied one the ordinary way (see
-    /// <see cref="ContainerNode.For"/>).</para>
     /// </summary>
     private Container BuildContainer(ContainerNode containerXml, BuildContext ctx)
     {
@@ -199,16 +194,11 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             Gap = gap,
             SlotIndex = 0,
         };
-        // containerXml.For overrides CurrentInputName unconditionally when set -- it's only ever
-        // set when this Container has no enclosing Input of its own to have supplied one (a
-        // top-level Container inside a OneOf sibling of the whole it describes). Lets a loose
-        // Label placed directly inside still find its whole with no enclosing Input to attach to.
         BuildContext containerCtx = ctx with
         {
             Style = computed,
             OriginX = frame.OriginX,
             OriginY = frame.OriginY,
-            CurrentInputName = containerXml.For ?? ctx.CurrentInputName,
         };
 
         var children = new List<ILayoutElement>();
@@ -225,8 +215,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             DeclaredOriginY: declaredOriginY,
             Gap: gap,
             VAlign: vAlign,
-            Collapse: containerXml.Collapse,
-            ForInputName: containerXml.For);
+            Collapse: containerXml.Collapse);
 
         if (containerXml.Collapse)
             CollapseGroupBuilder.Build(children, frame.Gap, ctx.CollapseInfo, vAlign);
@@ -438,19 +427,25 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// <summary>
     /// Resolves a &lt;Label&gt; found somewhere other than as a direct child of its own
     /// &lt;Input&gt; (e.g. nested inside a &lt;Condition&gt; wrapping a &lt;Container&gt;/
-    /// &lt;OneOf&gt;/&lt;Condition&gt;) against whichever Input is ambient in <paramref name="ctx"/>.
-    /// A missing ambient Input is a template-authoring error — logged once, here, at load time,
-    /// same as a missing required attribute elsewhere in this file — rather than silently
-    /// rendering nothing or throwing.
+    /// &lt;OneOf&gt;/&lt;Condition&gt;). It finds its owner one of two ways: by naming it outright
+    /// in <c>inputs</c>, or by relying on whichever Input is ambient in <paramref name="ctx"/>.
+    /// Neither is a template-authoring error — logged once, here, at load time, same as a missing
+    /// required attribute elsewhere in this file — rather than silently rendering nothing or
+    /// throwing.
+    ///
+    /// <para>Which of the named inputs actually owns it is a per-game question
+    /// <see cref="Rendering.LayoutFilter"/> answers, since it depends on which of them render; all
+    /// that is settled here is the list, and that the label named a way to find one at all.</para>
     /// </summary>
     private LabelElement BuildLooseLabel(LabelNode labelXml, BuildContext ctx)
     {
-        if (ctx.CurrentInputName is null)
+        string[] names = labelXml.Inputs?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? [];
+        if (names.Length == 0 && ctx.CurrentInputName is null)
         {
-            _logger.Error("Skipping <Label>: not nested inside any <Input>, directly or ambiently");
+            _logger.Error("Skipping <Label>: names no inputs and is not nested inside any <Input>, directly or ambiently");
             return new LabelElement(new LabelDefinition(X: 0, Y: 0));
         }
-        return new LabelElement(BuildLabelDefinition(labelXml, ctx));
+        return new LabelElement(BuildLabelDefinition(labelXml, ctx), names);
     }
 
     /// <summary>

@@ -100,8 +100,8 @@
                  a small manual nudge on top of that computed center, not a replacement for it. -->
             <Condition inputs="AxisLeftStick" atLeast="2" match="agree">
                 <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                <Container for="AxisLeftStick" x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Label x="-24" y="+17" align="right" fontSize="24" />
+                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Label inputs="AxisLeftStick" x="-24" y="+17" align="right" fontSize="24" />
                     <Input name="AxisLeftStickUp" height="34" width="34" />
                     <Input name="AxisLeftStickDown" height="34" width="34" />
                     <Input name="AxisLeftStickLeft" height="34" width="34" />
@@ -147,8 +147,8 @@
                  "top"), and its y="+15" is its own manual nudge on top of the computed center. -->
             <Condition inputs="AxisRightStick" atLeast="2" match="agree">
                 <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Container for="AxisRightStick" x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Label x="+52" y="+15" fontSize="24" />
+                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                    <Label inputs="AxisRightStick" x="+52" y="+15" fontSize="24" />
                     <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34" />
                     <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34" />
                     <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
@@ -183,8 +183,8 @@
                  full four-way agreement too, in the same shape as a partial one. -->
             <Condition inputs="ButtonDpad" atLeast="2" match="agree">
                 <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
-                <Container for="ButtonDpad" x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Label x="-24" y="+17" align="right" fontSize="24" />
+                <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
+                    <Label inputs="ButtonDpad" x="-24" y="+17" align="right" fontSize="24" />
                     <Input name="ButtonDpadUp" height="34" width="34" />
                     <Input name="ButtonDpadDown" height="34" width="34" />
                     <Input name="ButtonDpadLeft" height="34" width="34" />

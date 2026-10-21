@@ -582,6 +582,59 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
+    public void Render_MergedLabelNamingItsOwnInput_CentersIdenticallyToOneReachedAmbiently()
+    {
+        // The same production shape as the test above, in the arrangement the shipped template
+        // actually uses: the collapsing Container is a *sibling* of the whole's own bare Input
+        // rather than nested inside it, so no ambient Input reaches the loose Label and it names
+        // its owner itself. Pins that naming an owner and inheriting one place the label in
+        // exactly the same spot -- the migration off Container's old for= attribute is only safe
+        // if the two routes agree, and nothing else asserts a loose label's coordinates.
+        var up = Input(name: "AxisRightStickUp",
+            images: [new InputImageDefinition(0, 772, "AxisRightStickUp.png", ShowIf: Label, MinOpacity: 0)]);
+        var left = Input(name: "AxisRightStickLeft",
+            images: [new InputImageDefinition(0, 817, "AxisRightStickLeft.png", ShowIf: Label)]);
+        var right = Input(name: "AxisRightStickRight",
+            images: [new InputImageDefinition(0, 862, "AxisRightStickRight.png", ShowIf: Label)]);
+        var down = Input(name: "AxisRightStickDown",
+            images: [new InputImageDefinition(0, 907, "AxisRightStickDown.png", ShowIf: Label, MinOpacity: 0)]);
+        var looseLabel = new LabelElement(
+            new LabelDefinition(X: 0, Y: 787, FontSize: 20), ["AxisRightStick"]);
+        var group = new Container(
+            Children: [up, left, right, down, looseLabel],
+            Overlays: [],
+            DeclaredOriginY: 772,
+            Gap: 45,
+            VAlign: "top",
+            Collapse: true);
+        // The whole's own Input, with no children -- the Container is beside it, not within it.
+        var axisRightStick = new InputDefinition(
+            Name: "AxisRightStick", InputImages: [], Overlays: [], Labels: [], Children: []);
+
+        _images.With(src: "AxisRightStickUp.png", generic: "AxisRightStickUp.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickLeft.png", generic: "AxisRightStickLeft.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickRight.png", generic: "AxisRightStickRight.png", platform: Genesis, controller: ThreeButton);
+        _images.With(src: "AxisRightStickDown.png", generic: "AxisRightStickDown.png", platform: Genesis, controller: ThreeButton);
+
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>();
+        CollapseGroupBuilder.Build(group.Children, gap: 45, collapseInfo, vAlign: "top");
+        Template template = TemplateOf([axisRightStick, group], collapseInfo);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true,
+            ("AxisRightStick", "Steer"), ("AxisRightStickLeft", "Steer"), ("AxisRightStickRight", "Steer"));
+
+        RenderResult result = _service.Render(template, MappingOf(), labels);
+
+        // then the survivors shift exactly as before, and the merged label lands on the same
+        // 794.5 the ambient route produces
+        result.Images.Single(i => i.InputName == "AxisRightStickLeft").Top.ShouldBe(772);
+        result.Images.Single(i => i.InputName == "AxisRightStickRight").Top.ShouldBe(817);
+        RenderedLabel named = result.Labels.Single();
+        named.InputName.ShouldBe("AxisRightStick");
+        named.Text.ShouldBe("Steer");
+        named.Top.ShouldBe(794.5);
+    }
+
+    [Fact]
     public void Render_ConditionGatedLooseOverlay_AttachesToEnclosingInputAndUsesItsOwnFlags()
     {
         // given an Input whose only child is a Condition wrapping a bare Overlay -- no wrapping
