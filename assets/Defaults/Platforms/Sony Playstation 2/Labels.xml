@@ -1,0 +1,150 @@
+<Labels>
+    <Defaults>
+        <Input name="Start">Pause</Input>
+    </Defaults>
+
+    <Game launchBoxId="3931" romName="Bully">
+        <Input name="L-Any">Move</Input>
+        <Input name="R-Any">Camera</Input>
+        <Input name="Triangle">Grapple</Input>
+        <Input name="Circle">Jump</Input>
+        <Input name="Cross">Sprint</Input>
+        <Input name="Square">Attack</Input>
+        <Input name="L1">Lock On</Input>
+        <Input name="R1">Fire</Input>
+        <Input name="L2">Weapon Left</Input>
+        <Input name="R2">Weapon Right</Input>
+        <Input name="L3">Look Back</Input>
+        <Input name="R3">Crouch</Input>
+        <Input name="Dpad-Up">Zoom In</Input>
+        <Input name="Dpad-Down">Zoom Out</Input>
+        <Input name="Dpad-Left">Side Tasks</Input>
+        <Input name="Dpad-Right">Objectives</Input>
+        <Input name="Select">Map</Input>
+        <Input name="Start">Options</Input>
+    </Game>
+
+    <Game launchBoxId="4158" romName="Burnout 3 - Takedown">
+        <Input name="L-Any">Steer</Input>
+        <Input name="Dpad-Any">Steer</Input>
+        <Input name="R-Up">Accelerate</Input>
+        <Input name="R-Down">Brake</Input>
+        <Input name="Cross">Accelerate</Input>
+        <Input name="Square">Brake</Input>
+        <Input name="Triangle">Change View</Input>
+        <Input name="L1">Look Back</Input>
+        <Input name="R1">Boost</Input>
+        <Input name="L2">Next Track</Input>
+        <Input name="R2">Crashbreaker</Input>
+    </Game>
+
+    <Game launchBoxId="26" romName="God of War">
+        <Input name="L-Any">Move</Input>
+        <Input name="R-Any">Evade</Input>
+        <Input name="Dpad-Any">Select Magic</Input>
+        <Input name="Cross">Jump</Input>
+        <Input name="Square">Attack</Input>
+        <Input name="Triangle">Heavy Attack</Input>
+        <Input name="Circle">Grab</Input>
+        <Input name="L1">Block</Input>
+        <Input name="R1">Stomp</Input>
+        <Input name="L2">Use Magic</Input>
+        <Input name="R2">Action</Input>
+        <Input name="L3">Rage</Input>
+        <Input name="R3">Rage</Input>
+        <Input name="Start">Menu</Input>
+        <Input name="Select">Pause</Input>
+    </Game>
+
+    <Game launchBoxId="88" romName="God of War II">
+        <Input name="L-Any">Move</Input>
+        <Input name="R-Any">Evade</Input>
+        <Input name="Dpad-Any">Select Magic</Input>
+        <Input name="Cross">Jump</Input>
+        <Input name="Square">Attack</Input>
+        <Input name="Triangle">Light Attack</Input>
+        <Input name="Circle">Grab</Input>
+        <Input name="L1">Block</Input>
+        <Input name="R1">Action</Input>
+        <Input name="L2">Use Magic</Input>
+        <Input name="R2">Swap Weapon</Input>
+        <Input name="Start">Menu</Input>
+        <Input name="Select">Pause</Input>
+    </Game>
+
+    <Game launchBoxId="2239" romName="Ico">
+        <Input name="L-Any">Move</Input>
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="R-Any">Look</Input>
+        <Input name="Triangle">Jump</Input>
+        <Input name="Square">Attack</Input>
+        <Input name="Cross">Release</Input>
+        <Input name="Circle">Interact</Input>
+        <Input name="R1">Call Yorda</Input>
+        <Input name="R2">Zoom</Input>
+    </Game>
+
+    <Game launchBoxId="7317" romName="Katamari Damacy">
+        <Input name="L-Any">Roll</Input>
+        <Input name="R-Any">Roll</Input>
+        <Input name="Cross">Take Picture</Input>
+        <Input name="Circle">Picture Zoom</Input>
+        <Input name="L1">Look</Input>
+        <Input name="R1">Jump</Input>
+        <Input name="L3">Quick Turn</Input>
+        <Input name="R3">Quick Turn</Input>
+        <Input name="Select">Vibration</Input>
+    </Game>
+
+    <Game launchBoxId="35" romName="Killzone">
+        <Input name="L-Any">Move</Input>
+        <Input name="R-Any">Aim</Input>
+        <Input name="Cross">Action</Input>
+        <Input name="Square">Heat Vision</Input>
+        <Input name="Triangle">Reload</Input>
+        <Input name="Circle">Next Weapon</Input>
+        <Input name="L1">Grenade</Input>
+        <Input name="R1">Fire</Input>
+        <Input name="L2">Crouch</Input>
+        <Input name="R2">Alt Fire</Input>
+        <Input name="L3">Sprint</Input>
+        <Input name="R3">Zoom</Input>
+        <Input name="Dpad-Up">Zoom In</Input>
+        <Input name="Dpad-Down">Zoom Out</Input>
+        <Input name="Select">Objectives</Input>
+    </Game>
+
+    <Game launchBoxId="3928" romName="Resident Evil 4">
+        <Input name="L-Any">Move</Input>
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="R-Any">Camera</Input>
+        <Input name="Cross">Action</Input>
+        <Input name="Square">Run</Input>
+        <Input name="Circle">Run</Input>
+        <Input name="Triangle">Map</Input>
+        <Input name="L1">Knife</Input>
+        <Input name="R1">Aim</Input>
+        <Input name="R2">Call Ashley</Input>
+        <Input name="Start">Inventory</Input>
+        <Input name="Select">Options</Input>
+    </Game>
+
+    <Game launchBoxId="2240" romName="Shadow of the Colossus">
+        <Input name="L-Any">Move</Input>
+        <Input name="R-Any">Look</Input>
+        <Input name="Triangle">Jump</Input>
+        <Input name="Square">Attack</Input>
+        <Input name="Circle">Focus Light</Input>
+        <Input name="Cross">Call Agro</Input>
+        <Input name="L1">Lock On</Input>
+        <Input name="R1">Grip</Input>
+        <Input name="L2">Reset Camera</Input>
+        <Input name="R2">Zoom</Input>
+        <Input name="Dpad-Up">Draw Sword</Input>
+        <Input name="Dpad-Down">Stow Weapon</Input>
+        <Input name="Dpad-Left">Equip Weapon</Input>
+        <Input name="Dpad-Right">Equip Weapon</Input>
+        <Input name="Start">Map</Input>
+    </Game>
+
+</Labels>
