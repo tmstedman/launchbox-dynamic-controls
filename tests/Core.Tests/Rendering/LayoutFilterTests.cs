@@ -616,6 +616,66 @@ public class LayoutFilterTests
     }
 
     [Fact]
+    public void Filter_CollapseStack_OneOfDrawingFewerRowsThanItReserved_ClosesTheDifference()
+    {
+        // given a collapsing stack whose first slot is a OneOf between a single input and a block
+        // of two -- it reserves two rows for the larger, and this game selects the single one
+        InputDefinition single = Input("ButtonA");
+        InputDefinition inner0 = Input("ButtonB");
+        InputDefinition inner1 = Input("ButtonC");
+        var block = new Container(Children: [inner0, inner1], Overlays: [], Gap: 100, Collapse: true);
+        var oneOf = new OneOf(Alternatives: [single, block]);
+        InputDefinition tail = Input("ButtonD");
+        ILayoutElement[] group = [oneOf, tail];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [single] = new(group, Gap: 100),
+            [tail] = new(group, Gap: 100),
+        };
+        Template template = TemplateOf(elements: [oneOf, tail], collapseInfo: collapseInfo);
+        _evaluator.AnyVisible(single, Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then the tail moves up by the row the OneOf reserved but did not draw
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonA", 0.0), ("ButtonD", -100.0)]);
+    }
+
+    [Fact]
+    public void Filter_CollapseStack_OneOfDrawingEveryRowItReserved_LeavesTheTailWhereItIs()
+    {
+        // given the same stack, but this game selects the two-row block
+        InputDefinition single = Input("ButtonA");
+        InputDefinition inner0 = Input("ButtonB");
+        InputDefinition inner1 = Input("ButtonC");
+        var block = new Container(Children: [inner0, inner1], Overlays: [], Gap: 100, Collapse: true);
+        var oneOf = new OneOf(Alternatives: [single, block]);
+        InputDefinition tail = Input("ButtonD");
+        ILayoutElement[] group = [oneOf, tail];
+        ILayoutElement[] innerGroup = [inner0, inner1];
+        var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance)
+        {
+            [inner0] = new(innerGroup, Gap: 100),
+            [inner1] = new(innerGroup, Gap: 100),
+            [tail] = new(group, Gap: 100),
+        };
+        Template template = TemplateOf(elements: [oneOf, tail], collapseInfo: collapseInfo);
+        // AnyVisible defaults false for the single input, so the OneOf falls through to the
+        // block. The real evaluator answers true for a Container unconditionally; the substitute
+        // has to be told, since it is typed on ILayoutElement and knows nothing of that rule
+        _evaluator.AnyVisible(block, Arg.Any<VisibilityContext>()).Returns(true);
+
+        // when filtering
+        FilteredLayout result = _underTest.Filter(template, Ctx());
+
+        // then nothing is reclaimed: the block drew both of the rows it was reserved
+        result.Inputs.Select(i => (i.Input.Name, i.YOffset))
+            .ShouldBe([("ButtonB", 0.0), ("ButtonC", 0.0), ("ButtonD", 0.0)]);
+    }
+
+    [Fact]
     public void Filter_CollapseStack_OneOfWithVisibleAlternative_AssignsOffset()
     {
         // given a collapsing stack where the first slot is a OneOf with a visible, non-zero-opacity
