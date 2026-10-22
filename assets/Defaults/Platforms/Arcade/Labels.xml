@@ -3967,13 +3967,13 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Jump</Input>
         <Input name="START1">Start</Input>
-        <Input name="COIN1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36173" romName="ckongpt2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Jump</Input>
         <Input name="START1">Start</Input>
-        <Input name="COIN1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36046" romName="claybust">
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
@@ -8163,7 +8163,7 @@
         <Input name="P1_BUTTON8">Tilt</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN2">Insert Coin</Input>
-        <Input name="COIN1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36874" romName="gdarius2">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -17331,7 +17331,7 @@
         <Input name="P1_BUTTON8">Tilt</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN2">Insert Coin</Input>
-        <Input name="COIN1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="165014" romName="pwrgoal">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -20085,7 +20085,7 @@
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
         <Input name="START1">Start</Input>
-        <Input name="COIN1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="12825" romName="shufshot">
         <Input name="P1_TRACKBALL_X">Move / Slide Puck</Input>
