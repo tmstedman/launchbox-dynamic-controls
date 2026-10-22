@@ -618,6 +618,35 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_OneOfInAStack_ReservesItsLargestAlternativesRows()
+    {
+        // given a stack of a OneOf -- between a single input and a block of two -- then a tail.
+        // Only one alternative ever draws, but the frame is laid out once, so the reservation
+        // has to cover whichever fires; anything less and the tail lands inside the block.
+        TestLayout config = new TestLayout()
+            .Container(s => s.At(0, 0).Gap(100)
+                .OneOf(o => o
+                    .Input("A")
+                    .Container(inner => inner.Gap(10).Input("B").Input("C")))
+                .Input("D"));
+
+        // when the resolver runs
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        // then the OneOf's alternatives share its first row, and the tail clears both of them
+        Container outer = result.FirstContainer();
+        var oneOf = (OneOf)outer.Children[0];
+        var a = (InputDefinition)oneOf.Alternatives[0];
+        var block = (Container)oneOf.Alternatives[1];
+        var d = (InputDefinition)outer.Children[1];
+        a.InputImages.Single().Y.ShouldBe(0);
+        block.Children.Cast<InputDefinition>()
+            .Select(i => i.InputImages.Single().Y)
+            .ShouldBe([0.0, 10.0]);
+        d.InputImages.Single().Y.ShouldBe(200);
+    }
+
+    [Fact]
     public void Resolve_NestedGroupFollowedByAnInput_LeavesItClearOfTheNestedRows()
     {
         // given a nested group of two sitting *before* another Input -- the case the old

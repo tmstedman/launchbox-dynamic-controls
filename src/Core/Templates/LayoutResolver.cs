@@ -240,7 +240,11 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         // clears its last row instead of landing on its second. Floored at one: an empty
         // container still occupies a slot, as every other block does.
         ContainerNode containerXml => Math.Max(1, CountSlots(containerXml.Children)),
-        OneOfNode => 1,
+        // A OneOf reserves the rows of its largest alternative: only one of them draws, but the
+        // frame is laid out once, so the reservation has to cover whichever turns out to fire.
+        OneOfNode oneOfXml => oneOfXml.Alternatives.Count == 0
+            ? 1
+            : Math.Max(1, oneOfXml.Alternatives.Max(CountSlots)),
         ConditionNode conditionXml => CountSlots(conditionXml.Children),
         LabelNode => 0,
         OverlayNode => 0,
@@ -292,8 +296,9 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             }
             case OneOfNode oneOfXml:
             {
-                // OneOf: consumes one slot; all alternatives share that slot's origin.
-                (double sx, double sy) = ConsumeSlot(frame);
+                // OneOf: reserves the rows of its largest alternative, since only one of them
+                // draws but the frame is laid out once; all alternatives share its first row.
+                (double sx, double sy) = ConsumeSlot(frame, CountSlots(oneOfXml));
                 return BuildOneOf(oneOfXml, ctx with { OriginX = sx, OriginY = sy });
             }
             case ConditionNode conditionXml:

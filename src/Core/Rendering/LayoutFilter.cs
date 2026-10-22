@@ -141,8 +141,11 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
                         {
                             Shift(adjustments, leaf, cumulativeOffset);
                         }
-                        if (IsHidden(oneOf, template, ctx, renderSet))
-                            cumulativeOffset -= gap;
+                        // Advance past the rows the selected alternative drew, not the rows the
+                        // OneOf reserved for its largest. Selecting nothing draws none of them,
+                        // which is the same arithmetic and how the whole block vacates.
+                        cumulativeOffset -= (CollapseGroupBuilder.SpanOf(oneOf)
+                            - VisibleSpan(oneOf, template, ctx, renderSet)) * gap;
                         break;
                     case Container nested:
                         // A nested block's members belong to its own collapse group, which knows
@@ -187,8 +190,18 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         {
             Container nested when nested.Collapse => CollapseGroupBuilder.Flatten(nested.Children)
                 .Sum(inner => VisibleSpan(inner, template, ctx, renderSet)),
+            // Whichever alternative drew is what the OneOf actually occupies, which can be fewer
+            // rows than it reserved — a merged axis takes one where its unmerged form takes two.
+            OneOf oneOf => SelectedAlternative(oneOf, renderSet) is { } alternative
+                ? VisibleSpan(alternative, template, ctx, renderSet)
+                : 0,
             _ => IsHidden(slot, template, ctx, renderSet) ? 0 : CollapseGroupBuilder.SpanOf(slot),
         };
+
+    /// <summary>The alternative this game selected — the first one holding an input that
+    /// rendered. Null when none did, which is also how a OneOf vacates its slots entirely.</summary>
+    private static ILayoutElement? SelectedAlternative(OneOf oneOf, HashSet<InputDefinition> renderSet) =>
+        oneOf.Alternatives.FirstOrDefault(a => CollectInputLeaves(a).Any(renderSet.Contains));
 
     /// <summary>
     /// Resolves a loose Label's final Y. Unchanged if it has no enclosing Container (nothing to

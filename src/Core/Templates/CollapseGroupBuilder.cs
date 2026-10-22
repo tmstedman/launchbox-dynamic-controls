@@ -78,6 +78,7 @@ internal static class CollapseGroupBuilder
     internal static int SpanOf(ILayoutElement slot) => slot switch
     {
         Container container => Math.Max(1, Flatten(container.Children).Sum(SpanOf)),
+        OneOf oneOf => oneOf.Alternatives.Count == 0 ? 1 : Math.Max(1, oneOf.Alternatives.Max(SpanOf)),
         _ => 1
     };
 
