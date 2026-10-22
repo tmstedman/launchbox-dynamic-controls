@@ -198,6 +198,45 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
+    /// Both axes agree, each on its own text — crgolf's shape, and the one the template comment
+    /// claims no shipped game has. Each pair should collapse onto its own glyph, leaving two
+    /// rows. Today the horizontal alternative is selected first and the OneOf stops there, so
+    /// the vertical pair falls through to a label per direction and the column disagrees with
+    /// itself about whether an agreeing pair merges.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_BothPairsAgree_MergesEachOntoItsOwnAxis()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "BothPairsAgreeTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        foreach (string cluster in new[] { "ButtonDpad", "AxisLeftStick" })
+        {
+            // each axis carries its pair's shared text
+            overlay.ShouldHaveLabel(cluster + "X", "Slice");
+            overlay.ShouldHaveLabel(cluster + "Y", "Raise Club");
+
+            // and no individual direction renders a row or a label of its own
+            foreach (string d in new[] { "Up", "Down", "Left", "Right" })
+            {
+                overlay.RenderedImages.Where(i => i.InputName == cluster + d).ShouldBeEmpty();
+                overlay.InputLabels.Where(l => l.InputName == cluster + d).ShouldBeEmpty();
+            }
+
+            // leaving two rows, horizontal above vertical
+            overlay.ShouldStackInOrder(cluster + "X", cluster + "Y");
+        }
+    }
+
+    /// <summary>
     /// A direction above a merged pair carrying no label at all — the shape 17 shipped Genesis
     /// games have. Its row vacates, and everything below has to close up over it: the merged pair
     /// sits in a nested Container of its own, whose members belong to that block's collapse group

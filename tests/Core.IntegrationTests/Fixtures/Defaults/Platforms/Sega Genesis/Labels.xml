@@ -41,6 +41,14 @@
     <Input name="Dpad-Left">Move</Input>
     <Input name="Dpad-Right">Move</Input>
   </Game>
+  <!-- Both axes agree, each on its own text: the shape crgolf, crgolfhi and fitegolf have
+       in the shipped Arcade pack. Each pair should collapse onto its own glyph. -->
+  <Game romName="BothPairsAgreeTest">
+    <Input name="Dpad-Left">Slice</Input>
+    <Input name="Dpad-Right">Slice</Input>
+    <Input name="Dpad-Up">Raise Club</Input>
+    <Input name="Dpad-Down">Raise Club</Input>
+  </Game>
   <Game romName="Sonic the Hedgehog">
     <Input name="A">Jump</Input>
     <Input name="B">Jump</Input>

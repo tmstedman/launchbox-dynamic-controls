@@ -131,55 +131,44 @@
                  implies the other; if both pairs agreed on their own separate text the first
                  would win and the second pair would fall through to its own labels, which no
                  shipped game does. -->
-            <Condition inputs="AxisLeftStickX" match="agree">
-                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="AxisLeftStickX" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickUp" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickDown" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                </Container>
-            </Condition>
-            <Condition inputs="AxisLeftStickY" match="agree">
-                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
-                <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="AxisLeftStickLeft" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickRight" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickY" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                </Container>
-            </Condition>
-            <!-- Fallback: no two directions agree — each renders its own, independent text.
-                 A Container never decides its own inclusion, so this explicit Condition is what
-                 replaces the old Group's implicit "any member visible" check: without it, the
-                 OneOf could never select this alternative at all, having no other way to ask
-                 whether it has anything to show. Naming the composite asks about its parts —
-                 the Head declares which they are, so the four need not be spelled out. -->
+            <!-- Whatever the directions say: each axis picks for itself between its own glyph
+                 carrying the pair's shared text and a row per direction. Two independent OneOfs
+                 rather than a branch per combination, so neither axis can take a case from the
+                 other by being listed first, and the bare Container in each is the default that
+                 draws when the pair does not agree. -->
             <Condition inputs="AxisLeftStick" atLeast="1" match="label">
                 <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                 <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="AxisLeftStickLeft" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickRight" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickUp" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="AxisLeftStickDown" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
+                    <OneOf>
+                        <Condition inputs="AxisLeftStickX" match="agree">
+                            <Input name="AxisLeftStickX" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="AxisLeftStickLeft" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                            <Input name="AxisLeftStickRight" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Container>
+                    </OneOf>
+                    <OneOf>
+                        <Condition inputs="AxisLeftStickY" match="agree">
+                            <Input name="AxisLeftStickY" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="AxisLeftStickUp" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                            <Input name="AxisLeftStickDown" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Container>
+                    </OneOf>
                 </Container>
             </Condition>
         </OneOf>
@@ -207,51 +196,44 @@
                 </Container>
             </Condition>
             <!-- One axis agrees and the other doesn't: see AxisLeftStick above. -->
-            <Condition inputs="AxisRightStickX" match="agree">
-                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Input name="AxisRightStickX" useImage="AxisLeftStickX" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                </Container>
-            </Condition>
-            <Condition inputs="AxisRightStickY" match="agree">
-                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickY" useImage="AxisLeftStickY" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                </Container>
-            </Condition>
-            <!-- Fallback: no two directions agree — each renders its own, independent text.
-                 See AxisLeftStick above for why this needs an explicit Condition now. -->
+            <!-- Whatever the directions say: each axis picks for itself between its own glyph
+                 carrying the pair's shared text and a row per direction. Two independent OneOfs
+                 rather than a branch per combination, so neither axis can take a case from the
+                 other by being listed first, and the bare Container in each is the default that
+                 draws when the pair does not agree. -->
             <Condition inputs="AxisRightStick" atLeast="1" match="label">
                 <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
                 <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
-                    <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
-                        <Label x="+52" y="+15" />
-                    </Input>
+                    <OneOf>
+                        <Condition inputs="AxisRightStickX" match="agree">
+                            <Input name="AxisRightStickX" useImage="AxisLeftStickX" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                            <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                        </Container>
+                    </OneOf>
+                    <OneOf>
+                        <Condition inputs="AxisRightStickY" match="agree">
+                            <Input name="AxisRightStickY" useImage="AxisLeftStickY" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                            <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
+                                <Label x="+52" y="+15" />
+                            </Input>
+                        </Container>
+                    </OneOf>
                 </Container>
             </Condition>
         </OneOf>
@@ -275,52 +257,44 @@
                  pair that actually fires on shipped data — analogToDigital mirrors these labels
                  onto AxisLeftStick, so the two columns must offer the same alternatives or the
                  same game renders merged beside one and repeated beside the other. -->
-            <Condition inputs="ButtonDpadX" match="agree">
-                <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
-                <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="ButtonDpadX" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadUp" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadDown" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                </Container>
-            </Condition>
-            <Condition inputs="ButtonDpadY" match="agree">
-                <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
-                <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="ButtonDpadLeft" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadRight" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadY" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                </Container>
-            </Condition>
-            <!-- Fallback: no two directions agree (or nothing's labelled at all) — each
-                 direction renders its own, independent text. See AxisLeftStick above for why
-                 this needs an explicit Condition now. -->
+            <!-- Whatever the directions say: each axis picks for itself between its own glyph
+                 carrying the pair's shared text and a row per direction. Two independent OneOfs
+                 rather than a branch per combination, so neither axis can take a case from the
+                 other by being listed first, and the bare Container in each is the default that
+                 draws when the pair does not agree. -->
             <Condition inputs="ButtonDpad" atLeast="1" match="label">
                 <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
-                    <Input name="ButtonDpadLeft" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadRight" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadUp" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
-                    <Input name="ButtonDpadDown" height="34" width="34">
-                        <Label x="-24" y="+17" align="right" />
-                    </Input>
+                    <OneOf>
+                        <Condition inputs="ButtonDpadX" match="agree">
+                            <Input name="ButtonDpadX" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="ButtonDpadLeft" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                            <Input name="ButtonDpadRight" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Container>
+                    </OneOf>
+                    <OneOf>
+                        <Condition inputs="ButtonDpadY" match="agree">
+                            <Input name="ButtonDpadY" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Condition>
+                        <Container gap="45" collapse="true" style="small-label-vacate">
+                            <Input name="ButtonDpadUp" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                            <Input name="ButtonDpadDown" height="34" width="34">
+                                <Label x="-24" y="+17" align="right" />
+                            </Input>
+                        </Container>
+                    </OneOf>
                 </Container>
             </Condition>
         </OneOf>
