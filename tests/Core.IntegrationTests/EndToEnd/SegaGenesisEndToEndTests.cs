@@ -198,6 +198,40 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
+    /// Neither axis merges, and the horizontal pair has a blank direction — so its OneOf draws
+    /// one of the two rows it reserved. The row it did not draw has to be reclaimed by the
+    /// vertical pair below it, or the column shows a hole where the unbound direction would be.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_BlankInsideAnUnmergedPair_LeavesNoHoleBelowIt()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "BlankInsideAnUnmergedPairTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        foreach (string cluster in new[] { "ButtonDpad", "AxisLeftStick" })
+        {
+            overlay.RenderedImages.Where(i => i.InputName == cluster + "Right").ShouldBeEmpty();
+
+            double[] rows = [.. overlay.RenderedImages
+                .Where(i => i.InputName != null && i.InputName.StartsWith(cluster)
+                            && i.InputName.Length > cluster.Length)
+                .Select(i => i.Top)
+                .OrderBy(t => t)];
+            rows.Length.ShouldBe(3, $"{cluster} should draw Left, Up and Down");
+            (rows[1] - rows[0]).ShouldBe(rows[2] - rows[1],
+                $"{cluster} rows should be evenly spaced; they are {string.Join(", ", rows)}");
+        }
+    }
+
+    /// <summary>
     /// Both axes agree, each on its own text — crgolf's shape, and the one the template comment
     /// claims no shipped game has. Each pair should collapse onto its own glyph, leaving two
     /// rows. Today the horizontal alternative is selected first and the OneOf stops there, so
