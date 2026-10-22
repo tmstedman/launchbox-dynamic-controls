@@ -15,6 +15,14 @@ document is about filling one.
 | MAME controls database | `controls.xml`, the BYOAC project's label database | Per-direction detail, and machine-readable |
 | MAME config | One `cfg` per game, remapping ports to physical buttons | Which control each port actually reaches |
 
+**The artwork and the configs share an author**, so they are not independent witnesses. Where
+they disagree, one person has contradicted themselves and one of the two is a slip — the
+disagreement is evidence that something is wrong, never evidence for either side. The database
+is the only one of the three written by anyone else. Knuckle Heads is the case to keep in mind:
+its cfg binds the jump port to stick-up as well as two face buttons, so the pipeline reads up
+as *Jump*, while the artwork says the stick means *Move*. Both are that author's own statement
+about the same game, and which to correct has not been settled.
+
 **Run `decode.py` first and read the artwork against its output.** It answers the questions the
 image cannot: which physical control a port reaches, which directions the movement control
 actually has, and whether to expect one directional label or four. A reader given only the
