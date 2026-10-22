@@ -117,9 +117,16 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         var processedGroups = new HashSet<IReadOnlyList<ILayoutElement>>(ReferenceEqualityComparer.Instance);
         IReadOnlyDictionary<InputDefinition, CollapseInfo> collapseInfo = template.Layout.CollapseInfo;
 
-        foreach (InputDefinition input in inputsToRender)
+        // Driven by the groups themselves rather than by what each rendering input is keyed to.
+        // CollapseGroupBuilder claims an input for the innermost collapsing container holding it,
+        // so a container whose every member sits inside a nested block of its own is claimed by
+        // nothing that renders, and keying off inputsToRender skipped it — leaving the rows it
+        // owns unshifted while the blocks inside them collapsed. A group is this game's business
+        // when anything beneath it renders, whoever that input is keyed to.
+        foreach (CollapseInfo info in collapseInfo.Values)
         {
-            if (!collapseInfo.TryGetValue(input, out CollapseInfo? info) || !processedGroups.Add(info.Group)) continue;
+            if (!processedGroups.Add(info.Group)) continue;
+            if (!info.Group.Any(slot => CollectInputLeaves(slot).Any(renderSet.Contains))) continue;
 
             double gap = info.Gap;
             int visibleCount = info.Group.Sum(slot => VisibleSpan(slot, template, ctx, renderSet));

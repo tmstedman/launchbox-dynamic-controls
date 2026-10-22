@@ -49,6 +49,13 @@
     <Input name="Dpad-Up">Raise Club</Input>
     <Input name="Dpad-Down">Raise Club</Input>
   </Game>
+  <!-- Neither axis merges and one direction is blank: bradley's shape in the Arcade pack,
+       where the cfg binds three buttons to hat directions and leaves the fourth unbound. -->
+  <Game romName="BlankInsideAnUnmergedPairTest">
+    <Input name="Dpad-Left">Low Rate</Input>
+    <Input name="Dpad-Up">High Rate</Input>
+    <Input name="Dpad-Down">Single</Input>
+  </Game>
   <Game romName="Sonic the Hedgehog">
     <Input name="A">Jump</Input>
     <Input name="B">Jump</Input>
