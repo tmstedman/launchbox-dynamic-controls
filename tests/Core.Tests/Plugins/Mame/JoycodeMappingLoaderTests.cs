@@ -124,4 +124,44 @@ public class JoycodeMappingLoaderTests
         // the first
         result.Translate("JOYCODE_1_XAXIS").ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
     }
+
+    [Fact]
+    public void Load_MappingStatesWhichEndOfItsAxisAnInputIs_EachEndTranslatesAlone()
+    {
+        // given both halves of a bare analogue axis, each stating which end it lies on
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_XAXIS' half='dec' input='AxisLeftStickLeft' />
+              <Mapping joycode='JOYCODE_1_XAXIS' half='inc' input='AxisLeftStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then each end is reachable on its own, and the axis still reaches both
+        result.TranslateHalf("JOYCODE_1_XAXIS", "dec").ShouldBe(["AxisLeftStickLeft"]);
+        result.TranslateHalf("JOYCODE_1_XAXIS", "inc").ShouldBe(["AxisLeftStickRight"]);
+        result.Translate("JOYCODE_1_XAXIS").ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
+    }
+
+    [Fact]
+    public void Load_HalfNamesNeitherEnd_InputIsKeptWithoutOneAndLogsError()
+    {
+        // given an entry whose half names something MAME has no sequence type for
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_XAXIS' half='left' input='AxisLeftStickLeft' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then the input still translates and only the unusable claim is dropped, so a typo
+        // costs the axis its ends rather than costing the port its control altogether
+        result.Translate("JOYCODE_1_XAXIS").ShouldBe(["AxisLeftStickLeft"]);
+        result.TranslateHalf("JOYCODE_1_XAXIS", "dec").ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("expected \"dec\" or \"inc\"")));
+    }
 }

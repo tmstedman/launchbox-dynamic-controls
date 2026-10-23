@@ -131,6 +131,56 @@ public class JoycodeMappingTests
         result.ShouldBeEmpty();
     }
 
+    [Fact]
+    public void TranslateHalf_AxisDeclaringBothEnds_ReturnsOnlyTheEndAsked()
+    {
+        // given a bare analogue axis whose two generic inputs each state which end of it they are
+        var mapping = new JoycodeMapping(new Dictionary<string, List<JoycodeTarget>>
+        {
+            ["JOYCODE_1_XAXIS"] =
+            [
+                new JoycodeTarget("AxisLeftStickLeft", "dec"),
+                new JoycodeTarget("AxisLeftStickRight", "inc"),
+            ],
+        });
+
+        // when each end is asked for separately
+        // then only the input declared at that end answers
+        mapping.TranslateHalf("JOYCODE_1_XAXIS", "dec").ShouldBe(["AxisLeftStickLeft"]);
+        mapping.TranslateHalf("JOYCODE_1_XAXIS", "inc").ShouldBe(["AxisLeftStickRight"]);
+    }
+
+    [Fact]
+    public void TranslateHalf_JoycodeStatingNoEnds_ReturnsEmpty()
+    {
+        // given an ordinary button, which has no direction to state
+        // when either end of it is asked for
+        // then neither answers — the question does not apply to it
+        _underTest.TranslateHalf("JOYCODE_1_BUTTON1", "dec").ShouldBeEmpty();
+        _underTest.TranslateHalf("JOYCODE_1_BUTTON1", "inc").ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Translate_AxisDeclaringBothEnds_StillReturnsBothOfThem()
+    {
+        // given that same two-ended axis
+        var mapping = new JoycodeMapping(new Dictionary<string, List<JoycodeTarget>>
+        {
+            ["JOYCODE_1_XAXIS"] =
+            [
+                new JoycodeTarget("AxisLeftStickLeft", "dec"),
+                new JoycodeTarget("AxisLeftStickRight", "inc"),
+            ],
+        });
+
+        // when the axis itself is translated rather than one of its ends
+        var result = mapping.Translate("JOYCODE_1_XAXIS");
+
+        // then both are returned: stating the ends narrows nothing for a port bound to the axis,
+        // which drives it both ways
+        result.ShouldBe(["AxisLeftStickLeft", "AxisLeftStickRight"]);
+    }
+
     // Properties — hold for arbitrary input strings:
 
     // Every element in the result is a value from the mapping dictionary.
