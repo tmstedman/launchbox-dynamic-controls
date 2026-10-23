@@ -420,6 +420,36 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
+    public void Load_SequenceWithEmptyContent_IsTreatedAsUnbound()
+    {
+        // an empty <newseq> rather than the usual NONE -- it still declares the sequence, so the
+        // port counts as nudgeable, but binds nothing and must not reach anything through it
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_DIAL'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                    <newseq type='increment'></newseq>
+                    <newseq type='decrement'>   </newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then the nudge names are still stated, so a baseline for them is dropped rather than
+        // left pointing at an axis this cfg never bound
+        result.ShouldBeDictionaryOf(
+            ("P1_DIAL", ["ButtonA"]),
+            ("P1_DIAL.inc", []),
+            ("P1_DIAL.dec", []));
+    }
+
+    [Fact]
     public void Load_StandardNone_IncrementAndDecrementBound_UsesBoth()
     {
         // the adillor/spacwalk shape: a true analogue control (a trackball or paddle axis) with no
@@ -441,9 +471,13 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        // then both the increment and decrement buttons are recorded, standard-first order (moot
-        // here since standard is unbound) then increment, then decrement
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonB", "ButtonC"]));
+        // then each nudge direction becomes its own button, and the port's own name is stated
+        // empty -- it is bound, but not to anything analogue, so Controllers.xml's baseline guess
+        // at the axis must not survive the merge
+        result.ShouldBeDictionaryOf(
+            ("P1_BUTTON1", []),
+            ("P1_BUTTON1.inc", ["ButtonB"]),
+            ("P1_BUTTON1.dec", ["ButtonC"]));
     }
 
     [Fact]
@@ -467,14 +501,18 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA", "ButtonB"]));
+        // the analogue binding keeps the port's own name; the nudge gets its own
+        result.ShouldBeDictionaryOf(
+            ("P1_BUTTON1", ["ButtonA"]),
+            ("P1_BUTTON1.inc", ["ButtonB"]));
     }
 
     [Fact]
     public void Load_SameGenericReachableFromStandardAndIncrement_DedupsToOneEntry()
     {
-        // increment happens to translate to a generic the standard sequence already reached --
-        // shouldn't appear twice
+        // increment happens to translate to a generic the standard sequence already reached.
+        // They are separate buttons now, so both record it -- the duplicate that mattered was
+        // within one button's list, and a <Control> over the pair dedups what the port reaches
         StubXml("""
             <mameconfig>
               <system name='galaga'>
@@ -491,7 +529,65 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
+        result.ShouldBeDictionaryOf(
+            ("P1_BUTTON1", ["ButtonA"]),
+            ("P1_BUTTON1.inc", ["ButtonA"]));
+    }
+
+    [Fact]
+    public void Load_AllThreeSequencesBound_SplitsIntoThreeButtons()
+    {
+        // the airco22b shape: a throttle read from an analogue axis, nudged by two separate
+        // controls -- the triggers, not the axis. Each carries its own label in the artwork, so
+        // each has to be addressable on its own.
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_AD_STICK_Z'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
+                    <newseq type='decrement'>JOYCODE_1_BUTTON3</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then three buttons, and the port's own name is NOT stated empty -- its analogue
+        // binding is real, so the baseline it replaces is replaced by something
+        result.ShouldBeDictionaryOf(
+            ("P1_AD_STICK_Z", ["ButtonA"]),
+            ("P1_AD_STICK_Z.inc", ["ButtonB"]),
+            ("P1_AD_STICK_Z.dec", ["ButtonC"]));
+    }
+
+    [Fact]
+    public void Load_NudgeSequencesUntranslatable_RecordsNothingAtAll()
+    {
+        // every sequence is bound but none translates -- the port reaches nothing, so it must not
+        // even state its name empty, which would drop a baseline for no reason
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_DIAL'>
+                    <newseq type='increment'>JOYCODE_1_UNKNOWN</newseq>
+                    <newseq type='decrement'>JOYCODE_1_ALSOUNKNOWN</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load(CfgPath);
+
+        // then nothing is recorded
+        result.ShouldBeEmpty();
     }
 
     [Fact]

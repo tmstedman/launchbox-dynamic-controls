@@ -53,6 +53,11 @@
     <Mapping joycode="JOYCODE_1_RZAXIS_NEG_SWITCH" input="AxisRightStickUp" />
     <Mapping joycode="JOYCODE_1_RZAXIS_POS_SWITCH" input="AxisRightStickDown" />
 
+    <!-- Bare analogue axis: carries no sign, so both halves are declared against it, each
+         stating which end of it it is. -->
+    <Mapping joycode="JOYCODE_1_RZAXIS" half="dec" input="AxisRightStickUp" />
+    <Mapping joycode="JOYCODE_1_RZAXIS" half="inc" input="AxisRightStickDown" />
+
     <!-- Trigger slider axes (XInput) -->
     <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />
     <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />

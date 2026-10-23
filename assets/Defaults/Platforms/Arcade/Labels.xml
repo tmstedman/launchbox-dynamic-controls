@@ -108,8 +108,8 @@
     <Game romName="720">
         <Input name="P1_BUTTON1">Kick</Input>
         <Input name="P1_BUTTON2">Jump</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
     </Game>
     <Game romName="88games">
         <Input name="P1_BUTTON1">Run</Input>
@@ -118,17 +118,17 @@
     </Game>
     <Game romName="aafb">
         <Input name="P1_BUTTON1">Action</Input>
-        <Input name="P1_AD_STICK_X">Aim Left</Input>
-        <Input name="P1_AD_STICK_X_EXT">Aim Right</Input>
-        <Input name="P1_AD_STICK_Y">Short</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Long</Input>
+        <Input name="P1_AD_STICK_X.dec">Aim Left</Input>
+        <Input name="P1_AD_STICK_X.inc">Aim Right</Input>
+        <Input name="P1_AD_STICK_Y.dec">Short</Input>
+        <Input name="P1_AD_STICK_Y.inc">Long</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="aburner2">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Vulcan</Input>
-        <Input name="P1_AD_STICK_Z">Slow</Input>
-        <Input name="P1_AD_STICK_Z_EXT">Fast</Input>
+        <Input name="P1_AD_STICK_Z.dec">Slow</Input>
+        <Input name="P1_AD_STICK_Z.inc">Fast</Input>
     </Game>
     <Game romName="ace">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -204,10 +204,10 @@
         <Input name="P1_BUTTON1">Decision</Input>
         <Input name="P1_BUTTON2">Left (Select)</Input>
         <Input name="P1_BUTTON3">Right (Select)</Input>
-        <Input name="P1_AD_STICK_X">Sweep Left</Input>
-        <Input name="P1_AD_STICK_X_EXT">Sweep Right</Input>
-        <Input name="P1_AD_STICK_Y">Increase Edge</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Decrease Edge</Input>
+        <Input name="P1_AD_STICK_X.dec">Sweep Left</Input>
+        <Input name="P1_AD_STICK_X.inc">Sweep Right</Input>
+        <Input name="P1_AD_STICK_Y.dec">Increase Edge</Input>
+        <Input name="P1_AD_STICK_Y.inc">Decrease Edge</Input>
     </Game>
     <Game romName="altbeast">
         <Input name="P1_BUTTON1">Punch</Input>
@@ -393,8 +393,8 @@
     <Game romName="aztarac">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Radar</Input>
-        <Input name="P1_DIAL">Aim Left</Input>
-        <Input name="P1_DIAL_EXT">Aim Right</Input>
+        <Input name="P1_DIAL.dec">Aim Left</Input>
+        <Input name="P1_DIAL.inc">Aim Right</Input>
     </Game>
     <Game romName="azurian">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -636,8 +636,8 @@
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Thrust</Input>
         <Input name="P1_BUTTON3">Transform</Input>
-        <Input name="P1_DIAL">Rotate Ship Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Ship Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Ship Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Ship Right</Input>
     </Game>
     <Game romName="blswhstl">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -649,8 +649,8 @@
         <Input name="P1_JOYSTICK">Walk</Input>
     </Game>
     <Game romName="blueshrk">
-        <Input name="P1_PADDLE">Aim Left</Input>
-        <Input name="P1_PADDLE_EXT">Aim Right</Input>
+        <Input name="P1_PADDLE.dec">Aim Left</Input>
+        <Input name="P1_PADDLE.inc">Aim Right</Input>
     </Game>
     <Game romName="bm1stmix">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -658,8 +658,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bm2ndmix">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -667,8 +667,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bm4thmix">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -676,8 +676,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bm5thmix">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -685,8 +685,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bm6thmix">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -694,8 +694,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bmaster">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -708,8 +708,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bmcompmx">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -717,8 +717,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
-        <Input name="P1_DIAL">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
     </Game>
     <Game romName="bmcorerm">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -726,8 +726,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL">Scratch</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
     </Game>
     <Game romName="bmdct">
         <Input name="P1_BUTTON1">White 1</Input>
@@ -735,8 +735,8 @@
         <Input name="P1_BUTTON3">White 2</Input>
         <Input name="P1_BUTTON4">Black 2</Input>
         <Input name="P1_BUTTON5">White 3</Input>
-        <Input name="P1_DIAL">Scratch</Input>
-        <Input name="P1_DIAL_EXT">Scratch</Input>
+        <Input name="P1_DIAL.dec">Scratch</Input>
+        <Input name="P1_DIAL.inc">Scratch</Input>
     </Game>
     <Game romName="bnglngby">
         <Input name="P1_BUTTON1">B</Input>
@@ -765,8 +765,8 @@
     </Game>
     <Game romName="boothill">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_PADDLE">Aim Left</Input>
-        <Input name="P1_PADDLE_EXT">Aim Right</Input>
+        <Input name="P1_PADDLE.dec">Aim Left</Input>
+        <Input name="P1_PADDLE.inc">Aim Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="bosco">
@@ -784,8 +784,8 @@
     <Game romName="boxingb">
         <Input name="P1_BUTTON1">Rocket</Input>
         <Input name="P1_BUTTON2">Punch</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="bradley">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -798,12 +798,12 @@
         <Input name="P1_BUTTON7">High Explosive (High Rate)</Input>
         <Input name="P1_BUTTON8">Select Tow Missiles</Input>
         <Input name="P1_BUTTON9">7.62 mm Machine Gun</Input>
-        <Input name="P1_AD_STICK_Z_EXT">Decrease Range</Input>
-        <Input name="P1_AD_STICK_Z">Increase Range</Input>
-        <Input name="P1_AD_STICK_X_EXT">Aim Right</Input>
-        <Input name="P1_AD_STICK_X">Aim Left</Input>
-        <Input name="P1_AD_STICK_Y">Aim Up</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Aim Down</Input>
+        <Input name="P1_AD_STICK_Z.inc">Decrease Range</Input>
+        <Input name="P1_AD_STICK_Z.dec">Increase Range</Input>
+        <Input name="P1_AD_STICK_X.inc">Aim Right</Input>
+        <Input name="P1_AD_STICK_X.dec">Aim Left</Input>
+        <Input name="P1_AD_STICK_Y.dec">Aim Up</Input>
+        <Input name="P1_AD_STICK_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="brkthru">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -877,14 +877,14 @@
     <Game romName="calibr50">
         <Input name="P1_BUTTON1">Rapid Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="cameltry">
         <Input name="P1_BUTTON1">Jump / Speedup</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="canyon">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -929,8 +929,8 @@
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Thrust</Input>
         <Input name="P1_BUTTON3">Shields</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="cclimber">
         <Input name="P1_JOYSTICKLEFT">Left</Input>
@@ -991,8 +991,8 @@
         <Input name="P1_JOYSTICKRIGHT">Fire</Input>
     </Game>
     <Game romName="clowns">
-        <Input name="P1_PADDLE">Move Left</Input>
-        <Input name="P1_PADDLE_EXT">Move Right</Input>
+        <Input name="P1_PADDLE.dec">Move Left</Input>
+        <Input name="P1_PADDLE.inc">Move Right</Input>
     </Game>
     <Game romName="cltchitr">
         <Input name="P1_BUTTON1">A</Input>
@@ -1027,10 +1027,10 @@
     </Game>
     <Game romName="combat">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="commando">
         <Input name="P1_BUTTON1">Machine Gun</Input>
@@ -1074,8 +1074,8 @@
     <Game romName="crater">
         <Input name="P1_BUTTON1">Fire (Trigger)</Input>
         <Input name="P1_BUTTON2">Shield</Input>
-        <Input name="P1_DIAL">Turn Left</Input>
-        <Input name="P1_DIAL_EXT">Turn Right</Input>
+        <Input name="P1_DIAL.dec">Turn Left</Input>
+        <Input name="P1_DIAL.inc">Turn Right</Input>
         <Input name="P1_JOYSTICK_UP">Forward</Input>
         <Input name="P1_JOYSTICK_DOWN">Reverse</Input>
     </Game>
@@ -1086,8 +1086,8 @@
         <Input name="P1_BUTTON4">Change Stance Right</Input>
         <Input name="P1_BUTTON5">Change Stance Left</Input>
         <Input name="P1_BUTTON6">Change Club</Input>
-        <Input name="P1_AD_STICK_Y">Decrease Swing Angle</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Increase Swing Angle</Input>
+        <Input name="P1_AD_STICK_Y.dec">Decrease Swing Angle</Input>
+        <Input name="P1_AD_STICK_Y.inc">Increase Swing Angle</Input>
         <Input name="P1_JOYSTICK_LEFT">Slice Left</Input>
         <Input name="P1_JOYSTICK_RIGHT">Slice Right</Input>
     </Game>
@@ -1140,10 +1140,10 @@
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Missile</Input>
         <Input name="P1_BUTTON3">View Point</Input>
-        <Input name="P1_AD_STICK_X">Left Tread Left</Input>
-        <Input name="P1_AD_STICK_X_EXT">Left Tread Right</Input>
-        <Input name="P1_AD_STICK_Y">Left Tread Forward</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Left Tread Backward</Input>
+        <Input name="P1_AD_STICK_X.dec">Left Tread Left</Input>
+        <Input name="P1_AD_STICK_X.inc">Left Tread Right</Input>
+        <Input name="P1_AD_STICK_Y.dec">Left Tread Forward</Input>
+        <Input name="P1_AD_STICK_Y.inc">Left Tread Backward</Input>
     </Game>
     <Game romName="daioh">
         <Input name="P1_BUTTON1">Laser Shot</Input>
@@ -1163,8 +1163,8 @@
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Thrust</Input>
         <Input name="P1_BUTTON3">Laser</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="darkseal">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -1232,8 +1232,8 @@
     <Game romName="destroyr">
         <Input name="P1_BUTTON1">Release Charge</Input>
         <Input name="P1_BUTTON2">Slow</Input>
-        <Input name="P1_PADDLE_V_EXT">Depth Charge Down</Input>
-        <Input name="P1_PADDLE_V">Depth Charge Up</Input>
+        <Input name="P1_PADDLE_V.inc">Depth Charge Down</Input>
+        <Input name="P1_PADDLE_V.dec">Depth Charge Up</Input>
     </Game>
     <Game romName="devilfsh">
         <Input name="P1_BUTTON1">Drop bait</Input>
@@ -1311,8 +1311,8 @@
         <Input name="P1_BUTTON2">Deflect</Input>
         <Input name="P1_BUTTON3">Aim Up</Input>
         <Input name="P1_BUTTON4">Aim Down</Input>
-        <Input name="P1_DIAL">Aim</Input>
-        <Input name="P1_DIAL_EXT">Aim</Input>
+        <Input name="P1_DIAL.dec">Aim</Input>
+        <Input name="P1_DIAL.inc">Aim</Input>
         <Input name="P1_JOYSTICK">Move Tron</Input>
     </Game>
     <Game romName="dowild">
@@ -1322,8 +1322,8 @@
     <Game romName="downtown">
         <Input name="P1_BUTTON1">Punch</Input>
         <Input name="P1_BUTTON2">Kick</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="drgnunit">
@@ -1411,8 +1411,8 @@
     <Game romName="exterm">
         <Input name="P1_BUTTON1">Fire / Grap</Input>
         <Input name="P1_BUTTON2">Pound</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="eyes">
@@ -1439,8 +1439,8 @@
     </Game>
     <Game romName="finalap2">
         <Input name="P1_BUTTON1">High / Low</Input>
-        <Input name="P1_DIAL">Turn Left</Input>
-        <Input name="P1_DIAL_EXT">Turn Right</Input>
+        <Input name="P1_DIAL.dec">Turn Left</Input>
+        <Input name="P1_DIAL.inc">Turn Right</Input>
         <Input name="P1_PEDAL">Accelerate</Input>
         <Input name="P1_PEDAL2">Brake</Input>
     </Game>
@@ -1459,8 +1459,8 @@
         <Input name="P1_BUTTON1">Accelerate</Input>
         <Input name="P1_BUTTON2">Horn</Input>
         <Input name="P1_BUTTON3">Track Select</Input>
-        <Input name="P1_DIAL">Left (Rear Wheels)</Input>
-        <Input name="P1_DIAL_EXT">Right (Rear Wheels)</Input>
+        <Input name="P1_DIAL.dec">Left (Rear Wheels)</Input>
+        <Input name="P1_DIAL.inc">Right (Rear Wheels)</Input>
     </Game>
     <Game romName="forgottn">
         <Input name="P1_BUTTON1">Push to Fire</Input>
@@ -1557,8 +1557,8 @@
     <Game romName="gforce2">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Missile</Input>
-        <Input name="P1_AD_STICK_Z">Fast</Input>
-        <Input name="P1_AD_STICK_Z_EXT">Slow</Input>
+        <Input name="P1_AD_STICK_Z.dec">Fast</Input>
+        <Input name="P1_AD_STICK_Z.inc">Slow</Input>
     </Game>
     <Game romName="gground">
         <Input name="P1_BUTTON1">Magic Weapon</Input>
@@ -1597,8 +1597,8 @@
         <Input name="P1_BUTTON1">Vulcan - Gun</Input>
         <Input name="P1_BUTTON2">Missile</Input>
         <Input name="P1_BUTTON3">Afterburner</Input>
-        <Input name="P1_AD_STICK_Z">Speed Up</Input>
-        <Input name="P1_AD_STICK_Z_EXT">Slow Down</Input>
+        <Input name="P1_AD_STICK_Z.dec">Speed Up</Input>
+        <Input name="P1_AD_STICK_Z.inc">Slow Down</Input>
     </Game>
     <Game romName="gmissile">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -1625,25 +1625,25 @@
         <Input name="P1_BUTTON1">Trigger</Input>
         <Input name="P1_BUTTON2">Zoom In / Zoom Out</Input>
         <Input name="P1_BUTTON3">Enter</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
         <Input name="P1_JOYSTICK_UP">Select</Input>
         <Input name="P1_JOYSTICK_DOWN">Select</Input>
     </Game>
     <Game romName="gollygho">
         <Input name="P1_BUTTON1">1</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="gondo">
         <Input name="P1_BUTTON1">Character Weapon</Input>
         <Input name="P1_BUTTON2">Airbike Weapon</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="goonies">
@@ -1664,58 +1664,58 @@
     </Game>
     <Game romName="greatgun">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="gt2k">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gt3d">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gt97">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gt98">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gt99">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gtg2">
         <Input name="P1_BUTTON1">Face Left</Input>
         <Input name="P1_BUTTON2">Face Right</Input>
-        <Input name="P1_TRACKBALL_X">Choose Club</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Choose Club</Input>
-        <Input name="P1_TRACKBALL_Y">Forward Swing</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Back Swing</Input>
+        <Input name="P1_TRACKBALL_X.dec">Choose Club</Input>
+        <Input name="P1_TRACKBALL_X.inc">Choose Club</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Forward Swing</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Back Swing</Input>
     </Game>
     <Game romName="gtmr2">
         <Input name="P1_BUTTON1">Accelerate</Input>
@@ -1738,10 +1738,10 @@
     <Game romName="gunbustr">
         <Input name="P1_BUTTON1">Trigger</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
         <Input name="P1_JOYSTICK_UP">Move Forward</Input>
         <Input name="P1_JOYSTICK_DOWN">move Backward</Input>
         <Input name="P1_JOYSTICK_LEFT">Move Left</Input>
@@ -1756,8 +1756,8 @@
     <Game romName="gwar">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="gyruss">
@@ -1776,8 +1776,8 @@
     <Game romName="hbarrel">
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="hcastle">
@@ -1832,16 +1832,16 @@
     <Game romName="ikari">
         <Input name="P1_BUTTON1">Gun</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="ikari3">
         <Input name="P1_BUTTON1">Kick</Input>
         <Input name="P1_BUTTON2">Punch</Input>
         <Input name="P1_BUTTON3">Jump</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="indytemp">
@@ -2017,8 +2017,8 @@
     <Game romName="kroozr">
         <Input name="P1_BUTTON1">Zap!</Input>
         <Input name="P1_BUTTON2">Shield</Input>
-        <Input name="P1_DIAL">Aim Left</Input>
-        <Input name="P1_DIAL_EXT">Aim Right</Input>
+        <Input name="P1_DIAL.dec">Aim Left</Input>
+        <Input name="P1_DIAL.inc">Aim Right</Input>
         <Input name="P1_JOYSTICK">Krooz</Input>
     </Game>
     <Game romName="krull">
@@ -2056,25 +2056,25 @@
     </Game>
     <Game romName="lethalen">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="lethalj">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="lghost">
         <Input name="P1_BUTTON1">Laser Gun</Input>
         <Input name="P1_BUTTON2">Special Weapon</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="lkage">
         <Input name="P1_BUTTON1">Sword</Input>
@@ -2083,8 +2083,8 @@
     </Game>
     <Game romName="llander">
         <Input name="P1_BUTTON1">Abort</Input>
-        <Input name="P1_PADDLE_V">Increase Thrust</Input>
-        <Input name="P1_PADDLE_V_EXT">Decrease Thrust</Input>
+        <Input name="P1_PADDLE_V.dec">Increase Thrust</Input>
+        <Input name="P1_PADDLE_V.inc">Decrease Thrust</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="lnc">
@@ -2184,14 +2184,14 @@
     <Game romName="mhavoc">
         <Input name="P1_BUTTON1">Fire/Jump</Input>
         <Input name="P1_BUTTON2">Shield</Input>
-        <Input name="P1_DIAL_EXT">Move Right</Input>
-        <Input name="P1_DIAL">Move Left</Input>
+        <Input name="P1_DIAL.inc">Move Right</Input>
+        <Input name="P1_DIAL.dec">Move Left</Input>
     </Game>
     <Game romName="midres">
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Jump</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="minefld">
@@ -2283,8 +2283,8 @@
     </Game>
     <Game romName="mplanets">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="mrdo">
@@ -2430,10 +2430,10 @@
     </Game>
     <Game romName="oneshot">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="openice">
         <Input name="P1_BUTTON1">Turbo</Input>
@@ -2444,26 +2444,26 @@
     <Game romName="opwolf">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Rocket Gun</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="opwolf3">
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="othunder">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="pacland">
         <Input name="P1_BUTTON1">Jump</Input>
@@ -2494,8 +2494,8 @@
     <Game romName="paperboy">
         <Input name="P1_BUTTON1">Throw</Input>
         <Input name="P1_BUTTON2">Throw</Input>
-        <Input name="P1_AD_STICK_Y_EXT">Break</Input>
-        <Input name="P1_AD_STICK_Y">Accelerate</Input>
+        <Input name="P1_AD_STICK_Y.inc">Break</Input>
+        <Input name="P1_AD_STICK_Y.dec">Accelerate</Input>
     </Game>
     <Game romName="pbaction">
         <Input name="P1_BUTTON1">Left Flipper</Input>
@@ -2694,10 +2694,10 @@
     </Game>
     <Game romName="rchase">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="recordbr">
         <Input name="P1_BUTTON1">A</Input>
@@ -2732,10 +2732,10 @@
     <Game romName="revx">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="ripoff">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -2875,10 +2875,10 @@
     </Game>
     <Game romName="sdi">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_TRACKBALL_X">Aim Left</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Aim Right</Input>
-        <Input name="P1_TRACKBALL_Y">Aim Up</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Aim Down</Input>
+        <Input name="P1_TRACKBALL_X.dec">Aim Left</Input>
+        <Input name="P1_TRACKBALL_X.inc">Aim Right</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Aim Up</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Aim Down</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="searchar">
@@ -3012,18 +3012,18 @@
     <Game romName="sgunner">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Missile</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="sgunner2">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Missile</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="shadoww">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -3171,10 +3171,10 @@
         <Input name="P1_BUTTON1">Trigger</Input>
         <Input name="P1_BUTTON2">Bomb Select</Input>
         <Input name="P1_BUTTON3">Back Up</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="spacelnc">
         <Input name="P1_BUTTON1">Launch</Input>
@@ -3261,10 +3261,10 @@
     </Game>
     <Game romName="sshooter">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="sspaceat">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -3322,8 +3322,8 @@
         <Input name="P1_BUTTON2">Thrust</Input>
         <Input name="P1_BUTTON3">Photons</Input>
         <Input name="P1_BUTTON4">Warp</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="stratgyx">
         <Input name="P1_BUTTON1">Tank Fire</Input>
@@ -3400,8 +3400,8 @@
     <Game romName="tdfever">
         <Input name="P1_BUTTON1">Run</Input>
         <Input name="P1_BUTTON2">Pass</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="tekken">
@@ -3433,10 +3433,10 @@
     <Game romName="term2">
         <Input name="P1_BUTTON1">Trigger</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="terracre">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -3476,8 +3476,8 @@
     <Game romName="thndrbld">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_AD_STICK_Z">Fast</Input>
-        <Input name="P1_AD_STICK_Z_EXT">Slow</Input>
+        <Input name="P1_AD_STICK_Z.dec">Fast</Input>
+        <Input name="P1_AD_STICK_Z.inc">Slow</Input>
     </Game>
     <Game romName="thunderj">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -3508,10 +3508,10 @@
     <Game romName="timecris">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Step on It!</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="timekill">
         <Input name="P1_BUTTON1">Left Arm</Input>
@@ -3528,8 +3528,8 @@
     <Game romName="timesold">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Hyper Weapon</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="tinstar">
@@ -3559,8 +3559,8 @@
     <Game romName="tnk3">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Cannon</Input>
-        <Input name="P1_DIAL">Aim Left</Input>
-        <Input name="P1_DIAL_EXT">Aim Right</Input>
+        <Input name="P1_DIAL.dec">Aim Left</Input>
+        <Input name="P1_DIAL.inc">Aim Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="toki">
@@ -3603,10 +3603,10 @@
     </Game>
     <Game romName="triplhnt">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="trog">
         <Input name="P1_BUTTON1">Punch</Input>
@@ -3614,18 +3614,18 @@
     </Game>
     <Game romName="tron">
         <Input name="P1_BUTTON1">Fire</Input>
-        <Input name="P1_DIAL">Aim Left</Input>
-        <Input name="P1_DIAL_EXT">Aim Right</Input>
+        <Input name="P1_DIAL.dec">Aim Left</Input>
+        <Input name="P1_DIAL.inc">Aim Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="tshoot">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="P1_BUTTON3">Gobble!</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="tubep">
         <Input name="P1_BUTTON1">Fire</Input>
@@ -3667,10 +3667,10 @@
     <Game romName="undrfire">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
-        <Input name="P1_LIGHTGUN_X">Aim Left</Input>
-        <Input name="P1_LIGHTGUN_X_EXT">Aim Right</Input>
-        <Input name="P1_LIGHTGUN_Y">Aim Up</Input>
-        <Input name="P1_LIGHTGUN_Y_EXT">Aim Down</Input>
+        <Input name="P1_LIGHTGUN_X.dec">Aim Left</Input>
+        <Input name="P1_LIGHTGUN_X.inc">Aim Right</Input>
+        <Input name="P1_LIGHTGUN_Y.dec">Aim Up</Input>
+        <Input name="P1_LIGHTGUN_Y.inc">Aim Down</Input>
     </Game>
     <Game romName="uniwars">
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -3739,14 +3739,14 @@
         <Input name="P1_BUTTON2">Thrust</Input>
         <Input name="P1_BUTTON3">Shields</Input>
         <Input name="P1_BUTTON4">Doomsday</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
     </Game>
     <Game romName="victroad">
         <Input name="P1_BUTTON1">Fire</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
-        <Input name="P1_DIAL">Rotate Left</Input>
-        <Input name="P1_DIAL_EXT">Rotate Right</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="vigilant">
@@ -3841,10 +3841,10 @@
         <Input name="P1_JOYSTICK">Move</Input>
     </Game>
     <Game romName="wacko">
-        <Input name="P1_TRACKBALL_X">Krooz Left</Input>
-        <Input name="P1_TRACKBALL_Y">Krooz Up</Input>
-        <Input name="P1_TRACKBALL_X_EXT">Krooz Right</Input>
-        <Input name="P1_TRACKBALL_Y_EXT">Krooz Down</Input>
+        <Input name="P1_TRACKBALL_X.dec">Krooz Left</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Krooz Up</Input>
+        <Input name="P1_TRACKBALL_X.inc">Krooz Right</Input>
+        <Input name="P1_TRACKBALL_Y.inc">Krooz Down</Input>
         <Input name="P1_JOYSTICKLEFT">Zap</Input>
     </Game>
     <Game romName="wargods">
@@ -3885,8 +3885,8 @@
     </Game>
     <Game romName="wfortune">
         <Input name="P1_BUTTON1">Select</Input>
-        <Input name="P1_DIAL">Spin Left</Input>
-        <Input name="P1_DIAL_EXT">Spin Right</Input>
+        <Input name="P1_DIAL.dec">Spin Left</Input>
+        <Input name="P1_DIAL.inc">Spin Right</Input>
     </Game>
     <Game romName="wildfang">
         <Input name="P1_BUTTON1">Attack</Input>
@@ -4051,8 +4051,8 @@
         <Input name="P1_BUTTON2">Shield</Input>
         <Input name="P1_BUTTON3">Pick Up</Input>
         <Input name="P1_BUTTON4">Cast Spell</Input>
-        <Input name="P1_DIAL">Aim Sword Left</Input>
-        <Input name="P1_DIAL_EXT">Aim Sword Right</Input>
+        <Input name="P1_DIAL.dec">Aim Sword Left</Input>
+        <Input name="P1_DIAL.inc">Aim Sword Right</Input>
         <Input name="P1_JOYSTICK_UP">Up</Input>
         <Input name="P1_JOYSTICK_DOWN">Down</Input>
         <Input name="P1_JOYSTICK_LEFT">Run Left</Input>
