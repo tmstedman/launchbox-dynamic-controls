@@ -24,7 +24,7 @@ public class JoycodeMappingLoader(
 
     private JoycodeMapping LoadFromFile()
     {
-        var map = new Dictionary<string, List<string>>();
+        var map = new Dictionary<string, List<JoycodeTarget>>();
 
         string? path = _lfs.Resolve("Emulators", "MAME", "JoycodeMapping.xml");
         _logger.Debug($"Joycode mapping path: {path}");
@@ -53,12 +53,22 @@ public class JoycodeMappingLoader(
                 continue;
             }
 
-            if (!map.TryGetValue(joycode, out List<string>? inputs))
+            // Optional, and only meaningful on the two halves of a bare analogue axis: which end
+            // of the axis this input lies on, in MAME's own increment/decrement terms. Absent on
+            // every ordinary button, which has no direction to state.
+            string? half = node.Attributes["half"]?.Value;
+            if (half != null && half != "dec" && half != "inc")
             {
-                inputs = [];
-                map[joycode] = inputs;
+                _logger.Error($"Ignoring half=\"{half}\" on {joycode} in JoycodeMapping.xml: expected \"dec\" or \"inc\"");
+                half = null;
             }
-            inputs.Add(input);
+
+            if (!map.TryGetValue(joycode, out List<JoycodeTarget>? targets))
+            {
+                targets = [];
+                map[joycode] = targets;
+            }
+            targets.Add(new JoycodeTarget(input, half));
         }
 
         _logger.Debug($"Joycode mapping entries loaded: {map.Count}");
