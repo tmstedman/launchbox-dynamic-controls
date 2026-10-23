@@ -124,6 +124,42 @@ public class ControlsXmlLoader(ILogger logger, LayeredFileSystem lfs) : IControl
             break;
         }
 
-        return result;
+        return PairHalves(result);
     }
+
+    /// <summary>
+    /// Rewrites controls.xml's own name for the two halves of an analogue port onto the platform
+    /// button vocabulary: <c>FOO</c> and <c>FOO_EXT</c> become <c>FOO.dec</c> and <c>FOO.inc</c>.
+    ///
+    /// <para>The <c>_EXT</c> spelling is this database's invention — MAME has no such port, and a
+    /// cfg never names one — so unlike the cfg's own port types it has to be translated on the way
+    /// in rather than read verbatim. A game naming it is the database stating that this port has
+    /// two ends, which is the only place that fact appears, so the pairing is read from the data
+    /// and no list of which ports are analogue is kept here.</para>
+    ///
+    /// <para>A bare name with no <c>_EXT</c> beside it is left exactly as it is: a pedal travels
+    /// one way only and is one button, so renaming it would strand it.</para>
+    /// </summary>
+    private static InputLabelsConfig PairHalves(InputLabelsConfig labels)
+    {
+        var paired = new HashSet<string>(
+            labels.Labels
+                .Select(entry => entry.Name)
+                .Where(name => name.EndsWith(ExtSuffix))
+                .Select(name => name[..^ExtSuffix.Length]));
+
+        if (paired.Count == 0) return labels;
+
+        foreach (LabelEntry entry in labels.Labels)
+        {
+            if (entry.Name.EndsWith(ExtSuffix) && paired.Contains(entry.Name[..^ExtSuffix.Length]))
+                entry.Name = entry.Name[..^ExtSuffix.Length] + ".inc";
+            else if (paired.Contains(entry.Name))
+                entry.Name += ".dec";
+        }
+
+        return labels;
+    }
+
+    private const string ExtSuffix = "_EXT";
 }

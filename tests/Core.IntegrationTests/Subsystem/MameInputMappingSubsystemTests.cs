@@ -62,6 +62,7 @@ public class MameInputMappingSubsystemTests
             <Mapping name="P1_BUTTON6" input="ButtonRightShoulder" />
             <Mapping name="P1_JOYSTICK_UP" input="ButtonDpadUp" />
             <Mapping name="START1" input="ButtonStart" />
+            <Control name="P1_PADDLE" mappings="P1_PADDLE.inc P1_PADDLE.dec" />
           </Controller>
         </Controllers>
         """);
@@ -164,9 +165,9 @@ public class MameInputMappingSubsystemTests
         WriteBaseline();
         WriteJoycodeMapping();
         // adillor's shape: a trackball/paddle axis with no analogue hardware assigned, driven
-        // instead by two ordinary buttons nudging the value each way. PADDLE isn't in the
-        // baseline, so this appends rather than overriding, but the mechanism is the same either
-        // way -- both digital directions should still be recognized.
+        // instead by two ordinary buttons nudging the value each way. Each nudge direction gets
+        // its own button now, so the two can carry different labels; the <Control> on the port is
+        // what still lets a game that draws no distinction reach both by naming PADDLE alone.
         _dc.WriteMameCfg("dkong.cfg", """
             <mameconfig>
               <system name="dkong">
@@ -183,7 +184,115 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
+        // each direction addressable on its own...
+        mapping.ButtonToInput["P1_PADDLE.inc"].ShouldBe(["ButtonA"]);
+        mapping.ButtonToInput["P1_PADDLE.dec"].ShouldBe(["ButtonB"]);
+        // ...and the port itself still reaching both, via the control rather than a union
         mapping.ButtonToInput["P1_PADDLE"].ShouldBe(["ButtonA", "ButtonB"]);
+    }
+
+    [Theory]
+    // the plain axis: decrement is the negative end, which this file calls Up
+    [InlineData("JOYCODE_1_YAXIS", "AxisLeftStickUp", "AxisLeftStickDown")]
+    // and the reversed one declares the opposite halves, so the ends swap
+    [InlineData("JOYCODE_1_YAXIS_REVERSE", "AxisLeftStickDown", "AxisLeftStickUp")]
+    public void Load_AxisBoundWithNoNudges_EachHalfStillReachesItsOwnEndOfTheAxis(
+        string axisJoycode, string expectedDec, string expectedInc)
+    {
+        // bm1stmix's shape again, but with the halves declared. A cabinet with real analogue
+        // hardware binds no nudge buttons at all -- that is what nudges are for, the cabinets
+        // lacking it -- so without reading the half off the axis, a label written for one
+        // direction could only ever land on the minority of cfgs that nudge.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Control name="P1_DIAL" mappings="P1_DIAL.dec P1_DIAL.inc" />
+                <Mapping name="P1_DIAL.dec" input="AxisLeftStickLeft" />
+                <Mapping name="P1_DIAL.inc" input="AxisLeftStickRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping($"""
+            <JoycodeMapping>
+              <Mapping joycode="{axisJoycode}" half="{(axisJoycode.EndsWith("_REVERSE") ? "inc" : "dec")}" input="AxisLeftStickUp" />
+              <Mapping joycode="{axisJoycode}" half="{(axisJoycode.EndsWith("_REVERSE") ? "dec" : "inc")}" input="AxisLeftStickDown" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteMameCfg("bm1stmix.cfg", $"""
+            <mameconfig>
+              <system name="bm1stmix">
+                <input>
+                  <port type="P1_DIAL">
+                    <newseq type="standard">{axisJoycode}</newseq>
+                    <newseq type="increment">NONE</newseq>
+                    <newseq type="decrement">NONE</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("bm1stmix"));
+
+        // each half lands on its own end of the axis the cfg actually named...
+        mapping.ButtonToInput["P1_DIAL.dec"].ShouldBe([expectedDec]);
+        mapping.ButtonToInput["P1_DIAL.inc"].ShouldBe([expectedInc]);
+        // ...the port itself still reaching the whole axis
+        mapping.ButtonToInput["P1_DIAL"].ShouldBe(["AxisLeftStickUp", "AxisLeftStickDown"]);
+        // ...and the baseline's horizontal guess is still gone: the halves come from the axis
+        // this cfg names, never from the one Controllers.xml assumed
+        mapping.InputToButton.ContainsKey("AxisLeftStickLeft").ShouldBeFalse();
+        mapping.InputToButton.ContainsKey("AxisLeftStickRight").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Load_CfgMovesTheAxisAndBindsNoNudges_BaselineHalvesDoNotSurvive()
+    {
+        // the theory above, with the one thing it relies on taken away: this mapping states no
+        // halves, so there is no end of the axis to read the unbound nudges off. The baseline
+        // must still be dropped -- that is the part that does not depend on knowing the sign.
+        // Without it the port would reach the axis the cfg gave it AND the one Controllers.xml
+        // guessed, lighting all four directions.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Control name="P1_DIAL" mappings="P1_DIAL.dec P1_DIAL.inc" />
+                <Mapping name="P1_DIAL.dec" input="AxisLeftStickLeft" />
+                <Mapping name="P1_DIAL.inc" input="AxisLeftStickRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickUp" />
+              <Mapping joycode="JOYCODE_1_YAXIS" input="AxisLeftStickDown" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteMameCfg("bm1stmix.cfg", """
+            <mameconfig>
+              <system name="bm1stmix">
+                <input>
+                  <port type="P1_DIAL">
+                    <newseq type="standard">JOYCODE_1_YAXIS</newseq>
+                    <newseq type="increment">NONE</newseq>
+                    <newseq type="decrement">NONE</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("bm1stmix"));
+
+        // the vertical axis the cfg actually named, and nothing else
+        mapping.ButtonToInput["P1_DIAL"].ShouldBe(["AxisLeftStickUp", "AxisLeftStickDown"]);
+        // the baseline's horizontal guess is gone from the halves entirely -- an override with
+        // nothing in it produces no entry at all, rather than an empty one -- so the control
+        // finds no bound member and adds nothing
+        mapping.ButtonToInput.ContainsKey("P1_DIAL.dec").ShouldBeFalse();
+        mapping.ButtonToInput.ContainsKey("P1_DIAL.inc").ShouldBeFalse();
+        mapping.InputToButton.ContainsKey("AxisLeftStickLeft").ShouldBeFalse();
+        mapping.InputToButton.ContainsKey("AxisLeftStickRight").ShouldBeFalse();
     }
 
     // ---- single-player games borrowing a P2 slot for a second P1 axis (#16) ----
@@ -297,9 +406,14 @@ public class MameInputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        // No cfg → no transform → active map equals the natural baseline.
+        // No cfg → no transform → active map equals the natural baseline. Compared entry by
+        // entry rather than whole: resolving a control rebuilds both maps, so their lists are
+        // equal in content but no longer the same instances, and List<string> equality is by
+        // reference.
         mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
-        mapping.ButtonToInput.ShouldBe(mapping.NaturalButtonToInput);
+        mapping.ButtonToInput.Keys.ShouldBe(mapping.NaturalButtonToInput.Keys, ignoreOrder: true);
+        foreach ((string button, IReadOnlyList<string> inputs) in mapping.ButtonToInput)
+            inputs.ShouldBe(mapping.NaturalButtonToInput[button]);
         mapping.InputToButton.ShouldBe(mapping.NaturalInputToButton);
     }
 

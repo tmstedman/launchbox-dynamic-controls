@@ -9,6 +9,14 @@
     <Input name="P1_BUTTON1">Punch</Input>
     <Input name="P1_BUTTON2">Kick</Input>
   </Game>
+  <Game romName="airco22b">
+    <!-- One cfg port, three controls: the throttle axis plus the two triggers that nudge it.
+         Each sequence is its own platform button, so each can carry its own words. -->
+    <Input name="P1_AD_STICK_Z">Throttle</Input>
+    <Input name="P1_AD_STICK_Z.inc">Throttle Down</Input>
+    <Input name="P1_AD_STICK_Z.dec">Throttle Up</Input>
+    <Input name="P1_BUTTON1">Machine Gun</Input>
+  </Game>
   <Game romName="1942">
     <Input name="P1_BUTTON1">Fire</Input>
     <Input name="P1_BUTTON2">Loop</Input>
