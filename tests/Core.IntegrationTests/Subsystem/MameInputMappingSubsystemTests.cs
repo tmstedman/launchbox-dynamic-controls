@@ -52,7 +52,7 @@ public class MameInputMappingSubsystemTests
     /// <summary>Trimmed Arcade "Cabinet" baseline: just the ports these tests touch. Note BUTTON4
     /// (→ButtonY) is intentionally absent so a swap onto it has a conflict-free reverse lookup.
     /// Mapping names carry the "P1_" prefix, matching the raw cfg port types verbatim (#16); only
-    /// START stays bare, since START1/COIN1 collapse to one cabinet-level name regardless of player.</summary>
+    /// START1 keeps its cfg name, like every other port -- nothing is rewritten on the way in.</summary>
     private void WriteBaseline() => _dc.WritePlatform(Platform, """
         <Controllers>
           <Controller name="Cabinet" default="true">
@@ -61,7 +61,7 @@ public class MameInputMappingSubsystemTests
             <Mapping name="P1_BUTTON3" input="ButtonX" />
             <Mapping name="P1_BUTTON6" input="ButtonRightShoulder" />
             <Mapping name="P1_JOYSTICK_UP" input="ButtonDpadUp" />
-            <Mapping name="START" input="ButtonStart" />
+            <Mapping name="START1" input="ButtonStart" />
           </Controller>
         </Controllers>
         """);
@@ -135,7 +135,7 @@ public class MameInputMappingSubsystemTests
     {
         WriteBaseline();
         WriteJoycodeMapping();
-        // START1 normalizes to START. P2_BUTTON1 is a distinct key from P1_BUTTON1 (#16), so its
+        // START1 keeps its name. P2_BUTTON1 is a distinct key from P1_BUTTON1 (#16), so its
         // own override lands under its own name rather than smuggling onto P1_BUTTON1.
         _dc.WriteMameCfg("dkong.cfg", """
             <mameconfig>
@@ -153,7 +153,7 @@ public class MameInputMappingSubsystemTests
 
         mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonB"]);              // P1's own override
         mapping.ButtonToInput["P2_BUTTON1"].ShouldBe(["ButtonRightShoulder"]);  // P2's own, distinct key
-        mapping.ButtonToInput["START"].ShouldBe(["ButtonStart"]);               // START1 → START
+        mapping.ButtonToInput["START1"].ShouldBe(["ButtonStart"]);              // verbatim from the cfg
     }
 
     // ---- true analogue ports: standard, increment and decrement newseqs ----

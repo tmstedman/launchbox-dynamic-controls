@@ -13,7 +13,7 @@
         <Mapping name="JOYSTICK_DOWN" input="AxisLeftStickDown" />
         <Mapping name="JOYSTICK_LEFT" input="AxisLeftStickLeft" />
         <Mapping name="JOYSTICK_RIGHT" input="AxisLeftStickRight" />
-        <Mapping name="START" input="ButtonStart" />
-        <Mapping name="COIN" input="ButtonBack" />
+        <Mapping name="START1" input="ButtonStart" />
+        <Mapping name="COIN1" input="ButtonBack" />
     </Controller>
 </Controllers>

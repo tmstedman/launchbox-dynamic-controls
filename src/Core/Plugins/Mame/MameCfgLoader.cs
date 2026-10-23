@@ -76,9 +76,12 @@ public class MameCfgLoader(
                 {
                     if (portNode.Name != "port") continue;
 
-                    string? portType = portNode.Attributes["type"]?.Value;
-                    string? inputName = NormalizePortType(portType);
-                    if (inputName == null) continue;
+                    // The cfg's port type IS the platform button name — Controllers.xml and
+                    // Labels.xml are written against MAME's own vocabulary, with no rewriting
+                    // in between. Which ports can reach the overlay is settled below, by
+                    // whether their joycode translates.
+                    string? inputName = portNode.Attributes["type"]?.Value;
+                    if (string.IsNullOrEmpty(inputName)) continue;
 
                     var joycodesBySeqType = new Dictionary<string, string>();
                     foreach (XmlElement seqNode in portNode.ChildNodes.OfType<XmlElement>())
@@ -134,32 +137,4 @@ public class MameCfgLoader(
 
         return false;
     }
-
-    /// <summary>
-    /// Maps a MAME cfg port type onto the platform button vocabulary Controllers.xml and
-    /// Labels.xml are written against. Only <c>START1</c>/<c>COIN1</c> are renamed; every other
-    /// port keeps its own name, and null comes back only when the cfg named no type at all.
-    ///
-    /// <para><c>START1</c> and <c>COIN1</c> collapse to bare <c>START</c>/<c>COIN</c> because
-    /// that is the spelling thousands of existing entries already use — renaming them now would
-    /// strand every one. They are the only exception; nothing else is rewritten.</para>
-    ///
-    /// <para>Nothing is filtered out by name, either. Whether a port can reach the overlay is
-    /// settled one step later by the joycode bound to it: <see cref="JoycodeMapping"/> only ever
-    /// recognizes <c>JOYCODE_1_*</c> tokens, so another player's control translates to nothing
-    /// and is dropped there. Filtering on the port name as well used to duplicate that check,
-    /// less accurately — MAME routinely parks a player-one control in a slot named for somebody
-    /// else, and a name-based filter discards precisely those. It cost hwchamp's second boxing
-    /// lever (<c>P2_AD_STICK_Z</c> on <c>JOYCODE_1_RZAXIS</c>, see #16), 20pacgal's Galaga start
-    /// button (<c>START3</c> on <c>JOYCODE_1_BUTTON6</c>), and the PlayChoice-10 cabinets' two
-    /// game-menu buttons (<c>SERVICE</c> on <c>JOYCODE_1_BUTTON5</c>), each carved out in turn as
-    /// it was noticed. Letting the joycode decide retires the whole class of bug.</para>
-    /// </summary>
-    private static string? NormalizePortType(string? portType) => portType switch
-    {
-        null => null,
-        "START1" => "START",
-        "COIN1" => "COIN",
-        string t => t
-    };
 }
