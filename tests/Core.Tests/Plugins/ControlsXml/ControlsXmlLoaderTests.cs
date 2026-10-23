@@ -431,8 +431,70 @@ public class ControlsXmlLoaderTests
         racing.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
         [
             ("P1_BUTTON1", "Accelerate"),
-            ("P1_PADDLE", "Left"),
-            ("P1_PADDLE_EXT", "Right"),
+            ("P1_PADDLE.dec", "Left"),
+            ("P1_PADDLE.inc", "Right"),
         ]);
+    }
+
+    [Fact]
+    public void Lookup_GameNamingBothHalvesOfAnAxis_PairsThemOntoTheHalfNames()
+    {
+        // _EXT is this database's own spelling for the far end of an analogue port -- MAME has no
+        // such port and a cfg never writes one -- so it is the one name here that has to be
+        // translated rather than read as written. A game naming it is the database saying this
+        // port has two ends, which is the only place that is ever said.
+        StubXml("""
+            <dat>
+              <game romname='gtmr'>
+                <player number='1'>
+                  <labels>
+                    <label name='P1_PADDLE' value='Left' />
+                    <label name='P1_PADDLE_EXT' value='Right' />
+                    <label name='P1_PEDAL' value='Accelerate' />
+                    <label name='P1_BUTTON1' value='Horn' />
+                  </labels>
+                </player>
+              </game>
+            </dat>
+            """);
+
+        // when the game is looked up
+        var result = _underTest.Lookup("gtmr");
+
+        // then the paired port becomes its two halves, and a name with no _EXT beside it is left
+        // exactly as it is -- a pedal travels one way only, so renaming it would strand it
+        result.ShouldNotBeNull();
+        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe(
+        [
+            ("P1_PADDLE.dec", "Left"),
+            ("P1_PADDLE.inc", "Right"),
+            ("P1_PEDAL", "Accelerate"),
+            ("P1_BUTTON1", "Horn"),
+        ]);
+    }
+
+    [Fact]
+    public void Lookup_GameNamingOnlyTheFarHalf_StillPairsIt()
+    {
+        // the near half carries no label of its own in this game, so nothing names the bare port.
+        // _EXT is still this database's spelling and still means the same end of the axis.
+        StubXml("""
+            <dat>
+              <game romname='gtmr'>
+                <player number='1'>
+                  <labels>
+                    <label name='P1_DIAL_EXT' value='Right' />
+                  </labels>
+                </player>
+              </game>
+            </dat>
+            """);
+
+        // when the game is looked up
+        var result = _underTest.Lookup("gtmr");
+
+        // then it still lands on the half name, not on a button nothing declares
+        result.ShouldNotBeNull();
+        result.Labels.Select(l => (l.Name, l.Label)).ShouldBe([("P1_DIAL.inc", "Right")]);
     }
 }

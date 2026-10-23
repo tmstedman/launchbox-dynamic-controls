@@ -726,4 +726,41 @@ public class ArcadeEndToEndTests
         overlay.ShouldHaveLabel("ButtonBack",         "Insert Coin");   // inherited default
         #pragma warning restore format
     }
+
+    /// <summary>
+    /// One MAME cfg port driving three different physical controls, each with its own label.
+    /// Air Combat 22's throttle is read from an analogue axis and nudged by the two triggers;
+    /// the cfg loader gives each newseq its own platform button (<c>P1_AD_STICK_Z</c>,
+    /// <c>.inc</c>, <c>.dec</c>), and a <c>&lt;Control&gt;</c> over the pair keeps the port
+    /// itself reaching all three. Before the split the three were unioned onto one button, so
+    /// the port's single label smeared across the axis and both triggers.
+    /// </summary>
+    [Fact]
+    public void Arcade_AirCombat22_NudgedThrottleLabelsEachControlSeparately()
+    {
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "airco22b",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            // the axis the port is read from, merged onto the whole since both halves agree
+            new(Input: "AxisRightStick",  Text: "Throttle"),
+            // the two controls it is nudged by, each saying its own words rather than the
+            // port's -- each claims its trigger more directly than the port does
+            new(Input: "AxisTriggerLeft",  Text: "Throttle Down"),
+            new(Input: "AxisTriggerRight", Text: "Throttle Up"),
+            new(Input: "ButtonA",          Text: "Machine Gun"),
+            // inherited Arcade defaults
+            new(Input: "ButtonStart",      Text: "Start"),
+            new(Input: "ButtonBack",       Text: "Insert Coin"));
+            #pragma warning restore format
+    }
 }

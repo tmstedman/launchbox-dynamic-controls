@@ -30,11 +30,27 @@ public class MameCfgLoader(
     /// A true analogue port (DIAL, PADDLE, PEDAL, TRACKBALL_X/Y, ...) carries its "standard"
     /// joycode from real analogue hardware, but MAME also lets a player nudge the same value
     /// with two ordinary buttons instead — "increment" and "decrement" — for whichever direction
-    /// analogue hardware isn't present. All three are read and unioned in this order (most direct
-    /// first) so a digital-only binding is recognized exactly like an analogue one; "NONE" means
-    /// that sequence isn't bound and contributes nothing.
+    /// analogue hardware isn't present. "NONE" means that sequence isn't bound.
     /// </summary>
     private static readonly string[] SequenceTypes = ["standard", "increment", "decrement"];
+
+    /// <summary>
+    /// Each sequence becomes its own platform button: the port's own name for the analogue
+    /// binding, and a <c>.inc</c>/<c>.dec</c> sibling for each nudge direction.
+    ///
+    /// <para>They were unioned onto the one name until it proved lossy. The nudge buttons are
+    /// routinely a different physical control from the axis — Air Combat 22 steers its throttle
+    /// with the right stick and nudges it with the two triggers — and the artwork labels them
+    /// separately ("Throttle", "Throttle Up", "Throttle Down"). One name carries one label, so
+    /// unioning them made the port say one word about three controls.</para>
+    ///
+    /// <para>The suffix is MAME's own sequence type rather than a direction, because which way
+    /// a nudge goes is the game's business: Air Combat 22's increment is its throttle
+    /// <em>down</em>. A platform button standing for the pair is declared in Controllers.xml, so
+    /// a game that draws no distinction still labels all three by naming the port alone.</para>
+    /// </summary>
+    private static readonly (string SeqType, string Suffix)[] SequenceButtons =
+        [("standard", ""), ("increment", ".inc"), ("decrement", ".dec")];
 
     /// <summary>
     /// MAME rewrites a game's cfg on every clean exit, so a relaunch soon after closing the same
@@ -83,6 +99,12 @@ public class MameCfgLoader(
                     string? inputName = portNode.Attributes["type"]?.Value;
                     if (string.IsNullOrEmpty(inputName)) continue;
 
+                    // Which sequences the port *declares* is how an analogue port announces
+                    // itself: MAME writes increment and decrement on anything nudgeable, as NONE
+                    // where unbound, and writes neither on an ordinary button. That is the signal
+                    // for whether this port has .inc/.dec names at all — the values only say
+                    // whether they currently reach anything.
+                    var declaredSeqTypes = new HashSet<string>();
                     var joycodesBySeqType = new Dictionary<string, string>();
                     foreach (XmlElement seqNode in portNode.ChildNodes.OfType<XmlElement>())
                     {
@@ -90,29 +112,67 @@ public class MameCfgLoader(
                         string? seqType = seqNode.Attributes["type"]?.Value;
                         if (seqType == null || !SequenceTypes.Contains(seqType)) continue;
 
+                        declaredSeqTypes.Add(seqType);
                         string text = seqNode.InnerText.Trim();
                         if (text.Length > 0 && text != "NONE") joycodesBySeqType[seqType] = text;
                     }
 
                     if (joycodesBySeqType.Count == 0) continue;
 
-                    var genericInputs = new List<string>();
+                    var bySeqType = new Dictionary<string, List<string>>();
                     foreach (string seqType in SequenceTypes)
                     {
                         if (!joycodesBySeqType.TryGetValue(seqType, out string? joycode)) continue;
+                        var generics = new List<string>();
                         foreach (string generic in joycodeMapping.Translate(joycode))
-                            if (!genericInputs.Contains(generic)) genericInputs.Add(generic);
+                            if (!generics.Contains(generic)) generics.Add(generic);
+                        if (generics.Count > 0) bySeqType[seqType] = generics;
                     }
 
                     string joycodes = string.Join(", ", joycodesBySeqType.Values);
-                    if (genericInputs.Count > 0)
-                    {
-                        overrides[inputName] = genericInputs;
-                        _logger.Debug($"MAME override: {inputName} ({joycodes}) -> {string.Join(", ", genericInputs)}");
-                    }
-                    else
+                    if (bySeqType.Count == 0)
                     {
                         _logger.Debug($"MAME cfg: {inputName} ({joycodes}) -> unknown JOYCODE");
+                        continue;
+                    }
+
+                    // A bound port states all three of its names, empty where that sequence isn't
+                    // bound. Stating them is what drops Controllers.xml's baseline for the ones
+                    // this cfg doesn't use: the baseline describes the axis as the cabinet has it,
+                    // and a cfg that moves the axis elsewhere, or drives it by nudges alone, would
+                    // otherwise leave the unused names still pointing at the old guess — the port
+                    // then reaching both where the cfg put it and where the baseline assumed.
+                    foreach ((string seqType, string suffix) in SequenceButtons)
+                    {
+                        // The port's own name is always stated; a nudge name only when the port
+                        // declares that sequence, so an ordinary button never grows one.
+                        if (suffix.Length > 0 && !declaredSeqTypes.Contains(seqType)) continue;
+
+                        List<string> generics = bySeqType.GetValueOrDefault(seqType, []);
+                        string from = joycodesBySeqType.GetValueOrDefault(seqType, "unbound");
+
+                        // A nudge sequence the cfg leaves unbound still names a real half of the
+                        // axis, when the axis itself is bound: the hardware drives the value both
+                        // ways, and the joycode says which end is which. Reading the half off the
+                        // axis is what lets a label written for one direction land on a cabinet
+                        // whose cfg has no nudge buttons at all — the common case by far, since
+                        // nudges exist for cabinets lacking the analogue hardware. The baseline is
+                        // still dropped: these come from the axis this cfg names, never from
+                        // Controllers.xml's guess about which axis the port would use.
+                        if (generics.Count == 0
+                            && suffix.Length > 0
+                            && !joycodesBySeqType.ContainsKey(seqType)
+                            && joycodesBySeqType.TryGetValue("standard", out string? axis))
+                        {
+                            string half = suffix[1..];
+                            generics = [.. joycodeMapping.TranslateHalf(axis, half)];
+                            if (generics.Count > 0) from = $"{axis}, {half} half";
+                        }
+
+                        overrides[inputName + suffix] = generics;
+                        _logger.Debug(generics.Count > 0
+                            ? $"MAME override: {inputName}{suffix} ({from}) -> {string.Join(", ", generics)}"
+                            : $"MAME override: {inputName}{suffix} ({from}) -> nothing, baseline dropped");
                     }
                 }
             }
