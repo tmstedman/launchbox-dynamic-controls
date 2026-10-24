@@ -117,6 +117,7 @@
     <Game romName="25pacman">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="25pacmano">
@@ -460,6 +461,8 @@
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
         <Input name="P1_AD_STICK_Z">Throttle</Input>
+        <Input name="P1_AD_STICK_Z.dec">Throttle Up</Input>
+        <Input name="P1_AD_STICK_Z.inc">Throttle Down</Input>
         <Input name="P1_BUTTON1">Machine Gun</Input>
         <Input name="P1_BUTTON2">Missiles</Input>
         <Input name="START1">View / Start</Input>
@@ -642,23 +645,26 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="12052" romName="alpinerd">
-        <Input name="P1_JOYSTICK_LEFT">Menu LEFT</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Menu RIGHT</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left Select Button</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right Select Button</Input>
         <Input name="P1_AD_STICK_X">Turn</Input>
+        <Input name="P2_AD_STICK_X">Turn Harder</Input>
         <Input name="START1">View / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35409" romName="alpines">
-        <Input name="P1_JOYSTICK_LEFT">Menu LEFT</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Menu RIGHT</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left Select Button</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right Select Button</Input>
         <Input name="P1_AD_STICK_X">Turn</Input>
+        <Input name="P2_AD_STICK_X">Turn Harder</Input>
         <Input name="START1">View / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="12053" romName="alpinr2b">
-        <Input name="P1_JOYSTICK_LEFT">Menu LEFT</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Menu RIGHT</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left Select Button</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right Select Button</Input>
         <Input name="P1_AD_STICK_X">Turn</Input>
+        <Input name="P2_AD_STICK_X">Turn Harder</Input>
         <Input name="START1">View / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -832,7 +838,7 @@
         <Input name="P1_AD_STICK_Y">Throttle UP/DOWN</Input>
         <Input name="P1_BUTTON1">Select Left</Input>
         <Input name="P1_BUTTON2">Select Right</Input>
-        <Input name="START1">Decide</Input>
+        <Input name="START1">Start / Decide</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="34830" romName="appoooh">
@@ -1857,6 +1863,8 @@
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Shield</Input>
         <Input name="P1_POSITIONAL">Rotate Second Weapon</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -3362,6 +3370,8 @@
     <Game launchBoxId="23699" romName="calibr50">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="START1">Start</Input>
@@ -7580,6 +7590,8 @@
     <Game romName="fsoccer">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate Kick Position</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Kick / Shoot / Slide</Input>
         <Input name="P1_BUTTON2">High Kick/Shoot/Header</Input>
         <Input name="START1">Start</Input>
@@ -9862,6 +9874,7 @@
     <Game launchBoxId="12270" romName="horshoes">
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
+        <Input name="P1_TRACKBALL_Y.dec">Throw</Input>
         <Input name="P1_BUTTON1">Change Angle</Input>
         <Input name="P1_BUTTON2">Change Grip</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -22779,6 +22792,8 @@
     <Game launchBoxId="40222" romName="tdfever">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate Throw/Kick Position</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON2">Throw / Run</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -22786,6 +22801,8 @@
     <Game launchBoxId="40222" romName="tdfever2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate Throw/Kick Position</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON2">Throw / Run</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -23110,6 +23127,8 @@
     <Game launchBoxId="40052" romName="thegrid">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
+        <Input name="P1_TRACKBALL_X">Turn</Input>
+        <Input name="P1_TRACKBALL_Y">Turn</Input>
         <Input name="P1_BUTTON1">Jump</Input>
         <Input name="P1_BUTTON2">Super Weapon</Input>
         <Input name="P1_BUTTON3">Shoot</Input>
@@ -23147,6 +23166,7 @@
     <Game launchBoxId="34678" romName="thndrbld">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
+        <Input name="P1_AD_STICK_Z">Throttle</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Missiles</Input>
         <Input name="START1">Start</Input>
@@ -25400,6 +25420,7 @@
     <Game launchBoxId="40623" romName="wingwar">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
+        <Input name="P1_PEDAL">Throttle</Input>
         <Input name="P1_BUTTON1">Machine Gun</Input>
         <Input name="P1_BUTTON2">Missiles</Input>
         <Input name="P1_BUTTON3">Smoke</Input>
@@ -25488,6 +25509,7 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="168439" romName="wizwarz">
+        <Input name="P1_JOYSTICK">Shoot</Input>
         <Input name="P1_DIAL">Move</Input>
         <Input name="P1_BUTTON1">Bomb</Input>
         <Input name="START1">Start</Input>
@@ -25898,6 +25920,8 @@
     <Game launchBoxId="12871" romName="xybots">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="P1_BUTTON2">Rotate Camera</Input>
+        <Input name="P1_BUTTON3">Rotate Camera</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -26171,6 +26195,7 @@
     </Game>
     <Game launchBoxId="33030" romName="zwackery">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_DIAL">Attack Position</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shield</Input>
         <Input name="P1_BUTTON3">Spell Up</Input>
