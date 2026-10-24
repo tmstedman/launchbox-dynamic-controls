@@ -26031,7 +26031,7 @@
         <Label control="AxisTriggerLeft">Super Weapon</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonRightStick">Turn</Label>
+        <Label control="AxisRightStick">Turn</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -26073,7 +26073,7 @@
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Missiles</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonRightStick">Throttle</Label>
+        <Label control="AxisRightStick">Throttle</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28644,7 +28644,7 @@
         <Label control="ButtonDpadLeft">VR3 / YELLOW</Label>
         <Label control="ButtonDpadRight">VR4 / GREEN</Label>
         <Label control="ButtonDpadUp">VR1 / RED</Label>
-        <Label control="ButtonRightStick">Throttle</Label>
+        <Label control="AxisRightStick">Throttle</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28743,7 +28743,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Bomb</Label>
         <Label control="ButtonRightShoulder">Bomb</Label>
-        <Label control="ButtonRightStick">Shoot</Label>
+        <Label control="AxisRightStick">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -29198,7 +29198,7 @@
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonRightStick">Rotate Camera</Label>
+        <Label control="AxisRightStick">Rotate Camera</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -29251,9 +29251,7 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="ymcapsul" title="Yu-Gi-Oh Monster Capsule">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Throw</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -29507,7 +29505,7 @@
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonLeftShoulder">Shield</Label>
         <Label control="ButtonRightShoulder">Attack</Label>
-        <Label control="ButtonRightStick">Attack Position</Label>
+        <Label control="AxisRightStick">Attack Position</Label>
         <Label control="ButtonX">Spell Up</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
