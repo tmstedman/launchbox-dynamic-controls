@@ -96,11 +96,11 @@
 
         <!-- Lightgun -->
         <Control name="P1_LIGHTGUN_X" mappings="P1_LIGHTGUN_X.dec P1_LIGHTGUN_X.inc" />
-        <Mapping name="P1_LIGHTGUN_X.dec" input="AxisRightStickLeft" />
-        <Mapping name="P1_LIGHTGUN_X.inc" input="AxisRightStickRight" />
+        <Mapping name="P1_LIGHTGUN_X.dec" input="AxisLeftStickLeft" />
+        <Mapping name="P1_LIGHTGUN_X.inc" input="AxisLeftStickRight" />
         <Control name="P1_LIGHTGUN_Y" mappings="P1_LIGHTGUN_Y.dec P1_LIGHTGUN_Y.inc" />
-        <Mapping name="P1_LIGHTGUN_Y.dec" input="AxisRightStickUp" />
-        <Mapping name="P1_LIGHTGUN_Y.inc" input="AxisRightStickDown" />
+        <Mapping name="P1_LIGHTGUN_Y.dec" input="AxisLeftStickUp" />
+        <Mapping name="P1_LIGHTGUN_Y.inc" input="AxisLeftStickDown" />
 
         <!-- Nudge pairs. MAME lets an analogue port be driven by two ordinary buttons
              instead of (or alongside) real analogue hardware, as "increment" and "decrement"
