@@ -195,6 +195,22 @@ label runs off the screen (issue #11). The artwork's own captions are almost alw
 
 Keep under about 24 characters. The shipped set's median is four.
 
+### A button with two roles gets both, joined with " / "
+
+The same separator does a second job, and it is not compression. Where a game genuinely gives one
+button two distinct actions, name both rather than picking one: Shadow of the Colossus's `R1`
+grips a climbing surface and ducks on horseback, and the label is *Grip / Duck*. Three parts are
+allowed where they fit — 124 shipped labels have three — but check a render before using them.
+
+Two things are not a second role. A **modifier** is not an action: that same `R1` also makes you
+swim faster and mount faster, and those are left out. And a **menu binding** is not gameplay:
+Burnout 3's manual gives `Cross` as both "Accelerate" and "Select/Go to next screen", and only
+the first is labelled, because menu navigation is near-universal and says nothing about this
+game.
+
+Picking which two to name is a judgement. The rule that keeps it honest: name the uses a player
+would look the button up for.
+
 ### A source is authoritative for the fact, not for the length
 
 Arcade has two label sources and the short one wins on wording. A platform with only a verbose

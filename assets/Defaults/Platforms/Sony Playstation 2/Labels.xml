@@ -33,7 +33,7 @@
         <Input name="Square">Brake</Input>
         <Input name="Triangle">Change View</Input>
         <Input name="L1">Look Back</Input>
-        <Input name="R1">Boost</Input>
+        <Input name="R1">Boost / Impact Time</Input>
         <Input name="L2">Next Track</Input>
         <Input name="R2">Crashbreaker</Input>
     </Game>
@@ -132,12 +132,12 @@
     <Game launchBoxId="2240" romName="Shadow of the Colossus">
         <Input name="L-Any">Move</Input>
         <Input name="R-Any">Look</Input>
-        <Input name="Triangle">Jump</Input>
+        <Input name="Triangle">Jump / Mount</Input>
         <Input name="Square">Attack</Input>
         <Input name="Circle">Focus Light</Input>
-        <Input name="Cross">Call Agro</Input>
+        <Input name="Cross">Call Agro / Spur</Input>
         <Input name="L1">Lock On</Input>
-        <Input name="R1">Grip</Input>
+        <Input name="R1">Grip / Duck</Input>
         <Input name="L2">Reset Camera</Input>
         <Input name="R2">Zoom</Input>
         <Input name="Dpad-Up">Draw Sword</Input>
