@@ -117,6 +117,11 @@ as matching while the pipeline still says exactly what the row expects. Edit a l
 row and the row has to move with it; `~/.work/dynamic-controls/scripts/ab.py` applies the rows
 and lists any whose artwork text or expected text no longer appears.
 
+A row records a decision, so nothing is waived before someone has made it. A port the card splits
+across two controls is the common trap: its shipped label has to be written by hand to name both
+roles, and until it is, the row waits in `arcade-split-ports-to-review.tsv` (same columns) and
+the game counts as a mismatch. Move a row across once its combined text is in `Labels.xml`.
+
 ## `genesis-manuals.md`
 
 Which printed manual each Sega Genesis label was read off, by PDF page, and whether the page was
