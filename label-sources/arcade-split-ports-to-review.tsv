@@ -1,0 +1,44 @@
+rom	control	artwork_text	expected_pipeline_text	reason	note
+alpinerd	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+ecofghtr	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
+exprraid	ButtonB	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+forgottn	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
+frontlin	AxisRightStick	Aim	Move	port-split	one port drives two controls the card labels differently
+gberet	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gslgr94u	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gslugrsj	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gtg	AxisLeftStick	Move / Change Club	Move Left & Right	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gtg2j	AxisLeftStick	Move / Change Club	Move Left & Right	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+kengo	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+lastsurv	AxisTriggerRight	Shoot	Shoot / Select	port-split	one port drives two controls the card labels differently
+ltswords	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+mia	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+midnrun	ButtonLeftShoulder	Shift Down	Shift Up	port-split	one port drives two controls the card labels differently
+mplanets	AxisTriggerRight	Rotate Right	Rotate	port-split	one port drives two controls the card labels differently
+mplanets	ButtonLeftShoulder	Rotate Left	Shoot	port-split	one port drives two controls the card labels differently
+mrgoemon	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ninjaw	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+propcycl	ButtonStart	Start	Select	port-split	one port drives two controls the card labels differently
+rushatck	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+soniccar	ButtonDpad	Steering	Signal Left or Right	port-split	one port drives two controls the card labels differently
+thrilld	ButtonLeftShoulder	Shift Down	Shift Up	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+thrilld	ButtonRightShoulder	Shift Up	Shift Down	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+tokyowar	ButtonStart	Start	View Change	port-split	one port drives two controls the card labels differently
+trojan	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+truckk	ButtonStart	Start	Horn	port-split	one port drives two controls the card labels differently
+windheat	ButtonLeftShoulder	Shift Down	Shift Up	port-split	one port drives two controls the card labels differently
+ws	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ws89	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ws90	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+wwestern	AxisRightStick	Aim	Move	port-split	one port drives two controls the card labels differently
