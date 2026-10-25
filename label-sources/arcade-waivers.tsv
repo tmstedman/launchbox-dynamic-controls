@@ -115,7 +115,8 @@ mplanets	AxisTriggerRight	Rotate Right	Rotate	port-split	one port drives two con
 mplanets	ButtonLeftShoulder	Rotate Left	Shoot	port-split	one port drives two controls the card labels differently
 mrgoemon	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
 ninjaw	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
-offroadc	ButtonStart	Start	Boost	port-split	one port drives two controls the card labels differently
+offroadc	ButtonA	Boost	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
+offroadc	ButtonStart	Start	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
 propcycl	ButtonStart	Start	Select	port-split	one port drives two controls the card labels differently
 recordbr	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 recordbr	AxisLeftStickLeft		Button 1	not-in-artwork-vocabulary	the author cannot draw this control on the card
