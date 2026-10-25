@@ -1,0 +1,178 @@
+rom	control	artwork_text	expected_pipeline_text	reason	note
+acedrive	ButtonB	Shift Down	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+acedrive	ButtonDpadDown	Menu DOWN	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+acedrive	ButtonDpadUp	Menu UP	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+acedrive	ButtonLeftShoulder	Shift Down	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+acedrive	ButtonRightShoulder	Shift Up	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+acedrive	ButtonX	Shift Up	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+adillor	ButtonA	Action	Action / Start	port-split-merged	merged into one label, gameplay role before system role
+adillor	ButtonStart	Start	Action / Start	port-split-merged	merged into one label, gameplay role before system role
+afighter	AxisLeftStick	Steering		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+afighter	AxisLeftStickUp		Accelerate	not-in-artwork-vocabulary	the author cannot draw this control on the card
+afighter	AxisLeftStickX		Steering	not-in-artwork-vocabulary	the author cannot draw this control on the card
+afighter	ButtonDpad	Steering		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+afighter	ButtonDpadUp		Accelerate	improvement-kept	the joystick up direction accelerates; the card calls the whole stick Steering
+afighter	ButtonDpadX		Steering	not-in-artwork-vocabulary	the author cannot draw this control on the card
+airco22b	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+alpinerd	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+alpinerd	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+alpines	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+alpines	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+alpinr2b	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
+alpinr2b	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+cartfury	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+cartfury	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+cartfury	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+cartfury	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crgolf	AxisLeftStick	Slice L&R / Raise Club		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+crgolf	AxisLeftStickX		Slice Left / Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crgolf	AxisLeftStickY		Slice L&R / Raise Club	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crgolfhi	AxisLeftStick	Slice L&R / Raise Club		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+crgolfhi	AxisLeftStickX		Slice Left / Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crgolfhi	AxisLeftStickY		Slice L&R / Raise Club	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnexo	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnexo	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnexo	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnexo	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnusa	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnusa	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnusa	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnusa	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnwld	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnwld	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnwld	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+crusnwld	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+cybrcycc	ButtonA	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+cybrcycc	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
+ddr2m	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddr2m	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddr2m	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddr2m	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddrkids	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddrkids	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddrkids	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddrkids	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+drivedge	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+drivedge	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+drivedge	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+drivedge	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+dsftkd	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+dsftkd	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+dsftkd	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+dsftkd	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ecofghtr	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
+exprraid	ButtonB	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+f15se	AxisRightStick	Throttle		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+f15se	AxisRightStickUp		Throttle	not-in-artwork-vocabulary	the author cannot draw this control on the card
+fbait2bc	ButtonStart	Start	Cast / Start	port-split-merged	merged into one label, gameplay role before system role
+fbaitbc	ButtonStart	Start	Cast / Start	port-split-merged	merged into one label, gameplay role before system role
+fbaitmc	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+fbaitmc	ButtonX	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+fitegolf	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+fitegolf	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+fitegolf	AxisLeftStickY		Select Slice Direction	not-in-artwork-vocabulary	the author cannot draw this control on the card
+fitegolf	ButtonDpad	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+fitegolf	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+fitegolf	ButtonDpadY		Select Slice Direction	not-in-artwork-vocabulary	the author cannot draw this control on the card
+forgottn	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
+frontlin	AxisRightStick	Aim	Move	port-split	one port drives two controls the card labels differently
+funkyfig	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+funkyfig	AxisLeftStickUp		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+galspnbl	ButtonLeftShoulder	Left Flipper	Left Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
+galspnbl	ButtonRightShoulder	Right Flipper	Right Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
+gberet	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gslgr94u	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gslugrsj	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gtg	AxisLeftStick	Move / Change Club	Move Left & Right	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+gtg2j	AxisLeftStick	Move / Change Club	Move Left & Right	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+kengo	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+knckhead	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+knckhead	AxisLeftStickDown		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+knckhead	AxisLeftStickUp		Jump	not-in-artwork-vocabulary	the author cannot draw this control on the card
+knckhead	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+knckhead	ButtonDpad	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+knckhead	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+konami88	ButtonLeftShoulder	(Tap) Power Button 2	(Tap) Power Button 1	artwork-suspect	the card appears to put this port two labels on swapped controls
+konami88	ButtonRightShoulder	(Tap) Power Button 1	(Tap) Power Button 2	artwork-suspect	the card appears to put this port two labels on swapped controls
+lastsurv	AxisTriggerRight	Shoot	Shoot / Select	port-split	one port drives two controls the card labels differently
+letsdnce	ButtonB	Right	Move	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+letsdnce	ButtonY	Up	Move	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ltswords	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+mia	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+midnrun	ButtonLeftShoulder	Shift Down	Shift Up	port-split	one port drives two controls the card labels differently
+motofren	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+motofren	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+mplanets	AxisTriggerRight	Rotate Right	Rotate	port-split	one port drives two controls the card labels differently
+mplanets	ButtonLeftShoulder	Rotate Left	Shoot	port-split	one port drives two controls the card labels differently
+mrgoemon	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ninjaw	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+offroadc	ButtonStart	Start	Boost	port-split	one port drives two controls the card labels differently
+propcycl	ButtonStart	Start	Select	port-split	one port drives two controls the card labels differently
+recordbr	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+recordbr	AxisLeftStickLeft		Button 1	not-in-artwork-vocabulary	the author cannot draw this control on the card
+recordbr	AxisLeftStickRight		Button 2	not-in-artwork-vocabulary	the author cannot draw this control on the card
+rushatck	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+searchar	AxisRightStick	Rotate Shoot Position		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+searchar	AxisRightStickLeft		Rotate Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
+searchar	AxisRightStickRight		Rotate Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
+skychal	ButtonA	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+skychal	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+soniccar	ButtonDpad	Steering	Signal Left or Right	port-split	one port drives two controls the card labels differently
+spyhunt	ButtonRightShoulder	Shift Up	Shift Up / Start	port-split-merged	merged into one label, gameplay role before system role
+spyhunt	ButtonStart	Start	Shift Up / Start	port-split-merged	merged into one label, gameplay role before system role
+startrgn	ButtonA	Start / Decide	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
+startrgn	ButtonStart	Start	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
+stratgyx	AxisRightStick	Rotate		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+stratgyx	AxisRightStickLeft		Rotate	not-in-artwork-vocabulary	the author cannot draw this control on the card
+stratgyx	AxisRightStickRight		Rotate Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
+stunrun	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+stunrun	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+techbowl	ButtonA	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+techbowl	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
+techromn	ButtonRightShoulder	Change Weapon	Change Weapon / Start	port-split-merged	merged into one label, gameplay role before system role
+techromn	ButtonStart	Start	Change Weapon / Start	port-split-merged	merged into one label, gameplay role before system role
+theglad	ButtonRightShoulder	Change Item / Special	Change Item / Special / Start	port-split-merged	merged into one label, gameplay role before system role
+theglad	ButtonStart	Start	Change Item / Special / Start	port-split-merged	merged into one label, gameplay role before system role
+thrilld	ButtonLeftShoulder	Shift Down	Shift Up	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+thrilld	ButtonRightShoulder	Shift Up	Shift Down	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+tokyowar	ButtonStart	Start	View Change	port-split	one port drives two controls the card labels differently
+totcarn	ButtonA	Bomb	Bomb / Start	port-split-merged	merged into one label, gameplay role before system role
+totcarn	ButtonStart	Start	Bomb / Start	port-split-merged	merged into one label, gameplay role before system role
+trojan	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+truckk	ButtonStart	Start	Horn	port-split	one port drives two controls the card labels differently
+vanguard	AxisRightStick	Shoot Direction		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+vanguard	AxisRightStickDown		Shoot Down	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vanguard	AxisRightStickLeft		Shoot Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vanguard	AxisRightStickRight		Shoot Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vanguard	AxisRightStickUp		Shoot Up	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vformula	AxisLeftStick	Steering		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
+vformula	AxisLeftStickDown		VR2 / BLUE	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vformula	AxisLeftStickLeft		VR3 / YELLOW	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vformula	AxisLeftStickRight		VR4 / GREEN	not-in-artwork-vocabulary	the author cannot draw this control on the card
+vformula	AxisLeftStickUp		VR1 / RED	not-in-artwork-vocabulary	the author cannot draw this control on the card
+victlap	ButtonB	Shift Down	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+victlap	ButtonDpadDown	Menu DOWN	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+victlap	ButtonDpadUp	Menu UP	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+victlap	ButtonLeftShoulder	Shift Down	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
+victlap	ButtonRightShoulder	Shift Up	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+victlap	ButtonX	Shift Up	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
+windheat	ButtonLeftShoulder	Shift Down	Shift Up	port-split	one port drives two controls the card labels differently
+ws	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ws89	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+ws90	AxisLeftStick	Move / Mod Pitch	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
+wwestern	AxisRightStick	Aim	Move	port-split	one port drives two controls the card labels differently
+badlands	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+badlands	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+joust2	ButtonX	Transform	Transform / Start	port-split-merged	merged into one label, gameplay role before system role
+joust2	ButtonStart	Start	Transform / Start	port-split-merged	merged into one label, gameplay role before system role
+aplarail	ButtonA	Decide	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
+aplarail	ButtonStart	Start	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
