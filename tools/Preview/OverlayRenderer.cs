@@ -36,7 +36,28 @@ public static class OverlayRenderer
     /// <summary>WPF kernel radius to Skia standard deviation.</summary>
     private const float BlurRadiusToSigma = 1f / 3f;
 
-    public static SKBitmap Render(ControllerOverlayModel model, SKTypeface typeface, SKColor background)
+    /// <summary>
+    /// What the theme puts behind everything: the game's own artwork, <c>UniformToFill</c> and
+    /// blurred, under a near-black scrim. <c>Radius</c> and <c>Scrim</c> are the theme's own
+    /// values; <c>Path</c> null leaves the flat <c>background</c> colour in place.
+    ///
+    /// <para>One approximation worth knowing: on the pause screen the artwork spans the whole
+    /// display and the controller canvas is a Viewbox over one grid cell of it, so the real
+    /// screen shows a *crop* of the blurred image at screen scale. Filling this canvas with it
+    /// instead shows all of it, at canvas scale. The backdrop is therefore representative of
+    /// tone and busyness, not a pixel match — which is what judging label legibility needs.
+    /// Reproducing the crop would mean re-implementing the theme's grid here, the one thing
+    /// this renderer must not do.</para>
+    /// </summary>
+    public readonly record struct Backdrop(string? Path, double Radius, SKColor Scrim)
+    {
+        /// <summary>The theme's <c>BlurEffect Radius="60"</c> over its <c>#90000000</c> grid.</summary>
+        public static Backdrop For(string? path) =>
+            new(path, 60, new SKColor(0, 0, 0, 0x90));
+    }
+
+    public static SKBitmap Render(ControllerOverlayModel model, SKTypeface typeface,
+                                  SKColor background, Backdrop backdrop = default)
     {
         int width = (int)Math.Round(model.CanvasWidth);
         int height = (int)Math.Round(model.CanvasHeight);
@@ -45,6 +66,7 @@ public static class OverlayRenderer
         using var canvas = new SKCanvas(bitmap);
         canvas.Clear(background);
 
+        DrawBackdrop(canvas, backdrop, width, height);
         DrawBaseImage(canvas, model.ImagePath, width, height);
 
         // Labels first, then overlay images — the theme stacks the two ItemsControls in that
@@ -53,6 +75,43 @@ public static class OverlayRenderer
         foreach (RenderedImage image in model.RenderedImages) DrawOverlay(canvas, image);
 
         return bitmap;
+    }
+
+    /// <summary>
+    /// Draws the blurred artwork and its scrim, the two layers the theme stacks beneath the
+    /// controller. The blur is applied as the bitmap is drawn rather than to the source, so the
+    /// edges bleed outward and fill the canvas instead of fading to the clear colour — the same
+    /// reason <see cref="DrawOverlay"/> filters at paint time.
+    ///
+    /// <para>Internal so <see cref="TitleFrame"/> can lay the same backdrop across its taller
+    /// canvas, behind a frame rendered without one.</para>
+    /// </summary>
+    internal static void DrawBackdrop(SKCanvas canvas, Backdrop backdrop, int width, int height)
+    {
+        if (string.IsNullOrEmpty(backdrop.Path) || !File.Exists(backdrop.Path)) return;
+
+        using SKBitmap? source = SKBitmap.Decode(backdrop.Path);
+        if (source == null) return;
+
+        // UniformToFill: cover the canvas and let the long side overflow, where the controller
+        // photo below uses Uniform and fits inside.
+        float scale = Math.Max((float)width / source.Width, (float)height / source.Height);
+        float w = source.Width * scale, h = source.Height * scale;
+        var dest = SKRect.Create((width - w) / 2, (height - h) / 2, w, h);
+
+        using (var paint = new SKPaint { FilterQuality = SKFilterQuality.High, IsAntialias = true })
+        {
+            if (backdrop.Radius > 0)
+            {
+                float sigma = (float)backdrop.Radius * BlurRadiusToSigma;
+                paint.ImageFilter = SKImageFilter.CreateBlur(sigma, sigma);
+            }
+            canvas.DrawBitmap(source, dest, paint);
+        }
+
+        // SrcOver named explicitly: SkiaSharp's DrawColor defaults to Src, which would replace
+        // the blurred artwork with flat translucent black rather than dimming it.
+        if (backdrop.Scrim.Alpha > 0) canvas.DrawColor(backdrop.Scrim, SKBlendMode.SrcOver);
     }
 
     /// <summary>
