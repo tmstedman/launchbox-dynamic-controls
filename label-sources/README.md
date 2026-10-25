@@ -104,6 +104,19 @@ python3 ~/.work/dynamic-controls/scripts/artwork_corrections.py
 Groups every change by rom, which a bare `diff` does not — the changes are mostly identical
 label lines, and without the rom name there is no image to look up.
 
+## `arcade-waivers.tsv`
+
+The differences between the artwork and the shipped labels that are meant to stay. One row per
+control: `rom`, `control`, `artwork_text`, the `expected_pipeline_text` that replaces it, a
+`reason` and a one-line `note`. Most rows are a single port the card splits across two controls
+— the shipped label then names both roles, gameplay first ("Shoot / Start") — or a control the
+card has no way to draw.
+
+A waiver pins the pipeline's text rather than ignoring the control, so a waived game only scores
+as matching while the pipeline still says exactly what the row expects. Edit a label that has a
+row and the row has to move with it; `~/.work/dynamic-controls/scripts/ab.py` applies the rows
+and lists any whose artwork text or expected text no longer appears.
+
 ## `genesis-manuals.md`
 
 Which printed manual each Sega Genesis label was read off, by PDF page, and whether the page was
