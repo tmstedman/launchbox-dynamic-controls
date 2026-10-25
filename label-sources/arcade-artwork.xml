@@ -52,6 +52,19 @@
   ButtonLeftShoulder and ButtonRightShoulder for its two built-in games instead of using the
   plain Start position at all.
 
+  ButtonDpad was removed on review from the 88 games below, as a transcription error rather
+  than a label printed on the card: each carried a d-pad label the cabinet has no control for
+  (Bang!, a lightgun game whose cfg binds no d-pad, is the worked example).
+  arcade-artwork-original.xml keeps them as first read. Removed from:
+  apache3 arknoid2 ataxx bang beaminv blaster blockgal botss bowlrama breakout bshark bsktball
+  bullsdrt cameltry catch22 cclownz cerberus cloud9 csprint dangerz darkplnt dday deadeye
+  fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk gloc
+  gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
+  omega paperboy patocar pong pongd poolshrk rampart ridleofp sbrkout seawolf2 slrasslt
+  snakjack sonic spcenctr subs swa tacscan tailg tceptor tceptor2 techbowl teedoff tehkanwc
+  tempest term2 trisport trivialp trophyh tshoot viper warlords wcbowl wcbowl140 wcbowldx
+  wecleman wfortune wheelrun whodunit wildplt wolfpack zektor.
+
   Seeded by hand from images read during the import's measurement step. The remainder comes
   from the bulk read.
 -->
@@ -505,26 +518,23 @@
     </Game>
     <Game romName="afighter" title="Action Fighter">
         <Label control="AxisLeftStick">Steering</Label>
-        <Label control="AxisTriggerRight">(Analog) Accelerate</Label>
-        <Label control="ButtonA">Weapon A</Label>
-        <Label control="ButtonB">Weapon B</Label>
-        <Label control="ButtonDpad">Steering</Label>
-        <Label control="ButtonRightShoulder">(Analog) Start 2 Players</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Weapon C</Label>
-        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonA">Missile</Label>
+        <Label control="ButtonB">Transform</Label>
+        <Label control="ButtonDpad">Steering</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
+        <Label control="ButtonStart">Start 1 Player</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="afighterf" title="Action Fighter">
         <Label control="AxisLeftStick">Steering</Label>
-        <Label control="AxisTriggerRight">(Analog) Accelerate</Label>
-        <Label control="ButtonA">Weapon A</Label>
-        <Label control="ButtonB">Weapon B</Label>
-        <Label control="ButtonDpad">Steering</Label>
-        <Label control="ButtonRightShoulder">(Analog) Start 2 Players</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Weapon C</Label>
-        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonA">Missile</Label>
+        <Label control="ButtonB">Transform</Label>
+        <Label control="ButtonDpad">Steering</Label>
+        <Label control="ButtonRightShoulder">Start 2 Players</Label>
+        <Label control="ButtonStart">Start 1 Player</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="agallet" title="Air Gallet">
@@ -995,7 +1005,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -1297,7 +1306,6 @@
     <Game romName="arknoid2" title="Arkanoid: Revenge of DOH">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Release / Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -1517,7 +1525,6 @@
     <Game romName="ataxx" title="Ataxx">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Select</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -1783,7 +1790,6 @@
     <Game romName="bang" title="Bang!">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -2035,7 +2041,7 @@
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Reload</Label>
         <Label control="ButtonB">Bomb</Label>
-        <Label control="ButtonLeftShoulder">Bomb</Label>
+        <Label control="ButtonRightShoulder">Bomb</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -2076,7 +2082,6 @@
     <Game romName="beaminv" title="Beam Invader">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -2427,7 +2432,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Thrust</Label>
         <Label control="ButtonA">Thrust</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -2605,7 +2609,6 @@
     <Game romName="blockgal" title="Block Gal">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -3154,7 +3157,7 @@
     </Game>
     <Game romName="boothill" title="Boot Hill">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Move Shoot Postiton Up/Down</Label>
+        <Label control="AxisRightStick">Move Shoot Position Up/Down</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
@@ -3196,7 +3199,6 @@
         <Label control="AxisRightStick">Throttle</Label>
         <Label control="ButtonA">Blaster</Label>
         <Label control="ButtonB">Shield</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -3260,7 +3262,6 @@
     <Game romName="bowlrama" title="Bowl-O-Rama">
         <Label control="AxisLeftStick">Move / Bowl</Label>
         <Label control="ButtonA">Spin Right</Label>
-        <Label control="ButtonDpad">Move / Bowl</Label>
         <Label control="ButtonX">Spin Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -3349,7 +3350,6 @@
     <Game romName="breakout" title="Breakout">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -3448,7 +3448,6 @@
     </Game>
     <Game romName="bshark" title="Battle Shark">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -3456,7 +3455,6 @@
     <Game romName="bsktball" title="Atari Basketball">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot / Jump</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -3668,7 +3666,6 @@
     <Game romName="bullsdrt" title="Bulls Eye Darts">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Throw Dart</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -3851,7 +3848,6 @@
     <Game romName="cameltry" title="Cameltry">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -4014,7 +4010,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -4127,7 +4122,6 @@
     </Game>
     <Game romName="cclownz" title="Crazzy Clownz">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -4148,7 +4142,6 @@
     <Game romName="cerberus" title="Cerberus">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Thrust</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -4523,7 +4516,6 @@
     <Game romName="cloud9" title="Cloud 9">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Bomb</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5135,7 +5127,6 @@
     <Game romName="csprint" title="Championship Sprint">
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonDpad">Steering</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -5448,7 +5439,6 @@
     <Game romName="dangerz" title="Danger Zone">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5563,7 +5553,6 @@
     <Game romName="darkplnt" title="Dark Planet">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Thrust</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5717,7 +5706,6 @@
     <Game romName="dday" title="D-Day">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -5966,7 +5954,6 @@
     <Game romName="deadeye" title="Dead Eye">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -6624,7 +6611,7 @@
     </Game>
     <Game romName="dotron" title="Discs of Tron">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Move Shoot Postiton</Label>
+        <Label control="AxisRightStick">Move Shoot Position</Label>
         <Label control="AxisTriggerRight">(Hold) Deflect</Label>
         <Label control="ButtonRightShoulder">Disc</Label>
         <Label control="ButtonStart">Start</Label>
@@ -7925,7 +7912,6 @@
     <Game romName="fbcrazy" title="Football Crazy">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Select</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -8019,7 +8005,6 @@
     </Game>
     <Game romName="fgoal" title="Field Goal">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -8172,7 +8157,6 @@
     <Game romName="firebeas" title="Firebeast">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot Right</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -8180,7 +8164,6 @@
     <Game romName="firefox" title="Fire Fox">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missiles</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -8389,7 +8372,6 @@
     <Game romName="foodf" title="Food Fight">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9304,7 +9286,6 @@
         <Label control="AxisTriggerLeft">Shoot</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -9312,7 +9293,6 @@
     <Game romName="gghost" title="Goalie Ghost">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9342,7 +9322,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9405,14 +9384,12 @@
     <Game romName="gigas" title="Gigas">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Release Ball / Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gigasm2" title="Gigas Mark II">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Release Ball / Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9435,7 +9412,6 @@
     <Game romName="gimeabrk" title="Gimme A Break">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Set Shot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9497,7 +9473,6 @@
         <Label control="AxisTriggerRight">Missiles</Label>
         <Label control="ButtonA">Missiles</Label>
         <Label control="ButtonB">After Burner</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -9882,7 +9857,6 @@
     <Game romName="gridiron" title="Gridiron Fight">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -10394,7 +10368,7 @@
     </Game>
     <Game romName="gunfight" title="Gun Fight">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Move Shoot Postiton Up/Down</Label>
+        <Label control="AxisRightStick">Move Shoot Position Up/Down</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
@@ -10476,7 +10450,6 @@
     <Game romName="guts" title="Guts n' Glory">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Homing Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -11530,8 +11503,8 @@
     </Game>
     <Game romName="imolagp" title="Imola Grand Prix">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -11760,7 +11733,6 @@
     </Game>
     <Game romName="irrmaze" title="The Irritating Maze">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">(Hold) Free Look</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -11894,7 +11866,6 @@
     <Game romName="jedi" title="Return of the Jedi">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -12375,7 +12346,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -12418,7 +12388,6 @@
     <Game romName="kick" title="Kick">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Kick</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonRightShoulder">Start 2 Players</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -12852,8 +12821,8 @@
     </Game>
     <Game romName="konamigt" title="Konami GT">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonX">Change Gear</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -13028,7 +12997,7 @@
     </Game>
     <Game romName="kroozr" title="Kosmik Kroozr">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Move Shoot Postiton</Label>
+        <Label control="AxisRightStick">Move Shoot Position</Label>
         <Label control="ButtonLeftShoulder">(Hold) Shield</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -13779,9 +13748,9 @@
     <Game romName="luckywld" title="Lucky &amp; Wild">
         <Label control="AxisLeftStick">P1 Steer / P2 Crosshair</Label>
         <Label control="AxisRightStick">P1 Move Crosshair</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">P2 Shoot</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonRightShoulder">P1 Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -13977,10 +13946,10 @@
     </Game>
     <Game romName="mag_pdak" title="Paris Dakar">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Jump</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14217,7 +14186,6 @@
     </Game>
     <Game romName="marble" title="Marble Madness">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14238,7 +14206,6 @@
     <Game romName="marinedt" title="Marine Date">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Ink</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14447,7 +14414,6 @@
     <Game romName="mazeinv" title="Maze Invaders">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Reverse</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -14773,7 +14739,6 @@
     </Game>
     <Game romName="micon2" title="Micon-Kit Part II">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -14890,7 +14855,6 @@
     <Game romName="minigolf" title="Mini Golf">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Set Tee Position</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15023,7 +14987,6 @@
     <Game romName="mmagic" title="Monkey Magic">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -16254,10 +16217,10 @@
     </Game>
     <Game romName="neodrift" title="Neo Drift Out: New Technology">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -16786,12 +16749,12 @@
     </Game>
     <Game romName="offroadc" title="Off Road Challenge">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Boost</Label>
         <Label control="ButtonDpadLeft">View 2</Label>
         <Label control="ButtonDpadRight">View 3</Label>
         <Label control="ButtonDpadUp">View 1</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonY">Change Music</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -16865,7 +16828,6 @@
     <Game romName="omega" title="Omega">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Release Ball / Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -17385,7 +17347,6 @@
     <Game romName="paperboy" title="Paperboy">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Thtow Papaer</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -17483,7 +17444,6 @@
     </Game>
     <Game romName="patocar" title="Hashire Patrol Car">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -18175,17 +18135,17 @@
     </Game>
     <Game romName="pdrift" title="Power Drift">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Change Gear</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="pdriftl" title="Power Drift: Link Version">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Change Gear</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -18738,13 +18698,11 @@
     </Game>
     <Game romName="pong" title="Pong">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="pongd" title="Pong Doubles">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -18757,7 +18715,6 @@
     </Game>
     <Game romName="poolshrk" title="Pool Shark">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -20049,7 +20006,6 @@
     <Game romName="rampart" title="Rampart">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Rotate Block</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot / Place Block</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -20468,7 +20424,6 @@
     <Game romName="ridleofp" title="Riddle of Pythagoras">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">B Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">A Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -21531,7 +21486,6 @@
     <Game romName="sbrkout" title="Super Breakout">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -21804,7 +21758,6 @@
     </Game>
     <Game romName="seawolf2" title="Sea Wolf II">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -23115,7 +23068,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missiles</Label>
         <Label control="ButtonB">Power Up</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start / View</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -23207,7 +23159,6 @@
     <Game romName="snakjack" title="Snacks'n Jaxson">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Sneeze</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -23377,7 +23328,6 @@
     <Game romName="sonic" title="SegaSonic The Hedgehog">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="sonicbom" title="Sonic Boom">
@@ -23690,7 +23640,6 @@
     <Game romName="spcenctr" title="Space Encounters">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -24921,7 +24870,6 @@
     <Game romName="subs" title="Subs">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -25286,7 +25234,6 @@
         <Label control="AxisTriggerLeft">Proton Torpedo</Label>
         <Label control="AxisTriggerRight">Laser</Label>
         <Label control="ButtonA">Proton Torpedo</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Laser</Label>
         <Label control="ButtonY">View Change</Label>
         <Label control="ButtonStart">Start</Label>
@@ -25442,7 +25389,6 @@
     <Game romName="tacscan" title="Tac/Scan">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Replace Ship</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -25474,7 +25420,6 @@
     <Game romName="tailg" title="Tailgunner">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shield</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -25622,7 +25567,6 @@
     <Game romName="tceptor" title="Thunder Ceptor">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -25630,7 +25574,6 @@
     <Game romName="tceptor2" title="3-D Thunder Ceptor II">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -25691,7 +25634,6 @@
     <Game romName="techbowl" title="Technical Bowling">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -25726,7 +25668,6 @@
     <Game romName="teedoff" title="Tee'd Off">
         <Label control="AxisLeftStick">Swing Club</Label>
         <Label control="ButtonA">Change Shot</Label>
-        <Label control="ButtonDpad">Swing Club</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -25740,7 +25681,6 @@
     <Game romName="tehkanwc" title="Tehkan World Cup">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot / Pass</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -25830,7 +25770,6 @@
     <Game romName="tempest" title="Tempest">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Bomb</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -25870,7 +25809,6 @@
         <Label control="AxisTriggerLeft">Bomb</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Bomb</Label>
-        <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -26697,9 +26635,9 @@
     </Game>
     <Game romName="topspeed" title="Top Speed">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Turbo</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
         <Label control="ButtonX">Change Gear</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -26926,7 +26864,6 @@
     <Game romName="trisport" title="Tri-Sports">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Select</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Set Shot / Start</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -26958,7 +26895,6 @@
     <Game romName="trivialp" title="Trivial Pursuit">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Touch</Label>
-        <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonX">Pass</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -27005,7 +26941,7 @@
     </Game>
     <Game romName="tron" title="Tron">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Move Shoot Postiton</Label>
+        <Label control="AxisRightStick">Move Shoot Position</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -27014,7 +26950,6 @@
     <Game romName="trophyh" title="Trophy Hunting: Bear &amp; Moose">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Reload</Label>
-        <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -27112,7 +27047,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Grenade</Label>
         <Label control="ButtonB">Gobble</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -27984,7 +27918,6 @@
     <Game romName="viper" title="Viper">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Missile</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28306,7 +28239,6 @@
     <Game romName="warlords" title="Warlords">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -28421,7 +28353,6 @@
     <Game romName="wcbowl" title="World Class Bowling">
         <Label control="AxisLeftStick">Move / Bowl</Label>
         <Label control="ButtonA">Hook Right</Label>
-        <Label control="ButtonDpad">Move / Bowl</Label>
         <Label control="ButtonX">Hook Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28429,7 +28360,6 @@
     <Game romName="wcbowl140" title="World Class Bowling Tournament">
         <Label control="AxisLeftStick">Move / Bowl</Label>
         <Label control="ButtonA">Hook Right</Label>
-        <Label control="ButtonDpad">Move / Bowl</Label>
         <Label control="ButtonX">Hook Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28437,7 +28367,6 @@
     <Game romName="wcbowldx" title="World Class Bowling Deluxe">
         <Label control="AxisLeftStick">Move / Bowl</Label>
         <Label control="ButtonA">Hook Right</Label>
-        <Label control="ButtonDpad">Move / Bowl</Label>
         <Label control="ButtonX">Hook Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28464,7 +28393,6 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonDpad">Steering</Label>
         <Label control="ButtonX">Change Gear</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28488,7 +28416,6 @@
     <Game romName="wfortune" title="Wheel of Fortune">
         <Label control="AxisLeftStick">Move / Spin</Label>
         <Label control="ButtonA">Player Button</Label>
-        <Label control="ButtonDpad">Move / Spin</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -28542,7 +28469,6 @@
     <Game romName="wheelrun" title="Wheels Runner">
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonDpad">Steering</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -28557,7 +28483,6 @@
     <Game romName="whodunit" title="Who Dunit">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -28594,7 +28519,6 @@
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Missile</Label>
         <Label control="ButtonB">Bomb</Label>
-        <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28797,7 +28721,6 @@
     <Game romName="wolfpack" title="Wolf Pack">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -29330,7 +29253,6 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonB">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
