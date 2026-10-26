@@ -4740,6 +4740,9 @@
     <Game launchBoxId="36220" romName="cybrcomm">
         <Input name="P1_AD_STICK_X">Left Stick</Input>
         <Input name="P1_AD_STICK_Y">Left Stick</Input>
+        <Input name="P2_AD_STICK_X">Right Stick</Input>
+        <Input name="P2_AD_STICK_Y">Right Stick</Input>
+        <Input name="P1_BUTTON1">Machine Gun</Input>
         <Input name="P1_BUTTON2">Missiles</Input>
         <Input name="P1_BUTTON3">View Change</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -4754,6 +4757,9 @@
     <Game launchBoxId="34188" romName="cybsled">
         <Input name="P1_AD_STICK_X">Left Track</Input>
         <Input name="P1_AD_STICK_Y">Left Track</Input>
+        <Input name="P2_AD_STICK_X">Right Track</Input>
+        <Input name="P2_AD_STICK_Y">Right Track</Input>
+        <Input name="P1_BUTTON2">Machine Gun</Input>
         <Input name="P1_BUTTON1">Missiles</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -4947,7 +4953,7 @@
         <Input name="P1_BUTTON1">Power Up</Input>
         <Input name="P1_BUTTON2">Attack</Input>
         <Input name="P1_BUTTON3">Jump</Input>
-        <Input name="START1">Map</Input>
+        <Input name="START1">Map / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="32093" romName="darkedge">
@@ -5227,11 +5233,10 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36247" romName="ddr2m">
-        <Input name="P1_JOYSTICK">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_UP">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_DOWN">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_LEFT">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Up, Down, Left, Right</Input>
+        <Input name="P1_JOYSTICK_UP">Up</Input>
+        <Input name="P1_JOYSTICK_DOWN">Down</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right</Input>
         <Input name="P1_BUTTON2">Menu Left</Input>
         <Input name="P1_BUTTON3">Menu Right</Input>
         <Input name="START1">Start</Input>
@@ -5270,11 +5275,10 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="207135" romName="ddrkids">
-        <Input name="P1_JOYSTICK">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_UP">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_DOWN">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_LEFT">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Up, Down, Left, Right</Input>
+        <Input name="P1_JOYSTICK_UP">Up</Input>
+        <Input name="P1_JOYSTICK_DOWN">Down</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right</Input>
         <Input name="P1_BUTTON1">Menu Left</Input>
         <Input name="P1_BUTTON2">Menu Right</Input>
         <Input name="START1">Start</Input>
@@ -5419,16 +5423,22 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36353" romName="dendego">
+        <Input name="P1_POSITIONAL_V">Throttle (Up/Down)</Input>
+        <Input name="P1_PADDLE">Brake (Left/Right)</Input>
         <Input name="P1_BUTTON1">Horn</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36354" romName="dendego2">
+        <Input name="P1_POSITIONAL_V">Throttle (Up/Down)</Input>
+        <Input name="P1_PADDLE">Brake (Left/Right)</Input>
         <Input name="P1_BUTTON1">Horn</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36356" romName="dendegox">
+        <Input name="P1_POSITIONAL_V">Throttle (Up/Down)</Input>
+        <Input name="P1_PADDLE">Brake (Left/Right)</Input>
         <Input name="P1_BUTTON1">Horn</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -5504,7 +5514,7 @@
     </Game>
     <Game launchBoxId="12172" romName="devilw">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_BUTTON1">Power Up</Input>
+        <Input name="P1_BUTTON1">Power Up / Start</Input>
         <Input name="P1_BUTTON2">Attack</Input>
         <Input name="P1_BUTTON3">Jump</Input>
         <Input name="START1">Map</Input>
@@ -5781,6 +5791,7 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36411" romName="dogpatch">
+        <Input name="P1_POSITIONAL_V">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -5910,6 +5921,12 @@
         <Input name="P1_BUTTON2">Heavy Punch</Input>
         <Input name="P1_BUTTON3">Kick</Input>
         <Input name="P1_BUTTON4">Heavy Kick</Input>
+        <Input name="START1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
+    </Game>
+    <Game romName="douni">
+        <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_BUTTON2">Attack</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -6166,11 +6183,10 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36277" romName="dsftkd">
-        <Input name="P1_JOYSTICK">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_UP">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_DOWN">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_LEFT">Up, Down, Left, Right</Input>
-        <Input name="P1_JOYSTICK_RIGHT">Up, Down, Left, Right</Input>
+        <Input name="P1_JOYSTICK_UP">Up</Input>
+        <Input name="P1_JOYSTICK_DOWN">Down</Input>
+        <Input name="P1_JOYSTICK_LEFT">Left</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Right</Input>
         <Input name="P1_BUTTON2">Menu Left</Input>
         <Input name="P1_BUTTON3">Menu Right</Input>
         <Input name="START1">Start</Input>
@@ -12019,15 +12035,12 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="letsdnce">
-        <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_BUTTON1">Move</Input>
-        <Input name="P1_BUTTON2">Move</Input>
-        <Input name="P1_BUTTON2 P1_BUTTON6">Down</Input>
-        <Input name="P1_BUTTON3">Move</Input>
-        <Input name="P1_BUTTON3 P1_BUTTON5">Left</Input>
-        <Input name="P1_BUTTON4">Move</Input>
-        <Input name="P1_BUTTON5">Left</Input>
-        <Input name="P1_BUTTON6">Down</Input>
+        <Input name="P1_BUTTON1">Up</Input>
+        <Input name="P1_BUTTON2">Down</Input>
+        <Input name="P1_BUTTON3">Left</Input>
+        <Input name="P1_BUTTON4">Right</Input>
+        <Input name="P1_BUTTON5">Select Left</Input>
+        <Input name="P1_BUTTON6">Select Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>

@@ -41,22 +41,55 @@ crusnwld	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cann
 crusnwld	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 cybrcycc	ButtonA	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
 cybrcycc	ButtonStart	Start / View	View / Start	port-split-merged	merged into one label, gameplay role before system role
-ddr2m	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddr2m	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddr2m	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddr2m	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddrkids	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddrkids	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddrkids	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-ddrkids	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+ddr2m	AxisLeftStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddr2m	AxisRightStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddr2m	ButtonDpad	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddr2m	AxisLeftStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisLeftStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisLeftStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisLeftStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisRightStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisRightStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisRightStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	AxisRightStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddr2m	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisLeftStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddrkids	AxisRightStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddrkids	ButtonDpad	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+ddrkids	AxisLeftStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisLeftStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisLeftStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisLeftStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisRightStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisRightStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisRightStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	AxisRightStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+ddrkids	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
 drivedge	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
-dsftkd	ButtonA	Down	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-dsftkd	ButtonB	Right	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-dsftkd	ButtonX	Left	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-dsftkd	ButtonY	Up	Up, Down, Left, Right	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+dsftkd	AxisLeftStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+dsftkd	AxisRightStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+dsftkd	ButtonDpad	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
+dsftkd	AxisLeftStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisLeftStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisLeftStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisLeftStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisRightStickDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisRightStickLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisRightStickRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	AxisRightStickUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
+dsftkd	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
 f15se	AxisRightStick	Throttle		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 f15se	AxisRightStickUp		Throttle	not-in-artwork-vocabulary	the author cannot draw this control on the card
 fbait2bc	ButtonStart	Start	Cast / Start	port-split-merged	merged into one label, gameplay role before system role
@@ -81,8 +114,13 @@ knckhead	ButtonDpad	Move		not-in-artwork-vocabulary	the pipeline answers with pa
 knckhead	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 konami88	ButtonLeftShoulder	(Tap) Power Button 2	(Tap) Power Button 1	artwork-suspect	the card appears to put this port two labels on swapped controls
 konami88	ButtonRightShoulder	(Tap) Power Button 1	(Tap) Power Button 2	artwork-suspect	the card appears to put this port two labels on swapped controls
-letsdnce	ButtonB	Right	Move	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
-letsdnce	ButtonY	Up	Move	port-split-rhythm-pad	each arrow is a face button labelled alone and a stick direction labelled collectively
+letsdnce	ButtonDpad	Move		improvement-kept	the card calls the four arrows Move; each direction is labelled on its own
+letsdnce	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow; the card calls all four Move
+letsdnce	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card calls all four Move
+letsdnce	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card calls all four Move
+letsdnce	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card calls all four Move
+letsdnce	ButtonLeftShoulder		Select Left	improvement-kept	the cfg binds the two select buttons to the shoulders; the card leaves them blank
+letsdnce	ButtonRightShoulder		Select Right	improvement-kept	the cfg binds the two select buttons to the shoulders; the card leaves them blank
 motofren	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
 motofren	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
 offroadc	ButtonA	Boost	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
@@ -137,3 +175,5 @@ aplarail	ButtonStart	Start	Decide / Start	port-split-merged	merged into one labe
 checkman	ButtonX	Tiles Left	Tiles Left / 1P Start	port-split-merged	merged into one label, gameplay role before system role
 checkman	ButtonStart	Start	Tiles Left / 1P Start	port-split-merged	merged into one label, gameplay role before system role
 checkman	ButtonA	Tiles Right	Tiles Right / 2P Start	port-split-merged	merged into one label, gameplay role before system role
+darkadv	ButtonRightShoulder	Map	Map / Start	port-split-merged	merged into one label, gameplay role before system role
+darkadv	ButtonStart	Start	Map / Start	port-split-merged	merged into one label, gameplay role before system role

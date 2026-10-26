@@ -60,13 +60,13 @@
   ButtonLeftShoulder and ButtonRightShoulder for its two built-in games instead of using the
   plain Start position at all.
 
-  ButtonDpad was removed on review from the 89 games below, as a transcription error rather
+  ButtonDpad was removed on review from the 90 games below, as a transcription error rather
   than a label printed on the card: each carried a d-pad label the cabinet has no control for
   (Bang!, a lightgun game whose cfg binds no d-pad, is the worked example).
   arcade-artwork-original.xml keeps them as first read. Removed from:
   apache3 arknoid2 ataxx bang beaminv blaster blockgal botss bowlrama breakout bshark bsktball
   bullsdrt cameltry catch22 cclownz cerberus cloud9 crusherm csprint dangerz darkplnt dday
-  deadeye fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk
+  deadeye doraemon fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk
   gloc gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
   omega paperboy patocar pong pongd poolshrk rampart ridleofp sbrkout seawolf2 slrasslt
   snakjack sonic spcenctr subs swa tacscan tailg tceptor tceptor2 techbowl teedoff tehkanwc
@@ -5289,8 +5289,8 @@
     <Game romName="cybrcomm" title="Cyber Commando">
         <Label control="AxisLeftStick">Left Stick</Label>
         <Label control="AxisRightStick">Right Stick</Label>
+        <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
-        <Label control="ButtonLeftShoulder">Machine Gun</Label>
         <Label control="ButtonY">View Change</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -5307,8 +5307,8 @@
     <Game romName="cybsled" title="Cyber Sled">
         <Label control="AxisLeftStick">Left Track</Label>
         <Label control="AxisRightStick">Right Track</Label>
+        <Label control="AxisTriggerLeft">Machine Gun</Label>
         <Label control="AxisTriggerRight">Missiles</Label>
-        <Label control="ButtonLeftShoulder">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -5723,7 +5723,6 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="ddboy" title="Dam Dam Boy">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -6470,9 +6469,6 @@
     </Game>
     <Game romName="dogosokb" title="Victory Road">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Rotate Shoot Position</Label>
-        <Label control="AxisTriggerLeft">Rotate Left</Label>
-        <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonA">Grenade</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonLeftShoulder">Grenade</Label>
@@ -6585,10 +6581,8 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="doraemon" title="Doraemon no Eawase Montage">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">2</Label>
         <Label control="ButtonB">3</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">1</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -23939,7 +23933,6 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="splat" title="Splat!">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
