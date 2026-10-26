@@ -60,14 +60,14 @@
   ButtonLeftShoulder and ButtonRightShoulder for its two built-in games instead of using the
   plain Start position at all.
 
-  ButtonDpad was removed on review from the 88 games below, as a transcription error rather
+  ButtonDpad was removed on review from the 89 games below, as a transcription error rather
   than a label printed on the card: each carried a d-pad label the cabinet has no control for
   (Bang!, a lightgun game whose cfg binds no d-pad, is the worked example).
   arcade-artwork-original.xml keeps them as first read. Removed from:
   apache3 arknoid2 ataxx bang beaminv blaster blockgal botss bowlrama breakout bshark bsktball
-  bullsdrt cameltry catch22 cclownz cerberus cloud9 csprint dangerz darkplnt dday deadeye
-  fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk gloc
-  gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
+  bullsdrt cameltry catch22 cclownz cerberus cloud9 crusherm csprint dangerz darkplnt dday
+  deadeye fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk
+  gloc gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
   omega paperboy patocar pong pongd poolshrk rampart ridleofp sbrkout seawolf2 slrasslt
   snakjack sonic spcenctr subs swa tacscan tailg tceptor tceptor2 techbowl teedoff tehkanwc
   tempest term2 trisport trivialp trophyh tshoot viper warlords wcbowl wcbowl140 wcbowldx
@@ -3167,7 +3167,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Move Shoot Position Up/Down</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
-        <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -3305,9 +3304,9 @@
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Single Explosive Shot</Label>
         <Label control="ButtonB">Low Rate Explosive Shot</Label>
-        <Label control="ButtonDpadDown">Single Armor Peircing</Label>
-        <Label control="ButtonDpadLeft">Low Rate Armor Peircing</Label>
-        <Label control="ButtonDpadUp">High Rate Armor Peircing</Label>
+        <Label control="ButtonDpadDown">Single Armor Piercing</Label>
+        <Label control="ButtonDpadLeft">Low Rate Armor Piercing</Label>
+        <Label control="ButtonDpadUp">High Rate Armor Piercing</Label>
         <Label control="ButtonLeftShoulder">TOW Missile</Label>
         <Label control="ButtonRightShoulder">7.62mm Machine Gun</Label>
         <Label control="ButtonY">High Rate Explosive Shot</Label>
@@ -3959,8 +3958,8 @@
     <Game romName="carnevil" title="CarnEvil">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Reload</Label>
-        <Label control="ButtonLeftShoulder">Reload</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
+        <Label control="AxisTriggerLeft">Reload</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -4398,7 +4397,6 @@
     </Game>
     <Game romName="chopper" title="Chopper I">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Rotate Second Weapon</Label>
         <Label control="ButtonA">Bomb</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
@@ -4957,7 +4955,6 @@
     <Game romName="crimfghtu" title="Crime Fighters">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Kick</Label>
-        <Label control="ButtonB">Attack Behind</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Punch</Label>
         <Label control="ButtonStart">Start</Label>
@@ -5036,7 +5033,7 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="crusherm" title="Crusher Makochan">
-        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonA">Crash Piston</Label>
         <Label control="ButtonX">(Tap) Power / Punch</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>

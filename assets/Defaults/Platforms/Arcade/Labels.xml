@@ -2783,6 +2783,7 @@
     </Game>
     <Game launchBoxId="29895" romName="boothill">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL_V">Move Shoot Position Up/Down</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -2909,13 +2910,14 @@
     <Game launchBoxId="467501" romName="bradley">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
+        <Input name="P1_AD_STICK_Z">Change Range UP/DOWN</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON10">Zoom In</Input>
-        <Input name="P1_BUTTON2">Single Armor Peircing</Input>
+        <Input name="P1_BUTTON2">Single Armor Piercing</Input>
         <Input name="P1_BUTTON3">Single Explosive Shot</Input>
-        <Input name="P1_BUTTON4">Low Rate Armor Peircing</Input>
+        <Input name="P1_BUTTON4">Low Rate Armor Piercing</Input>
         <Input name="P1_BUTTON5">Low Rate Explosive Shot</Input>
-        <Input name="P1_BUTTON6">High Rate Armor Peircing</Input>
+        <Input name="P1_BUTTON6">High Rate Armor Piercing</Input>
         <Input name="P1_BUTTON7">High Rate Explosive Shot</Input>
         <Input name="P1_BUTTON8">7.62mm Machine Gun</Input>
         <Input name="P1_BUTTON9">TOW Missile</Input>
@@ -3267,6 +3269,7 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35799" romName="buriki">
+        <Input name="P1_JOYSTICK">Punch / Block / Combo / Moves</Input>
         <Input name="P1_BUTTON1">Move</Input>
         <Input name="P1_BUTTON2">Move</Input>
         <Input name="START1">Start</Input>
@@ -3813,7 +3816,8 @@
     </Game>
     <Game launchBoxId="28749" romName="checkman">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="START1">Tiles Left</Input>
+        <Input name="START1">Tiles Left / 1P Start</Input>
+        <Input name="START2">Tiles Right / 2P Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35987" romName="checkmat">
@@ -4041,6 +4045,7 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36056" romName="clowns">
+        <Input name="P1_PADDLE">Move</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -4431,6 +4436,7 @@
     <Game romName="crimfghtu">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Punch</Input>
+        <Input name="P1_BUTTON1 P1_BUTTON2">Attack Behind</Input>
         <Input name="P1_BUTTON2">Kick</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -4465,6 +4471,7 @@
     <Game launchBoxId="12151" romName="crossbow">
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -4498,6 +4505,7 @@
     </Game>
     <Game launchBoxId="36206" romName="crusherm">
         <Input name="P1_BUTTON1">(Tap) Power / Punch</Input>
+        <Input name="P1_BUTTON2">Crash Piston</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36205" romName="crusnexo">
