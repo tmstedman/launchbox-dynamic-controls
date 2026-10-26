@@ -18,6 +18,11 @@ spell-corrected, reconciled against the MAME controls database, or mapped to emu
 Every one of those is a judgement that can change, and keeping them downstream means a rule
 change never costs another read of 3,571 images.
 
+The exception is a card that is itself wrong — a misspelling, a control it leaves unlabelled, a
+label on a control the cabinet does not have or on the wrong one. Those are corrected here once a second look at the
+image has settled that the card, not our reading, is at fault, and the diff against
+`arcade-artwork-original.xml` (below) is then the list to send back to the artwork's author.
+
 Controls are named with the plugin's own generic inputs — the vocabulary in `Layout.xml`.
 A control the artwork leaves blank is simply absent. A directional cluster carries either one
 label for the whole control or one per direction; transcribe whichever is drawn.

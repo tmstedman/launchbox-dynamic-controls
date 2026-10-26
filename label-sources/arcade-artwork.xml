@@ -9,6 +9,14 @@
   ports. Those are judgements, they belong downstream, and keeping them out means this file
   never has to be rebuilt when one of them changes.
 
+  The one exception is a card that is itself wrong: a misspelling, a control it leaves
+  unlabelled, a label on a control the cabinet does not have, or on the wrong one (CarnEvil's
+  gun buttons belong on the triggers its cfg binds, not the shoulders the card shows). Those
+  are corrected here, once a second look at the image has settled that the card and not our
+  reading is at fault.
+  arcade-artwork-original.xml keeps every card as first read, so the diff between the two
+  files is the list of corrections to send back to the artwork's author.
+
   A control the artwork leaves unlabelled is simply absent. A directional cluster may carry
   one label for the whole control or one per direction; transcribe whichever is drawn.
 
