@@ -134,3 +134,6 @@ joust2	ButtonX	Transform	Transform / Start	port-split-merged	merged into one lab
 joust2	ButtonStart	Start	Transform / Start	port-split-merged	merged into one label, gameplay role before system role
 aplarail	ButtonA	Decide	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
 aplarail	ButtonStart	Start	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
+checkman	ButtonX	Tiles Left	Tiles Left / 1P Start	port-split-merged	merged into one label, gameplay role before system role
+checkman	ButtonStart	Start	Tiles Left / 1P Start	port-split-merged	merged into one label, gameplay role before system role
+checkman	ButtonA	Tiles Right	Tiles Right / 2P Start	port-split-merged	merged into one label, gameplay role before system role
