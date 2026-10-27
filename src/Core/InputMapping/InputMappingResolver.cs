@@ -64,7 +64,7 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             _logger.Debug($"Applied AnalogToDigital mirror (Dpad -> {mode.ToString().ToLowerInvariant()} stick)");
         }
 
-        Dictionary<string, string> inputToButton = BuildReverse(buttonToInput);
+        Dictionary<string, string> inputToButton = BuildReverse(buttonToInput, derived);
         var readOnlyButtonToInput = buttonToInput.ToDictionary(
             e => e.Key,
             e => (IReadOnlyList<string>)e.Value);
@@ -92,19 +92,25 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
 
     /// <summary>
     /// Builds the reverse lookup (generic input → primary platform button) from
-    /// <paramref name="buttonToInput"/>. First-seen-wins: subsequent platform buttons claiming
-    /// the same generic (e.g. from AnalogToDigital mirroring) are recorded in ButtonToInput but
-    /// not exposed as the primary platform button for that generic.
+    /// <paramref name="buttonToInput"/>. A button binding the generic outright outranks one
+    /// reaching it only derivedly (<paramref name="derived"/>), as it does for labels, so the image
+    /// and the label name the same owner; among equals, first-seen wins. The others are recorded
+    /// in ButtonToInput but not exposed as the primary platform button for that generic.
     /// </summary>
-    private static Dictionary<string, string> BuildReverse(Dictionary<string, List<string>> buttonToInput)
+    private static Dictionary<string, string> BuildReverse(
+        Dictionary<string, List<string>> buttonToInput, Dictionary<string, List<string>> derived)
     {
         var reverse = new Dictionary<string, string>();
-        foreach (KeyValuePair<string, List<string>> entry in buttonToInput)
+        foreach (bool derivedPass in new[] { false, true })
         {
-            foreach (string generic in entry.Value)
+            foreach (KeyValuePair<string, List<string>> entry in buttonToInput)
             {
-                if (!reverse.ContainsKey(generic))
-                    reverse[generic] = entry.Key;
+                List<string> buttonDerived = derived.GetValueOrDefault(entry.Key, []);
+                foreach (string generic in entry.Value)
+                {
+                    if (buttonDerived.Contains(generic) == derivedPass)
+                        reverse.TryAdd(generic, entry.Key);
+                }
             }
         }
         return reverse;

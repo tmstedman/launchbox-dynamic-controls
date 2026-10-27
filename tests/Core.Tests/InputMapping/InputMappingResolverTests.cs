@@ -212,6 +212,44 @@ public class InputMappingResolverTests
         result.DerivedButtonToInput.ShouldBeDictionaryOf(("Dpad-Up", ["AxisLeftStickUp"]));
     }
 
+    [Fact]
+    public void Resolve_ReverseLookup_PrefersAButtonsOwnBindingOverADerivedOne()
+    {
+        // downtown: the nudge comes first in the file (it is in the baseline) but reaches the
+        // stick only because the port does; the port binds it. The reverse lookup decides the
+        // image, so it has to name the same owner the labels do
+        var config = new InputMappingConfig
+        {
+            Mappings =
+            [
+                Entry("P1_POSITIONAL.dec", "AxisTriggerLeft"),
+                Entry("P1_POSITIONAL.dec", "AxisRightStickLeft", derived: true),
+                Entry("P1_POSITIONAL", "AxisRightStickLeft"),
+            ],
+        };
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.InputToButton.ShouldBeDictionaryOf(
+            ("AxisTriggerLeft", "P1_POSITIONAL.dec"),
+            ("AxisRightStickLeft", "P1_POSITIONAL"));
+    }
+
+    [Fact]
+    public void Resolve_ReverseLookup_OnlyDerivedClaimants_FirstSeenStillWins()
+    {
+        // a derived claim is still a claim -- with nothing binding the input outright, the first
+        // derived one owns it as before
+        var config = new InputMappingConfig
+        {
+            Mappings = [Entry("P1_DIAL.dec", "AxisRightStickLeft", derived: true)],
+        };
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.InputToButton.ShouldBeDictionaryOf(("AxisRightStickLeft", "P1_DIAL.dec"));
+    }
+
     // Properties — hold for arbitrary mapping entry collections:
 
     // Every input appearing in ButtonToInput has a corresponding entry in InputToButton.
