@@ -19,12 +19,14 @@ public class MamePortBindingTests
         ["JOYCODE_1_BUTTON2"] = [new("ButtonB", null)],
         ["JOYCODE_1_BUTTON3"] = [new("ButtonC", null)],
         ["JOYCODE_1_ZAXIS"] = [new("AxisRightStickLeft", "dec"), new("AxisRightStickRight", "inc")],
-        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [new("AxisRightStickLeft", null)],
-        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [new("AxisRightStickRight", null)],
-        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [new("AxisLeftStickLeft", null)],
-        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", null)],
+        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [new("AxisRightStickLeft", null, new AxisEnd("JOYCODE_1_ZAXIS", "dec"))],
+        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [new("AxisRightStickRight", null, new AxisEnd("JOYCODE_1_ZAXIS", "inc"))],
+        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [new("AxisLeftStickLeft", null, new AxisEnd("JOYCODE_1_XAXIS", "dec"))],
+        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", null, new AxisEnd("JOYCODE_1_XAXIS", "inc"))],
         ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
         ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
+        ["JOYCODE_1_HAT1LEFT"] = [new("ButtonDpadLeft", null)],
+        ["JOYCODE_1_HAT1RIGHT"] = [new("ButtonDpadRight", null)],
     });
 
     /// <summary>
@@ -193,6 +195,21 @@ public class MamePortBindingTests
         Derived(reach).ShouldBeEmpty();
     }
 
+    [Fact]
+    public void NudgesOnTheHatsTwoEnds_StayTheNudgesOwn()
+    {
+        // a dial's nudges rebound to the D-pad: a hat declares no ends, so it is two buttons
+        // rather than an axis, and each nudge keeps its own direction
+        IReadOnlyList<MamePortReach> reach = Resolve(
+            standard: "NONE", increment: "JOYCODE_1_HAT1RIGHT", decrement: "JOYCODE_1_HAT1LEFT");
+
+        Inputs(reach).ShouldBeDictionaryOf(
+            (Port, []),
+            (Port + ".inc", ["ButtonDpadRight"]),
+            (Port + ".dec", ["ButtonDpadLeft"]));
+        Derived(reach).ShouldBeEmpty();
+    }
+
     // ---- an unbound nudge still names its half of a bound axis ----
 
     [Fact]
@@ -209,6 +226,20 @@ public class MamePortBindingTests
         Derived(reach).ShouldBeDictionaryOf(
             (Port + ".inc", ["AxisRightStickRight"]),
             (Port + ".dec", ["AxisRightStickLeft"]));
+    }
+
+    [Fact]
+    public void UnboundNudges_StandardIsOneEndsSwitch_ReachNothing()
+    {
+        // a switch is one end of an axis, not half of one a nudge can borrow: only the port
+        // reaches its direction
+        IReadOnlyList<MamePortReach> reach = Resolve(
+            standard: "JOYCODE_1_ZAXIS_NEG_SWITCH", increment: "NONE", decrement: "NONE");
+
+        Inputs(reach).ShouldBeDictionaryOf(
+            (Port, ["AxisRightStickLeft"]),
+            (Port + ".inc", []),
+            (Port + ".dec", []));
     }
 
     [Fact]

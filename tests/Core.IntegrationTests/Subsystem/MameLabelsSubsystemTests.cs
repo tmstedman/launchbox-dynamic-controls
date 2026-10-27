@@ -279,8 +279,8 @@ public class MameLabelsSubsystemTests
             """);
         _dc.WriteMameMapping("""
             <JoycodeMapping>
-              <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" input="AxisRightStickLeft" />
-              <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" input="AxisRightStickRight" />
+              <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" axis="JOYCODE_1_ZAXIS" end="dec" input="AxisRightStickLeft" />
+              <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" axis="JOYCODE_1_ZAXIS" end="inc" input="AxisRightStickRight" />
               <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />
               <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
             </JoycodeMapping>

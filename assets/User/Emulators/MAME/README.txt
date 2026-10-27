@@ -13,3 +13,10 @@ JoycodeMapping.xml
   (next to mame.exe). Open cfg/default.cfg or the per-game cfg/{rom}.cfg and
   look for the JOYCODE_... strings assigned to each port — these are the values
   you need to map.
+
+  A User copy replaces the shipped file wholesale, so copy the shipped one and
+  edit it rather than starting empty. Keep the axis= and end= attributes on
+  the stick switches (..._SWITCH), and add them to any you add: they say which
+  end of which axis each switch is, which is how a stick nudging a dial both
+  ways is recognised. A switch without them still translates, but pairs with
+  nothing, and a file with none at all is reported in the debug log.
