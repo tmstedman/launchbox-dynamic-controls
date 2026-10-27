@@ -6766,7 +6766,8 @@
     </Game>
     <Game launchBoxId="12195" romName="exprraid">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Duck</Input>
         <Input name="P1_BUTTON1">Punch</Input>
         <Input name="P1_BUTTON2">Kick</Input>
         <Input name="START1">Start</Input>
@@ -8171,7 +8172,8 @@
     </Game>
     <Game romName="gberet">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Lie Down</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -11054,7 +11056,7 @@
     </Game>
     <Game launchBoxId="37664" romName="kengo">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
         <Input name="P1_BUTTON1">Attack / (Hold) Charge</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -12292,7 +12294,7 @@
     </Game>
     <Game launchBoxId="37664" romName="ltswords">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
         <Input name="P1_BUTTON1">Attack / (Hold) Charge</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -13163,7 +13165,8 @@
     </Game>
     <Game launchBoxId="37742" romName="mia">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Crawl</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -13767,7 +13770,8 @@
     </Game>
     <Game launchBoxId="38225" romName="mrgoemon">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Drop Down</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -14563,7 +14567,8 @@
     </Game>
     <Game launchBoxId="32144" romName="ninjaw">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Crouch</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -18713,7 +18718,8 @@
     </Game>
     <Game romName="rushatck">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Lie Down</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -23995,7 +24001,8 @@
     </Game>
     <Game romName="trojan">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_JOYSTICK_UP">Move</Input>
+        <Input name="P1_JOYSTICK_UP">Jump</Input>
+        <Input name="P1_JOYSTICK_DOWN">Crouch</Input>
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">(Hold) Shield</Input>
         <Input name="START1">Start</Input>
