@@ -749,4 +749,86 @@ public class InputLabelsServiceTests
             ("AxisTriggerLeft", "Rotate Left"),
             ("AxisTriggerRight", "Rotate Right"));
     }
+
+    [Fact]
+    public void Load_AxisBoundAndNudgesUnbound_ThePortsLabelOutranksTheNudgesOnBothHalves()
+    {
+        // bm1stmix's shape: the port binds the whole axis and each nudge reaches its half only
+        // derivedly. Ranked by position, the port's second half tied with that half's nudge and
+        // went blank while the first took the port's word -- one stick, two different answers
+        ResolvedMapping mapping = Mapping(platform: "Arcade",
+            buttonToInput: new()
+            {
+                ["P1_DIAL"] = ["AxisLeftStickLeft", "AxisLeftStickRight"],
+                ["P1_DIAL.dec"] = ["AxisLeftStickLeft"],
+                ["P1_DIAL.inc"] = ["AxisLeftStickRight"],
+            },
+            derived: new()
+            {
+                ["P1_DIAL.dec"] = ["AxisLeftStickLeft"],
+                ["P1_DIAL.inc"] = ["AxisLeftStickRight"],
+            });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("P1_DIAL", "Steer"),
+            ("P1_DIAL.dec", "Steer Left"),
+            ("P1_DIAL.inc", "Steer Right")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("bm1stmix"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisLeftStickLeft", "Steer"),
+            ("AxisLeftStickRight", "Steer"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_ControlAndItsFirstMemberBothLabelled_TheMemberWins()
+    {
+        // a control reaches its first member's input at position 0, as the member does, so by
+        // position alone the two tied there and it went blank -- while every other member won
+        // outright. The control's reach is derived, so the member's own binding wins everywhere.
+        ResolvedMapping mapping = Mapping(platform: "Arcade",
+            buttonToInput: new()
+            {
+                ["Dpad-Any"] = ["ButtonDpadUp", "ButtonDpadDown"],
+                ["Dpad-Up"] = ["ButtonDpadUp"],
+                ["Dpad-Down"] = ["ButtonDpadDown"],
+            },
+            derived: new() { ["Dpad-Any"] = ["ButtonDpadUp", "ButtonDpadDown"] });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("Dpad-Any", "Move"),
+            ("Dpad-Up", "Jump"),
+            ("Dpad-Down", "Crouch")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("3on3dunk"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonDpadUp", "Jump"),
+            ("ButtonDpadDown", "Crouch"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_MirroredClaimFirstInItsList_StillLosesToTheOwnBinding()
+    {
+        // the mirror is derived wherever it lands in the list: here it sits first, level with the
+        // stick's own binding by position, and still steps aside
+        ResolvedMapping mapping = Mapping(platform: "Nintendo 64",
+            buttonToInput: new()
+            {
+                ["Stick-Any"] = ["AxisLeftStick"],
+                ["Dpad-Any"] = ["AxisLeftStick", "ButtonDpad"],
+            },
+            derived: new() { ["Dpad-Any"] = ["AxisLeftStick"] });
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("Stick-Any", "Look"),
+            ("Dpad-Any", "Move")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("Goldeneye 007"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisLeftStick", "Look"),
+            ("ButtonDpad", "Move"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
 }
