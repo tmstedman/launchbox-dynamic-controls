@@ -60,14 +60,14 @@
   ButtonLeftShoulder and ButtonRightShoulder for its two built-in games instead of using the
   plain Start position at all.
 
-  ButtonDpad was removed on review from the 90 games below, as a transcription error rather
+  ButtonDpad was removed on review from the 93 games below, as a transcription error rather
   than a label printed on the card: each carried a d-pad label the cabinet has no control for
   (Bang!, a lightgun game whose cfg binds no d-pad, is the worked example).
   arcade-artwork-original.xml keeps them as first read. Removed from:
   apache3 arknoid2 ataxx bang beaminv blaster blockgal botss bowlrama breakout bshark bsktball
   bullsdrt cameltry catch22 cclownz cerberus cloud9 crusherm csprint dangerz darkplnt dday
-  deadeye doraemon fbcrazy fgoal firebeas firefox foodf gforce2 gghost ghoshunt gigas gigasm2 gimeabrk
-  gloc gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
+  deadeye doraemon fbcrazy fgoal firebeas firefox foodf g13jnr g13knd gforce2 gghost ghoshunt gigas gigasm2 gimeabrk
+  gloc golgo13 gridiron guts irrmaze jedi kdeadeye kick marble marinedt mazeinv micon2 minigolf mmagic
   omega paperboy patocar pong pongd poolshrk rampart ridleofp sbrkout seawolf2 slrasslt
   snakjack sonic spcenctr subs swa tacscan tailg tceptor tceptor2 techbowl teedoff tehkanwc
   tempest term2 trisport trivialp trophyh tshoot viper warlords wcbowl wcbowl140 wcbowldx
@@ -8690,10 +8690,10 @@
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
-    <Game romName="g13jnr" title="Gologo 13: Juusei no Requium">
+    <Game romName="g13jnr" title="Golgo 13: Juusei no Requiem">
         <Label control="AxisLeftStick">Move Crosshair</Label>
-        <Label control="ButtonDpadUp">Move Crosshair</Label>
-        <Label control="ButtonDpadDown">Move Crosshair</Label>
+        <Label control="AxisTriggerLeft">Scope</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonX">Scope</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8701,8 +8701,6 @@
     </Game>
     <Game romName="g13knd" title="Golgo 13 Kiseki no Dandou">
         <Label control="AxisLeftStick">Move Crosshair</Label>
-        <Label control="ButtonDpadUp">Move Crosshair</Label>
-        <Label control="ButtonDpadDown">Move Crosshair</Label>
         <Label control="AxisTriggerLeft">(Hold) Scope</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
@@ -9586,8 +9584,6 @@
     </Game>
     <Game romName="golgo13" title="Golgo 13">
         <Label control="AxisLeftStick">Move Crosshair</Label>
-        <Label control="ButtonDpadUp">Move Crosshair</Label>
-        <Label control="ButtonDpadDown">Move Crosshair</Label>
         <Label control="AxisTriggerLeft">(Hold) Scope</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>

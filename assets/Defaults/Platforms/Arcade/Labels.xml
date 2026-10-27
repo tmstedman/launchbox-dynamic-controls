@@ -7767,8 +7767,6 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="158016" romName="g13jnr">
-        <Input name="P1_JOYSTICK_UP">Move Crosshair</Input>
-        <Input name="P1_JOYSTICK_DOWN">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
@@ -7777,8 +7775,6 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36986" romName="g13knd">
-        <Input name="P1_JOYSTICK_UP">Move Crosshair</Input>
-        <Input name="P1_JOYSTICK_DOWN">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
@@ -8568,8 +8564,6 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="155186" romName="golgo13">
-        <Input name="P1_JOYSTICK_UP">Move Crosshair</Input>
-        <Input name="P1_JOYSTICK_DOWN">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
