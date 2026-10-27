@@ -5,10 +5,31 @@ namespace DynamicControls.Core.Tests.Plugins.Mame;
 /// <summary>
 /// Unit tests for <see cref="MameSequence"/>: one cfg <c>&lt;newseq&gt;</c>, read as the
 /// <c>OR</c>-separated alternatives that each trigger it, and the one question asked of two of
-/// them together — which of their switches form an axis between them.
+/// them together — which of their switches form an axis between them. Which joycode is which end
+/// of which axis is the joycode vocabulary's to say, so a joycode it doesn't declare pairs with
+/// nothing, however its name reads.
 /// </summary>
 public class MameSequenceTests
 {
+    private static JoycodeTarget End(string input, string axis, string side) => new(input, null, new AxisEnd(axis, side));
+
+    private static readonly JoycodeMapping Joycodes = new(new Dictionary<string, List<JoycodeTarget>>
+    {
+        ["JOYCODE_1_BUTTON1"] = [new("ButtonA", null)],
+        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [End("AxisLeftStickLeft", "JOYCODE_1_XAXIS", "dec")],
+        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [End("AxisLeftStickRight", "JOYCODE_1_XAXIS", "inc")],
+        ["JOYCODE_1_YAXIS_UP_SWITCH"] = [End("AxisLeftStickUp", "JOYCODE_1_YAXIS", "dec")],
+        ["JOYCODE_1_YAXIS_DOWN_SWITCH"] = [End("AxisLeftStickDown", "JOYCODE_1_YAXIS", "inc")],
+        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [End("AxisRightStickLeft", "JOYCODE_1_ZAXIS", "dec")],
+        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [End("AxisRightStickRight", "JOYCODE_1_ZAXIS", "inc")],
+        ["JOYCODE_1_RZAXIS_NEG_SWITCH"] = [End("AxisRightStickUp", "JOYCODE_1_RZAXIS", "dec")],
+        // a second spelling of the Z axis's ends: one end can be declared by several codes
+        ["JOYCODE_1_ALTZ_NEG_SWITCH"] = [End("AxisRightStickLeft", "JOYCODE_1_ZAXIS", "dec")],
+        ["JOYCODE_1_ALTZ_POS_SWITCH"] = [End("AxisRightStickRight", "JOYCODE_1_ZAXIS", "inc")],
+        ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
+        ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
+    });
+
     [Theory]
     [InlineData("NONE")]
     [InlineData("")]
@@ -49,9 +70,14 @@ public class MameSequenceTests
                 "JOYCODE_1_XAXIS_RIGHT_SWITCH", "JOYCODE_1_XAXIS_LEFT_SWITCH")]
     [InlineData("JOYCODE_1_YAXIS_UP_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH",
                 "JOYCODE_1_YAXIS_UP_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH")]
+    // an end declared by two codes: every one of them pairs, and the shared opposite is named once
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_ALTZ_POS_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH",
+                "JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_ALTZ_POS_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_ALTZ_NEG_SWITCH",
+                "JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_ALTZ_NEG_SWITCH")]
     public void AxisEndsSharedWith_OppositeEndsOfOneAxis_Pair(string here, string there, string expectedHere, string expectedThere)
     {
-        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there), Joycodes);
 
         pairedHere.ToString().ShouldBe(expectedHere);
         pairedThere.ToString().ShouldBe(expectedThere);
@@ -71,9 +97,11 @@ public class MameSequenceTests
     [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH JOYCODE_1_BUTTON1", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
     // ordinary buttons are no axis at all
     [InlineData("JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2")]
+    // named like an axis's two ends, but the vocabulary declares neither
+    [InlineData("JOYCODE_1_WAXIS_POS_SWITCH", "JOYCODE_1_WAXIS_NEG_SWITCH")]
     public void AxisEndsSharedWith_NotOneAxisBothWays_PairsNothing(string here, string there)
     {
-        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there), Joycodes);
 
         pairedHere.IsBound.ShouldBeFalse();
         pairedThere.IsBound.ShouldBeFalse();

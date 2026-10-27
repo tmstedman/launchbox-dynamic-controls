@@ -63,15 +63,45 @@ public class JoycodeMappingLoader(
                 half = null;
             }
 
+            // Optional: the axis a switch is one end of, and which end, so the two ends of one
+            // stick can be recognised as a pair. Each is meaningless without the other, so half a
+            // declaration is dropped rather than guessed.
+            AxisEnd? end = ReadEnd(node, joycode);
+
             if (!map.TryGetValue(joycode, out List<JoycodeTarget>? targets))
             {
                 targets = [];
                 map[joycode] = targets;
             }
-            targets.Add(new JoycodeTarget(input, half));
+            if (end != null && targets.Any(t => t.End != null && t.End != end))
+            {
+                _logger.Error($"Ignoring axis=\"{end.Axis}\" end=\"{end.Side}\" on {joycode} in JoycodeMapping.xml: an earlier entry already declares it a different end");
+                end = null;
+            }
+            targets.Add(new JoycodeTarget(input, half, end));
+        }
+
+        var mapping = new JoycodeMapping(map);
+        if (map.Count > 0 && !mapping.DeclaresAnyEnd)
+        {
+            _logger.Error($"{path} declares no axis ends (axis= and end=), so a nudge pair on a stick's two switches won't be read as one axis. A copy made from an older release needs them added back; see README.txt beside it");
         }
 
         _logger.Debug($"Joycode mapping entries loaded: {map.Count}");
-        return new JoycodeMapping(map);
+        return mapping;
+    }
+
+    private AxisEnd? ReadEnd(XmlElement node, string joycode)
+    {
+        string? axis = node.Attributes["axis"]?.Value;
+        string? end = node.Attributes["end"]?.Value;
+        if (axis == null && end == null) return null;
+
+        if (axis == null || end is not "dec" and not "inc")
+        {
+            _logger.Error($"Ignoring axis=\"{axis}\" end=\"{end}\" on {joycode} in JoycodeMapping.xml: an end needs both, with end=\"dec\" or end=\"inc\"");
+            return null;
+        }
+        return new AxisEnd(axis, end);
     }
 }

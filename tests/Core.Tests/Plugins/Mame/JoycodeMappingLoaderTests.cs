@@ -164,4 +164,122 @@ public class JoycodeMappingLoaderTests
         result.TranslateHalf("JOYCODE_1_XAXIS", "dec").ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("expected \"dec\" or \"inc\"")));
     }
+
+    [Fact]
+    public void Load_SwitchStatesTheAxisItIsAnEndOf_ItsEndIsKnown()
+    {
+        // given a stick axis read as a switch, declaring which axis it is an end of and which end
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' end='inc' input='AxisRightStickRight' />
+              <Mapping joycode='JOYCODE_1_SLIDER1_NEG_SWITCH' input='AxisTriggerLeft' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then the switch is that end of that axis but no half of it, and a joycode declaring no
+        // axis is no end
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(new AxisEnd("JOYCODE_1_ZAXIS", "inc"));
+        result.TranslateHalf("JOYCODE_1_ZAXIS_POS_SWITCH", "inc").ShouldBeEmpty();
+        result.EndOf("JOYCODE_1_SLIDER1_NEG_SWITCH").ShouldBeNull();
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight"]);
+    }
+
+    [Theory]
+    [InlineData("axis='JOYCODE_1_ZAXIS'")]
+    [InlineData("end='inc'")]
+    public void Load_HalfAnEnd_IsNoEndAndLogsError(string attributes)
+    {
+        // given a switch naming its axis without which end, or which end without its axis
+        StubXml($"""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' {attributes} input='AxisRightStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then it still translates, but an end of no known side pairs with nothing
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight"]);
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("an end needs both")));
+    }
+
+    [Fact]
+    public void Load_EndNeitherDecNorInc_IsNoEndAndLogsError()
+    {
+        // given a switch naming its end in words other than MAME's own sequence types
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' end='pos' input='AxisRightStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then it still translates, but is no end, and the bad value is reported
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight"]);
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("end=\"pos\"") && s.Contains("end=\"dec\" or end=\"inc\"")));
+    }
+
+    [Fact]
+    public void Load_OneJoycodeDeclaredTwoDifferentEnds_KeepsTheFirstAndLogsError()
+    {
+        // given one switch declared twice, as opposite ends
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' end='inc' input='AxisRightStickRight' />
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' end='dec' input='ButtonDpadRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then the first end stands, both inputs still translate, and the conflict is reported
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(new AxisEnd("JOYCODE_1_ZAXIS", "inc"));
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight", "ButtonDpadRight"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("already declares it a different end")));
+    }
+
+    [Fact]
+    public void Load_MappingDeclaringNoEnds_LogsError()
+    {
+        // given a copy made before ends were declared: switches, but no axis= on any of them
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_NEG_SWITCH' input='AxisRightStickLeft' />
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' input='AxisRightStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        _underTest.Load();
+
+        // then the silent loss of axis pairing is reported
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("declares no axis ends")));
+    }
+
+    [Fact]
+    public void Load_MappingDeclaringAnEnd_DoesNotReportMissingEnds()
+    {
+        // given a mapping declaring one end beside an ordinary button
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_BUTTON1' input='ButtonA' />
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' end='inc' input='AxisRightStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        _underTest.Load();
+
+        // then nothing is reported: one end is enough to show the file knows about them
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
 }

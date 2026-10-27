@@ -65,7 +65,7 @@ public static class MamePortBinding
         // port's analogue binding — bound as switches so it keeps turning while held. It is the
         // port's own reach, as if the axis were bound to standard; the nudges reach their half of
         // it only because the port does.
-        (MameSequence incEnd, MameSequence decEnd) = increment.AxisEndsSharedWith(decrement);
+        (MameSequence incEnd, MameSequence decEnd) = increment.AxisEndsSharedWith(decrement, joycodes);
         MameSequence axisPair = incEnd.Concat(decEnd);
 
         var bySeqType = new Dictionary<string, (List<string> Own, List<string> Derived)>
