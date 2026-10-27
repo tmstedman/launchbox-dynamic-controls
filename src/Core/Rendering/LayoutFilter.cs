@@ -68,7 +68,7 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
         }
 
         var renderSet = new HashSet<InputDefinition>(inputsToRender, ReferenceEqualityComparer.Instance);
-        Dictionary<InputDefinition, double> adjustments = ComputeCollapseAdjustments(inputsToRender, template, ctx, renderSet);
+        Dictionary<InputDefinition, double> adjustments = ComputeCollapseAdjustments(template, ctx, renderSet);
 
         // Merged once, here, so InputLabelRenderer/InputImageRenderer never need to know a static
         // (InputDefinition.Labels/Overlays) and a loose (Condition-gated) source ever existed
@@ -108,7 +108,6 @@ public class LayoutFilter(IVisibilityEvaluator evaluator) : ILayoutFilter
     /// instead of fighting each other.</para>
     /// </summary>
     private Dictionary<InputDefinition, double> ComputeCollapseAdjustments(
-        List<InputDefinition> inputsToRender,
         Template template,
         VisibilityContext ctx,
         HashSet<InputDefinition> renderSet)

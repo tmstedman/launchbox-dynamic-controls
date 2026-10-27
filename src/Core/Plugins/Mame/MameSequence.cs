@@ -18,14 +18,20 @@ public sealed class MameSequence
     /// </summary>
     private static readonly Dictionary<string, string> OppositeEnd = new()
     {
-        ["POS"] = "NEG", ["NEG"] = "POS",
-        ["LEFT"] = "RIGHT", ["RIGHT"] = "LEFT",
-        ["UP"] = "DOWN", ["DOWN"] = "UP",
+        ["POS"] = "NEG",
+        ["NEG"] = "POS",
+        ["LEFT"] = "RIGHT",
+        ["RIGHT"] = "LEFT",
+        ["UP"] = "DOWN",
+        ["DOWN"] = "UP",
     };
 
     public static readonly MameSequence Unbound = new([]);
 
-    private MameSequence(IReadOnlyList<string> alternatives) => Alternatives = alternatives;
+    private MameSequence(IReadOnlyList<string> alternatives)
+    {
+        Alternatives = alternatives;
+    }
 
     public IReadOnlyList<string> Alternatives { get; }
 
@@ -62,7 +68,11 @@ public sealed class MameSequence
             string opposite = $"{match.Groups[1].Value}_{OppositeEnd[match.Groups[2].Value]}_SWITCH";
             if (!other.Alternatives.Contains(opposite)
                 || Alternatives.Contains(opposite)
-                || other.Alternatives.Contains(alternative)) continue;
+                || other.Alternatives.Contains(alternative))
+            {
+                continue;
+            }
+
             here.Add(alternative);
             there.Add(opposite);
         }

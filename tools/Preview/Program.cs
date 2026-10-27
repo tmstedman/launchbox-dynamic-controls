@@ -199,7 +199,7 @@ static SKTypeface LoadTypeface(string path)
 {
     if (path.Length > 0)
     {
-        SKTypeface? loaded = SKTypeface.FromFile(path);
+        var loaded = SKTypeface.FromFile(path);
         if (loaded != null) return loaded;
         Console.Error.WriteLine($"Could not read font {path}, falling back.");
     }
@@ -215,7 +215,7 @@ static SKTypeface LoadTypeface(string path)
     // to be compared back -- without this every lookup "succeeds" and the first entry always wins.
     static SKTypeface? Exact(string family)
     {
-        SKTypeface? found = SKTypeface.FromFamilyName(family, SKFontStyleWeight.SemiBold,
+        var found = SKTypeface.FromFamilyName(family, SKFontStyleWeight.SemiBold,
             SKFontStyleWidth.Normal, SKFontStyleSlant.Upright);
         return found != null && found.FamilyName.Equals(family, StringComparison.OrdinalIgnoreCase)
             ? found

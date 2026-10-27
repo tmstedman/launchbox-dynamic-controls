@@ -156,12 +156,12 @@ public static class ImageWriter
         var sb = new StringBuilder();
         AppendPrologue(sb, header, command, "Renders");
 
-        var shapes = roms
+        IOrderedEnumerable<(List<string> Roms, IReadOnlyList<GameImage> Images)> shapes = roms
             .GroupBy(r => string.Join('\n', Ordered(r.Images).Select(i =>
                 $"{i.Control}|{i.Source}|{i.Width}|{i.Height}|{i.Opacity}|{i.BlurRadius}")))
             .Select(g => (
                 Roms: g.Select(r => r.RomName).OrderBy(n => n, StringComparer.Ordinal).ToList(),
-                Images: g.First().Images))
+                g.First().Images))
             .OrderBy(s => s.Roms[0], StringComparer.Ordinal);
 
         foreach ((List<string> shapeRoms, IReadOnlyList<GameImage> images) in shapes)
