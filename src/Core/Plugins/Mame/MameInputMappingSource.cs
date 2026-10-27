@@ -55,7 +55,10 @@ public class MameInputMappingSource(
         InputMappingConfig baseline,
         IReadOnlyList<MamePortReach> overrides)
     {
-        var byName = overrides.ToDictionary(r => r.Name);
+        // The later of two same-named buttons stands, in the earlier's place. Nothing promises the
+        // loader de-duplicates, and a throw here would be swallowed into an empty overlay.
+        var byName = new Dictionary<string, MamePortReach>();
+        foreach (MamePortReach reach in overrides) byName[reach.Name] = reach;
         var mappings = new List<MappingEntry>();
         var expandedOverrides = new HashSet<string>();
         var baselineNames = new HashSet<string>();
@@ -76,7 +79,7 @@ public class MameInputMappingSource(
             }
         }
 
-        foreach (MamePortReach reach in overrides)
+        foreach (MamePortReach reach in byName.Values)
         {
             if (baselineNames.Contains(reach.Name)) continue;
             mappings.AddRange(Entries(reach));
