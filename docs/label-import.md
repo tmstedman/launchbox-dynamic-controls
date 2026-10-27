@@ -123,6 +123,16 @@ port's own sequence (`tdfever`), or as a switch at each end of it, one in each n
 turning while held (`downtown`). A nudge label reaches the stick only when the port has no label
 of its own — so a game labelling only the nudges still shows them there, one per half.
 
+### A port type the cfg repeats is named by its tag and mask
+
+MAME writes one `<port>` per tag and bit a type sits on, so a cfg can carry the same type several
+times: `escounts` has four `OTHER` ports, for Pass, Collect, Continue and Bonus. The last of them
+keeps the bare type as its name, and each earlier one is named by its type, its tag without the
+leading colon, and its mask — `OTHER:STROBE1:2`. Read the names straight off the cfg's `<port>`
+attributes; a qualified port's nudges are named after it the same way (`P1_DIAL:DIAL0:255.inc`).
+Both tag and mask are needed: `escounts` puts all four on one tag, and `gahaha`'s two sticks share
+a mask on different tags.
+
 ### Labels are captions, not prose
 
 The database writes sentences: `Offensive Throw / Defensive Catch`, or Champion Base Ball's
