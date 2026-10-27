@@ -26,7 +26,7 @@ public class MameInputMappingSource(
         string cfgDir = Path.Combine(
             Path.GetDirectoryName(game.EmulatorPath)!, "cfg");
 
-        MameCfgOverrides? overrides = null;
+        IReadOnlyList<MamePortReach>? overrides = null;
         if (game.RomName != null)
             overrides = _cfgLoader.Load(Path.Combine(cfgDir, game.RomName + ".cfg"));
 
@@ -53,8 +53,9 @@ public class MameInputMappingSource(
     /// </summary>
     private static InputMappingConfig Merge(
         InputMappingConfig baseline,
-        MameCfgOverrides overrides)
+        IReadOnlyList<MamePortReach> overrides)
     {
+        var byName = overrides.ToDictionary(r => r.Name);
         var mappings = new List<MappingEntry>();
         var expandedOverrides = new HashSet<string>();
         var baselineNames = new HashSet<string>();
@@ -62,11 +63,11 @@ public class MameInputMappingSource(
         foreach (MappingEntry entry in baseline.Mappings)
         {
             baselineNames.Add(entry.Name);
-            if (overrides.TryGetValue(entry.Name, out List<string>? newInputs))
+            if (byName.TryGetValue(entry.Name, out MamePortReach? reach))
             {
                 if (expandedOverrides.Add(entry.Name))
                 {
-                    mappings.AddRange(Entries(entry.Name, newInputs, overrides));
+                    mappings.AddRange(Entries(reach));
                 }
             }
             else
@@ -75,10 +76,10 @@ public class MameInputMappingSource(
             }
         }
 
-        foreach ((string name, List<string> inputs) in overrides)
+        foreach (MamePortReach reach in overrides)
         {
-            if (baselineNames.Contains(name)) continue;
-            mappings.AddRange(Entries(name, inputs, overrides));
+            if (baselineNames.Contains(reach.Name)) continue;
+            mappings.AddRange(Entries(reach));
         }
 
         return new InputMappingConfig
@@ -89,9 +90,7 @@ public class MameInputMappingSource(
         };
     }
 
-    private static IEnumerable<MappingEntry> Entries(string name, List<string> inputs, MameCfgOverrides overrides)
-    {
-        List<string> derived = overrides.Derived.GetValueOrDefault(name, []);
-        return inputs.Select(input => new MappingEntry { Name = name, Input = input, Derived = derived.Contains(input) });
-    }
+    private static IEnumerable<MappingEntry> Entries(MamePortReach reach) =>
+        reach.Own.Select(input => new MappingEntry { Name = reach.Name, Input = input })
+            .Concat(reach.Derived.Select(input => new MappingEntry { Name = reach.Name, Input = input, Derived = true }));
 }

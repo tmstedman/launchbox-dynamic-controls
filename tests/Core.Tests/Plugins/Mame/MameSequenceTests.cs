@@ -1,0 +1,72 @@
+using DynamicControls.Plugins.Mame;
+
+namespace DynamicControls.Core.Tests.Plugins.Mame;
+
+/// <summary>
+/// Unit tests for <see cref="MameSequence"/>: one cfg <c>&lt;newseq&gt;</c>, read as the
+/// <c>OR</c>-separated alternatives that each trigger it, and the one question asked of two of
+/// them together — which of their switches form an axis between them.
+/// </summary>
+public class MameSequenceTests
+{
+    [Theory]
+    [InlineData("NONE")]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData(null)]
+    public void Parse_NoneOrEmpty_IsUnbound(string? text) =>
+        MameSequence.Parse(text).IsBound.ShouldBeFalse();
+
+    [Fact]
+    public void Parse_SplitsOnOr_KeepingAChordWhole()
+    {
+        // a chord -- codes pressed together, space-separated -- is one alternative, not two
+        MameSequence sequence = MameSequence.Parse(" JOYCODE_1_BUTTON1 OR JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3 ");
+
+        sequence.Alternatives.ShouldBe(["JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3"]);
+        sequence.ToString().ShouldBe("JOYCODE_1_BUTTON1 OR JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3");
+    }
+
+    [Fact]
+    public void Without_DropsThoseAlternatives_AndKeepsTheRestInOrder()
+    {
+        MameSequence sequence = MameSequence.Parse("JOYCODE_1_BUTTON1 OR JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_BUTTON2");
+
+        sequence.Without(MameSequence.Parse("JOYCODE_1_ZAXIS_POS_SWITCH")).Alternatives
+            .ShouldBe(["JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2"]);
+    }
+
+    [Theory]
+    // downtown's stick: an end of the axis in each nudge, beside a trigger in each
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_SLIDER2_NEG_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_SLIDER1_NEG_SWITCH",
+                "JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
+    // which end is in which nudge doesn't matter -- it's still one axis both ways
+    [InlineData("JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH",
+                "JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
+    public void AxisEndsSharedWith_OppositeEndsOfOneAxis_Pair(string here, string there, string expectedHere, string expectedThere)
+    {
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+
+        pairedHere.ToString().ShouldBe(expectedHere);
+        pairedThere.ToString().ShouldBe(expectedThere);
+    }
+
+    [Theory]
+    // both ends of the axis in one nudge: pressing it pushes both ways at once
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
+    // an end in each, but of two different axes
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_RZAXIS_NEG_SWITCH")]
+    // the same end in both
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
+    // an end held only as part of a chord is not the stick on its own
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH JOYCODE_1_BUTTON1", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
+    // ordinary buttons are no axis at all
+    [InlineData("JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2")]
+    public void AxisEndsSharedWith_NotOneAxisBothWays_PairsNothing(string here, string there)
+    {
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+
+        pairedHere.IsBound.ShouldBeFalse();
+        pairedThere.IsBound.ShouldBeFalse();
+    }
+}

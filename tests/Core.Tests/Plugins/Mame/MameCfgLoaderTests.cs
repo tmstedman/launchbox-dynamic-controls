@@ -4,10 +4,10 @@ using NSubstitute;
 namespace DynamicControls.Core.Tests.Plugins.Mame;
 
 /// <summary>
-/// Unit tests for <see cref="MameCfgLoader"/>. The loader reads a MAME .cfg file and produces a
-/// dictionary of {input name -> generic inputs} by walking system/input/port/newseq, translating
-/// whichever of standard/increment/decrement are bound (standard-first, deduped) via an injected
-/// <see cref="IJoycodeMappingLoader"/>. Filesystem and joycode loader are both substituted so each
+/// Unit tests for <see cref="MameCfgLoader"/>: waiting out MAME's write, walking
+/// system/input/port/newseq, keeping each port's cfg name, and logging a port that translates to
+/// nothing. What a port's sequences reach once read is <see cref="MamePortBinding"/>'s, tested in
+/// <see cref="MamePortBindingTests"/>. Filesystem and joycode loader are both substituted so each
 /// test supplies a literal cfg XML and a fixed joycode dictionary.
 /// </summary>
 public class MameCfgLoaderTests
@@ -34,6 +34,12 @@ public class MameCfgLoaderTests
         });
         _joycodeMappingLoader.Load().Returns(joycodeMapping);
         _underTest = new MameCfgLoader(_logger, _fs, _joycodeMappingLoader, _delay);
+    }
+
+    private static Dictionary<string, IReadOnlyList<string>> Inputs(IReadOnlyList<MamePortReach>? result)
+    {
+        result.ShouldNotBeNull();
+        return result.ToDictionary(r => r.Name, r => r.Inputs);
     }
 
     private void StubXml(string xml)
@@ -82,7 +88,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then the retry closes the race and the file is parsed normally
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
+        Inputs(result).ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
         _delay.Received(1).Sleep(Arg.Any<int>());
     }
 
@@ -124,7 +130,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then each port is keyed by its raw "P1_" type, value is the translated input
-        result.ShouldBeDictionaryOf(
+        Inputs(result).ShouldBeDictionaryOf(
             ("P1_BUTTON1", ["ButtonA"]),
             ("P1_BUTTON2", ["ButtonB"]));
     }
@@ -152,7 +158,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then each keeps the name the cfg gave it -- the vocabulary is MAME's own, unrewritten
-        result.ShouldBeDictionaryOf(
+        Inputs(result).ShouldBeDictionaryOf(
             ("START1", ["Start"]),
             ("COIN1", ["Coin"]));
     }
@@ -183,7 +189,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then both survive under their own cfg names, so Labels.xml can address them apart
-        result.ShouldBeDictionaryOf(
+        Inputs(result).ShouldBeDictionaryOf(
             ("START1", ["ButtonA"]),
             ("START3", ["ButtonB"]));
     }
@@ -242,7 +248,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then each keeps its own port name, so Labels.xml can address them separately
-        result.ShouldBeDictionaryOf(
+        Inputs(result).ShouldBeDictionaryOf(
             ("P3_BUTTON1", ["ButtonB"]),
             ("SERVICE", ["ButtonC"]),
             ("P1_BUTTON1", ["ButtonA"]));
@@ -294,7 +300,7 @@ public class MameCfgLoaderTests
         // when the loader runs
         var result = _underTest.Load(CfgPath);
 
-        result.ShouldBeDictionaryOf(("P2_BUTTON1", ["ButtonA"]));
+        Inputs(result).ShouldBeDictionaryOf(("P2_BUTTON1", ["ButtonA"]));
     }
 
     [Fact]
@@ -320,29 +326,6 @@ public class MameCfgLoaderTests
 
         result.ShouldBeEmpty();
         _logger.Received().Debug(Arg.Is<string>(s => s.Contains("unknown JOYCODE") && s.Contains("P2_BUTTON1")));
-    }
-
-    [Fact]
-    public void Load_OrChainedJoycode_StoresAllTranslatedInputsInOrder()
-    {
-        // given a port whose sequence chains two JOYCODEs with "OR" (MAME's alternative-binding syntax)
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_BUTTON1'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON2 OR JOYCODE_1_BUTTON1</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        // then both translated inputs are recorded in source order (renderer marks every physical button)
-        result.ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonB", "ButtonA"]));
     }
 
     [Fact]
@@ -390,7 +373,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then only the port with a sequence contributes; no error is logged for the skip
-        result.ShouldBeDictionaryOf(("P1_BUTTON3", ["ButtonC"]));
+        Inputs(result).ShouldBeDictionaryOf(("P1_BUTTON3", ["ButtonC"]));
     }
 
     [Fact]
@@ -443,249 +426,30 @@ public class MameCfgLoaderTests
 
         // then the nudge names are still stated, so a baseline for them is dropped rather than
         // left pointing at an axis this cfg never bound
-        result.ShouldBeDictionaryOf(
+        Inputs(result).ShouldBeDictionaryOf(
             ("P1_DIAL", ["ButtonA"]),
             ("P1_DIAL.inc", []),
             ("P1_DIAL.dec", []));
     }
 
     [Fact]
-    public void Load_StandardNone_IncrementAndDecrementBound_UsesBoth()
+    public void Load_SamePortTypeTwice_TheLaterReplacesTheEarlier_InTheEarliersPlace()
     {
-        // the adillor/spacwalk shape: a true analogue control (a trackball or paddle axis) with no
-        // analogue hardware assigned, driven instead by two ordinary buttons nudging it each way
+        // the dingo/hotrod shape: MAME writes one <port> per tag a type sits on, so a type can
+        // appear twice. One platform button carries one binding, so the later stands -- and
+        // keeps the first one's place, so nothing downstream sees the button twice
         StubXml("""
             <mameconfig>
-              <system name='galaga'>
+              <system name='dingo'>
                 <input>
-                  <port type='P1_BUTTON1'>
-                    <newseq type='standard'>NONE</newseq>
-                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
-                    <newseq type='decrement'>JOYCODE_1_BUTTON3</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        // then each nudge direction becomes its own button, and the port's own name is stated
-        // empty -- it is bound, but not to anything analogue, so Controllers.xml's baseline guess
-        // at the axis must not survive the merge
-        result.ShouldBeDictionaryOf(
-            ("P1_BUTTON1", []),
-            ("P1_BUTTON1.inc", ["ButtonB"]),
-            ("P1_BUTTON1.dec", ["ButtonC"]));
-    }
-
-    [Fact]
-    public void Load_StandardAndIncrementBothBound_StandardOrderedFirst()
-    {
-        // a port with real analogue hardware assigned AND a digital fallback for one direction --
-        // both are recognized, analogue first since it's the more direct binding
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_BUTTON1'>
+                  <port tag=':IN0' type='P1_BUTTON1'>
                     <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
                   </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        // the analogue binding keeps the port's own name; the nudge gets its own
-        result.ShouldBeDictionaryOf(
-            ("P1_BUTTON1", ["ButtonA"]),
-            ("P1_BUTTON1.inc", ["ButtonB"]));
-    }
-
-    [Fact]
-    public void Load_SameGenericReachableFromStandardAndIncrement_DedupsToOneEntry()
-    {
-        // increment happens to translate to a generic the standard sequence already reached.
-        // They are separate buttons now, so both record it -- the duplicate that mattered was
-        // within one button's list, and a <Control> over the pair dedups what the port reaches
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_BUTTON1'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                    <newseq type='increment'>JOYCODE_1_BUTTON1</newseq>
+                  <port tag=':IN0' type='P1_BUTTON2'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
                   </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        result.ShouldBeDictionaryOf(
-            ("P1_BUTTON1", ["ButtonA"]),
-            ("P1_BUTTON1.inc", ["ButtonA"]));
-    }
-
-    [Fact]
-    public void Load_AllThreeSequencesBound_SplitsIntoThreeButtons()
-    {
-        // the airco22b shape: a throttle read from an analogue axis, nudged by two separate
-        // controls -- the triggers, not the axis. Each carries its own label in the artwork, so
-        // each has to be addressable on its own.
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_AD_STICK_Z'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                    <newseq type='increment'>JOYCODE_1_BUTTON2</newseq>
-                    <newseq type='decrement'>JOYCODE_1_BUTTON3</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        // then three buttons, and the port's own name is NOT stated empty -- its analogue
-        // binding is real, so the baseline it replaces is replaced by something
-        result.ShouldBeDictionaryOf(
-            ("P1_AD_STICK_Z", ["ButtonA"]),
-            ("P1_AD_STICK_Z.inc", ["ButtonB"]),
-            ("P1_AD_STICK_Z.dec", ["ButtonC"]));
-    }
-
-    [Fact]
-    public void Load_NudgeSequencesUntranslatable_RecordsNothingAtAll()
-    {
-        // every sequence is bound but none translates -- the port reaches nothing, so it must not
-        // even state its name empty, which would drop a baseline for no reason
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_DIAL'>
-                    <newseq type='increment'>JOYCODE_1_UNKNOWN</newseq>
-                    <newseq type='decrement'>JOYCODE_1_ALSOUNKNOWN</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        // when the loader runs
-        var result = _underTest.Load(CfgPath);
-
-        // then nothing is recorded
-        result.ShouldBeEmpty();
-    }
-
-    // ---- a stick nudging both ways is the port's axis ----
-
-    private void StubStickAndTriggerSwitches() =>
-        _joycodeMappingLoader.Load().Returns(new JoycodeMapping(new Dictionary<string, List<string>>
-        {
-            ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = ["AxisRightStickLeft"],
-            ["JOYCODE_1_ZAXIS_POS_SWITCH"] = ["AxisRightStickRight"],
-            ["JOYCODE_1_RZAXIS_NEG_SWITCH"] = ["AxisRightStickUp"],
-            ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = ["AxisTriggerLeft"],
-            ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = ["AxisTriggerRight"],
-        }));
-
-    [Fact]
-    public void Load_NudgesHoldOppositeEndsOfOneAxis_ThePairIsThePortsOwn()
-    {
-        // downtown's shape: the stick turns the rotary by its two switches rather than its axis,
-        // so it keeps turning while held, and the triggers nudge it too. Opposite ends of one
-        // axis, one in each nudge, are a stick standing in for the port's analogue binding --
-        // what tdfever states directly by binding the axis to standard -- so they are the port's
-        // own reach. The nudges still reach their half of it, so a game labelling only the halves
-        // keeps its stick labels, but only as a derived claim the port's own label outranks.
-        StubStickAndTriggerSwitches();
-        StubXml("""
-            <mameconfig>
-              <system name='downtown'>
-                <input>
-                  <port type='P1_POSITIONAL'>
-                    <newseq type='standard'>NONE</newseq>
-                    <newseq type='increment'>JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_SLIDER2_NEG_SWITCH</newseq>
-                    <newseq type='decrement'>JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_SLIDER1_NEG_SWITCH</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        var result = _underTest.Load(CfgPath);
-
-        result.ShouldBeDictionaryOf(
-            ("P1_POSITIONAL", ["AxisRightStickRight", "AxisRightStickLeft"]),
-            ("P1_POSITIONAL.inc", ["AxisTriggerRight", "AxisRightStickRight"]),
-            ("P1_POSITIONAL.dec", ["AxisTriggerLeft", "AxisRightStickLeft"]));
-        result.Derived.ShouldBeDictionaryOf(
-            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
-            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
-    }
-
-    [Fact]
-    public void Load_NudgesHoldOnlyTheAxisPair_ThePortReachesItAndTheNudgesOnlyDerive()
-    {
-        // the same stick with no triggers alongside: the nudges bind nothing of their own, so
-        // everything they reach is derived from the port's axis
-        StubStickAndTriggerSwitches();
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_POSITIONAL'>
-                    <newseq type='standard'>NONE</newseq>
-                    <newseq type='increment'>JOYCODE_1_ZAXIS_POS_SWITCH</newseq>
-                    <newseq type='decrement'>JOYCODE_1_ZAXIS_NEG_SWITCH</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        var result = _underTest.Load(CfgPath);
-
-        result.ShouldBeDictionaryOf(
-            ("P1_POSITIONAL", ["AxisRightStickRight", "AxisRightStickLeft"]),
-            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
-            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
-        result.Derived.ShouldBeDictionaryOf(
-            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
-            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
-    }
-
-    [Theory]
-    // both ends of the axis in one nudge: pressing it pushes both ways at once, not an axis
-    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_SLIDER1_NEG_SWITCH")]
-    // an end in each nudge, but of two different axes
-    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_RZAXIS_NEG_SWITCH")]
-    // the same end of the axis in both
-    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
-    public void Load_NudgeSwitchesNotOneAxisBothWays_StayTheNudgesOwn(string increment, string decrement)
-    {
-        StubStickAndTriggerSwitches();
-        StubXml($"""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_POSITIONAL'>
-                    <newseq type='standard'>NONE</newseq>
-                    <newseq type='increment'>{increment}</newseq>
-                    <newseq type='decrement'>{decrement}</newseq>
+                  <port tag=':IN1' type='P1_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON3</newseq>
                   </port>
                 </input>
               </system>
@@ -695,43 +459,11 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         result.ShouldNotBeNull();
-        result["P1_POSITIONAL"].ShouldBeEmpty();
-        result.Derived.ShouldBeEmpty();
-    }
-
-    [Fact]
-    public void Load_UnboundNudgeReadOffTheAxis_IsDerived()
-    {
-        // bm1stmix's shape: real analogue hardware and no nudge buttons, so each nudge reaches its
-        // end of the axis only because the port's own binding does -- the same derived claim as
-        // above, arrived at from the other side
-        _joycodeMappingLoader.Load().Returns(new JoycodeMapping(new Dictionary<string, List<JoycodeTarget>>
-        {
-            ["JOYCODE_1_ZAXIS"] = [new("AxisRightStickLeft", "dec"), new("AxisRightStickRight", "inc")],
-        }));
-        StubXml("""
-            <mameconfig>
-              <system name='galaga'>
-                <input>
-                  <port type='P1_DIAL'>
-                    <newseq type='standard'>JOYCODE_1_ZAXIS</newseq>
-                    <newseq type='increment'>NONE</newseq>
-                    <newseq type='decrement'>NONE</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        var result = _underTest.Load(CfgPath);
-
-        result.ShouldBeDictionaryOf(
-            ("P1_DIAL", ["AxisRightStickLeft", "AxisRightStickRight"]),
-            ("P1_DIAL.inc", ["AxisRightStickRight"]),
-            ("P1_DIAL.dec", ["AxisRightStickLeft"]));
-        result.Derived.ShouldBeDictionaryOf(
-            ("P1_DIAL.inc", ["AxisRightStickRight"]),
-            ("P1_DIAL.dec", ["AxisRightStickLeft"]));
+        result.Select(r => (r.Name, string.Join(" ", r.Inputs))).ShouldBe(
+        [
+            ("P1_BUTTON1", "ButtonC"),
+            ("P1_BUTTON2", "ButtonB"),
+        ]);
     }
 
     [Fact]
@@ -757,7 +489,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then the typeless port is skipped and only the typed port contributes
-        result.ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
+        Inputs(result).ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
     }
 
     [Fact]
@@ -783,7 +515,7 @@ public class MameCfgLoaderTests
         var result = _underTest.Load(CfgPath);
 
         // then the typeless newseq is not treated as standard and BUTTON1 is skipped
-        result.ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
+        Inputs(result).ShouldBeDictionaryOf(("P1_BUTTON2", ["ButtonB"]));
     }
 
     [Fact]
