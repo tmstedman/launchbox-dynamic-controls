@@ -7137,9 +7137,9 @@
     <Game romName="ecofghtr" title="Eco Fighters">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate Shoot Position</Label>
+        <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Rotate Left</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -19706,6 +19706,7 @@
     </Game>
     <Game romName="quasar" title="Quasar">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -20565,6 +20566,7 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">View 1</Label>
+        <Label control="ButtonDpad">Change Music</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonY">View 2</Label>
@@ -22531,6 +22533,7 @@
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="ButtonDpad">Move</Label>
     </Game>
     <Game romName="shootbul" title="Shoot the Bull">
         <Label control="AxisLeftStick">Throw Dart</Label>
@@ -26799,6 +26802,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Label control="ButtonDpad">Move</Label>
     </Game>
     <Game romName="trckydoc" title="Tricky Doc">
         <Label control="AxisLeftStick">Move</Label>
@@ -29085,6 +29089,7 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">View 1</Label>
+        <Label control="ButtonDpad">Change Music</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonY">View 2</Label>
