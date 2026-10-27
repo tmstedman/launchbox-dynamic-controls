@@ -1,8 +1,11 @@
+using System.Text.RegularExpressions;
+
 namespace DynamicControls.Plugins.Mame;
 
 /// <summary>
 /// One platform button a MAME port states, and what it reaches. <see cref="Own"/> is what the
-/// button binds; <see cref="Derived"/> what it reaches only because its port's axis does (see
+/// button binds; <see cref="Derived"/> what it reaches only as part of something larger — its
+/// port's axis, or the joystick a direction belongs to (see
 /// <see cref="MamePortBinding"/>), carried on to
 /// <see cref="InputMapping.ResolvedMapping.DerivedButtonToInput"/>. Both empty is a button the
 /// cfg states but leaves unbound, which still drops Controllers.xml's baseline for it.
@@ -44,6 +47,10 @@ public static class MamePortBinding
     /// <em>down</em>. A platform button standing for the pair is declared in Controllers.xml, so
     /// a game that draws no distinction still labels all three by naming the port alone.</para>
     /// </summary>
+    /// <summary>One direction of a joystick, in MAME's port naming: <c>P1_JOYSTICK_UP</c>,
+    /// <c>P1_JOYSTICKLEFT_DOWN</c>.</summary>
+    private static readonly Regex JoystickDirection = new(@"_JOYSTICK[A-Z]*_(UP|DOWN|LEFT|RIGHT)$");
+
     private static readonly (string SeqType, string Suffix)[] SequenceButtons =
         [("standard", ""), ("increment", ".inc"), ("decrement", ".dec")];
 
@@ -70,7 +77,7 @@ public static class MamePortBinding
 
         var bySeqType = new Dictionary<string, (List<string> Own, List<string> Derived)>
         {
-            ["standard"] = ([.. Translate(joycodes, standard).Concat(Translate(joycodes, axisPair)).Distinct()], []),
+            ["standard"] = SplitJoystickDirection(port, joycodes, standard, axisPair),
             ["increment"] = Split(joycodes, increment.Without(incEnd), incEnd),
             ["decrement"] = Split(joycodes, decrement.Without(decEnd), decEnd),
         };
@@ -113,6 +120,26 @@ public static class MamePortBinding
             reach.Add(new MamePortReach(port + suffix, own, derived, from));
         }
         return reach;
+    }
+
+    /// <summary>
+    /// The port's own sequence. A joystick direction port carrying a button alongside its hat and
+    /// stick is two controls: the joystick's direction, which the port reaches only because the
+    /// joystick does, and a button that is the port's alone — gberet binds its jump button onto
+    /// up. So the direction is derived, and a label of the whole joystick's outranks the port's
+    /// there, while the port's own label keeps to the button. A port of directions alone is
+    /// simply that direction and keeps it all, so whether MAME happened to write the port into
+    /// the cfg never decides who labels it.
+    /// </summary>
+    private static (List<string> Own, List<string> Derived) SplitJoystickDirection(
+        string port, JoycodeMapping joycodes, MameSequence standard, MameSequence axisPair)
+    {
+        List<string> inputs = [.. Translate(joycodes, standard).Concat(Translate(joycodes, axisPair)).Distinct()];
+        if (!JoystickDirection.IsMatch(port)) return (inputs, []);
+
+        MameSequence directions = standard.Directions();
+        (List<string> own, List<string> derived) = Split(joycodes, standard.Without(directions), directions);
+        return own.Count > 0 && derived.Count > 0 ? (own, derived) : (inputs, []);
     }
 
     /// <summary>A nudge's own reach, and what it derives from the axis end it holds.</summary>

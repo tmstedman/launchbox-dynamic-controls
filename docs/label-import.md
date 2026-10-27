@@ -123,6 +123,20 @@ port's own sequence (`tdfever`), or as a switch at each end of it, one in each n
 turning while held (`downtown`). A nudge label reaches the stick only when the port has no label
 of its own — so a game labelling only the nudges still shows them there, one per half.
 
+### A direction carrying a button takes the joystick's label, and labels the button
+
+A cfg sometimes binds a button onto a joystick direction alongside the hat and stick:
+`gberet` puts its jump button on up (`JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR
+JOYCODE_1_BUTTON1`), since up is how the game jumps. That port is two controls, so label it the
+way the artwork does: the joystick with what the stick does (`P1_JOYSTICK` *Move*), and the
+direction with what the button does (`P1_JOYSTICK_UP` *Jump*). The joystick's label is the
+direction's on the stick and the D-pad, and the direction's own label keeps to the button.
+
+Only a direction carrying a button splits. A port of hat and stick alone is simply that
+direction, and its own label still outranks the joystick's there — so `P1_JOYSTICK_DOWN`
+*Crouch* beside `P1_JOYSTICK` *Move* shows *Crouch* on down. A direction label reaches the stick
+whenever the joystick has no label of its own.
+
 ### Labels are captions, not prose
 
 The database writes sentences: `Offensive Throw / Defensive Catch`, or Champion Base Ball's

@@ -52,6 +52,9 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
         }
         foreach (MappingEntry entry in xml.Mappings.Where(e => e.Derived && !bound.Contains((e.Name, e.Input))))
             AddDerived(derived, entry.Name, entry.Input);
+        // Taken before the mirror: what a transform derives is held for a larger control, while
+        // the mirror's stick is the button's own reach, only weaker.
+        var controlled = derived.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value.ToList());
         _logger.Debug($"Mapping entries: {buttonToInput.Count}");
 
         if (xml.AnalogToDigital is AnalogToDigitalMode mode)
@@ -81,6 +84,7 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             AnalogToDigital: xml.AnalogToDigital)
         {
             DerivedButtonToInput = derived.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value),
+            ControlledButtonToInput = controlled,
         };
     }
 

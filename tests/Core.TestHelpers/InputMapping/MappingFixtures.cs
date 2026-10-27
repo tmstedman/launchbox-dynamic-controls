@@ -20,7 +20,8 @@ public static class MappingFixtures
         IReadOnlyDictionary<string, IReadOnlyList<string>>? naturalButtonToInput = null,
         IReadOnlyDictionary<string, string>? naturalInputToButton = null,
         AnalogToDigitalMode? analogToDigital = null,
-        IReadOnlyDictionary<string, IReadOnlyList<string>>? derivedButtonToInput = null)
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? derivedButtonToInput = null,
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? controlledButtonToInput = null)
     {
         return new ResolvedMapping(
             Platform: platform,
@@ -32,6 +33,7 @@ public static class MappingFixtures
             AnalogToDigital: analogToDigital)
         {
             DerivedButtonToInput = derivedButtonToInput ?? new Dictionary<string, IReadOnlyList<string>>(),
+            ControlledButtonToInput = controlledButtonToInput ?? new Dictionary<string, IReadOnlyList<string>>(),
         };
     }
 }

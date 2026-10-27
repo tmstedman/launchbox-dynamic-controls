@@ -45,7 +45,8 @@ public record ResolvedMapping(
     /// <summary>
     /// For each platform button, the inputs in its <see cref="ButtonToInput"/> list it reaches
     /// only because something else does — an <c>analogToDigital</c> mirror, a control reaching
-    /// what its members reach, a nudge reaching its half of an axis its port is bound to. Every
+    /// what its members reach, a nudge reaching its half of an axis its port is bound to, a
+    /// joystick direction reaching its hat and stick beside a button of its own. Every
     /// other input in the list is the button's own binding. A button with nothing derived has
     /// no entry.
     ///
@@ -57,5 +58,19 @@ public record ResolvedMapping(
     /// order.</para>
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> DerivedButtonToInput { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>
+    /// For each platform button, the derived inputs it reaches as part of a larger control — a
+    /// MAME nudge's half of its port's axis, a joystick direction port's hat and stick when the
+    /// port carries a button too. A <c>&lt;Control&gt;</c> standing for the button takes these
+    /// as its own rather than derived, so the control's label outranks the button's there.
+    ///
+    /// <para>A subset of <see cref="DerivedButtonToInput"/>, kept apart for the
+    /// <c>analogToDigital</c> mirror: its stick is the Dpad button's own reach, only weaker, and a
+    /// control standing for that button has no more claim to it than to the Dpad direction the
+    /// mirror copied it from.</para>
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> ControlledButtonToInput { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
 }

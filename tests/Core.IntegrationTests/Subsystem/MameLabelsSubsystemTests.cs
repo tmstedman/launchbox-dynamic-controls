@@ -344,4 +344,114 @@ public class MameLabelsSubsystemTests
             ("AxisTriggerLeft", "Rotate Left"),
             ("AxisTriggerRight", "Rotate Right"));
     }
+
+    /// <summary>
+    /// gberet's joystick: four direction ports, each on the hat and the left stick, with the jump
+    /// button bound onto up alongside them -- so pressing A pushes up, which is how the game
+    /// jumps. <paramref name="up"/> is the up port's binding.
+    /// </summary>
+    private void WriteJoystick(string labels, string up)
+    {
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Control name="P1_JOYSTICK" mappings="P1_JOYSTICK_UP P1_JOYSTICK_DOWN P1_JOYSTICK_LEFT P1_JOYSTICK_RIGHT" />
+                <Mapping name="P1_JOYSTICK_UP" input="ButtonDpadUp" />
+                <Mapping name="P1_JOYSTICK_DOWN" input="ButtonDpadDown" />
+                <Mapping name="P1_JOYSTICK_LEFT" input="ButtonDpadLeft" />
+                <Mapping name="P1_JOYSTICK_RIGHT" input="ButtonDpadRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON1" input="ButtonA" />
+              <Mapping joycode="JOYCODE_1_HAT1UP" input="ButtonDpadUp" />
+              <Mapping joycode="JOYCODE_1_HAT1DOWN" input="ButtonDpadDown" />
+              <Mapping joycode="JOYCODE_1_HAT1LEFT" input="ButtonDpadLeft" />
+              <Mapping joycode="JOYCODE_1_HAT1RIGHT" input="ButtonDpadRight" />
+              <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" input="AxisLeftStickUp" />
+              <Mapping joycode="JOYCODE_1_YAXIS_DOWN_SWITCH" input="AxisLeftStickDown" />
+              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" input="AxisLeftStickRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "gberet", labels);
+        _dc.WriteMameCfg("gberet.cfg", $"""
+            <mameconfig>
+              <system name="gberet">
+                <input>
+                  <port type="P1_JOYSTICK_UP"><newseq type="standard">{up}</newseq></port>
+                  <port type="P1_JOYSTICK_DOWN"><newseq type="standard">JOYCODE_1_HAT1DOWN OR JOYCODE_1_YAXIS_DOWN_SWITCH</newseq></port>
+                  <port type="P1_JOYSTICK_LEFT"><newseq type="standard">JOYCODE_1_HAT1LEFT OR JOYCODE_1_XAXIS_LEFT_SWITCH</newseq></port>
+                  <port type="P1_JOYSTICK_RIGHT"><newseq type="standard">JOYCODE_1_HAT1RIGHT OR JOYCODE_1_XAXIS_RIGHT_SWITCH</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+    }
+
+    private const string UpWithJumpButton = "JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR JOYCODE_1_BUTTON1";
+
+    [Fact]
+    public void Load_DirectionCarryingAButton_JoystickLabelsTheDirection_DirectionLabelsTheButton()
+    {
+        // The card says "Move" on the stick and the D-pad and "Jump" on A. The up port is two
+        // controls, the joystick's up and a button, so the joystick's label is the direction's
+        // and up's own label keeps to the button.
+        WriteJoystick("""
+            <InputLabels>
+              <Input name="P1_JOYSTICK">Move</Input>
+              <Input name="P1_JOYSTICK_UP">Jump</Input>
+            </InputLabels>
+            """, UpWithJumpButton);
+        GameInfo game = Game(platform: Platform, romName: "gberet", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+        IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
+
+        labels.LabelText["ButtonA"].ShouldBe("Jump");
+        collapsed["ButtonDpad"].ShouldBe("Move");
+        collapsed["AxisLeftStick"].ShouldBe("Move");
+    }
+
+    [Fact]
+    public void Load_DirectionCarryingAButton_OnlyTheDirectionLabelled_KeepsItEverywhere()
+    {
+        // With no label on the joystick there is nothing for the direction to take instead, so up
+        // still says what the port says -- splitting off the button never costs a game a label.
+        WriteJoystick("""
+            <InputLabels>
+              <Input name="P1_JOYSTICK_UP">Jump</Input>
+            </InputLabels>
+            """, UpWithJumpButton);
+        GameInfo game = Game(platform: Platform, romName: "gberet", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonA", "Jump"),
+            ("ButtonDpadUp", "Jump"),
+            ("AxisLeftStickUp", "Jump"));
+    }
+
+    [Fact]
+    public void Load_DirectionCarryingNoButton_ItsOwnLabelStillOutranksTheJoysticks()
+    {
+        // Only a port that is two controls splits. A plain direction is the direction, and its
+        // own label still beats the whole joystick's there, as before.
+        WriteJoystick("""
+            <InputLabels>
+              <Input name="P1_JOYSTICK">Move</Input>
+              <Input name="P1_JOYSTICK_UP">Jump</Input>
+            </InputLabels>
+            """, "JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH");
+        GameInfo game = Game(platform: Platform, romName: "gberet", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["ButtonDpadUp"].ShouldBe("Jump");
+        labels.LabelText["AxisLeftStickUp"].ShouldBe("Jump");
+        labels.LabelText["ButtonDpadDown"].ShouldBe("Move");
+    }
 }

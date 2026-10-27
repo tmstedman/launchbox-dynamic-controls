@@ -25,6 +25,8 @@ public class MamePortBindingTests
         ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", null)],
         ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
         ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
+        ["JOYCODE_1_HAT1UP"] = [new("ButtonDpadUp", null)],
+        ["JOYCODE_1_YAXIS_UP_SWITCH"] = [new("AxisLeftStickUp", null)],
     });
 
     /// <summary>
@@ -32,13 +34,13 @@ public class MamePortBindingTests
     /// doesn't declare at all; <c>"NONE"</c> is one it declares and leaves unbound.
     /// </summary>
     private static IReadOnlyList<MamePortReach> Resolve(
-        string? standard = null, string? increment = null, string? decrement = null)
+        string? standard = null, string? increment = null, string? decrement = null, string port = Port)
     {
         var declared = new Dictionary<string, MameSequence>();
         if (standard != null) declared["standard"] = MameSequence.Parse(standard);
         if (increment != null) declared["increment"] = MameSequence.Parse(increment);
         if (decrement != null) declared["decrement"] = MameSequence.Parse(decrement);
-        return MamePortBinding.Resolve(Port, declared, Joycodes);
+        return MamePortBinding.Resolve(port, declared, Joycodes);
     }
 
     private static Dictionary<string, IReadOnlyList<string>> Inputs(IReadOnlyList<MamePortReach> reach) =>
@@ -221,5 +223,48 @@ public class MamePortBindingTests
                 (Port, ["ButtonA"]),
                 (Port + ".inc", []),
                 (Port + ".dec", []));
+    }
+
+    // ---- a joystick direction carrying a button is the joystick's direction, and a button ----
+
+    [Theory]
+    [InlineData("P1_JOYSTICK_UP")]
+    [InlineData("P1_JOYSTICKLEFT_UP")]
+    public void DirectionPortAlsoCarryingAButton_ReachesTheDirectionForTheJoystick(string port)
+    {
+        // gberet's shape: up on the hat or the stick, and a button the player jumps with, all one
+        // port. The hat and stick are the joystick's direction -- the port reaches them because
+        // the joystick does -- while the button is the port's alone. So a label of the whole
+        // joystick's is the direction's, and the port's own label keeps to the button.
+        IReadOnlyList<MamePortReach> reach = Resolve(
+            standard: "JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR JOYCODE_1_BUTTON1", port: port);
+
+        Inputs(reach).ShouldBeDictionaryOf((port, ["ButtonA", "ButtonDpadUp", "AxisLeftStickUp"]));
+        Derived(reach).ShouldBeDictionaryOf((port, ["ButtonDpadUp", "AxisLeftStickUp"]));
+    }
+
+    [Fact]
+    public void DirectionPortWithOnlyDirections_IsItsOwn()
+    {
+        // nothing else shares the port, so it is simply that direction -- whether MAME happened to
+        // write the port into the cfg must not decide who labels it
+        Derived(Resolve(standard: "JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH", port: "P1_JOYSTICK_UP"))
+            .ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void DirectionPortsButtonTranslatesToNothing_IsItsOwn()
+    {
+        // another player's button reaches nothing here, so there is no second control to split off
+        Derived(Resolve(standard: "JOYCODE_1_HAT1UP OR JOYCODE_2_BUTTON1", port: "P1_JOYSTICK_UP"))
+            .ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void ButtonPortAlsoCarryingAHat_IsItsOwn()
+    {
+        // only a joystick's direction belongs to a joystick; a button bound to the hat is that button
+        Derived(Resolve(standard: "JOYCODE_1_BUTTON1 OR JOYCODE_1_HAT1UP", port: "P1_BUTTON1"))
+            .ShouldBeEmpty();
     }
 }

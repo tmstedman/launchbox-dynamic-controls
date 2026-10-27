@@ -157,6 +157,43 @@ public class ControlResolverTests
             ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
     }
 
+    // --- what a member holds for its control is the control's own ---
+
+    [Fact]
+    public void WhatAMemberHoldsForTheControl_IsTheControlsOwn()
+    {
+        // gberet: the up port reaches the hat and stick because the joystick does, and its jump
+        // button by its own binding. The joystick owns the direction, so its label outranks the
+        // port's there; the button it only reaches through the port, so the port's label keeps it.
+        ResolvedMapping mapping = MappingOf(
+            buttonToInput: Buttons(
+                ("P1_JOYSTICK_UP", ["ButtonA", "ButtonDpadUp", "AxisLeftStickUp"]),
+                ("P1_JOYSTICK_DOWN", ["ButtonDpadDown"])),
+            derivedButtonToInput: Buttons(("P1_JOYSTICK_UP", ["ButtonDpadUp", "AxisLeftStickUp"])),
+            controlledButtonToInput: Buttons(("P1_JOYSTICK_UP", ["ButtonDpadUp", "AxisLeftStickUp"])));
+
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("P1_JOYSTICK", "P1_JOYSTICK_UP", "P1_JOYSTICK_DOWN")]);
+
+        result.ButtonToInput["P1_JOYSTICK"].ShouldBe(["ButtonA", "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown"]);
+        result.DerivedButtonToInput.ShouldBeDictionaryOf(
+            ("P1_JOYSTICK", ["ButtonA", "ButtonDpadDown"]),
+            ("P1_JOYSTICK_UP", ["ButtonDpadUp", "AxisLeftStickUp"]));
+    }
+
+    [Fact]
+    public void WhatAMemberOnlyDerives_StaysDerivedForTheControl()
+    {
+        // the analogToDigital mirror's stick is derived but held for nothing: the control reaches
+        // it only because its member does, exactly as it reaches the Dpad direction it mirrors
+        ResolvedMapping mapping = MappingOf(
+            buttonToInput: Buttons(("Dpad-Up", ["ButtonDpadUp", "AxisLeftStickUp"])),
+            derivedButtonToInput: Buttons(("Dpad-Up", ["AxisLeftStickUp"])));
+
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up")]);
+
+        result.DerivedButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
+    }
+
     // --- the natural snapshot ---
 
     [Fact]

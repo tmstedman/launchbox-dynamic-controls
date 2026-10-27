@@ -33,13 +33,15 @@ public class ControlResolver(ILogger logger)
         (IReadOnlyDictionary<string, IReadOnlyList<string>> buttonToInput,
          IReadOnlyDictionary<string, string> inputToButton,
          IReadOnlyDictionary<string, IReadOnlyList<string>> derived) =
-            Expand(mapping.ButtonToInput, mapping.InputToButton, mapping.DerivedButtonToInput, controls, "current");
+            Expand(mapping.ButtonToInput, mapping.InputToButton, mapping.DerivedButtonToInput,
+                mapping.ControlledButtonToInput, controls, "current");
 
         // Only the current view's derived reach is read — by the labels — so the natural
         // snapshot's is discarded.
         (IReadOnlyDictionary<string, IReadOnlyList<string>> naturalButtonToInput,
          IReadOnlyDictionary<string, string> naturalInputToButton, _) =
-            Expand(mapping.NaturalButtonToInput, mapping.NaturalInputToButton, mapping.DerivedButtonToInput, controls, "natural");
+            Expand(mapping.NaturalButtonToInput, mapping.NaturalInputToButton, mapping.DerivedButtonToInput,
+                mapping.ControlledButtonToInput, controls, "natural");
 
         return mapping with
         {
@@ -55,6 +57,7 @@ public class ControlResolver(ILogger logger)
         IReadOnlyDictionary<string, IReadOnlyList<string>> buttonToInput,
         IReadOnlyDictionary<string, string> inputToButton,
         IReadOnlyDictionary<string, IReadOnlyList<string>> derivedButtonToInput,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> controlledButtonToInput,
         IReadOnlyList<ControlEntry> controls,
         string which)
     {
@@ -85,14 +88,17 @@ public class ControlResolver(ILogger logger)
             // that merely stands for buttons which reach it, so the direct binding keeps the
             // reverse lookup and decides which image the player is shown.
             // What it appends is derived — reached only because a member reaches it — so a
-            // label of the control's own outranks a member's only where the control binds it too.
+            // label of the control's own outranks a member's only where the control binds it too,
+            // or where a member reaches it only on the control's behalf: gberet's up port reaches
+            // the stick because the joystick does, so the joystick's label is the stick's.
+            var heldForIt = new HashSet<string>(control.Mappings.SelectMany(m => controlledButtonToInput.GetValueOrDefault(m, [])));
             List<string> own = buttons.TryGetValue(control.Name, out List<string>? existing) ? existing : [];
             List<string> appended = derived.TryGetValue(control.Name, out List<string>? soFar) ? soFar : [];
             foreach (string input in reached)
             {
                 if (own.Contains(input)) continue;
                 own.Add(input);
-                appended.Add(input);
+                if (!heldForIt.Contains(input)) appended.Add(input);
             }
             buttons[control.Name] = own;
             if (appended.Count > 0) derived[control.Name] = appended;

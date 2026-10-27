@@ -213,6 +213,36 @@ public class InputMappingResolverTests
     }
 
     [Fact]
+    public void Resolve_DerivedEntry_IsHeldForTheControl()
+    {
+        // a transform derives a claim when the button reaches it as part of something larger --
+        // gberet's up port reaches the hat because the joystick does -- so a control standing for
+        // that button takes it as its own
+        var config = new InputMappingConfig
+        {
+            Mappings = [Entry("P1_JOYSTICK_UP", "ButtonA"), Entry("P1_JOYSTICK_UP", "ButtonDpadUp", derived: true)],
+        };
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.ControlledButtonToInput.ShouldBeDictionaryOf(("P1_JOYSTICK_UP", ["ButtonDpadUp"]));
+    }
+
+    [Fact]
+    public void Resolve_MirroredStickDirection_IsNotHeldForTheControl()
+    {
+        // the mirror's stick is the Dpad button's own, only weaker: a control standing for that
+        // button has no more claim to it than to the Dpad direction the mirror copied it from
+        var config = MappingConfig(
+            analogToDigital: AnalogToDigitalMode.Left,
+            mappings: [("Dpad-Up", "ButtonDpadUp")]);
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.ControlledButtonToInput.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Resolve_ReverseLookup_PrefersAButtonsOwnBindingOverADerivedOne()
     {
         // downtown: the nudge comes first in the file (it is in the baseline) but reaches the

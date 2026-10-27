@@ -9,6 +9,8 @@ namespace DynamicControls.Plugins.Mame;
 /// </summary>
 public sealed class MameSequence
 {
+    private static readonly Regex Direction = new(@"^JOYCODE_\d+_(HAT\d+(UP|DOWN|LEFT|RIGHT)|R?[XYZ]AXIS_(POS|NEG|LEFT|RIGHT|UP|DOWN)(_SWITCH)?)$");
+
     private static readonly Regex AxisSwitch = new(@"^(JOYCODE_\d+_\w+?)_(POS|NEG|LEFT|RIGHT|UP|DOWN)_SWITCH$");
 
     /// <summary>
@@ -68,6 +70,13 @@ public sealed class MameSequence
         }
         return (Of(here), Of(there));
     }
+
+    /// <summary>
+    /// The alternatives that push a direction: a hat, or a stick axis read as a switch. A trigger
+    /// slider has a <c>NEG</c> end but pushes no direction, and a direction held only inside a
+    /// chord is not that direction on its own.
+    /// </summary>
+    public MameSequence Directions() => Of(Alternatives.Where(a => Direction.IsMatch(a)));
 
     /// <summary>The sequence as a cfg would write it, which is what joycode translation reads.</summary>
     public override string ToString() => string.Join(" OR ", Alternatives);

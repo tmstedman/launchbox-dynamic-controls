@@ -78,4 +78,32 @@ public class MameSequenceTests
         pairedHere.IsBound.ShouldBeFalse();
         pairedThere.IsBound.ShouldBeFalse();
     }
+
+    [Theory]
+    // a hat direction, and a stick axis thresholded into a switch, named by direction or by sign
+    [InlineData("JOYCODE_1_HAT1UP")]
+    [InlineData("JOYCODE_1_YAXIS_UP_SWITCH")]
+    [InlineData("JOYCODE_1_XAXIS_LEFT_SWITCH")]
+    [InlineData("JOYCODE_1_RZAXIS_NEG_SWITCH")]
+    [InlineData("JOYCODE_1_RXAXIS_POS_SWITCH")]
+    public void Directions_StickAndHatSwitches_AreDirections(string joycode) =>
+        MameSequence.Parse(joycode).Directions().ToString().ShouldBe(joycode);
+
+    [Theory]
+    // a button, a trigger slider -- which has a NEG end but pushes no direction -- a bare axis, and
+    // a direction held only as part of a chord
+    [InlineData("JOYCODE_1_BUTTON1")]
+    [InlineData("JOYCODE_1_SLIDER1_NEG_SWITCH")]
+    [InlineData("JOYCODE_1_YAXIS")]
+    [InlineData("JOYCODE_1_HAT1UP JOYCODE_1_BUTTON1")]
+    public void Directions_AnythingElse_IsNoDirection(string joycode) =>
+        MameSequence.Parse(joycode).Directions().IsBound.ShouldBeFalse();
+
+    [Fact]
+    public void Directions_KeepsOnlyTheDirectionsInOrder()
+    {
+        // gberet's up: the hat and the stick, and a button the player jumps with
+        MameSequence.Parse("JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR JOYCODE_1_BUTTON1").Directions().Alternatives
+            .ShouldBe(["JOYCODE_1_HAT1UP", "JOYCODE_1_YAXIS_UP_SWITCH"]);
+    }
 }

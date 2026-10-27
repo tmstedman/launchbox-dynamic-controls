@@ -127,9 +127,10 @@ public record MappingEntry
 
     /// <summary>
     /// The button reaches <see cref="Input"/> only because something else does, rather than by a
-    /// binding of its own — set by a transform that derives it (a MAME nudge reaching its half of
-    /// the port's axis), never read from a file. Carried to
-    /// <see cref="ResolvedMapping.DerivedButtonToInput"/>.
+    /// binding of its own — set by a transform that derives it as part of a larger control (a
+    /// MAME nudge reaching its half of the port's axis, a joystick direction its hat and stick),
+    /// never read from a file. Carried to <see cref="ResolvedMapping.DerivedButtonToInput"/> and
+    /// <see cref="ResolvedMapping.ControlledButtonToInput"/>.
     /// </summary>
     public bool Derived { get; set; }
 }
