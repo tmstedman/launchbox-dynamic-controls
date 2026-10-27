@@ -297,4 +297,22 @@ public class MameInputMappingSourceTests
             ("AxisRightStickLeft", true),
         ]);
     }
+
+    [Theory]
+    // a name the baseline declares, and one it doesn't
+    [InlineData("BUTTON1")]
+    [InlineData("EXTRA")]
+    public void Transform_SameNameTwice_TheLaterStands_AndNothingIsLost(string name)
+    {
+        // nothing in the loader contract promises unique names, and a throw here is swallowed
+        // into an empty overlay -- losing every label the game has, not just this button's
+        _cfgLoader.Load(GameCfgPath).Returns([Reach(name, "ButtonA"), Reach("BUTTON2", "ButtonB"), Reach(name, "ButtonC")]);
+        InputMappingConfig baseline = MappingConfig(mappings: [("BUTTON1", "OldA")]);
+
+        var result = _underTest.Transform(MameGame(), baseline);
+
+        result.ShouldNotBeNull();
+        result.Mappings.Where(m => m.Name == name).Select(m => m.Input).ShouldBe(["ButtonC"]);
+        result.Mappings.Where(m => m.Name == "BUTTON2").Select(m => m.Input).ShouldBe(["ButtonB"]);
+    }
 }
