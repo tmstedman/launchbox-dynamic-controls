@@ -13,3 +13,10 @@ JoycodeMapping.xml
   (next to mame.exe). Open cfg/default.cfg or the per-game cfg/{rom}.cfg and
   look for the JOYCODE_... strings assigned to each port — these are the values
   you need to map.
+
+  A User copy replaces the shipped file wholesale, so copy the shipped one and
+  edit it rather than starting empty. Keep the axis= and half= attributes on
+  the hat and stick directions, and add them to any you add: they say which end
+  of which axis each code is, which is how a stick nudging a dial both ways is
+  recognised, and how a joystick direction is told from a button bound beside
+  it. A direction without them still translates, but is treated as a button.

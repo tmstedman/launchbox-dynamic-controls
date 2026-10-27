@@ -75,8 +75,8 @@ public class MameInputMappingSubsystemTests
           <Mapping joycode="JOYCODE_1_BUTTON3" input="ButtonX" />
           <Mapping joycode="JOYCODE_1_BUTTON4" input="ButtonY" />
           <Mapping joycode="JOYCODE_1_BUTTON6" input="ButtonRightShoulder" />
-          <Mapping joycode="JOYCODE_1_HAT1UP" input="ButtonDpadUp" />
-          <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" input="AxisLeftStickUp" />
+          <Mapping joycode="JOYCODE_1_HAT1UP" axis="JOYCODE_1_HAT1Y" half="dec" input="ButtonDpadUp" />
+          <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" axis="JOYCODE_1_YAXIS" half="dec" input="AxisLeftStickUp" />
           <Mapping joycode="JOYCODE_1_START" input="ButtonStart" />
         </JoycodeMapping>
         """);
@@ -209,8 +209,8 @@ public class MameInputMappingSubsystemTests
             """);
         _dc.WriteMameMapping("""
             <JoycodeMapping>
-              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" input="AxisLeftStickLeft" />
-              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" input="AxisLeftStickRight" />
+              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" axis="JOYCODE_1_XAXIS" half="dec" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" axis="JOYCODE_1_XAXIS" half="inc" input="AxisLeftStickRight" />
             </JoycodeMapping>
             """);
         _dc.WriteMameCfg("spacwalk.cfg", """

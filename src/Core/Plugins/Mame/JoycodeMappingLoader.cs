@@ -63,12 +63,22 @@ public class JoycodeMappingLoader(
                 half = null;
             }
 
+            // Optional: the axis a switch is one end of, so the two ends of one stick can be
+            // recognised as a pair, and a hat or stick direction told from a button. Meaningless
+            // without the end it is, so an axis with no half is dropped rather than guessed.
+            string? axis = node.Attributes["axis"]?.Value;
+            if (axis != null && half == null)
+            {
+                _logger.Error($"Ignoring axis=\"{axis}\" on {joycode} in JoycodeMapping.xml: it needs half=\"dec\" or half=\"inc\" to say which end it is");
+                axis = null;
+            }
+
             if (!map.TryGetValue(joycode, out List<JoycodeTarget>? targets))
             {
                 targets = [];
                 map[joycode] = targets;
             }
-            targets.Add(new JoycodeTarget(input, half));
+            targets.Add(new JoycodeTarget(input, half, axis));
         }
 
         _logger.Debug($"Joycode mapping entries loaded: {map.Count}");

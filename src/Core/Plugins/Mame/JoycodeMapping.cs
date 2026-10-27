@@ -14,11 +14,22 @@ public interface IJoycodeMappingLoader
 /// One generic input a joycode reaches, and which way along the axis it lies.
 ///
 /// <para><see cref="Half"/> is <c>"dec"</c> or <c>"inc"</c> on the two halves of a bare analogue
-/// axis, and null everywhere else — an ordinary button has no direction to state. It names MAME's
-/// own sequence types rather than a direction, because which way a nudge goes is the game's
-/// business, not the hardware's.</para>
+/// axis, and on a switch at one end of an axis, which also names that axis in
+/// <see cref="Axis"/>; null everywhere else — an ordinary button or a trigger has no direction to
+/// state. It names MAME's own sequence types rather than a direction, because which way a nudge
+/// goes is the game's business, not the hardware's.</para>
 /// </summary>
-public record JoycodeTarget(string Input, string? Half);
+public record JoycodeTarget(string Input, string? Half, string? Axis = null);
+
+/// <summary>
+/// Which end of which axis a joycode is: a hat direction, or a stick axis read as a switch.
+/// <see cref="Axis"/> is only a name to match on — two joycodes are one axis's two ends when they
+/// name the same axis and opposite halves.
+/// </summary>
+public record AxisEnd(string Axis, string Half)
+{
+    public AxisEnd Opposite => this with { Half = Half == "dec" ? "inc" : "dec" };
+}
 
 /// <summary>
 /// Translates MAME JOYCODE values to generic input names.
@@ -60,6 +71,18 @@ public class JoycodeMapping(Dictionary<string, List<JoycodeTarget>> data)
     /// the suffix exists, and a platform that inverts some other way says so the same way.</para>
     /// </summary>
     public IReadOnlyList<string> TranslateHalf(string? joycode, string half) => Resolve(joycode, half);
+
+    /// <summary>
+    /// Which end of which axis <paramref name="joycode"/> is, or null for a joycode declaring no
+    /// axis — a button, a trigger, a bare axis (both ends at once), a chord, or a joycode the
+    /// mapping doesn't know. Declared in JoycodeMapping.xml rather than read off the joycode's
+    /// name, so a device whose codes this file has never seen needs only a line of data.
+    /// </summary>
+    public AxisEnd? EndOf(string joycode) =>
+        _data.TryGetValue(joycode, out List<JoycodeTarget>? targets)
+            && targets.FirstOrDefault(t => t.Axis != null) is { Axis: string axis, Half: string half }
+            ? new AxisEnd(axis, half)
+            : null;
 
     private IReadOnlyList<string> Resolve(string? joycode, string? half)
     {

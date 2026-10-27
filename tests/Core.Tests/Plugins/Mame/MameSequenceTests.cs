@@ -4,11 +4,33 @@ namespace DynamicControls.Core.Tests.Plugins.Mame;
 
 /// <summary>
 /// Unit tests for <see cref="MameSequence"/>: one cfg <c>&lt;newseq&gt;</c>, read as the
-/// <c>OR</c>-separated alternatives that each trigger it, and the one question asked of two of
-/// them together — which of their switches form an axis between them.
+/// <c>OR</c>-separated alternatives that each trigger it, and the two questions asked of them
+/// against the joycode vocabulary — which push a direction, and which switches form an axis
+/// between two sequences. Which joycode is which end of which axis is the vocabulary's to say,
+/// so a joycode it doesn't declare is neither, however its name reads.
 /// </summary>
 public class MameSequenceTests
 {
+    private static JoycodeTarget End(string input, string axis, string half) => new(input, half, axis);
+
+    private static readonly JoycodeMapping Joycodes = new(new Dictionary<string, List<JoycodeTarget>>
+    {
+        ["JOYCODE_1_BUTTON1"] = [new("ButtonA", null)],
+        ["JOYCODE_1_HAT1UP"] = [End("ButtonDpadUp", "JOYCODE_1_HAT1Y", "dec")],
+        ["JOYCODE_1_HAT2UP"] = [End("ButtonDpadUp", "JOYCODE_1_HAT2Y", "dec")],
+        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [End("AxisLeftStickLeft", "JOYCODE_1_XAXIS", "dec")],
+        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [End("AxisLeftStickRight", "JOYCODE_1_XAXIS", "inc")],
+        ["JOYCODE_1_YAXIS_UP_SWITCH"] = [End("AxisLeftStickUp", "JOYCODE_1_YAXIS", "dec")],
+        ["JOYCODE_1_YAXIS_DOWN_SWITCH"] = [End("AxisLeftStickDown", "JOYCODE_1_YAXIS", "inc")],
+        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [End("AxisRightStickLeft", "JOYCODE_1_ZAXIS", "dec")],
+        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [End("AxisRightStickRight", "JOYCODE_1_ZAXIS", "inc")],
+        ["JOYCODE_1_RZAXIS_NEG_SWITCH"] = [End("AxisRightStickUp", "JOYCODE_1_RZAXIS", "dec")],
+        ["JOYCODE_1_RXAXIS_POS_SWITCH"] = [End("AxisRightStickRight", "JOYCODE_1_RXAXIS", "inc")],
+        ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
+        ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
+        ["JOYCODE_1_YAXIS"] = [new("AxisLeftStickUp", "dec"), new("AxisLeftStickDown", "inc")],
+    });
+
     [Theory]
     [InlineData("NONE")]
     [InlineData("")]
@@ -51,7 +73,7 @@ public class MameSequenceTests
                 "JOYCODE_1_YAXIS_UP_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH")]
     public void AxisEndsSharedWith_OppositeEndsOfOneAxis_Pair(string here, string there, string expectedHere, string expectedThere)
     {
-        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there), Joycodes);
 
         pairedHere.ToString().ShouldBe(expectedHere);
         pairedThere.ToString().ShouldBe(expectedThere);
@@ -71,9 +93,11 @@ public class MameSequenceTests
     [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH JOYCODE_1_BUTTON1", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
     // ordinary buttons are no axis at all
     [InlineData("JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2")]
+    // named like an axis's two ends, but the vocabulary declares neither
+    [InlineData("JOYCODE_1_WAXIS_POS_SWITCH", "JOYCODE_1_WAXIS_NEG_SWITCH")]
     public void AxisEndsSharedWith_NotOneAxisBothWays_PairsNothing(string here, string there)
     {
-        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
+        (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there), Joycodes);
 
         pairedHere.IsBound.ShouldBeFalse();
         pairedThere.IsBound.ShouldBeFalse();
@@ -86,8 +110,10 @@ public class MameSequenceTests
     [InlineData("JOYCODE_1_XAXIS_LEFT_SWITCH")]
     [InlineData("JOYCODE_1_RZAXIS_NEG_SWITCH")]
     [InlineData("JOYCODE_1_RXAXIS_POS_SWITCH")]
+    // a second hat, which no code names: declaring it is all it takes
+    [InlineData("JOYCODE_1_HAT2UP")]
     public void Directions_StickAndHatSwitches_AreDirections(string joycode) =>
-        MameSequence.Parse(joycode).Directions().ToString().ShouldBe(joycode);
+        MameSequence.Parse(joycode).Directions(Joycodes).ToString().ShouldBe(joycode);
 
     [Theory]
     // a button, a trigger slider -- which has a NEG end but pushes no direction -- a bare axis, and
@@ -96,14 +122,16 @@ public class MameSequenceTests
     [InlineData("JOYCODE_1_SLIDER1_NEG_SWITCH")]
     [InlineData("JOYCODE_1_YAXIS")]
     [InlineData("JOYCODE_1_HAT1UP JOYCODE_1_BUTTON1")]
+    // a hat the vocabulary doesn't declare
+    [InlineData("JOYCODE_1_HAT3UP")]
     public void Directions_AnythingElse_IsNoDirection(string joycode) =>
-        MameSequence.Parse(joycode).Directions().IsBound.ShouldBeFalse();
+        MameSequence.Parse(joycode).Directions(Joycodes).IsBound.ShouldBeFalse();
 
     [Fact]
     public void Directions_KeepsOnlyTheDirectionsInOrder()
     {
         // gberet's up: the hat and the stick, and a button the player jumps with
-        MameSequence.Parse("JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR JOYCODE_1_BUTTON1").Directions().Alternatives
+        MameSequence.Parse("JOYCODE_1_HAT1UP OR JOYCODE_1_YAXIS_UP_SWITCH OR JOYCODE_1_BUTTON1").Directions(Joycodes).Alternatives
             .ShouldBe(["JOYCODE_1_HAT1UP", "JOYCODE_1_YAXIS_UP_SWITCH"]);
     }
 }

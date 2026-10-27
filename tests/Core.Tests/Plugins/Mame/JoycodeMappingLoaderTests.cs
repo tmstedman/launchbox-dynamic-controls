@@ -164,4 +164,43 @@ public class JoycodeMappingLoaderTests
         result.TranslateHalf("JOYCODE_1_XAXIS", "dec").ShouldBeEmpty();
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("expected \"dec\" or \"inc\"")));
     }
+
+    [Fact]
+    public void Load_SwitchStatesTheAxisItIsAnEndOf_ItsEndIsKnown()
+    {
+        // given a stick axis read as a switch, declaring which axis it is an end of and which end
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' half='inc' input='AxisRightStickRight' />
+              <Mapping joycode='JOYCODE_1_SLIDER1_NEG_SWITCH' input='AxisTriggerLeft' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then the switch is that end of that axis, and a joycode declaring no axis is no end
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(new AxisEnd("JOYCODE_1_ZAXIS", "inc"));
+        result.EndOf("JOYCODE_1_SLIDER1_NEG_SWITCH").ShouldBeNull();
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight"]);
+    }
+
+    [Fact]
+    public void Load_AxisWithoutAHalf_IsNoEndAndLogsError()
+    {
+        // given a switch naming its axis but not which end of it
+        StubXml("""
+            <JoycodeMapping>
+              <Mapping joycode='JOYCODE_1_ZAXIS_POS_SWITCH' axis='JOYCODE_1_ZAXIS' input='AxisRightStickRight' />
+            </JoycodeMapping>
+            """);
+
+        // when the loader runs
+        var result = _underTest.Load();
+
+        // then it still translates, but an end of no known side pairs with nothing
+        result.Translate("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBe(["AxisRightStickRight"]);
+        result.EndOf("JOYCODE_1_ZAXIS_POS_SWITCH").ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("axis=") && s.Contains("half=")));
+    }
 }

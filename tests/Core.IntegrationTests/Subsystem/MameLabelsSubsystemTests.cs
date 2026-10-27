@@ -178,8 +178,8 @@ public class MameLabelsSubsystemTests
             <JoycodeMapping>
               <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickLeft" />
               <Mapping joycode="JOYCODE_1_XAXIS" input="AxisLeftStickRight" />
-              <Mapping joycode="JOYCODE_1_HAT1LEFT" input="ButtonDpadLeft" />
-              <Mapping joycode="JOYCODE_1_HAT1RIGHT" input="ButtonDpadRight" />
+              <Mapping joycode="JOYCODE_1_HAT1LEFT" axis="JOYCODE_1_HAT1X" half="dec" input="ButtonDpadLeft" />
+              <Mapping joycode="JOYCODE_1_HAT1RIGHT" axis="JOYCODE_1_HAT1X" half="inc" input="ButtonDpadRight" />
             </JoycodeMapping>
             """);
         _dc.WriteGameLabels(Platform, "arknoid2", """
@@ -279,8 +279,8 @@ public class MameLabelsSubsystemTests
             """);
         _dc.WriteMameMapping("""
             <JoycodeMapping>
-              <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" input="AxisRightStickLeft" />
-              <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" input="AxisRightStickRight" />
+              <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" axis="JOYCODE_1_ZAXIS" half="dec" input="AxisRightStickLeft" />
+              <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" axis="JOYCODE_1_ZAXIS" half="inc" input="AxisRightStickRight" />
               <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />
               <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
             </JoycodeMapping>
@@ -366,14 +366,14 @@ public class MameLabelsSubsystemTests
         _dc.WriteMameMapping("""
             <JoycodeMapping>
               <Mapping joycode="JOYCODE_1_BUTTON1" input="ButtonA" />
-              <Mapping joycode="JOYCODE_1_HAT1UP" input="ButtonDpadUp" />
-              <Mapping joycode="JOYCODE_1_HAT1DOWN" input="ButtonDpadDown" />
-              <Mapping joycode="JOYCODE_1_HAT1LEFT" input="ButtonDpadLeft" />
-              <Mapping joycode="JOYCODE_1_HAT1RIGHT" input="ButtonDpadRight" />
-              <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" input="AxisLeftStickUp" />
-              <Mapping joycode="JOYCODE_1_YAXIS_DOWN_SWITCH" input="AxisLeftStickDown" />
-              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" input="AxisLeftStickLeft" />
-              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" input="AxisLeftStickRight" />
+              <Mapping joycode="JOYCODE_1_HAT1UP" axis="JOYCODE_1_HAT1Y" half="dec" input="ButtonDpadUp" />
+              <Mapping joycode="JOYCODE_1_HAT1DOWN" axis="JOYCODE_1_HAT1Y" half="inc" input="ButtonDpadDown" />
+              <Mapping joycode="JOYCODE_1_HAT1LEFT" axis="JOYCODE_1_HAT1X" half="dec" input="ButtonDpadLeft" />
+              <Mapping joycode="JOYCODE_1_HAT1RIGHT" axis="JOYCODE_1_HAT1X" half="inc" input="ButtonDpadRight" />
+              <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" axis="JOYCODE_1_YAXIS" half="dec" input="AxisLeftStickUp" />
+              <Mapping joycode="JOYCODE_1_YAXIS_DOWN_SWITCH" axis="JOYCODE_1_YAXIS" half="inc" input="AxisLeftStickDown" />
+              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" axis="JOYCODE_1_XAXIS" half="dec" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" axis="JOYCODE_1_XAXIS" half="inc" input="AxisLeftStickRight" />
             </JoycodeMapping>
             """);
         _dc.WriteGameLabels(Platform, "gberet", labels);

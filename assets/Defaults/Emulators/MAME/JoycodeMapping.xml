@@ -11,45 +11,53 @@
   <Mapping joycode="JOYCODE_1_BUTTON7" input="ButtonLeftStick" />
   <Mapping joycode="JOYCODE_1_BUTTON8" input="ButtonRightStick" />
 
+  <!-- axis= and half= on a direction say which end of which axis it is. Two codes naming the
+       same axis and opposite halves are its two ends: a nudged dial bound to one in each
+       sequence is the stick turning it both ways, and a joystick direction port holding them
+       beside a button is the joystick's direction plus a button of its own. The axis name is only
+       matched, never parsed, so a hat's two axes are named here too; and half follows the
+       bare-axis convention below (dec = left/up, inc = right/down). A code without them, like a
+       button or a trigger, pushes no direction. -->
+
   <!-- D-pad (POV hat). On modern XInput controllers, the d-pad reports as HAT1. -->
-  <Mapping joycode="JOYCODE_1_HAT1UP" input="ButtonDpadUp" />
-  <Mapping joycode="JOYCODE_1_HAT1DOWN" input="ButtonDpadDown" />
-  <Mapping joycode="JOYCODE_1_HAT1LEFT" input="ButtonDpadLeft" />
-  <Mapping joycode="JOYCODE_1_HAT1RIGHT" input="ButtonDpadRight" />
+  <Mapping joycode="JOYCODE_1_HAT1UP" axis="JOYCODE_1_HAT1Y" half="dec" input="ButtonDpadUp" />
+  <Mapping joycode="JOYCODE_1_HAT1DOWN" axis="JOYCODE_1_HAT1Y" half="inc" input="ButtonDpadDown" />
+  <Mapping joycode="JOYCODE_1_HAT1LEFT" axis="JOYCODE_1_HAT1X" half="dec" input="ButtonDpadLeft" />
+  <Mapping joycode="JOYCODE_1_HAT1RIGHT" axis="JOYCODE_1_HAT1X" half="inc" input="ButtonDpadRight" />
 
   <!-- Left stick. XAXIS/YAXIS are the left-stick axes; the _SWITCH variants are the same
        axes used as digital triggers (e.g. MAME records this when "Type a key" sees the
        analog stick crossing a threshold) — still the left stick physically. -->
-  <Mapping joycode="JOYCODE_1_XAXIS_LEFT" input="AxisLeftStickLeft" />
-  <Mapping joycode="JOYCODE_1_XAXIS_RIGHT" input="AxisLeftStickRight" />
-  <Mapping joycode="JOYCODE_1_YAXIS_UP" input="AxisLeftStickUp" />
-  <Mapping joycode="JOYCODE_1_YAXIS_DOWN" input="AxisLeftStickDown" />
-  <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" input="AxisLeftStickLeft" />
-  <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" input="AxisLeftStickRight" />
-  <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" input="AxisLeftStickUp" />
-  <Mapping joycode="JOYCODE_1_YAXIS_DOWN_SWITCH" input="AxisLeftStickDown" />
+  <Mapping joycode="JOYCODE_1_XAXIS_LEFT" axis="JOYCODE_1_XAXIS" half="dec" input="AxisLeftStickLeft" />
+  <Mapping joycode="JOYCODE_1_XAXIS_RIGHT" axis="JOYCODE_1_XAXIS" half="inc" input="AxisLeftStickRight" />
+  <Mapping joycode="JOYCODE_1_YAXIS_UP" axis="JOYCODE_1_YAXIS" half="dec" input="AxisLeftStickUp" />
+  <Mapping joycode="JOYCODE_1_YAXIS_DOWN" axis="JOYCODE_1_YAXIS" half="inc" input="AxisLeftStickDown" />
+  <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" axis="JOYCODE_1_XAXIS" half="dec" input="AxisLeftStickLeft" />
+  <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" axis="JOYCODE_1_XAXIS" half="inc" input="AxisLeftStickRight" />
+  <Mapping joycode="JOYCODE_1_YAXIS_UP_SWITCH" axis="JOYCODE_1_YAXIS" half="dec" input="AxisLeftStickUp" />
+  <Mapping joycode="JOYCODE_1_YAXIS_DOWN_SWITCH" axis="JOYCODE_1_YAXIS" half="inc" input="AxisLeftStickDown" />
 
   <!-- Right stick (XInput) -->
-  <Mapping joycode="JOYCODE_1_RXAXIS_NEG" input="AxisRightStickLeft" />
-  <Mapping joycode="JOYCODE_1_RXAXIS_POS" input="AxisRightStickRight" />
-  <Mapping joycode="JOYCODE_1_RYAXIS_NEG" input="AxisRightStickUp" />
-  <Mapping joycode="JOYCODE_1_RYAXIS_POS" input="AxisRightStickDown" />
-  <Mapping joycode="JOYCODE_1_RXAXIS_NEG_SWITCH" input="AxisRightStickLeft" />
-  <Mapping joycode="JOYCODE_1_RXAXIS_POS_SWITCH" input="AxisRightStickRight" />
-  <Mapping joycode="JOYCODE_1_RYAXIS_NEG_SWITCH" input="AxisRightStickUp" />
-  <Mapping joycode="JOYCODE_1_RYAXIS_POS_SWITCH" input="AxisRightStickDown" />
+  <Mapping joycode="JOYCODE_1_RXAXIS_NEG" axis="JOYCODE_1_RXAXIS" half="dec" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_RXAXIS_POS" axis="JOYCODE_1_RXAXIS" half="inc" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RYAXIS_NEG" axis="JOYCODE_1_RYAXIS" half="dec" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RYAXIS_POS" axis="JOYCODE_1_RYAXIS" half="inc" input="AxisRightStickDown" />
+  <Mapping joycode="JOYCODE_1_RXAXIS_NEG_SWITCH" axis="JOYCODE_1_RXAXIS" half="dec" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_RXAXIS_POS_SWITCH" axis="JOYCODE_1_RXAXIS" half="inc" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RYAXIS_NEG_SWITCH" axis="JOYCODE_1_RYAXIS" half="dec" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RYAXIS_POS_SWITCH" axis="JOYCODE_1_RYAXIS" half="inc" input="AxisRightStickDown" />
 
   <!-- Right stick (DirectInput). Standard Xbox-style controllers report:
        Z  = right-stick X (NEG=left, POS=right)
        RZ = right-stick Y (NEG=up,   POS=down) -->
-  <Mapping joycode="JOYCODE_1_ZAXIS_NEG" input="AxisRightStickLeft" />
-  <Mapping joycode="JOYCODE_1_ZAXIS_POS" input="AxisRightStickRight" />
-  <Mapping joycode="JOYCODE_1_RZAXIS_NEG" input="AxisRightStickUp" />
-  <Mapping joycode="JOYCODE_1_RZAXIS_POS" input="AxisRightStickDown" />
-  <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" input="AxisRightStickLeft" />
-  <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" input="AxisRightStickRight" />
-  <Mapping joycode="JOYCODE_1_RZAXIS_NEG_SWITCH" input="AxisRightStickUp" />
-  <Mapping joycode="JOYCODE_1_RZAXIS_POS_SWITCH" input="AxisRightStickDown" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_NEG" axis="JOYCODE_1_ZAXIS" half="dec" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_POS" axis="JOYCODE_1_ZAXIS" half="inc" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_NEG" axis="JOYCODE_1_RZAXIS" half="dec" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_POS" axis="JOYCODE_1_RZAXIS" half="inc" input="AxisRightStickDown" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" axis="JOYCODE_1_ZAXIS" half="dec" input="AxisRightStickLeft" />
+  <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" axis="JOYCODE_1_ZAXIS" half="inc" input="AxisRightStickRight" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_NEG_SWITCH" axis="JOYCODE_1_RZAXIS" half="dec" input="AxisRightStickUp" />
+  <Mapping joycode="JOYCODE_1_RZAXIS_POS_SWITCH" axis="JOYCODE_1_RZAXIS" half="inc" input="AxisRightStickDown" />
 
   <!-- Trigger slider axes (XInput) -->
   <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />

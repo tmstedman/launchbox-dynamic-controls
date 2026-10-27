@@ -72,7 +72,7 @@ public static class MamePortBinding
         // port's analogue binding — bound as switches so it keeps turning while held. It is the
         // port's own reach, as if the axis were bound to standard; the nudges reach their half of
         // it only because the port does.
-        (MameSequence incEnd, MameSequence decEnd) = increment.AxisEndsSharedWith(decrement);
+        (MameSequence incEnd, MameSequence decEnd) = increment.AxisEndsSharedWith(decrement, joycodes);
         MameSequence axisPair = incEnd.Concat(decEnd);
 
         var bySeqType = new Dictionary<string, (List<string> Own, List<string> Derived)>
@@ -137,7 +137,7 @@ public static class MamePortBinding
         List<string> inputs = [.. Translate(joycodes, standard).Concat(Translate(joycodes, axisPair)).Distinct()];
         if (!JoystickDirection.IsMatch(port)) return (inputs, []);
 
-        MameSequence directions = standard.Directions();
+        MameSequence directions = standard.Directions(joycodes);
         (List<string> own, List<string> derived) = Split(joycodes, standard.Without(directions), directions);
         return own.Count > 0 && derived.Count > 0 ? (own, derived) : (inputs, []);
     }

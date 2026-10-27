@@ -19,14 +19,14 @@ public class MamePortBindingTests
         ["JOYCODE_1_BUTTON2"] = [new("ButtonB", null)],
         ["JOYCODE_1_BUTTON3"] = [new("ButtonC", null)],
         ["JOYCODE_1_ZAXIS"] = [new("AxisRightStickLeft", "dec"), new("AxisRightStickRight", "inc")],
-        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [new("AxisRightStickLeft", null)],
-        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [new("AxisRightStickRight", null)],
-        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [new("AxisLeftStickLeft", null)],
-        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", null)],
+        ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [new("AxisRightStickLeft", "dec", "JOYCODE_1_ZAXIS")],
+        ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [new("AxisRightStickRight", "inc", "JOYCODE_1_ZAXIS")],
+        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [new("AxisLeftStickLeft", "dec", "JOYCODE_1_XAXIS")],
+        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", "inc", "JOYCODE_1_XAXIS")],
         ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
         ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
-        ["JOYCODE_1_HAT1UP"] = [new("ButtonDpadUp", null)],
-        ["JOYCODE_1_YAXIS_UP_SWITCH"] = [new("AxisLeftStickUp", null)],
+        ["JOYCODE_1_HAT1UP"] = [new("ButtonDpadUp", "dec", "JOYCODE_1_HAT1Y")],
+        ["JOYCODE_1_YAXIS_UP_SWITCH"] = [new("AxisLeftStickUp", "dec", "JOYCODE_1_YAXIS")],
     });
 
     /// <summary>
