@@ -5,7 +5,7 @@ using DynamicControls.Tools.Common;
 
 const string ToolName = "LabelDump";
 
-Options? options = Options.Parse(args);
+var options = Options.Parse(args);
 if (options == null) return 1;
 
 if (!Directory.Exists(options.Root))

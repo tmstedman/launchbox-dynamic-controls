@@ -103,10 +103,11 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
             if (platformButton == null) return new Unmapped();
         }
 
+        // The parts check is guarded on there being parts at all: All() over an empty list is
+        // true, which would make every ordinary input a MappedDefault and strand Remapped as dead
+        // code.
         if (!mapping.NaturalButtonToInput.TryGetValue(platformButton, out IReadOnlyList<string>? defaultGenerics)
             || defaultGenerics.Contains(inputName)
-            // Guarded on there being parts at all: All() over an empty list is true, which would
-            // make every ordinary input a MappedDefault and strand Remapped as dead code.
             || (parts.Count > 0 && parts.All(defaultGenerics.Contains)))
         {
             return new MappedDefault(platformButton);
