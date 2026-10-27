@@ -11,7 +11,6 @@ alpinr2b	ButtonDpadLeft	Menu LEFT	Left Select	port-split	one port drives two con
 alpinr2b	ButtonDpadRight	Menu RIGHT	Right Select	port-split	one port drives two controls the card labels differently
 alpinr2b	ButtonLeftShoulder	Left Select Button	Left Select	port-split	one port drives two controls the card labels differently
 alpinr2b	ButtonRightShoulder	Right Select Button	Right Select	port-split	one port drives two controls the card labels differently
-ecofghtr	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
 exprraid	ButtonB	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
 forgottn	AxisTriggerRight	Rotate Right	Rotate Shoot Position	port-split	one port drives two controls the card labels differently
 frontlin	AxisRightStick	Aim	Move	port-split	one port drives two controls the card labels differently

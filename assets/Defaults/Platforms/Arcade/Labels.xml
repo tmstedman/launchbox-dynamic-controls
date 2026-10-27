@@ -6147,6 +6147,10 @@
         <Input name="P1_BUTTON2">Green Button</Input>
         <Input name="P1_BUTTON1">Red Button</Input>
         <Input name="P2_BUTTON3">Clutch</Input>
+        <Input name="P2_JOYSTICK_UP">1st Gear</Input>
+        <Input name="P2_JOYSTICK_DOWN">2nd Gear</Input>
+        <Input name="P2_JOYSTICK_LEFT">3rd Gear</Input>
+        <Input name="P2_JOYSTICK_RIGHT">4th Gear</Input>
     </Game>
     <Game launchBoxId="36503" romName="drivfrcp">
         <Input name="P1_JOYSTICK_LEFT">Steering</Input>
@@ -6379,9 +6383,9 @@
     </Game>
     <Game launchBoxId="12189" romName="ecofghtr">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_BUTTON1">Rotate Shoot Position</Input>
+        <Input name="P1_BUTTON1">Rotate Left</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
-        <Input name="P1_BUTTON3">Rotate Shoot Position</Input>
+        <Input name="P1_BUTTON3">Rotate Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>

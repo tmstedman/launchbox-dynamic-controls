@@ -75,6 +75,10 @@ drivedge	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author canno
 drivedge	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+driveyes	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+driveyes	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+driveyes	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
+driveyes	AxisRightStickUp		1st Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 dsftkd	AxisLeftStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
 dsftkd	AxisRightStick	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
 dsftkd	ButtonDpad	Up, Down, Left, Right		improvement-kept	the card lumps the four arrows into one label; each direction is labelled on its own
@@ -90,6 +94,9 @@ dsftkd	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow;
 dsftkd	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
 dsftkd	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
 dsftkd	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+ecofghtr	AxisRightStick	Rotate Shoot Position		improvement-kept	each rotate button labels its own turn; the card calls the whole stick Rotate Shoot Position
+ecofghtr	AxisRightStickLeft		Rotate Left	improvement-kept	each half of the stick names its turn, as the card does on the triggers
+ecofghtr	AxisRightStickRight		Rotate Right	improvement-kept	each half of the stick names its turn, as the card does on the triggers
 f15se	AxisRightStick	Throttle		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 f15se	AxisRightStickUp		Throttle	not-in-artwork-vocabulary	the author cannot draw this control on the card
 fbait2bc	ButtonStart	Start	Cast / Start	port-split-merged	merged into one label, gameplay role before system role
