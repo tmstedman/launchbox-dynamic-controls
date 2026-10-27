@@ -34,6 +34,8 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
     public ResolvedMapping Resolve(string platform, InputMappingConfig xml, string? controller)
     {
         var buttonToInput = new Dictionary<string, List<string>>();
+        var derived = new Dictionary<string, List<string>>();
+        var bound = new HashSet<(string Name, string Input)>();
         foreach (MappingEntry entry in xml.Mappings)
         {
             if (!buttonToInput.TryGetValue(entry.Name, out List<string>? list))
@@ -43,12 +45,22 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             }
             if (!list.Contains(entry.Input))
                 list.Add(entry.Input);
+
+            // A button's own binding of an input is the stronger claim, wherever it came
+            // in the file, so one entry binding it outright overrides any deriving it.
+            if (!entry.Derived) bound.Add((entry.Name, entry.Input));
         }
+        foreach (MappingEntry entry in xml.Mappings.Where(e => e.Derived && !bound.Contains((e.Name, e.Input))))
+            AddDerived(derived, entry.Name, entry.Input);
         _logger.Debug($"Mapping entries: {buttonToInput.Count}");
 
         if (xml.AnalogToDigital is AnalogToDigitalMode mode)
         {
+            var ownCounts = buttonToInput.ToDictionary(e => e.Key, e => e.Value.Count);
             AnalogToDigitalMirror.Mirror(buttonToInput, mode);
+            foreach ((string button, List<string> inputs) in buttonToInput)
+                foreach (string mirrored in inputs.Skip(ownCounts[button]))
+                    AddDerived(derived, button, mirrored);
             _logger.Debug($"Applied AnalogToDigital mirror (Dpad -> {mode.ToString().ToLowerInvariant()} stick)");
         }
 
@@ -66,7 +78,16 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             InputToButton: inputToButton,
             NaturalButtonToInput: readOnlyButtonToInput,
             NaturalInputToButton: inputToButton,
-            AnalogToDigital: xml.AnalogToDigital);
+            AnalogToDigital: xml.AnalogToDigital)
+        {
+            DerivedButtonToInput = derived.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value),
+        };
+    }
+
+    private static void AddDerived(Dictionary<string, List<string>> derived, string button, string input)
+    {
+        if (!derived.TryGetValue(button, out List<string>? inputs)) derived[button] = inputs = [];
+        if (!inputs.Contains(input)) inputs.Add(input);
     }
 
     /// <summary>

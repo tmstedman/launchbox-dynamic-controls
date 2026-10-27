@@ -260,4 +260,88 @@ public class MameLabelsSubsystemTests
 
         collapsed["AxisLeftStick"].ShouldBe("TrackBall Movement");
     }
+
+    /// <summary>
+    /// downtown's rotary: the right stick turns it by a switch at each end of its axis, so it
+    /// keeps turning while held, and the triggers nudge it too. Both sit in the port's two nudge
+    /// sequences together, so naming the sequences alone can't tell the stick from the triggers.
+    /// </summary>
+    private void WriteRotary(string labels)
+    {
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Control name="P1_POSITIONAL" mappings="P1_POSITIONAL.dec P1_POSITIONAL.inc" />
+                <Mapping name="P1_POSITIONAL.dec" input="AxisLeftStickLeft" />
+                <Mapping name="P1_POSITIONAL.inc" input="AxisLeftStickRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_ZAXIS_NEG_SWITCH" input="AxisRightStickLeft" />
+              <Mapping joycode="JOYCODE_1_ZAXIS_POS_SWITCH" input="AxisRightStickRight" />
+              <Mapping joycode="JOYCODE_1_SLIDER1_NEG_SWITCH" input="AxisTriggerLeft" />
+              <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "downtown", labels);
+        _dc.WriteMameCfg("downtown.cfg", """
+            <mameconfig>
+              <system name="downtown">
+                <input>
+                  <port type="P1_POSITIONAL">
+                    <newseq type="standard">NONE</newseq>
+                    <newseq type="increment">JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_SLIDER2_NEG_SWITCH</newseq>
+                    <newseq type="decrement">JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_SLIDER1_NEG_SWITCH</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+    }
+
+    [Fact]
+    public void Load_StickNudgingBothWaysBesideTriggers_PortLabelsTheStick_NudgesLabelTheTriggers()
+    {
+        // The card says "Rotate" on the stick and names each trigger's turn. A switch at each end
+        // of one axis is the stick standing in for the port's analogue binding, so the port's own
+        // label is the stick's, and the nudge labels keep to the triggers.
+        WriteRotary("""
+            <InputLabels>
+              <Input name="P1_POSITIONAL">Rotate</Input>
+              <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+              <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
+            </InputLabels>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "downtown", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["AxisTriggerLeft"].ShouldBe("Rotate Left");
+        labels.LabelText["AxisTriggerRight"].ShouldBe("Rotate Right");
+        Collapse(labels)["AxisRightStick"].ShouldBe("Rotate");
+    }
+
+    [Fact]
+    public void Load_StickNudgingBothWaysBesideTriggers_OnlyNudgesLabelled_StickKeepsTheirLabels()
+    {
+        // With no label on the port there is nothing for the stick to take instead, so it keeps
+        // what the nudges say about each half -- recognising the axis never costs a game a label.
+        WriteRotary("""
+            <InputLabels>
+              <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+              <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
+            </InputLabels>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "downtown", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisRightStickLeft", "Rotate Left"),
+            ("AxisRightStickRight", "Rotate Right"),
+            ("AxisTriggerLeft", "Rotate Left"),
+            ("AxisTriggerRight", "Rotate Right"));
+    }
 }

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace DynamicControls.Plugins.Mame;
@@ -10,7 +11,7 @@ namespace DynamicControls.Plugins.Mame;
 /// </summary>
 public interface IMameCfgLoader
 {
-    Dictionary<string, List<string>>? Load(string path);
+    MameCfgOverrides? Load(string path);
 }
 
 /// <summary>
@@ -67,7 +68,7 @@ public class MameCfgLoader(
     private readonly IJoycodeMappingLoader _joycodeMappingLoader = joycodeMappingLoader;
     private readonly IDelay _delay = delay;
 
-    public Dictionary<string, List<string>>? Load(string path)
+    public MameCfgOverrides? Load(string path)
     {
         if (!WaitForFile(path)) return null;
 
@@ -78,7 +79,7 @@ public class MameCfgLoader(
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;
 
-        var overrides = new Dictionary<string, List<string>>();
+        var overrides = new MameCfgOverrides();
 
         foreach (XmlElement systemNode in root.ChildNodes.OfType<XmlElement>())
         {
@@ -119,14 +120,36 @@ public class MameCfgLoader(
 
                     if (joycodesBySeqType.Count == 0) continue;
 
-                    var bySeqType = new Dictionary<string, List<string>>();
+                    // A switch at each end of one axis, one in each nudge, is a stick standing in
+                    // for the port's analogue binding — bound as switches so it keeps turning while
+                    // held. It is the port's own reach, as if the axis were bound to standard; the
+                    // nudges reach their half of it only because the port does.
+                    (List<string> incPair, List<string> decPair) = AxisPair(
+                        joycodesBySeqType.GetValueOrDefault("increment"),
+                        joycodesBySeqType.GetValueOrDefault("decrement"));
+                    var bySeqType = new Dictionary<string, (List<string> Own, List<string> Derived)>();
                     foreach (string seqType in SequenceTypes)
                     {
-                        if (!joycodesBySeqType.TryGetValue(seqType, out string? joycode)) continue;
-                        var generics = new List<string>();
-                        foreach (string generic in joycodeMapping.Translate(joycode))
-                            if (!generics.Contains(generic)) generics.Add(generic);
-                        if (generics.Count > 0) bySeqType[seqType] = generics;
+                        // standard may be NONE and still carry the pair
+                        string? joycode = joycodesBySeqType.GetValueOrDefault(seqType);
+                        (string? own, string? derived) = seqType switch
+                        {
+                            "standard" => (joycode, Join([.. incPair, .. decPair])),
+                            "increment" => (Without(joycode, incPair), Join(incPair)),
+                            _ => (Without(joycode, decPair), Join(decPair)),
+                        };
+
+                        // the pair is the port's own binding, alongside whatever standard holds
+                        List<string> ownGenerics = Translate(joycodeMapping, own);
+                        List<string> derivedGenerics = Translate(joycodeMapping, derived);
+                        if (seqType == "standard")
+                        {
+                            ownGenerics = [.. ownGenerics.Concat(derivedGenerics).Distinct()];
+                            derivedGenerics = [];
+                        }
+                        derivedGenerics.RemoveAll(ownGenerics.Contains);
+                        if (ownGenerics.Count + derivedGenerics.Count > 0)
+                            bySeqType[seqType] = (ownGenerics, derivedGenerics);
                     }
 
                     string joycodes = string.Join(", ", joycodesBySeqType.Values);
@@ -148,30 +171,36 @@ public class MameCfgLoader(
                         // declares that sequence, so an ordinary button never grows one.
                         if (suffix.Length > 0 && !declaredSeqTypes.Contains(seqType)) continue;
 
-                        List<string> generics = bySeqType.GetValueOrDefault(seqType, []);
-                        string from = joycodesBySeqType.GetValueOrDefault(seqType, "unbound");
+                        (List<string> own, List<string> derived) = bySeqType.GetValueOrDefault(seqType, ([], []));
+                        string from = joycodesBySeqType.GetValueOrDefault(seqType)
+                            ?? (suffix.Length == 0 && incPair.Count > 0 ? $"{Join([.. incPair, .. decPair])}, from the nudges" : "unbound");
 
                         // A nudge sequence the cfg leaves unbound still names a real half of the
                         // axis, when the axis itself is bound: the hardware drives the value both
                         // ways, and the joycode says which end is which. Reading the half off the
                         // axis is what lets a label written for one direction land on a cabinet
                         // whose cfg has no nudge buttons at all — the common case by far, since
-                        // nudges exist for cabinets lacking the analogue hardware. The baseline is
-                        // still dropped: these come from the axis this cfg names, never from
-                        // Controllers.xml's guess about which axis the port would use.
-                        if (generics.Count == 0
+                        // nudges exist for cabinets lacking the analogue hardware. It is derived,
+                        // like the stick half a nudge reaches above, so the port's own label
+                        // outranks it there. The baseline is still dropped: these come from the
+                        // axis this cfg names, never from Controllers.xml's guess about which axis
+                        // the port would use.
+                        if (own.Count + derived.Count == 0
                             && suffix.Length > 0
                             && !joycodesBySeqType.ContainsKey(seqType)
                             && joycodesBySeqType.TryGetValue("standard", out string? axis))
                         {
                             string half = suffix[1..];
-                            generics = [.. joycodeMapping.TranslateHalf(axis, half)];
-                            if (generics.Count > 0) from = $"{axis}, {half} half";
+                            derived = [.. joycodeMapping.TranslateHalf(axis, half)];
+                            if (derived.Count > 0) from = $"{axis}, {half} half";
                         }
 
+                        List<string> generics = [.. own, .. derived];
                         overrides[inputName + suffix] = generics;
+                        if (derived.Count > 0) overrides.Derived[inputName + suffix] = derived;
                         _logger.Debug(generics.Count > 0
                             ? $"MAME override: {inputName}{suffix} ({from}) -> {string.Join(", ", generics)}"
+                                + (derived.Count > 0 ? $" (derived: {string.Join(", ", derived)})" : "")
                             : $"MAME override: {inputName}{suffix} ({from}) -> nothing, baseline dropped");
                     }
                 }
@@ -180,6 +209,44 @@ public class MameCfgLoader(
 
         return overrides;
     }
+
+    private static readonly Regex AxisSwitch = new(@"^(JOYCODE_\d+_\w+)_(POS|NEG)_SWITCH$");
+
+    /// <summary>
+    /// The switches in a port's two nudges that form one axis between them: an end of the axis
+    /// in one nudge and its opposite end in the other. Only a lone switch counts — a sequence
+    /// alternative pressing several codes together is a chord, not one end of a stick — and a
+    /// nudge holding both ends of an axis pushes both ways at once, so it pairs with nothing.
+    /// </summary>
+    private static (List<string> Increment, List<string> Decrement) AxisPair(string? increment, string? decrement)
+    {
+        List<string> inc = Alternatives(increment), dec = Alternatives(decrement);
+        var incPair = new List<string>();
+        var decPair = new List<string>();
+        foreach (string alternative in inc)
+        {
+            Match match = AxisSwitch.Match(alternative);
+            if (!match.Success) continue;
+            string opposite = $"{match.Groups[1].Value}_{(match.Groups[2].Value == "POS" ? "NEG" : "POS")}_SWITCH";
+            if (!dec.Contains(opposite) || inc.Contains(opposite) || dec.Contains(alternative)) continue;
+            incPair.Add(alternative);
+            decPair.Add(opposite);
+        }
+        return (incPair, decPair);
+    }
+
+    /// <summary>A sequence's <c>OR</c>-separated alternatives, each one way to trigger it.</summary>
+    private static List<string> Alternatives(string? sequence) =>
+        sequence == null ? [] : [.. sequence.Split(" OR ").Select(a => a.Trim()).Where(a => a.Length > 0)];
+
+    private static string? Join(List<string> alternatives) =>
+        alternatives.Count == 0 ? null : string.Join(" OR ", alternatives);
+
+    private static string? Without(string? sequence, List<string> removed) =>
+        Join([.. Alternatives(sequence).Where(a => !removed.Contains(a))]);
+
+    private static List<string> Translate(JoycodeMapping joycodeMapping, string? sequence) =>
+        sequence == null ? [] : [.. joycodeMapping.Translate(sequence).Distinct()];
 
     /// <summary>
     /// Retries <see cref="IFileSystem.FileExists"/> a few times, a short delay apart, before

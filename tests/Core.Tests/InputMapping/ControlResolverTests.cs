@@ -115,6 +115,48 @@ public class ControlResolverTests
         result.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpad", "ButtonDpadUp"]);
     }
 
+    // --- what a control appends is derived ---
+
+    [Fact]
+    public void WhatAControlReaches_IsDerived()
+    {
+        // the control reaches these only because its members do
+        ResolvedMapping mapping = MappingOf(
+            buttonToInput: Buttons(
+                ("Dpad-Up", ["ButtonDpadUp"]),
+                ("Dpad-Down", ["ButtonDpadDown"])));
+
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("Dpad-Any", "Dpad-Up", "Dpad-Down")]);
+
+        result.DerivedButtonToInput.ShouldBeDictionaryOf(("Dpad-Any", ["ButtonDpadUp", "ButtonDpadDown"]));
+    }
+
+    [Fact]
+    public void ControlWithItsOwnDirectMapping_OnlyWhatItAppendsIsDerived()
+    {
+        // downtown's rotary: the port reaches the stick by its own binding and the triggers only
+        // through its nudges. The stick stays its own claim, so its label outranks the nudges'
+        // there, while on the triggers the nudges' own claims outrank the port's. What the
+        // nudges themselves had derived is carried through untouched.
+        ResolvedMapping mapping = MappingOf(
+            buttonToInput: Buttons(
+                ("P1_POSITIONAL", ["AxisRightStickRight", "AxisRightStickLeft"]),
+                ("P1_POSITIONAL.inc", ["AxisTriggerRight", "AxisRightStickRight"]),
+                ("P1_POSITIONAL.dec", ["AxisTriggerLeft", "AxisRightStickLeft"])),
+            derivedButtonToInput: Buttons(
+                ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
+                ("P1_POSITIONAL.dec", ["AxisRightStickLeft"])));
+
+        ResolvedMapping result = _underTest.Apply(mapping, [Control("P1_POSITIONAL", "P1_POSITIONAL.dec", "P1_POSITIONAL.inc")]);
+
+        result.ButtonToInput["P1_POSITIONAL"].ShouldBe(
+            ["AxisRightStickRight", "AxisRightStickLeft", "AxisTriggerLeft", "AxisTriggerRight"]);
+        result.DerivedButtonToInput.ShouldBeDictionaryOf(
+            ("P1_POSITIONAL", ["AxisTriggerLeft", "AxisTriggerRight"]),
+            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
+            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
+    }
+
     // --- the natural snapshot ---
 
     [Fact]

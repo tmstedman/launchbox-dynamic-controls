@@ -19,15 +19,19 @@ public static class MappingFixtures
         IReadOnlyDictionary<string, string>? inputToButton = null,
         IReadOnlyDictionary<string, IReadOnlyList<string>>? naturalButtonToInput = null,
         IReadOnlyDictionary<string, string>? naturalInputToButton = null,
-        AnalogToDigitalMode? analogToDigital = null)
+        AnalogToDigitalMode? analogToDigital = null,
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? derivedButtonToInput = null)
     {
-        return new(
+        return new ResolvedMapping(
             Platform: platform,
             Controller: controller,
             ButtonToInput: buttonToInput ?? new Dictionary<string, IReadOnlyList<string>>(),
             InputToButton: inputToButton ?? new Dictionary<string, string>(),
             NaturalButtonToInput: naturalButtonToInput ?? new Dictionary<string, IReadOnlyList<string>>(),
             NaturalInputToButton: naturalInputToButton ?? new Dictionary<string, string>(),
-            AnalogToDigital: analogToDigital);
+            AnalogToDigital: analogToDigital)
+        {
+            DerivedButtonToInput = derivedButtonToInput ?? new Dictionary<string, IReadOnlyList<string>>(),
+        };
     }
 }

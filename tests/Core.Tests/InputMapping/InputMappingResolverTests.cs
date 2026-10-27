@@ -161,6 +161,57 @@ public class InputMappingResolverTests
         result.NaturalInputToButton.ShouldBeSameAs(result.InputToButton);
     }
 
+    // --- derived reach ---
+
+    private static MappingEntry Entry(string name, string input, bool derived = false) =>
+        new() { Name = name, Input = input, Derived = derived };
+
+    [Fact]
+    public void Resolve_DerivedEntry_IsRecordedAsDerived()
+    {
+        // given a nudge binding its trigger, and reaching its half of the stick only because the
+        // port's own axis does
+        var config = new InputMappingConfig
+        {
+            Mappings = [Entry("P1_POSITIONAL.dec", "AxisTriggerLeft"), Entry("P1_POSITIONAL.dec", "AxisRightStickLeft", derived: true)],
+        };
+
+        // when resolving
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        // then the button reaches both, and only the stick half is marked derived
+        result.ButtonToInput.ShouldBeDictionaryOf(("P1_POSITIONAL.dec", ["AxisTriggerLeft", "AxisRightStickLeft"]));
+        result.DerivedButtonToInput.ShouldBeDictionaryOf(("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
+    }
+
+    [Fact]
+    public void Resolve_InputBothBoundAndDerived_IsTheButtonsOwn()
+    {
+        // a binding of the button's own is the stronger claim, whichever entry came first
+        var config = new InputMappingConfig
+        {
+            Mappings = [Entry("P1_DIAL.dec", "AxisRightStickLeft", derived: true), Entry("P1_DIAL.dec", "AxisRightStickLeft")],
+        };
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.ButtonToInput.ShouldBeDictionaryOf(("P1_DIAL.dec", ["AxisRightStickLeft"]));
+        result.DerivedButtonToInput.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Resolve_MirroredStickDirection_IsDerived()
+    {
+        // the analogToDigital mirror reaches the stick only because the Dpad direction does
+        var config = MappingConfig(
+            analogToDigital: AnalogToDigitalMode.Left,
+            mappings: [("Dpad-Up", "ButtonDpadUp")]);
+
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        result.DerivedButtonToInput.ShouldBeDictionaryOf(("Dpad-Up", ["AxisLeftStickUp"]));
+    }
+
     // Properties — hold for arbitrary mapping entry collections:
 
     // Every input appearing in ButtonToInput has a corresponding entry in InputToButton.
