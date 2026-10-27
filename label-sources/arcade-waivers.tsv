@@ -97,6 +97,14 @@ dsftkd	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the
 ecofghtr	AxisRightStick	Rotate Shoot Position		improvement-kept	each rotate button labels its own turn; the card calls the whole stick Rotate Shoot Position
 ecofghtr	AxisRightStickLeft		Rotate Left	improvement-kept	each half of the stick names its turn, as the card does on the triggers
 ecofghtr	AxisRightStickRight		Rotate Right	improvement-kept	each half of the stick names its turn, as the card does on the triggers
+exprraid	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+exprraid	AxisLeftStickDown		Duck	improvement-kept	down is Duck; the card calls the whole control Move
+exprraid	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+exprraid	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+exprraid	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+exprraid	ButtonDpadDown		Duck	improvement-kept	down is Duck; the card calls the whole control Move
+exprraid	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+exprraid	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 f15se	AxisRightStick	Throttle		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 f15se	AxisRightStickUp		Throttle	not-in-artwork-vocabulary	the author cannot draw this control on the card
 fbait2bc	ButtonStart	Start	Cast / Start	port-split-merged	merged into one label, gameplay role before system role
@@ -113,6 +121,22 @@ funkyfig	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with
 funkyfig	AxisLeftStickUp		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 galspnbl	ButtonLeftShoulder	Left Flipper	Left Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
 galspnbl	ButtonRightShoulder	Right Flipper	Right Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
+gberet	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+gberet	AxisLeftStickDown		Lie Down	improvement-kept	down is Lie Down; the card calls the whole control Move
+gberet	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+gberet	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+gberet	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+gberet	ButtonDpadDown		Lie Down	improvement-kept	down is Lie Down; the card calls the whole control Move
+gberet	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+gberet	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+kengo	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+kengo	AxisLeftStickDown		Move	improvement-kept	down is still Move: what down does here is unconfirmed
+kengo	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+kengo	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+kengo	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+kengo	ButtonDpadDown		Move	improvement-kept	down is still Move: what down does here is unconfirmed
+kengo	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+kengo	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 knckhead	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 knckhead	AxisLeftStickDown		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 knckhead	AxisLeftStickUp		Jump	not-in-artwork-vocabulary	the author cannot draw this control on the card
@@ -128,13 +152,53 @@ letsdnce	ButtonDpadRight		Right	improvement-kept	each direction names its own ar
 letsdnce	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card calls all four Move
 letsdnce	ButtonLeftShoulder		Select Left	improvement-kept	the cfg binds the two select buttons to the shoulders; the card leaves them blank
 letsdnce	ButtonRightShoulder		Select Right	improvement-kept	the cfg binds the two select buttons to the shoulders; the card leaves them blank
+ltswords	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+ltswords	AxisLeftStickDown		Move	improvement-kept	down is still Move: what down does here is unconfirmed
+ltswords	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+ltswords	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+ltswords	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+ltswords	ButtonDpadDown		Move	improvement-kept	down is still Move: what down does here is unconfirmed
+ltswords	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+ltswords	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+mia	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+mia	AxisLeftStickDown		Crawl	improvement-kept	down is Crawl; the card calls the whole control Move
+mia	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+mia	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+mia	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+mia	ButtonDpadDown		Crawl	improvement-kept	down is Crawl; the card calls the whole control Move
+mia	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+mia	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 motofren	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
 motofren	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+mrgoemon	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+mrgoemon	AxisLeftStickDown		Drop Down	improvement-kept	down is Drop Down; the card calls the whole control Move
+mrgoemon	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+mrgoemon	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+mrgoemon	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+mrgoemon	ButtonDpadDown		Drop Down	improvement-kept	down is Drop Down; the card calls the whole control Move
+mrgoemon	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+mrgoemon	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+ninjaw	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+ninjaw	AxisLeftStickDown		Crouch	improvement-kept	down is Crouch; the card calls the whole control Move
+ninjaw	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+ninjaw	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+ninjaw	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+ninjaw	ButtonDpadDown		Crouch	improvement-kept	down is Crouch; the card calls the whole control Move
+ninjaw	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+ninjaw	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 offroadc	ButtonA	Boost	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
 offroadc	ButtonStart	Start	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
 recordbr	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 recordbr	AxisLeftStickLeft		Button 1	not-in-artwork-vocabulary	the author cannot draw this control on the card
 recordbr	AxisLeftStickRight		Button 2	not-in-artwork-vocabulary	the author cannot draw this control on the card
+rushatck	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+rushatck	AxisLeftStickDown		Lie Down	improvement-kept	down is Lie Down; the card calls the whole control Move
+rushatck	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+rushatck	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+rushatck	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+rushatck	ButtonDpadDown		Lie Down	improvement-kept	down is Lie Down; the card calls the whole control Move
+rushatck	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+rushatck	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 skychal	ButtonA	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 skychal	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 spyhunt	ButtonRightShoulder	Shift Up	Shift Up / Start	port-split-merged	merged into one label, gameplay role before system role
@@ -154,6 +218,14 @@ theglad	ButtonRightShoulder	Change Item / Special	Change Item / Special / Start	
 theglad	ButtonStart	Start	Change Item / Special / Start	port-split-merged	merged into one label, gameplay role before system role
 totcarn	ButtonA	Bomb	Bomb / Start	port-split-merged	merged into one label, gameplay role before system role
 totcarn	ButtonStart	Start	Bomb / Start	port-split-merged	merged into one label, gameplay role before system role
+trojan	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+trojan	AxisLeftStickDown		Crouch	improvement-kept	down is Crouch; the card calls the whole control Move
+trojan	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+trojan	AxisLeftStickX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+trojan	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
+trojan	ButtonDpadDown		Crouch	improvement-kept	down is Crouch; the card calls the whole control Move
+trojan	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
+trojan	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 vanguard	AxisRightStick	Shoot Direction		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 vanguard	AxisRightStickDown		Shoot Down	not-in-artwork-vocabulary	the author cannot draw this control on the card
 vanguard	AxisRightStickLeft		Shoot Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
