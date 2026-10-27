@@ -101,6 +101,50 @@ public class MameLabelsSubsystemTests
     }
 
     [Fact]
+    public void Load_PortTypeRepeatedOnOneTag_EachPortIsLabelledByItsOwnName()
+    {
+        // escounts: three OTHER ports on one tag, told apart only by mask. The last keeps the bare
+        // name, and the earlier two are labelled under their qualified names
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true" />
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON5" input="ButtonLeftShoulder" />
+              <Mapping joycode="JOYCODE_1_BUTTON6" input="ButtonRightShoulder" />
+              <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "escounts", """
+            <InputLabels>
+              <Input name="OTHER:STROBE1:4">Collect</Input>
+              <Input name="OTHER:STROBE1:2">Continue</Input>
+              <Input name="OTHER">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("escounts.cfg", """
+            <mameconfig>
+              <system name="escounts">
+                <input>
+                  <port tag=":STROBE1" type="OTHER" mask="2"><newseq type="standard">JOYCODE_1_BUTTON6</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="4"><newseq type="standard">JOYCODE_1_BUTTON5</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="16"><newseq type="standard">JOYCODE_1_SLIDER2_NEG_SWITCH</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "escounts", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["ButtonLeftShoulder"].ShouldBe("Collect");
+        labels.LabelText["ButtonRightShoulder"].ShouldBe("Continue");
+        labels.LabelText["AxisTriggerRight"].ShouldBe("Bonus");
+    }
+
+    [Fact]
     public void Load_PortNudgedByOtherControls_EachSequenceCarriesItsOwnLabel()
     {
         // airco22b's shape, and the reason the cfg loader stopped unioning a port's sequences:
