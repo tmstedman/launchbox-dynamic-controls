@@ -9,7 +9,19 @@ namespace DynamicControls.Plugins.Mame;
 /// </summary>
 public sealed class MameSequence
 {
-    private static readonly Regex AxisSwitch = new(@"^(JOYCODE_\d+_\w+)_(POS|NEG)_SWITCH$");
+    private static readonly Regex AxisSwitch = new(@"^(JOYCODE_\d+_\w+?)_(POS|NEG|LEFT|RIGHT|UP|DOWN)_SWITCH$");
+
+    /// <summary>
+    /// The opposite end of each axis end MAME names: by sign for most axes, by direction for X
+    /// (<c>LEFT</c>/<c>RIGHT</c>) and Y (<c>UP</c>/<c>DOWN</c>) — which are exactly how MAME's own
+    /// defaults nudge a dial, paddle or positional port.
+    /// </summary>
+    private static readonly Dictionary<string, string> OppositeEnd = new()
+    {
+        ["POS"] = "NEG", ["NEG"] = "POS",
+        ["LEFT"] = "RIGHT", ["RIGHT"] = "LEFT",
+        ["UP"] = "DOWN", ["DOWN"] = "UP",
+    };
 
     public static readonly MameSequence Unbound = new([]);
 
@@ -47,7 +59,7 @@ public sealed class MameSequence
         {
             Match match = AxisSwitch.Match(alternative);
             if (!match.Success) continue;
-            string opposite = $"{match.Groups[1].Value}_{(match.Groups[2].Value == "POS" ? "NEG" : "POS")}_SWITCH";
+            string opposite = $"{match.Groups[1].Value}_{OppositeEnd[match.Groups[2].Value]}_SWITCH";
             if (!other.Alternatives.Contains(opposite)
                 || Alternatives.Contains(opposite)
                 || other.Alternatives.Contains(alternative)) continue;
