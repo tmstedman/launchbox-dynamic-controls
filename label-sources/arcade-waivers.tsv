@@ -128,9 +128,6 @@ offroadc	ButtonStart	Start	Boost / Start	port-split-merged	merged into one label
 recordbr	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 recordbr	AxisLeftStickLeft		Button 1	not-in-artwork-vocabulary	the author cannot draw this control on the card
 recordbr	AxisLeftStickRight		Button 2	not-in-artwork-vocabulary	the author cannot draw this control on the card
-searchar	AxisRightStick	Rotate Shoot Position		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
-searchar	AxisRightStickLeft		Rotate Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
-searchar	AxisRightStickRight		Rotate Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
 skychal	ButtonA	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 skychal	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 spyhunt	ButtonRightShoulder	Shift Up	Shift Up / Start	port-split-merged	merged into one label, gameplay role before system role
