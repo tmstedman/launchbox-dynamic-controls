@@ -110,6 +110,19 @@ directions — a horizontal-only dial, a vertical-only joystick — label those 
 individually and leave the rest blank. Otherwise the overlay claims a control that does
 nothing, which is the same defect as labelling a dead D-pad.
 
+### An analogue port's stick takes the port's label, its nudges the rest
+
+A MAME analogue port (`P1_DIAL`, `P1_PADDLE`, `P1_POSITIONAL`, ...) is three platform buttons:
+the port itself for its axis, and `.inc`/`.dec` for the two nudge sequences that turn it
+digitally. Label the port with what the stick does (*Rotate*), and the nudges only when the
+artwork names each turn — on triggers, typically (*Rotate Left*, *Rotate Right*).
+
+Where the port binds the stick, the port's label is the stick's and the nudge labels keep to
+whatever else the nudges bind. That holds however the cfg spells the stick: as the axis on the
+port's own sequence (`tdfever`), or as a switch at each end of it, one in each nudge, so it keeps
+turning while held (`downtown`). A nudge label reaches the stick only when the port has no label
+of its own — so a game labelling only the nudges still shows them there, one per half.
+
 ### Labels are captions, not prose
 
 The database writes sentences: `Offensive Throw / Defensive Catch`, or Champion Base Ball's
