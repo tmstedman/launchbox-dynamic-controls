@@ -31,12 +31,15 @@ public class ControlResolver(ILogger logger)
         if (controls.Count == 0) return mapping;
 
         (IReadOnlyDictionary<string, IReadOnlyList<string>> buttonToInput,
-         IReadOnlyDictionary<string, string> inputToButton) =
-            Expand(mapping.ButtonToInput, mapping.InputToButton, controls, "current");
+         IReadOnlyDictionary<string, string> inputToButton,
+         IReadOnlyDictionary<string, IReadOnlyList<string>> derived) =
+            Expand(mapping.ButtonToInput, mapping.InputToButton, mapping.DerivedButtonToInput, controls, "current");
 
+        // Only the current view's derived reach is read — by the labels — so the natural
+        // snapshot's is discarded.
         (IReadOnlyDictionary<string, IReadOnlyList<string>> naturalButtonToInput,
-         IReadOnlyDictionary<string, string> naturalInputToButton) =
-            Expand(mapping.NaturalButtonToInput, mapping.NaturalInputToButton, controls, "natural");
+         IReadOnlyDictionary<string, string> naturalInputToButton, _) =
+            Expand(mapping.NaturalButtonToInput, mapping.NaturalInputToButton, mapping.DerivedButtonToInput, controls, "natural");
 
         return mapping with
         {
@@ -44,17 +47,20 @@ public class ControlResolver(ILogger logger)
             InputToButton = inputToButton,
             NaturalButtonToInput = naturalButtonToInput,
             NaturalInputToButton = naturalInputToButton,
+            DerivedButtonToInput = derived,
         };
     }
 
-    private (IReadOnlyDictionary<string, IReadOnlyList<string>>, IReadOnlyDictionary<string, string>) Expand(
+    private (IReadOnlyDictionary<string, IReadOnlyList<string>>, IReadOnlyDictionary<string, string>, IReadOnlyDictionary<string, IReadOnlyList<string>>) Expand(
         IReadOnlyDictionary<string, IReadOnlyList<string>> buttonToInput,
         IReadOnlyDictionary<string, string> inputToButton,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> derivedButtonToInput,
         IReadOnlyList<ControlEntry> controls,
         string which)
     {
         var buttons = buttonToInput.ToDictionary(kv => kv.Key, kv => kv.Value.ToList());
         var inputs = inputToButton.ToDictionary(kv => kv.Key, kv => kv.Value);
+        var derived = derivedButtonToInput.ToDictionary(kv => kv.Key, kv => kv.Value.ToList());
 
         foreach (ControlEntry control in controls)
         {
@@ -78,10 +84,18 @@ public class ControlResolver(ILogger logger)
             // Appended, never displacing. A button that drives an input directly outranks one
             // that merely stands for buttons which reach it, so the direct binding keeps the
             // reverse lookup and decides which image the player is shown.
+            // What it appends is derived — reached only because a member reaches it — so a
+            // label of the control's own outranks a member's only where the control binds it too.
             List<string> own = buttons.TryGetValue(control.Name, out List<string>? existing) ? existing : [];
+            List<string> appended = derived.TryGetValue(control.Name, out List<string>? soFar) ? soFar : [];
             foreach (string input in reached)
-                if (!own.Contains(input)) own.Add(input);
+            {
+                if (own.Contains(input)) continue;
+                own.Add(input);
+                appended.Add(input);
+            }
             buttons[control.Name] = own;
+            if (appended.Count > 0) derived[control.Name] = appended;
 
             foreach (string input in reached)
                 inputs.TryAdd(input, control.Name);
@@ -89,6 +103,8 @@ public class ControlResolver(ILogger logger)
             _logger.Debug($"Control ({which}): {control.Name} -> {string.Join(", ", reached)}");
         }
 
-        return (buttons.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value), inputs);
+        return (buttons.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value),
+                inputs,
+                derived.ToDictionary(kv => kv.Key, kv => (IReadOnlyList<string>)kv.Value));
     }
 }

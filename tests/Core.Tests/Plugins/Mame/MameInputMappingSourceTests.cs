@@ -83,7 +83,7 @@ public class MameInputMappingSourceTests
     public void Transform_GameCfgPresent_UsesItAndSkipsDefault()
     {
         // given a per-game cfg with overrides and a (would-be) default.cfg
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -102,7 +102,7 @@ public class MameInputMappingSourceTests
     {
         // given no per-game cfg but a default.cfg with overrides
         _cfgLoader.Load(GameCfgPath).ReturnsNull();
-        _cfgLoader.Load(DefaultCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -120,7 +120,7 @@ public class MameInputMappingSourceTests
     {
         // given a per-game cfg that exists but contains no overrides (empty dict)
         _cfgLoader.Load(GameCfgPath).Returns([]);
-        _cfgLoader.Load(DefaultCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -167,7 +167,7 @@ public class MameInputMappingSourceTests
         // RomName is non-nullable on the GameInfo record but the source treats null defensively
         // — verify only default.cfg is probed when the game name can't be used
         GameInfo game = MameGame() with { RomName = null! };
-        _cfgLoader.Load(DefaultCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -186,7 +186,7 @@ public class MameInputMappingSourceTests
     public void Transform_BaselineEntryNotOverridden_CopiedVerbatim()
     {
         // given a cfg that overrides one button but the baseline declares two
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -212,7 +212,7 @@ public class MameInputMappingSourceTests
     public void Transform_MultiInputOverride_ExpandsToOneEntryPerInput()
     {
         // given an override whose value lists two inputs (MAME OR-chained sequence)
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA", "ButtonB"],
         });
@@ -234,7 +234,7 @@ public class MameInputMappingSourceTests
     public void Transform_OverrideNameNotInBaseline_IsAppendedAtEnd()
     {
         // given an override for a name the baseline does not declare
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["EXTRA"] = ["ButtonX"],
         });
@@ -256,7 +256,7 @@ public class MameInputMappingSourceTests
     public void Transform_DuplicateBaselineNameWithOverride_ExpandsOnce()
     {
         // given two baseline entries with the same Name and an override for that name
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -279,7 +279,7 @@ public class MameInputMappingSourceTests
     public void Transform_CarriesControllerAndAnalogToDigitalFromBaseline()
     {
         // given a baseline with a controller selection and an A2D mode
-        _cfgLoader.Load(GameCfgPath).Returns(new Dictionary<string, List<string>>
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
         {
             ["BUTTON1"] = ["ButtonA"],
         });
@@ -296,5 +296,33 @@ public class MameInputMappingSourceTests
         result.ShouldNotBeNull();
         result.Controller.ShouldBe("Pad-6btn");
         result.AnalogToDigital.ShouldBe(AnalogToDigitalMode.Left);
+    }
+
+    [Theory]
+    // an override replacing a baseline entry, and one the baseline never declared
+    [InlineData(true)]
+    [InlineData(false)]
+    public void Transform_DerivedReach_IsMarkedOnTheMergedEntries(bool inBaseline)
+    {
+        // given a nudge whose stick half is derived from the port's own axis
+        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
+        {
+            ["P1_POSITIONAL.dec"] = ["AxisTriggerLeft", "AxisRightStickLeft"],
+            Derived = { ["P1_POSITIONAL.dec"] = ["AxisRightStickLeft"] },
+        });
+        InputMappingConfig baseline = MappingConfig(mappings: inBaseline
+            ? [("P1_POSITIONAL.dec", "AxisLeftStickLeft")]
+            : [("BUTTON1", "ButtonA")]);
+
+        // when the transform runs
+        var result = _underTest.Transform(MameGame(), baseline);
+
+        // then the derived half is marked as such, and the nudge's own binding is not
+        result.ShouldNotBeNull();
+        result.Mappings.Where(m => m.Name == "P1_POSITIONAL.dec").Select(m => (m.Input, m.Derived)).ShouldBe(
+        [
+            ("AxisTriggerLeft", false),
+            ("AxisRightStickLeft", true),
+        ]);
     }
 }

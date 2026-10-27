@@ -26,7 +26,7 @@ public class MameInputMappingSource(
         string cfgDir = Path.Combine(
             Path.GetDirectoryName(game.EmulatorPath)!, "cfg");
 
-        Dictionary<string, List<string>>? overrides = null;
+        MameCfgOverrides? overrides = null;
         if (game.RomName != null)
             overrides = _cfgLoader.Load(Path.Combine(cfgDir, game.RomName + ".cfg"));
 
@@ -53,7 +53,7 @@ public class MameInputMappingSource(
     /// </summary>
     private static InputMappingConfig Merge(
         InputMappingConfig baseline,
-        Dictionary<string, List<string>> overrides)
+        MameCfgOverrides overrides)
     {
         var mappings = new List<MappingEntry>();
         var expandedOverrides = new HashSet<string>();
@@ -66,8 +66,7 @@ public class MameInputMappingSource(
             {
                 if (expandedOverrides.Add(entry.Name))
                 {
-                    mappings.AddRange(newInputs.Select(input =>
-                        new MappingEntry { Name = entry.Name, Input = input }));
+                    mappings.AddRange(Entries(entry.Name, newInputs, overrides));
                 }
             }
             else
@@ -79,8 +78,7 @@ public class MameInputMappingSource(
         foreach ((string name, List<string> inputs) in overrides)
         {
             if (baselineNames.Contains(name)) continue;
-            mappings.AddRange(inputs.Select(input =>
-                new MappingEntry { Name = name, Input = input }));
+            mappings.AddRange(Entries(name, inputs, overrides));
         }
 
         return new InputMappingConfig
@@ -89,5 +87,11 @@ public class MameInputMappingSource(
             AnalogToDigital = baseline.AnalogToDigital,
             Mappings = mappings
         };
+    }
+
+    private static IEnumerable<MappingEntry> Entries(string name, List<string> inputs, MameCfgOverrides overrides)
+    {
+        List<string> derived = overrides.Derived.GetValueOrDefault(name, []);
+        return inputs.Select(input => new MappingEntry { Name = name, Input = input, Derived = derived.Contains(input) });
     }
 }

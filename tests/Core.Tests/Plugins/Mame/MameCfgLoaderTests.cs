@@ -590,6 +590,150 @@ public class MameCfgLoaderTests
         result.ShouldBeEmpty();
     }
 
+    // ---- a stick nudging both ways is the port's axis ----
+
+    private void StubStickAndTriggerSwitches() =>
+        _joycodeMappingLoader.Load().Returns(new JoycodeMapping(new Dictionary<string, List<string>>
+        {
+            ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = ["AxisRightStickLeft"],
+            ["JOYCODE_1_ZAXIS_POS_SWITCH"] = ["AxisRightStickRight"],
+            ["JOYCODE_1_RZAXIS_NEG_SWITCH"] = ["AxisRightStickUp"],
+            ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = ["AxisTriggerLeft"],
+            ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = ["AxisTriggerRight"],
+        }));
+
+    [Fact]
+    public void Load_NudgesHoldOppositeEndsOfOneAxis_ThePairIsThePortsOwn()
+    {
+        // downtown's shape: the stick turns the rotary by its two switches rather than its axis,
+        // so it keeps turning while held, and the triggers nudge it too. Opposite ends of one
+        // axis, one in each nudge, are a stick standing in for the port's analogue binding --
+        // what tdfever states directly by binding the axis to standard -- so they are the port's
+        // own reach. The nudges still reach their half of it, so a game labelling only the halves
+        // keeps its stick labels, but only as a derived claim the port's own label outranks.
+        StubStickAndTriggerSwitches();
+        StubXml("""
+            <mameconfig>
+              <system name='downtown'>
+                <input>
+                  <port type='P1_POSITIONAL'>
+                    <newseq type='standard'>NONE</newseq>
+                    <newseq type='increment'>JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_SLIDER2_NEG_SWITCH</newseq>
+                    <newseq type='decrement'>JOYCODE_1_ZAXIS_NEG_SWITCH OR JOYCODE_1_SLIDER1_NEG_SWITCH</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(
+            ("P1_POSITIONAL", ["AxisRightStickRight", "AxisRightStickLeft"]),
+            ("P1_POSITIONAL.inc", ["AxisTriggerRight", "AxisRightStickRight"]),
+            ("P1_POSITIONAL.dec", ["AxisTriggerLeft", "AxisRightStickLeft"]));
+        result.Derived.ShouldBeDictionaryOf(
+            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
+            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
+    }
+
+    [Fact]
+    public void Load_NudgesHoldOnlyTheAxisPair_ThePortReachesItAndTheNudgesOnlyDerive()
+    {
+        // the same stick with no triggers alongside: the nudges bind nothing of their own, so
+        // everything they reach is derived from the port's axis
+        StubStickAndTriggerSwitches();
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_POSITIONAL'>
+                    <newseq type='standard'>NONE</newseq>
+                    <newseq type='increment'>JOYCODE_1_ZAXIS_POS_SWITCH</newseq>
+                    <newseq type='decrement'>JOYCODE_1_ZAXIS_NEG_SWITCH</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(
+            ("P1_POSITIONAL", ["AxisRightStickRight", "AxisRightStickLeft"]),
+            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
+            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
+        result.Derived.ShouldBeDictionaryOf(
+            ("P1_POSITIONAL.inc", ["AxisRightStickRight"]),
+            ("P1_POSITIONAL.dec", ["AxisRightStickLeft"]));
+    }
+
+    [Theory]
+    // both ends of the axis in one nudge: pressing it pushes both ways at once, not an axis
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_SLIDER1_NEG_SWITCH")]
+    // an end in each nudge, but of two different axes
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_RZAXIS_NEG_SWITCH")]
+    // the same end of the axis in both
+    [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
+    public void Load_NudgeSwitchesNotOneAxisBothWays_StayTheNudgesOwn(string increment, string decrement)
+    {
+        StubStickAndTriggerSwitches();
+        StubXml($"""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_POSITIONAL'>
+                    <newseq type='standard'>NONE</newseq>
+                    <newseq type='increment'>{increment}</newseq>
+                    <newseq type='decrement'>{decrement}</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldNotBeNull();
+        result["P1_POSITIONAL"].ShouldBeEmpty();
+        result.Derived.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_UnboundNudgeReadOffTheAxis_IsDerived()
+    {
+        // bm1stmix's shape: real analogue hardware and no nudge buttons, so each nudge reaches its
+        // end of the axis only because the port's own binding does -- the same derived claim as
+        // above, arrived at from the other side
+        _joycodeMappingLoader.Load().Returns(new JoycodeMapping(new Dictionary<string, List<JoycodeTarget>>
+        {
+            ["JOYCODE_1_ZAXIS"] = [new("AxisRightStickLeft", "dec"), new("AxisRightStickRight", "inc")],
+        }));
+        StubXml("""
+            <mameconfig>
+              <system name='galaga'>
+                <input>
+                  <port type='P1_DIAL'>
+                    <newseq type='standard'>JOYCODE_1_ZAXIS</newseq>
+                    <newseq type='increment'>NONE</newseq>
+                    <newseq type='decrement'>NONE</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldBeDictionaryOf(
+            ("P1_DIAL", ["AxisRightStickLeft", "AxisRightStickRight"]),
+            ("P1_DIAL.inc", ["AxisRightStickRight"]),
+            ("P1_DIAL.dec", ["AxisRightStickLeft"]));
+        result.Derived.ShouldBeDictionaryOf(
+            ("P1_DIAL.inc", ["AxisRightStickRight"]),
+            ("P1_DIAL.dec", ["AxisRightStickLeft"]));
+    }
+
     [Fact]
     public void Load_PortWithoutTypeAttribute_IsSkipped()
     {

@@ -74,7 +74,10 @@ public class InputLabelsServiceTests
     /// keeps test bodies focused on what they're mapping and absorbs the read-only-collection
     /// conversion in one place.
     /// </summary>
-    private static ResolvedMapping Mapping(string platform, Dictionary<string, List<string>> buttonToInput)
+    private static ResolvedMapping Mapping(
+        string platform,
+        Dictionary<string, List<string>> buttonToInput,
+        Dictionary<string, List<string>>? derived = null)
     {
         var readOnly = buttonToInput.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value);
         var empty = new Dictionary<string, string>();
@@ -85,7 +88,10 @@ public class InputLabelsServiceTests
             InputToButton: empty,
             NaturalButtonToInput: readOnly,
             NaturalInputToButton: empty,
-            AnalogToDigital: null);
+            AnalogToDigital: null)
+        {
+            DerivedButtonToInput = (derived ?? []).ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value),
+        };
     }
 
     [Fact]
@@ -678,5 +684,69 @@ public class InputLabelsServiceTests
         labels.LabelText.ShouldBeDictionaryOf(
             ("ButtonRightShoulder", "Power Move"),
             ("ButtonA", "Kick"));
+    }
+
+    // --- own claims outrank derived ones ---
+
+    /// <summary>
+    /// downtown's rotary as the mapping layer leaves it: the stick turns the port by a switch at
+    /// each end of its axis, so it is the port's own reach, and each nudge reaches its half of
+    /// the stick only as a derived claim. The triggers are the nudges' own, and the port reaches
+    /// them only through its control. The stick's two halves sit at different positions in the
+    /// port's list, which is what ranking by position got wrong.
+    /// </summary>
+    #pragma warning disable format
+    private static ResolvedMapping RotaryMapping() => Mapping(
+        platform: "Arcade",
+        buttonToInput: new()
+        {
+            ["P1_POSITIONAL"]     = ["AxisRightStickRight", "AxisRightStickLeft", "AxisTriggerLeft", "AxisTriggerRight"],
+            ["P1_POSITIONAL.inc"] = ["AxisTriggerRight", "AxisRightStickRight"],
+            ["P1_POSITIONAL.dec"] = ["AxisTriggerLeft", "AxisRightStickLeft"],
+        },
+        derived: new()
+        {
+            ["P1_POSITIONAL"]     = ["AxisTriggerLeft", "AxisTriggerRight"],
+            ["P1_POSITIONAL.inc"] = ["AxisRightStickRight"],
+            ["P1_POSITIONAL.dec"] = ["AxisRightStickLeft"],
+        });
+    #pragma warning restore format
+
+    [Fact]
+    public void Load_OwnClaimOutranksDerived_WhereverEachSitsInItsList()
+    {
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("P1_POSITIONAL", "Rotate"),
+            ("P1_POSITIONAL.dec", "Rotate Left"),
+            ("P1_POSITIONAL.inc", "Rotate Right")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("downtown"), RotaryMapping());
+
+        // the stick is the port's own on both sides, though one half sits second in its list; the
+        // triggers are the nudges' own, though the port reaches them too
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisRightStickLeft", "Rotate"),
+            ("AxisRightStickRight", "Rotate"),
+            ("AxisTriggerLeft", "Rotate Left"),
+            ("AxisTriggerRight", "Rotate Right"));
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_OwnClaimantUnlabelled_TheDerivedClaimantsLabelStands()
+    {
+        // a game that labels only the halves keeps them on the stick: an unlabelled port is no
+        // contender, so the derived claim has nothing to outrank it
+        _loader.Load(Arg.Any<GameInfo>()).Returns(Labels(
+            ("P1_POSITIONAL.dec", "Rotate Left"),
+            ("P1_POSITIONAL.inc", "Rotate Right")));
+
+        ResolvedLabels labels = BuildTestFixture.Load(Game("downtown"), RotaryMapping());
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("AxisRightStickLeft", "Rotate Left"),
+            ("AxisRightStickRight", "Rotate Right"),
+            ("AxisTriggerLeft", "Rotate Left"),
+            ("AxisTriggerRight", "Rotate Right"));
     }
 }

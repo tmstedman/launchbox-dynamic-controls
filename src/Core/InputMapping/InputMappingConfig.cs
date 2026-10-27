@@ -124,4 +124,12 @@ public record MappingEntry
 
     /// <summary>Generic input name this button maps to (e.g. "ButtonY").</summary>
     public string Input { get; set; } = null!;
+
+    /// <summary>
+    /// The button reaches <see cref="Input"/> only because something else does, rather than by a
+    /// binding of its own — set by a transform that derives it (a MAME nudge reaching its half of
+    /// the port's axis), never read from a file. Carried to
+    /// <see cref="ResolvedMapping.DerivedButtonToInput"/>.
+    /// </summary>
+    public bool Derived { get; set; }
 }

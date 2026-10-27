@@ -73,7 +73,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}");
             InputLabelsConfig? defaultData = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
             Dictionary<string, string> merged = MergeWithDefaults(data, defaultData);
-            ResolvedLabels resolved = TranslateToGeneric(merged, mapping.ButtonToInput) with { IsGameSpecific = true };
+            ResolvedLabels resolved = TranslateToGeneric(merged, mapping) with { IsGameSpecific = true };
             if (resolved.LabelText.Count == 0) continue;
             return resolved;
         }
@@ -91,7 +91,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         if (defaultData == null) return null;
 
         _logger.Debug($"Default labels count: {defaultData.Labels.Count}");
-        return TranslateToGeneric(ToLabelDict(defaultData), mapping.ButtonToInput);
+        return TranslateToGeneric(ToLabelDict(defaultData), mapping);
     }
 
     /// <summary>
@@ -139,10 +139,12 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// that exactly, it's the label.</para>
     ///
     /// <para>Failing that, a button can still reach a generic only weakly, through something
-    /// derived rather than its own binding — an <c>analogToDigital</c> mirror appends the stick
-    /// onto the Dpad's list well after the Dpad's own targets. So when the full set has no match,
-    /// it's retried after dropping every button whose reach here isn't at its strongest (lowest)
-    /// rank, in case that was masking a real match underneath.</para>
+    /// derived rather than its own binding — an <c>analogToDigital</c> mirror, a control reaching
+    /// what its members reach, a nudge reaching its half of its port's axis (see
+    /// <see cref="ResolvedMapping.DerivedButtonToInput"/>). So when the full set has no match,
+    /// it's retried after dropping every button whose claim here isn't the strongest, in case
+    /// that was masking a real match underneath. An own binding outranks a derived one; between
+    /// two of the same kind, the one earlier in its button's list is stronger.</para>
     ///
     /// <para>When neither set matches and more than one button remains, the contenders are asked
     /// whether they disagree at all: where each carries its own text and all of it is the same,
@@ -152,8 +154,9 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// </summary>
     private ResolvedLabels TranslateToGeneric(
         Dictionary<string, string> platformLabels,
-        IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping)
+        ResolvedMapping mapping)
     {
+        IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping = mapping.ButtonToInput;
         var labelsByButtonSet = new Dictionary<string, string>();
         foreach (KeyValuePair<string, string> entry in platformLabels)
         {
@@ -165,10 +168,11 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         var relevantButtons = new HashSet<string>(
             platformLabels.Keys.SelectMany(name => name.Split(' ', StringSplitOptions.RemoveEmptyEntries)));
 
-        // Record every relevant button that reaches each generic, and how directly. A button's
-        // own bindings come first in its list and anything derived -- an analogToDigital mirror
-        // -- is appended after, so a lower position is a stronger claim.
-        var reachersByGeneric = new Dictionary<string, List<(string Button, int Rank)>>();
+        // Record every relevant button that reaches each generic, and how directly: whether the
+        // button binds it or only derives it, then where it sits in the button's list. Position
+        // alone can't stand in for the first -- a button binding both halves of an axis has to
+        // list one of them second, which would make it look as weak as a derived claim.
+        var reachersByGeneric = new Dictionary<string, List<(string Button, (int Derived, int Position) Rank)>>();
         foreach (string button in relevantButtons)
         {
             if (!inputMapping.TryGetValue(button, out IReadOnlyList<string>? genericNames))
@@ -177,16 +181,18 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                 continue;
             }
 
-            for (int rank = 0; rank < genericNames.Count; rank++)
+            IReadOnlyList<string> derived = mapping.DerivedButtonToInput.GetValueOrDefault(button, []);
+            for (int position = 0; position < genericNames.Count; position++)
             {
-                if (!reachersByGeneric.TryGetValue(genericNames[rank], out List<(string, int)>? buttons))
-                    reachersByGeneric[genericNames[rank]] = buttons = [];
-                buttons.Add((button, rank));
+                string generic = genericNames[position];
+                if (!reachersByGeneric.TryGetValue(generic, out List<(string, (int, int))>? buttons))
+                    reachersByGeneric[generic] = buttons = [];
+                buttons.Add((button, (derived.Contains(generic) ? 1 : 0, position)));
             }
         }
 
         var labelText = new Dictionary<string, string>();
-        foreach ((string generic, List<(string Button, int Rank)> reachers) in reachersByGeneric)
+        foreach ((string generic, List<(string Button, (int Derived, int Position) Rank)> reachers) in reachersByGeneric)
         {
             string[] all = [.. Buttons(reachers)];
             if (labelsByButtonSet.TryGetValue(string.Join(' ', all), out string? text))
@@ -196,7 +202,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                 continue;
             }
 
-            int strongest = reachers.Min(r => r.Rank);
+            (int, int) strongest = reachers.Min(r => r.Rank);
             string[] strongestOnly = [.. Buttons(reachers.Where(r => r.Rank == strongest))];
             if (strongestOnly.Length != all.Length && labelsByButtonSet.TryGetValue(string.Join(' ', strongestOnly), out string? narrowedText))
             {
@@ -237,7 +243,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         return new ResolvedLabels(LabelText: labelText);
     }
 
-    private static IEnumerable<string> Buttons(IEnumerable<(string Button, int Rank)> reachers) =>
+    private static IEnumerable<string> Buttons(IEnumerable<(string Button, (int Derived, int Position) Rank)> reachers) =>
         reachers.Select(r => r.Button).Distinct().OrderBy(b => b, StringComparer.Ordinal);
 
     /// <summary>Normalizes a label's button name(s) into an order-independent lookup key.</summary>

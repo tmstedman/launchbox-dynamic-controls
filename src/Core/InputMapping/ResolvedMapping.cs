@@ -40,4 +40,22 @@ public record ResolvedMapping(
     IReadOnlyDictionary<string, string> InputToButton,
     IReadOnlyDictionary<string, IReadOnlyList<string>> NaturalButtonToInput,
     IReadOnlyDictionary<string, string> NaturalInputToButton,
-    AnalogToDigitalMode? AnalogToDigital);
+    AnalogToDigitalMode? AnalogToDigital)
+{
+    /// <summary>
+    /// For each platform button, the inputs in its <see cref="ButtonToInput"/> list it reaches
+    /// only because something else does — an <c>analogToDigital</c> mirror, a control reaching
+    /// what its members reach, a nudge reaching its half of an axis its port is bound to. Every
+    /// other input in the list is the button's own binding. A button with nothing derived has
+    /// no entry.
+    ///
+    /// <para>This is what decides between two labelled buttons reaching one input: an own
+    /// binding is the stronger claim. It used to be read off each input's position in the list,
+    /// on the grounds that derived inputs are appended after a button's own, but a button with
+    /// two bindings of its own (both halves of an axis) then had its second look as weak as a
+    /// derived one, and which half of the stick kept its label came down to declaration
+    /// order.</para>
+    /// </summary>
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> DerivedButtonToInput { get; init; } =
+        new Dictionary<string, IReadOnlyList<string>>();
+}
