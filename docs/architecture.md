@@ -262,6 +262,7 @@ The test tiers follow this split:
 - **Unit tests** (`tests/Core.Tests/`) — one class at a time, collaborators substituted
 - **Subsystem tests** (`tests/Core.IntegrationTests/Subsystem/`) — one subsystem wired up for real; scenario data lives inline next to the assertions, so each test covers a focused case without a new fixture tree
 - **End-to-end tests** (`tests/Core.IntegrationTests/EndToEnd/`) — the full pipeline against an on-disk `Fixtures/` tree, proving the wiring against real data
+- **Shipped-data tests** (`tests/Core.IntegrationTests/ShippedData/`) — no pipeline: a file from `assets/` itself is under test, read from disk, for the facts that used to live in code and must not drift now they are data
 
 Roughly: subsystem tests are where you cover lots of scenarios, E2E tests are where you prove the wiring works against real data, and unit tests are where you pin edge cases for individual classes.
 

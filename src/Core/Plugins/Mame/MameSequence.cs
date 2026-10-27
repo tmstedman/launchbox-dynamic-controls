@@ -1,5 +1,3 @@
-using System.Text.RegularExpressions;
-
 namespace DynamicControls.Plugins.Mame;
 
 /// <summary>
@@ -9,23 +7,6 @@ namespace DynamicControls.Plugins.Mame;
 /// </summary>
 public sealed class MameSequence
 {
-    private static readonly Regex AxisSwitch = new(@"^(JOYCODE_\d+_\w+?)_(POS|NEG|LEFT|RIGHT|UP|DOWN)_SWITCH$");
-
-    /// <summary>
-    /// The opposite end of each axis end MAME names: by sign for most axes, by direction for X
-    /// (<c>LEFT</c>/<c>RIGHT</c>) and Y (<c>UP</c>/<c>DOWN</c>) — which are exactly how MAME's own
-    /// defaults nudge a dial, paddle or positional port.
-    /// </summary>
-    private static readonly Dictionary<string, string> OppositeEnd = new()
-    {
-        ["POS"] = "NEG",
-        ["NEG"] = "POS",
-        ["LEFT"] = "RIGHT",
-        ["RIGHT"] = "LEFT",
-        ["UP"] = "DOWN",
-        ["DOWN"] = "UP",
-    };
-
     public static readonly MameSequence Unbound = new([]);
 
     private MameSequence(IReadOnlyList<string> alternatives)
@@ -53,28 +34,31 @@ public sealed class MameSequence
 
     /// <summary>
     /// The switches forming one axis between this sequence and <paramref name="other"/>: an end of
-    /// the axis here and its opposite end there. Only a lone switch counts — a chord holding one
-    /// is not that end of the stick on its own — and a sequence holding both ends of an axis
-    /// pushes both ways at once, so it pairs with nothing.
+    /// an axis here and its opposite end there, as <paramref name="joycodes"/> declares them. Only
+    /// a lone switch counts — a chord holding one is not that end of the stick on its own — and a
+    /// sequence holding both ends of an axis pushes both ways at once, so it pairs with nothing.
     /// </summary>
-    public (MameSequence Here, MameSequence There) AxisEndsSharedWith(MameSequence other)
+    public (MameSequence Here, MameSequence There) AxisEndsSharedWith(MameSequence other, JoycodeMapping joycodes)
     {
         var here = new List<string>();
         var there = new List<string>();
         foreach (string alternative in Alternatives)
         {
-            Match match = AxisSwitch.Match(alternative);
-            if (!match.Success) continue;
-            string opposite = $"{match.Groups[1].Value}_{OppositeEnd[match.Groups[2].Value]}_SWITCH";
-            if (!other.Alternatives.Contains(opposite)
-                || Alternatives.Contains(opposite)
-                || other.Alternatives.Contains(alternative))
+            if (joycodes.EndOf(alternative) is not AxisEnd end)
+            {
+                continue;
+            }
+
+            List<string> opposite = [.. other.Alternatives.Where(a => joycodes.EndOf(a) == end.Opposite)];
+            if (opposite.Count == 0
+                || Alternatives.Any(a => joycodes.EndOf(a) == end.Opposite)
+                || other.Alternatives.Any(a => joycodes.EndOf(a) == end))
             {
                 continue;
             }
 
             here.Add(alternative);
-            there.Add(opposite);
+            there.AddRange(opposite.Where(a => !there.Contains(a)));
         }
         return (Of(here), Of(there));
     }
