@@ -29,6 +29,8 @@ public class MameInputMappingSourceTests
         _underTest = new MameInputMappingSource(_logger, _cfgLoader);
     }
 
+    private static MamePortReach Reach(string name, params string[] inputs) => new(name, inputs, [], From: "");
+
     private static GameInfo MameGame(string romName = "OutRun", string emulator = null!) =>
         Game(romName) with { EmulatorPath = emulator ?? MameExe };
 
@@ -83,10 +85,7 @@ public class MameInputMappingSourceTests
     public void Transform_GameCfgPresent_UsesItAndSkipsDefault()
     {
         // given a per-game cfg with overrides and a (would-be) default.cfg
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
 
         // when the transform runs
         var result = _underTest.Transform(MameGame(), MappingConfig());
@@ -102,10 +101,7 @@ public class MameInputMappingSourceTests
     {
         // given no per-game cfg but a default.cfg with overrides
         _cfgLoader.Load(GameCfgPath).ReturnsNull();
-        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(DefaultCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
 
         // when the transform runs
         var result = _underTest.Transform(MameGame(), MappingConfig());
@@ -120,10 +116,7 @@ public class MameInputMappingSourceTests
     {
         // given a per-game cfg that exists but contains no overrides (empty dict)
         _cfgLoader.Load(GameCfgPath).Returns([]);
-        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(DefaultCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
 
         // when the transform runs
         var result = _underTest.Transform(MameGame(), MappingConfig());
@@ -167,10 +160,7 @@ public class MameInputMappingSourceTests
         // RomName is non-nullable on the GameInfo record but the source treats null defensively
         // — verify only default.cfg is probed when the game name can't be used
         GameInfo game = MameGame() with { RomName = null! };
-        _cfgLoader.Load(DefaultCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(DefaultCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
 
         // when the transform runs
         _underTest.Transform(game, MappingConfig());
@@ -186,10 +176,7 @@ public class MameInputMappingSourceTests
     public void Transform_BaselineEntryNotOverridden_CopiedVerbatim()
     {
         // given a cfg that overrides one button but the baseline declares two
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
         InputMappingConfig baseline = MappingConfig(mappings:
         [
             ("BUTTON1", "OldA"),
@@ -212,10 +199,7 @@ public class MameInputMappingSourceTests
     public void Transform_MultiInputOverride_ExpandsToOneEntryPerInput()
     {
         // given an override whose value lists two inputs (MAME OR-chained sequence)
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA", "ButtonB"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("BUTTON1", "ButtonA", "ButtonB")]);
         InputMappingConfig baseline = MappingConfig(mappings: [("BUTTON1", "OldA")]);
 
         // when the transform runs
@@ -234,10 +218,7 @@ public class MameInputMappingSourceTests
     public void Transform_OverrideNameNotInBaseline_IsAppendedAtEnd()
     {
         // given an override for a name the baseline does not declare
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["EXTRA"] = ["ButtonX"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("EXTRA", "ButtonX")]);
         InputMappingConfig baseline = MappingConfig(mappings: [("BUTTON1", "OldA")]);
 
         // when the transform runs
@@ -256,10 +237,7 @@ public class MameInputMappingSourceTests
     public void Transform_DuplicateBaselineNameWithOverride_ExpandsOnce()
     {
         // given two baseline entries with the same Name and an override for that name
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
         InputMappingConfig baseline = MappingConfig(mappings:
         [
             ("BUTTON1", "OldA1"),
@@ -279,10 +257,7 @@ public class MameInputMappingSourceTests
     public void Transform_CarriesControllerAndAnalogToDigitalFromBaseline()
     {
         // given a baseline with a controller selection and an A2D mode
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["BUTTON1"] = ["ButtonA"],
-        });
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("BUTTON1", "ButtonA")]);
         InputMappingConfig baseline = MappingConfig(
             controller: "Pad-6btn",
             analogToDigital: AnalogToDigitalMode.Left,
@@ -305,11 +280,8 @@ public class MameInputMappingSourceTests
     public void Transform_DerivedReach_IsMarkedOnTheMergedEntries(bool inBaseline)
     {
         // given a nudge whose stick half is derived from the port's own axis
-        _cfgLoader.Load(GameCfgPath).Returns(new MameCfgOverrides
-        {
-            ["P1_POSITIONAL.dec"] = ["AxisTriggerLeft", "AxisRightStickLeft"],
-            Derived = { ["P1_POSITIONAL.dec"] = ["AxisRightStickLeft"] },
-        });
+        _cfgLoader.Load(GameCfgPath).Returns(
+            [new MamePortReach("P1_POSITIONAL.dec", Own: ["AxisTriggerLeft"], Derived: ["AxisRightStickLeft"], From: "")]);
         InputMappingConfig baseline = MappingConfig(mappings: inBaseline
             ? [("P1_POSITIONAL.dec", "AxisLeftStickLeft")]
             : [("BUTTON1", "ButtonA")]);
