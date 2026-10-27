@@ -433,22 +433,22 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_SamePortTypeTwice_TheLaterKeepsTheName_InTheEarliersPlace_AndTheEarlierIsQualified()
+    public void Load_SamePortTypeTwice_TheLaterReplacesTheEarlier_InTheEarliersPlace()
     {
-        // the dingo shape: MAME writes one <port> per tag a type sits on, so a type can appear
-        // twice. The later keeps the bare name and the first one's place, as before; the earlier
-        // is kept too, under its type, tag and mask, after everything else
+        // the dingo/hotrod shape: MAME writes one <port> per tag a type sits on, so a type can
+        // appear twice. One platform button carries one binding, so the later stands -- and
+        // keeps the first one's place, so nothing downstream sees the button twice
         StubXml("""
             <mameconfig>
               <system name='dingo'>
                 <input>
-                  <port tag=':IN0' type='P1_BUTTON1' mask='16'>
+                  <port tag=':IN0' type='P1_BUTTON1'>
                     <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
                   </port>
-                  <port tag=':IN0' type='P1_BUTTON2' mask='32'>
+                  <port tag=':IN0' type='P1_BUTTON2'>
                     <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
                   </port>
-                  <port tag=':IN1' type='P1_BUTTON1' mask='16'>
+                  <port tag=':IN1' type='P1_BUTTON1'>
                     <newseq type='standard'>JOYCODE_1_BUTTON3</newseq>
                   </port>
                 </input>
@@ -463,98 +463,7 @@ public class MameCfgLoaderTests
         [
             ("P1_BUTTON1", "ButtonC"),
             ("P1_BUTTON2", "ButtonB"),
-            ("P1_BUTTON1:IN0:16", "ButtonA"),
         ]);
-    }
-
-    [Fact]
-    public void Load_OneTypeOnOneTagManyTimes_EachEarlierIsQualifiedByItsMask()
-    {
-        // escounts: four OTHER ports on one tag, told apart only by mask. The last keeps the bare
-        // name; each earlier one is qualified, in the order it was displaced
-        StubXml("""
-            <mameconfig>
-              <system name='escounts'>
-                <input>
-                  <port tag=':STROBE1' type='OTHER' mask='1'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                  </port>
-                  <port tag=':STROBE1' type='OTHER' mask='2'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
-                  </port>
-                  <port tag=':STROBE1' type='OTHER' mask='4'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON3</newseq>
-                  </port>
-                  <port tag=':STROBE1' type='OTHER' mask='16'>
-                    <newseq type='standard'>JOYCODE_1_START</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        var result = _underTest.Load(CfgPath);
-
-        result.ShouldNotBeNull();
-        result.Select(r => (r.Name, string.Join(" ", r.Inputs))).ShouldBe(
-        [
-            ("OTHER", "Start"),
-            ("OTHER:STROBE1:1", "ButtonA"),
-            ("OTHER:STROBE1:2", "ButtonB"),
-            ("OTHER:STROBE1:4", "ButtonC"),
-        ]);
-    }
-
-    [Fact]
-    public void Load_RepeatedPortWithNudges_ItsNudgesAreQualifiedWithIt()
-    {
-        // a nudge is named after its port, so a qualified port's nudges carry the qualified name
-        StubXml("""
-            <mameconfig>
-              <system name='twodials'>
-                <input>
-                  <port tag=':DIAL0' type='P1_DIAL' mask='255'>
-                    <newseq type='increment'>JOYCODE_1_BUTTON1</newseq>
-                    <newseq type='decrement'>JOYCODE_1_BUTTON2</newseq>
-                  </port>
-                  <port tag=':DIAL1' type='P1_DIAL' mask='255'>
-                    <newseq type='increment'>JOYCODE_1_BUTTON3</newseq>
-                    <newseq type='decrement'>JOYCODE_1_START</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        Inputs(_underTest.Load(CfgPath)).ShouldBeDictionaryOf(
-            ("P1_DIAL", []),
-            ("P1_DIAL.inc", ["ButtonC"]),
-            ("P1_DIAL.dec", ["Start"]),
-            ("P1_DIAL:DIAL0:255", []),
-            ("P1_DIAL:DIAL0:255.inc", ["ButtonA"]),
-            ("P1_DIAL:DIAL0:255.dec", ["ButtonB"]));
-    }
-
-    [Fact]
-    public void Load_RepeatedTypeWhoseEarlierPortReachesNothing_LeavesNothingToQualify()
-    {
-        // the earlier port is another player's, so it never took the name and nothing is displaced
-        StubXml("""
-            <mameconfig>
-              <system name='twoslots'>
-                <input>
-                  <port tag=':IN0' type='P1_BUTTON1' mask='1'>
-                    <newseq type='standard'>JOYCODE_2_BUTTON1</newseq>
-                  </port>
-                  <port tag=':IN1' type='P1_BUTTON1' mask='1'>
-                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
-                  </port>
-                </input>
-              </system>
-            </mameconfig>
-            """);
-
-        Inputs(_underTest.Load(CfgPath)).ShouldBeDictionaryOf(("P1_BUTTON1", ["ButtonA"]));
     }
 
     [Fact]

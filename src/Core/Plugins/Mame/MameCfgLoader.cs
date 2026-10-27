@@ -51,13 +51,10 @@ public class MameCfgLoader(
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;
 
-        // MAME writes one <port> per tag and bit a type sits on, so one type can appear several
-        // times. The later keeps the bare name, in the earlier's place; the earlier is kept under
-        // its qualified name (see QualifiedName), after everything else.
+        // MAME writes one <port> per tag a type sits on, so one type can appear twice. A button
+        // carries one binding, so the later replaces the earlier, in the earlier's place.
         var overrides = new List<MamePortReach>();
         var indexByName = new Dictionary<string, int>();
-        var qualifiedByIndex = new List<string>();
-        var displaced = new List<MamePortReach>();
 
         foreach (XmlElement systemNode in root.ChildNodes.OfType<XmlElement>())
         {
@@ -97,24 +94,16 @@ public class MameCfgLoader(
                         continue;
                     }
 
-                    string qualifiedPort = QualifiedName(inputName, portNode);
                     foreach (MamePortReach button in reach)
                     {
-                        // The port's own name or one of its nudges (PORT.inc), qualified alike.
-                        string qualified = qualifiedPort + button.Name[inputName.Length..];
                         if (indexByName.TryGetValue(button.Name, out int index))
                         {
-                            MamePortReach earlier = overrides[index] with { Name = qualifiedByIndex[index] };
-                            displaced.Add(earlier);
-                            _logger.Debug($"MAME cfg: {button.Name} appears again, so the earlier one is {earlier.Name}");
                             overrides[index] = button;
-                            qualifiedByIndex[index] = qualified;
                         }
                         else
                         {
                             indexByName[button.Name] = overrides.Count;
                             overrides.Add(button);
-                            qualifiedByIndex.Add(qualified);
                         }
                         _logger.Debug(button.Inputs.Count > 0
                             ? $"MAME override: {button.Name} ({button.From}) -> {string.Join(", ", button.Inputs)}"
@@ -125,21 +114,7 @@ public class MameCfgLoader(
             }
         }
 
-        return [.. overrides, .. displaced];
-    }
-
-    /// <summary>
-    /// The platform button name of a port whose type the cfg repeats: its type, then its tag
-    /// without MAME's leading colon, then its mask — <c>OTHER:STROBE1:2</c>. MAME tells ports apart
-    /// by tag and mask together, and neither alone is enough: escounts puts four <c>OTHER</c>
-    /// ports on one tag, and gahaha's two sticks share a full-range mask on different tags.
-    /// No spaces, which a Labels.xml name reserves for button combinations.
-    /// </summary>
-    private static string QualifiedName(string type, XmlElement portNode)
-    {
-        string tag = (portNode.Attributes["tag"]?.Value ?? "").TrimStart(':');
-        string? mask = portNode.Attributes["mask"]?.Value;
-        return string.Join(":", new[] { type, tag, mask }.Where(part => !string.IsNullOrEmpty(part)));
+        return overrides;
     }
 
     /// <summary>
