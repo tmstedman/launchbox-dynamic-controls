@@ -5938,6 +5938,9 @@
     </Game>
     <Game launchBoxId="36460" romName="downtown">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Punch</Input>
         <Input name="P1_BUTTON2">Kick</Input>
         <Input name="START1">Start</Input>
@@ -5945,6 +5948,9 @@
     </Game>
     <Game launchBoxId="36460" romName="downtownj">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Punch</Input>
         <Input name="P1_BUTTON2">Kick</Input>
         <Input name="START1">Start</Input>
@@ -19331,7 +19337,7 @@
     </Game>
     <Game launchBoxId="39188" romName="searchar">
         <Input name="P1_JOYSTICK">Move</Input>
-        <Input name="P1_POSITIONAL.dec P1_POSITIONAL.inc">Rotate Shoot Position</Input>
+        <Input name="P1_POSITIONAL">Rotate Shoot Position</Input>
         <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
         <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot / (Hold) Charge</Input>
