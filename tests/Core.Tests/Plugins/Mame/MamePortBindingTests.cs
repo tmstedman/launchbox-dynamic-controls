@@ -21,6 +21,8 @@ public class MamePortBindingTests
         ["JOYCODE_1_ZAXIS"] = [new("AxisRightStickLeft", "dec"), new("AxisRightStickRight", "inc")],
         ["JOYCODE_1_ZAXIS_NEG_SWITCH"] = [new("AxisRightStickLeft", null)],
         ["JOYCODE_1_ZAXIS_POS_SWITCH"] = [new("AxisRightStickRight", null)],
+        ["JOYCODE_1_XAXIS_LEFT_SWITCH"] = [new("AxisLeftStickLeft", null)],
+        ["JOYCODE_1_XAXIS_RIGHT_SWITCH"] = [new("AxisLeftStickRight", null)],
         ["JOYCODE_1_SLIDER1_NEG_SWITCH"] = [new("AxisTriggerLeft", null)],
         ["JOYCODE_1_SLIDER2_NEG_SWITCH"] = [new("AxisTriggerRight", null)],
     });
@@ -157,6 +159,23 @@ public class MamePortBindingTests
         Derived(reach).ShouldBeDictionaryOf(
             (Port + ".inc", ["AxisRightStickRight"]),
             (Port + ".dec", ["AxisRightStickLeft"]));
+    }
+
+    [Fact]
+    public void NudgesHoldTheLeftAndRightEndsOfTheXAxis_ThePairIsThePortsOwn()
+    {
+        // spacwalk's shape, and MAME's default for a nudged dial or paddle: the X axis names its
+        // ends LEFT and RIGHT rather than NEG and POS, and is the same stick standing in
+        IReadOnlyList<MamePortReach> reach = Resolve(
+            standard: "NONE", increment: "JOYCODE_1_XAXIS_RIGHT_SWITCH", decrement: "JOYCODE_1_XAXIS_LEFT_SWITCH");
+
+        Inputs(reach).ShouldBeDictionaryOf(
+            (Port, ["AxisLeftStickRight", "AxisLeftStickLeft"]),
+            (Port + ".inc", ["AxisLeftStickRight"]),
+            (Port + ".dec", ["AxisLeftStickLeft"]));
+        Derived(reach).ShouldBeDictionaryOf(
+            (Port + ".inc", ["AxisLeftStickRight"]),
+            (Port + ".dec", ["AxisLeftStickLeft"]));
     }
 
     [Fact]

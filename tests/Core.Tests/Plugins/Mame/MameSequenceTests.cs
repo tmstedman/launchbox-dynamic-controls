@@ -43,6 +43,12 @@ public class MameSequenceTests
     // which end is in which nudge doesn't matter -- it's still one axis both ways
     [InlineData("JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH",
                 "JOYCODE_1_ZAXIS_NEG_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
+    // MAME names the X and Y axes' ends by direction rather than sign -- the spacwalk shape,
+    // and how MAME's own defaults nudge a dial, paddle or positional port
+    [InlineData("JOYCODE_1_XAXIS_RIGHT_SWITCH", "JOYCODE_1_XAXIS_LEFT_SWITCH",
+                "JOYCODE_1_XAXIS_RIGHT_SWITCH", "JOYCODE_1_XAXIS_LEFT_SWITCH")]
+    [InlineData("JOYCODE_1_YAXIS_UP_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH",
+                "JOYCODE_1_YAXIS_UP_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH")]
     public void AxisEndsSharedWith_OppositeEndsOfOneAxis_Pair(string here, string there, string expectedHere, string expectedThere)
     {
         (MameSequence pairedHere, MameSequence pairedThere) = MameSequence.Parse(here).AxisEndsSharedWith(MameSequence.Parse(there));
@@ -58,6 +64,9 @@ public class MameSequenceTests
     [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_RZAXIS_NEG_SWITCH")]
     // the same end in both
     [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH", "JOYCODE_1_ZAXIS_POS_SWITCH")]
+    [InlineData("JOYCODE_1_XAXIS_LEFT_SWITCH", "JOYCODE_1_XAXIS_LEFT_SWITCH")]
+    // ends of two different axes, named by direction: left is not the opposite of down
+    [InlineData("JOYCODE_1_XAXIS_LEFT_SWITCH", "JOYCODE_1_YAXIS_DOWN_SWITCH")]
     // an end held only as part of a chord is not the stick on its own
     [InlineData("JOYCODE_1_ZAXIS_POS_SWITCH JOYCODE_1_BUTTON1", "JOYCODE_1_ZAXIS_NEG_SWITCH")]
     // ordinary buttons are no axis at all
