@@ -191,6 +191,52 @@ public class MameInputMappingSubsystemTests
         mapping.ButtonToInput["P1_PADDLE"].ShouldBe(["ButtonA", "ButtonB"]);
     }
 
+    [Fact]
+    public void Load_PaddleNudgedByTheXAxisEnds_ThePortOwnsTheStick()
+    {
+        // spacwalk's shape, and MAME's own default for a nudged paddle: the stick's left and right
+        // switches, one in each nudge. The port binds the stick, so it owns it -- in the reverse
+        // lookup that picks the image as much as in the labels -- and the nudges reach their half
+        // only derivedly, ahead of the port in Controllers.xml though they are
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Control name="P1_PADDLE" mappings="P1_PADDLE.dec P1_PADDLE.inc" />
+                <Mapping name="P1_PADDLE.dec" input="AxisLeftStickLeft" />
+                <Mapping name="P1_PADDLE.inc" input="AxisLeftStickRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_XAXIS_LEFT_SWITCH" input="AxisLeftStickLeft" />
+              <Mapping joycode="JOYCODE_1_XAXIS_RIGHT_SWITCH" input="AxisLeftStickRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteMameCfg("spacwalk.cfg", """
+            <mameconfig>
+              <system name="spacwalk">
+                <input>
+                  <port type="P1_PADDLE">
+                    <newseq type="standard">NONE</newseq>
+                    <newseq type="increment">JOYCODE_1_XAXIS_RIGHT_SWITCH</newseq>
+                    <newseq type="decrement">JOYCODE_1_XAXIS_LEFT_SWITCH</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("spacwalk"));
+
+        mapping.ButtonToInput["P1_PADDLE"].ShouldBe(["AxisLeftStickRight", "AxisLeftStickLeft"]);
+        mapping.DerivedButtonToInput.ShouldBeDictionaryOf(
+            ("P1_PADDLE.inc", ["AxisLeftStickRight"]),
+            ("P1_PADDLE.dec", ["AxisLeftStickLeft"]));
+        mapping.InputToButton["AxisLeftStickLeft"].ShouldBe("P1_PADDLE");
+        mapping.InputToButton["AxisLeftStickRight"].ShouldBe("P1_PADDLE");
+    }
+
     [Theory]
     // the plain axis: decrement is the negative end, which this file calls Up
     [InlineData("JOYCODE_1_YAXIS", "AxisLeftStickUp", "AxisLeftStickDown")]
