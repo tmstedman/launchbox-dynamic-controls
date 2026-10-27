@@ -57,7 +57,7 @@ public class JoycodeMappingLoader(
             // of the axis this input lies on, in MAME's own increment/decrement terms. Absent on
             // every ordinary button, which has no direction to state.
             string? half = node.Attributes["half"]?.Value;
-            if (half != null && half != "dec" && half != "inc")
+            if (half is not null and not "dec" and not "inc")
             {
                 _logger.Error($"Ignoring half=\"{half}\" on {joycode} in JoycodeMapping.xml: expected \"dec\" or \"inc\"");
                 half = null;

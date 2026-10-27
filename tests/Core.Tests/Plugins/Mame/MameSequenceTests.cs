@@ -21,7 +21,7 @@ public class MameSequenceTests
     public void Parse_SplitsOnOr_KeepingAChordWhole()
     {
         // a chord -- codes pressed together, space-separated -- is one alternative, not two
-        MameSequence sequence = MameSequence.Parse(" JOYCODE_1_BUTTON1 OR JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3 ");
+        var sequence = MameSequence.Parse(" JOYCODE_1_BUTTON1 OR JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3 ");
 
         sequence.Alternatives.ShouldBe(["JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3"]);
         sequence.ToString().ShouldBe("JOYCODE_1_BUTTON1 OR JOYCODE_1_BUTTON2 JOYCODE_1_BUTTON3");
@@ -30,7 +30,7 @@ public class MameSequenceTests
     [Fact]
     public void Without_DropsThoseAlternatives_AndKeepsTheRestInOrder()
     {
-        MameSequence sequence = MameSequence.Parse("JOYCODE_1_BUTTON1 OR JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_BUTTON2");
+        var sequence = MameSequence.Parse("JOYCODE_1_BUTTON1 OR JOYCODE_1_ZAXIS_POS_SWITCH OR JOYCODE_1_BUTTON2");
 
         sequence.Without(MameSequence.Parse("JOYCODE_1_ZAXIS_POS_SWITCH")).Alternatives
             .ShouldBe(["JOYCODE_1_BUTTON1", "JOYCODE_1_BUTTON2"]);

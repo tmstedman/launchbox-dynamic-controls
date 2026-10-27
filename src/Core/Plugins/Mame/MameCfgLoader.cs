@@ -96,7 +96,10 @@ public class MameCfgLoader(
 
                     foreach (MamePortReach button in reach)
                     {
-                        if (indexByName.TryGetValue(button.Name, out int index)) overrides[index] = button;
+                        if (indexByName.TryGetValue(button.Name, out int index))
+                        {
+                            overrides[index] = button;
+                        }
                         else
                         {
                             indexByName[button.Name] = overrides.Count;

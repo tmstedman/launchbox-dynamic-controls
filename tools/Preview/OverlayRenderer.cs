@@ -63,7 +63,7 @@ public static class OverlayRenderer
     {
         if (string.IsNullOrEmpty(path) || !File.Exists(path)) return;
 
-        using SKBitmap? source = SKBitmap.Decode(path);
+        using var source = SKBitmap.Decode(path);
         if (source == null) return;
 
         float scale = Math.Min((float)width / source.Width, (float)height / source.Height);
@@ -83,7 +83,7 @@ public static class OverlayRenderer
     {
         if (!File.Exists(image.Source)) return;
 
-        using SKBitmap? source = SKBitmap.Decode(image.Source);
+        using var source = SKBitmap.Decode(image.Source);
         if (source == null) return;
 
         SKRect dest = Fit(source, image);

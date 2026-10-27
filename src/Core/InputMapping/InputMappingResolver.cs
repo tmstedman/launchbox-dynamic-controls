@@ -59,8 +59,11 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             var ownCounts = buttonToInput.ToDictionary(e => e.Key, e => e.Value.Count);
             AnalogToDigitalMirror.Mirror(buttonToInput, mode);
             foreach ((string button, List<string> inputs) in buttonToInput)
+            {
                 foreach (string mirrored in inputs.Skip(ownCounts[button]))
                     AddDerived(derived, button, mirrored);
+            }
+
             _logger.Debug($"Applied AnalogToDigital mirror (Dpad -> {mode.ToString().ToLowerInvariant()} stick)");
         }
 
