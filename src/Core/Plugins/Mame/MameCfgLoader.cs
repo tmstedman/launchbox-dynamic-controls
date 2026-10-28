@@ -53,7 +53,8 @@ public class MameCfgLoader(
 
         // MAME writes one <port> per tag and bit a type sits on, so one type can appear several
         // times. The last of them keeps the bare names; each earlier one is kept whole, nudges
-        // and all, under its qualified name (see QualifiedName), after everything else. A port
+        // and all, under its qualified name (see QualifiedName), after everything else, and the
+        // last is kept under its own qualified name too, so every port of the type has one. A port
         // states its type's bare name whatever else it binds, so a type has one owner at a time,
         // and a new port of the type takes over the owner's slots by name, keeping any it doesn't
         // restate stated but empty.
@@ -64,6 +65,7 @@ public class MameCfgLoader(
         var positionByType = new Dictionary<string, int>();
         var displaced = new List<MamePortReach>();
         var placeholders = new HashSet<string>();
+        var repeatedTypes = new List<string>();
 
         foreach (XmlElement systemNode in root.ChildNodes.OfType<XmlElement>())
         {
@@ -121,6 +123,7 @@ public class MameCfgLoader(
                     var freed = new Dictionary<string, int>();
                     if (ownerByType.TryGetValue(inputName, out (string Qualified, List<string> Names) owner))
                     {
+                        if (!repeatedTypes.Contains(inputName)) repeatedTypes.Add(inputName);
                         foreach (string name in owner.Names)
                         {
                             int index = indexByName[name];
@@ -164,6 +167,17 @@ public class MameCfgLoader(
                     ownerByType[inputName] = (qualifiedPort, owned);
                 }
             }
+        }
+
+        // The last port of each repeated type answers to its qualified name as well as the bare
+        // one, so a game's labels can name every port the same way. Its placeholders reach nothing
+        // and have no qualified form to offer.
+        foreach (string type in repeatedTypes)
+        {
+            (string qualified, List<string> names) = ownerByType[type];
+            displaced.AddRange(names
+                .Where(name => !placeholders.Contains(name))
+                .Select(name => slots[indexByName[name]] with { Name = qualified + name[type.Length..] }));
         }
 
         return [.. slots, .. displaced];

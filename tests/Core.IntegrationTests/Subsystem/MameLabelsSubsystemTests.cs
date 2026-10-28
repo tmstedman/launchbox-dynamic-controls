@@ -145,6 +145,46 @@ public class MameLabelsSubsystemTests
     }
 
     [Fact]
+    public void Load_PortTypeRepeated_EveryPortCanBeLabelledByItsQualifiedName()
+    {
+        // escounts written fully qualified: the last port answers to its qualified name as well as
+        // the bare one, so a game's labels need not mix the two forms
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true" />
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON5" input="ButtonLeftShoulder" />
+              <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "escounts", """
+            <InputLabels>
+              <Input name="OTHER:STROBE1:4">Collect</Input>
+              <Input name="OTHER:STROBE1:16">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("escounts.cfg", """
+            <mameconfig>
+              <system name="escounts">
+                <input>
+                  <port tag=":STROBE1" type="OTHER" mask="4"><newseq type="standard">JOYCODE_1_BUTTON5</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="16"><newseq type="standard">JOYCODE_1_SLIDER2_NEG_SWITCH</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "escounts", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["ButtonLeftShoulder"].ShouldBe("Collect");
+        labels.LabelText["AxisTriggerRight"].ShouldBe("Bonus");
+    }
+
+    [Fact]
     public void Load_RepeatedPortWhoseNudgesTheLaterLacks_BareNudgesStayDroppedFromTheBaseline()
     {
         // the earlier port's nudges move with it to its qualified name; the later port states

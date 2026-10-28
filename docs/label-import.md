@@ -126,9 +126,10 @@ of its own — so a game labelling only the nudges still shows them there, one p
 ### A port type the cfg repeats is named by its tag and mask
 
 MAME writes one `<port>` per tag and bit a type sits on, so a cfg can carry the same type several
-times: `escounts` has four `OTHER` ports, for Pass, Collect, Continue and Bonus. The last of them
-keeps the bare type as its name, and each earlier one is named by its type, its tag without the
-leading colon, and its mask — `OTHER:STROBE1:2`. Read the names straight off the cfg's `<port>`
+times: `escounts` has four `OTHER` ports, for Pass, Collect, Continue and Bonus. Each is named by
+its type, its tag without the leading colon, and its mask — `OTHER:STROBE1:2` — and the last of them
+also keeps the bare type, so labels written before repeats were named still land. Read the names
+straight off the cfg's `<port>`
 attributes; a qualified port's nudges are named after it the same way (`P1_DIAL:DIAL0:255.inc`).
 A tag can hold colons of its own (`COIN1:mainpcb:IN0:128`). A port with neither tag nor mask, or
 one whose name another port already took, adds its place among every port of its type in the
@@ -137,10 +138,11 @@ cfg, bound or not — `P1_BUTTON1#2`, or `P1_BUTTON1:IN0#2` when it is the name 
 Both tag and mask are needed: `escounts` puts all four on one tag, and `gahaha`'s two sticks share
 a mask on different tags.
 
-Which port is "the last" is counted among those bound to player 1, so the names hold only while
-the cfg binds the ports the way the labels were written against: rebind `escounts`' Bonus port to
-player 2 and its Continue port becomes the bare `OTHER`, taking Bonus's label. Write them against
-the cfg pack's own bindings, as every Arcade label is.
+Label every port of a repeated type by its qualified name, the last one included. The bare name
+belongs to whichever repeat is last among those bound to player 1, so it moves with the cfg:
+rebind `escounts`' Bonus port to player 2 and its Continue port becomes the bare `OTHER`. The
+qualified names don't move. Name one port by one form only — the last port's two names reach the
+same control, and different text on each leaves that control unlabelled.
 
 ### Labels are captions, not prose
 

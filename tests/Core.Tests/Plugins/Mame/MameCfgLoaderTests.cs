@@ -433,11 +433,11 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
-    public void Load_SamePortTypeTwice_TheLaterKeepsTheName_InTheEarliersPlace_AndTheEarlierIsQualified()
+    public void Load_SamePortTypeTwice_TheLaterKeepsTheName_InTheEarliersPlace_AndEachIsQualified()
     {
         // the dingo shape: MAME writes one <port> per tag and bit a type sits on, so a type can
-        // appear twice. The later keeps the bare name and the first one's place, as before; the earlier
-        // is kept too, under its type, tag and mask, after everything else
+        // appear twice. The later keeps the bare name and the first one's place, as before; each is
+        // also kept under its type, tag and mask, after everything else, so a label can name either
         StubXml("""
             <mameconfig>
               <system name='dingo'>
@@ -464,6 +464,7 @@ public class MameCfgLoaderTests
             ("P1_BUTTON1", "ButtonC"),
             ("P1_BUTTON2", "ButtonB"),
             ("P1_BUTTON1:IN0:16", "ButtonA"),
+            ("P1_BUTTON1:IN1:16", "ButtonC"),
         ]);
     }
 
@@ -471,7 +472,7 @@ public class MameCfgLoaderTests
     public void Load_OneTypeOnOneTagManyTimes_EachEarlierIsQualifiedByItsMask()
     {
         // escounts: four OTHER ports on one tag, told apart only by mask. The last keeps the bare
-        // name; each earlier one is qualified, in the order it was displaced
+        // name; every one is qualified, the earlier in the order they were displaced, the last after
         StubXml("""
             <mameconfig>
               <system name='escounts'>
@@ -502,6 +503,7 @@ public class MameCfgLoaderTests
             ("OTHER:STROBE1:1", "ButtonA"),
             ("OTHER:STROBE1:2", "ButtonB"),
             ("OTHER:STROBE1:4", "ButtonC"),
+            ("OTHER:STROBE1:16", "Start"),
         ]);
     }
 
@@ -532,7 +534,10 @@ public class MameCfgLoaderTests
             ("P1_DIAL.dec", ["Start"]),
             ("P1_DIAL:DIAL0:255", []),
             ("P1_DIAL:DIAL0:255.inc", ["ButtonA"]),
-            ("P1_DIAL:DIAL0:255.dec", ["ButtonB"]));
+            ("P1_DIAL:DIAL0:255.dec", ["ButtonB"]),
+            ("P1_DIAL:DIAL1:255", []),
+            ("P1_DIAL:DIAL1:255.inc", ["ButtonC"]),
+            ("P1_DIAL:DIAL1:255.dec", ["Start"]));
     }
 
     [Fact]
@@ -562,7 +567,8 @@ public class MameCfgLoaderTests
             ("P1_DIAL.dec", []),
             ("P1_DIAL:DIAL0:255", []),
             ("P1_DIAL:DIAL0:255.inc", ["ButtonA"]),
-            ("P1_DIAL:DIAL0:255.dec", ["ButtonB"]));
+            ("P1_DIAL:DIAL0:255.dec", ["ButtonB"]),
+            ("P1_DIAL:DIAL1:255", ["Start"]));
     }
 
     [Fact]
@@ -583,7 +589,8 @@ public class MameCfgLoaderTests
 
         Inputs(_underTest.Load(CfgPath)).ShouldBeDictionaryOf(
             ("P1_BUTTON1", ["ButtonC"]),
-            ("P1_BUTTON1#1", ["ButtonA"]));
+            ("P1_BUTTON1#1", ["ButtonA"]),
+            ("P1_BUTTON1#2", ["ButtonC"]));
     }
 
     [Fact]
@@ -605,7 +612,8 @@ public class MameCfgLoaderTests
 
         Inputs(_underTest.Load(CfgPath)).ShouldBeDictionaryOf(
             ("P1_BUTTON1", ["ButtonC"]),
-            ("P1_BUTTON1#2", ["ButtonA"]));
+            ("P1_BUTTON1#2", ["ButtonA"]),
+            ("P1_BUTTON1#3", ["ButtonC"]));
     }
 
     [Fact]
@@ -627,7 +635,8 @@ public class MameCfgLoaderTests
         Inputs(_underTest.Load(CfgPath)).ShouldBeDictionaryOf(
             ("P1_BUTTON1", ["ButtonC"]),
             ("P1_BUTTON1:IN0", ["ButtonA"]),
-            ("P1_BUTTON1:IN0#2", ["ButtonB"]));
+            ("P1_BUTTON1:IN0#2", ["ButtonB"]),
+            ("P1_BUTTON1:IN0#3", ["ButtonC"]));
     }
 
     [Fact]
