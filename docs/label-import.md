@@ -142,6 +142,12 @@ the cfg binds the ports the way the labels were written against: rebind `escount
 player 2 and its Continue port becomes the bare `OTHER`, taking Bonus's label. Write them against
 the cfg pack's own bindings, as every Arcade label is.
 
+The last port keeps only the bare name, not a qualified one beside it, because the bare name is
+the one the rest of the pipeline is written against. Controllers.xml's `<Control name="P1_DIAL"
+mappings="P1_DIAL.dec P1_DIAL.inc">` names bare ports, so only the bare name lets one label reach a
+port's nudges too, and a second name covering the same inputs would leave a composite no single
+button drives without the one button its image is looked up from.
+
 ### Labels are captions, not prose
 
 The database writes sentences: `Offensive Throw / Defensive Catch`, or Champion Base Ball's
