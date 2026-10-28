@@ -116,7 +116,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         {
             foreach ((string buttons, string text) in ByButtonSet(labels.Labels, aliases, source))
             {
-                if (merged.TryAdd(buttons, text) && !first) _logger.Debug($"Inherited default: {buttons} -> {text}");
+                if (merged.TryAdd(buttons, text) && !first) _logger.Debug($"Inherited from {source}: {buttons} -> {text}");
             }
             first = false;
         }
@@ -126,9 +126,8 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// <summary>
     /// Translates platform button labels, keyed by <see cref="ByButtonSet"/>, to generic input
     /// names using the input mapping. An individual label is treated as a combination of one, so
-    /// both resolve through the same
-    /// rule: a generic takes a label's text only when some entry names exactly the buttons that
-    /// reach it, no more and no fewer.
+    /// both resolve through the same rule: a generic takes a label's text only when some entry
+    /// names exactly the buttons that reach it, no more and no fewer.
     ///
     /// <para>For each generic, the candidates are the buttons some label actually mentions, and
     /// its full driver set is every one of them that reaches it at all, regardless of how far
