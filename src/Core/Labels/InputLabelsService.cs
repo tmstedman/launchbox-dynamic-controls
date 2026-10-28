@@ -72,7 +72,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
 
             _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}");
             InputLabelsConfig? defaultData = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
-            Dictionary<string, string> merged = MergeWithDefaults(data, defaultData);
+            Dictionary<string, string> merged = MergeWithDefaults(data, defaultData, mapping.ButtonAliases);
             ResolvedLabels resolved = TranslateToGeneric(merged, mapping) with { IsGameSpecific = true };
             if (resolved.LabelText.Count == 0) continue;
             return resolved;
@@ -91,22 +91,24 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         if (defaultData == null) return null;
 
         _logger.Debug($"Default labels count: {defaultData.Labels.Count}");
-        return TranslateToGeneric(ToLabelDict(defaultData), mapping);
+        return TranslateToGeneric(ByButtonSet(ToLabelDict(defaultData), mapping.ButtonAliases), mapping);
     }
 
     /// <summary>
-    /// Merges game labels with default labels. Default entries are added for any platform button
-    /// not already present in the game labels.
+    /// Merges game labels with default labels. Default entries are added for any set of buttons
+    /// the game labels don't already name — compared once each side names its buttons one way,
+    /// so a game naming a port by another name of it still overrides the default for that port.
     /// </summary>
-    private Dictionary<string, string> MergeWithDefaults(InputLabelsConfig gameData, InputLabelsConfig? defaultData)
+    private Dictionary<string, string> MergeWithDefaults(
+        InputLabelsConfig gameData, InputLabelsConfig? defaultData, IReadOnlyDictionary<string, string> aliases)
     {
-        Dictionary<string, string> labels = ToLabelDict(gameData);
+        Dictionary<string, string> labels = ByButtonSet(ToLabelDict(gameData), aliases);
         if (defaultData == null) return labels;
 
-        foreach (LabelEntry entry in defaultData.Labels.Where(e => !labels.ContainsKey(e.Name)))
+        foreach ((string buttons, string text) in ByButtonSet(ToLabelDict(defaultData), aliases))
         {
-            labels[entry.Name] = entry.Label;
-            _logger.Debug($"Inherited default: {entry.Name} -> {entry.Label}");
+            if (!labels.TryAdd(buttons, text)) continue;
+            _logger.Debug($"Inherited default: {buttons} -> {text}");
         }
         _logger.Debug($"Default labels count: {defaultData.Labels.Count}");
 
@@ -127,7 +129,8 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     }
 
     /// <summary>
-    /// Translates platform button labels to generic input names using the input mapping. An
+    /// Translates platform button labels, keyed by <see cref="ByButtonSet"/>, to generic input
+    /// names using the input mapping. An
     /// individual label is treated as a combination of one, so both resolve through the same
     /// rule: a generic takes a label's text only when some entry names exactly the buttons that
     /// reach it, no more and no fewer.
@@ -153,21 +156,15 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// unlabelled rather than guessed at.</para>
     /// </summary>
     private ResolvedLabels TranslateToGeneric(
-        Dictionary<string, string> platformLabels,
+        Dictionary<string, string> labelsByButtonSet,
         ResolvedMapping mapping)
     {
-        platformLabels = ResolveAliases(platformLabels, mapping.ButtonAliases);
         IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping = mapping.ButtonToInput;
-        var labelsByButtonSet = new Dictionary<string, string>();
-        foreach (KeyValuePair<string, string> entry in platformLabels)
-        {
-            labelsByButtonSet[ButtonSetKey(entry.Key)] = entry.Value;
-        }
 
         // Only buttons some label mentions can contend for a generic -- a button nobody labelled
         // is not a candidate driver even if the mapping happens to reach it too.
         var relevantButtons = new HashSet<string>(
-            platformLabels.Keys.SelectMany(name => name.Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+            labelsByButtonSet.Keys.SelectMany(name => name.Split(' ', StringSplitOptions.RemoveEmptyEntries)));
 
         // Record every relevant button that reaches each generic, and how directly: whether the
         // button binds it or only derives it, then where it sits in the button's list. Position
@@ -245,27 +242,26 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     }
 
     /// <summary>
-    /// Rewrites every button a label names by another name of it to the button it means, each
-    /// one inside a combination too, so the rest of the matching sees one name per button. Two
-    /// entries that then name the same buttons are the same label written twice: identical text
-    /// is no conflict, and different text keeps the entry written first.
+    /// Keys each label by the set of buttons it names (<see cref="ButtonSetKey"/>), with every
+    /// button named by another name of it rewritten to the button it means, inside a combination
+    /// too, so the rest of the matching sees one name per button. Two entries that then name the
+    /// same buttons — in another order, or one by each of its names — are the same label written
+    /// twice: identical text is no conflict, and different text keeps the entry written first.
     /// </summary>
-    private Dictionary<string, string> ResolveAliases(
+    private Dictionary<string, string> ByButtonSet(
         Dictionary<string, string> platformLabels, IReadOnlyDictionary<string, string> aliases)
     {
-        if (aliases.Count == 0) return platformLabels;
-
         var resolved = new Dictionary<string, string>();
         var writtenAs = new Dictionary<string, string>();
         foreach ((string name, string text) in platformLabels)
         {
-            string buttons = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Select(button => aliases.GetValueOrDefault(button, button)));
+            string buttons = ButtonSetKey(string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(button => aliases.GetValueOrDefault(button, button))));
             if (resolved.TryGetValue(buttons, out string? earlier))
             {
                 if (earlier != text)
                 {
-                    _logger.Error($"Label \"{name}\" names the same button as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
+                    _logger.Error($"Label \"{name}\" names the same buttons as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
                 }
                 continue;
             }
