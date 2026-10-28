@@ -152,8 +152,8 @@ names are silently ignored.
 Merging with the shipped Labels.xml: your file is merged entry-by-entry with
 Defaults/Platforms/{Platform}/Labels.xml — a User <Game> entry overrides the
 matching Defaults entry entirely (matched first by id, then by name); User
-<Defaults> buttons override matching Defaults buttons, and unmentioned
-Defaults buttons are kept.
+<Defaults> buttons override Defaults entries naming the same buttons (a
+combination in any order), and unmentioned Defaults buttons are kept.
 
 Contributing: if you create labels for a game, please consider submitting
 them so they ship as defaults for everyone. Open a pull request or issue at:

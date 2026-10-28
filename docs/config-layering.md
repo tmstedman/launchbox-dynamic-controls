@@ -83,7 +83,7 @@ A user changing one setting writes only that setting, and every other default â€
 One file holds every game on a platform, so replacing it wholesale would mean that labelling a single game discards the shipped labels for every other game on that platform.
 
 - `<Game>` entries match by `launchBoxId` first, then `romName`. A user entry matching a shipped one replaces it; an unmatched user entry is added.
-- `<Defaults>` entries overlay by their `name` attribute. A user `<Input name="Start">` replaces the shipped one; shipped buttons the user didn't name survive.
+- `<Defaults>` entries overlay by the buttons they name. A user `<Input name="Start">` replaces the shipped one; shipped buttons the user didn't name survive. A combination is the same buttons in any order, and a MAME port is the same port under its bare name or its `TYPE:tag:mask`, so `B A` replaces a shipped `A B`.
 
 **The merge is per entry, not per label.** A user `<Game>` entry replaces the shipped entry for that game outright rather than combining button-by-button â€” so "show *these* labels for this game" stays expressible, instead of leaving the user unable to remove a shipped label.
 

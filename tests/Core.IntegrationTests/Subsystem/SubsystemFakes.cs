@@ -18,6 +18,21 @@ internal sealed class NullLogger : ILogger
 }
 
 /// <summary>
+/// <see cref="ILogger"/> that keeps every <see cref="Error"/> it is given, for subsystem tests
+/// asserting that a scenario is (or isn't) reported; the rest is dropped as by
+/// <see cref="NullLogger"/>.
+/// </summary>
+internal sealed class ErrorRecordingLogger : ILogger
+{
+    public List<string> Errors { get; } = [];
+    public bool IsDebugEnabled { get; set; }
+    public void Debug(string message) { }
+    public void Info(string message) { }
+    public void Error(string message) => Errors.Add(message);
+    public void ClearLog() { }
+}
+
+/// <summary>
 /// Programmable <see cref="ITemplateImageSource"/>: the I/O boundary substituted at the
 /// subsystem-test seam so tests can pin exactly what generic/styled paths the resolver gets
 /// without touching disk. Unregistered <c>(src, platform, controller)</c> tuples resolve to
