@@ -882,6 +882,60 @@ public class InputLabelsServiceTests
 
         // then the entry written first stands, and the clash is reported
         labels.LabelText["ButtonX"].ShouldBe("Brake");
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("A:IN0:1") && s.Contains("names the same button as")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("A:IN0:1") && s.Contains("names the same buttons as")));
+    }
+
+    [Fact]
+    public void Load_GameLabelsAButtonByItsOtherName_OverridesTheDefaultWithoutAClash()
+    {
+        // given a default written against a button's bare name, and the game's own label against
+        // its other name
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A:IN0:1", "Brake")));
+        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(("A", "Start")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] }), ("A:IN0:1", "A"));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        // then the game's label stands in for the default, as it would under the bare name
+        labels.LabelText["ButtonX"].ShouldBe("Brake");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_SameCombinationInAnotherOrderAndName_KeepsTheFirstAndLogsError()
+    {
+        // given one combination labelled twice, its buttons in another order and one by its other name
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A:IN0:1 C", "First"), ("C A", "Second")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new()
+        {
+            ["A"] = ["ButtonY"],
+            ["C"] = ["ButtonY"],
+        }), ("A:IN0:1", "A"));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        // then the entry written first stands, and the clash is reported
+        labels.LabelText["ButtonY"].ShouldBe("First");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("\"C A\"") && s.Contains("names the same buttons as")));
+    }
+
+    [Fact]
+    public void Load_CombinationNamingOneButtonByBothNames_IsThatButtonsOwnLabel()
+    {
+        // given a button's own label, then a "combination" naming that one button by both its names
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A", "Brake"), ("A A:IN0:1", "Other")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] }), ("A:IN0:1", "A"));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        // then the second is the first written again, so the first stands and the clash is reported
+        labels.LabelText["ButtonX"].ShouldBe("Brake");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("A A:IN0:1") && s.Contains("names the same buttons as")));
     }
 }
