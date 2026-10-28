@@ -51,10 +51,19 @@ public class MameCfgLoader(
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;
 
-        // MAME writes one <port> per tag a type sits on, so one type can appear twice. A button
-        // carries one binding, so the later replaces the earlier, in the earlier's place.
-        var overrides = new List<MamePortReach>();
+        // MAME writes one <port> per tag and bit a type sits on, so one type can appear several
+        // times. The last of them keeps the bare names; each earlier one is kept whole, nudges
+        // and all, under its qualified name (see QualifiedName), after everything else. A port
+        // states its type's bare name whatever else it binds, so a type has one owner at a time,
+        // and a new port of the type takes over the owner's slots by name, keeping any it doesn't
+        // restate stated but empty.
+        var slots = new List<MamePortReach>();
         var indexByName = new Dictionary<string, int>();
+        var ownerByType = new Dictionary<string, (string Qualified, List<string> Names)>();
+        var usedQualified = new HashSet<string>();
+        var positionByType = new Dictionary<string, int>();
+        var displaced = new List<MamePortReach>();
+        var placeholders = new HashSet<string>();
 
         foreach (XmlElement systemNode in root.ChildNodes.OfType<XmlElement>())
         {
@@ -75,6 +84,10 @@ public class MameCfgLoader(
                     string? inputName = portNode.Attributes["type"]?.Value;
                     if (string.IsNullOrEmpty(inputName)) continue;
 
+                    // Every port of the type counts, bound or not, since the position is read
+                    // off the cfg.
+                    int position = positionByType[inputName] = positionByType.GetValueOrDefault(inputName) + 1;
+
                     var declared = new Dictionary<string, MameSequence>();
                     foreach (XmlElement seqNode in portNode.ChildNodes.OfType<XmlElement>())
                     {
@@ -94,27 +107,82 @@ public class MameCfgLoader(
                         continue;
                     }
 
+                    string qualifiedPort = QualifiedName(inputName, portNode);
+                    // Nothing on the port to name it by, or another port already named the same:
+                    // its place among its type tells them apart.
+                    if (qualifiedPort == inputName || !usedQualified.Add(qualifiedPort))
+                    {
+                        qualifiedPort += $"#{position}";
+                        usedQualified.Add(qualifiedPort);
+                    }
+
+                    // The type's earlier owner gives up every slot it holds, and this port refills
+                    // those it states again.
+                    var freed = new Dictionary<string, int>();
+                    if (ownerByType.TryGetValue(inputName, out (string Qualified, List<string> Names) owner))
+                    {
+                        foreach (string name in owner.Names)
+                        {
+                            int index = indexByName[name];
+                            freed[name] = index;
+                            if (placeholders.Remove(name)) continue;
+                            // The port's own name or one of its nudges (PORT.inc), qualified alike.
+                            MamePortReach moved = slots[index] with { Name = owner.Qualified + name[inputName.Length..] };
+                            displaced.Add(moved);
+                            _logger.Debug($"MAME cfg: {name} appears again, so the earlier one is {moved.Name}");
+                        }
+                    }
+
                     foreach (MamePortReach button in reach)
                     {
-                        if (indexByName.TryGetValue(button.Name, out int index))
+                        if (freed.TryGetValue(button.Name, out int index))
                         {
-                            overrides[index] = button;
+                            slots[index] = button;
+                            indexByName[button.Name] = index;
                         }
                         else
                         {
-                            indexByName[button.Name] = overrides.Count;
-                            overrides.Add(button);
+                            indexByName[button.Name] = slots.Count;
+                            slots.Add(button);
                         }
                         _logger.Debug(button.Inputs.Count > 0
                             ? $"MAME override: {button.Name} ({button.From}) -> {string.Join(", ", button.Inputs)}"
                                 + (button.Derived.Count > 0 ? $" (derived: {string.Join(", ", button.Derived)})" : "")
                             : $"MAME override: {button.Name} ({button.From}) -> nothing, baseline dropped");
                     }
+
+                    // A name the earlier owner stated and this port doesn't stays stated, reaching
+                    // nothing: left unstated, Controllers.xml's guess for it would come back.
+                    List<string> owned = [.. reach.Select(button => button.Name)];
+                    foreach ((string name, int index) in freed)
+                    {
+                        if (owned.Contains(name)) continue;
+                        slots[index] = new MamePortReach(name, [], [], "unbound");
+                        placeholders.Add(name);
+                        owned.Add(name);
+                    }
+                    ownerByType[inputName] = (qualifiedPort, owned);
                 }
             }
         }
 
-        return overrides;
+        return [.. slots, .. displaced];
+    }
+
+    /// <summary>
+    /// The name a port is kept under if a later port of its type takes the bare one: its type,
+    /// then its tag without MAME's leading colon, then its mask — <c>OTHER:STROBE1:2</c>. The
+    /// caller adds the port's position (<c>#2</c>) where this alone would not tell it apart. A tag
+    /// may itself hold colons (<c>COIN1:mainpcb:IN0:128</c>), so the name is matched whole, never
+    /// split. MAME tells ports apart by tag and mask together, and neither alone is enough:
+    /// escounts puts four <c>OTHER</c> ports on one tag, and gahaha's two sticks share a full-range
+    /// mask on different tags. No spaces, which a Labels.xml name reserves for button combinations.
+    /// </summary>
+    private static string QualifiedName(string type, XmlElement portNode)
+    {
+        string tag = (portNode.Attributes["tag"]?.Value ?? "").TrimStart(':');
+        string? mask = portNode.Attributes["mask"]?.Value;
+        return string.Join(":", new[] { type, tag, mask }.Where(part => !string.IsNullOrEmpty(part)));
     }
 
     /// <summary>

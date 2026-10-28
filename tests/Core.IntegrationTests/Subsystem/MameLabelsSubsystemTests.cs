@@ -101,6 +101,137 @@ public class MameLabelsSubsystemTests
     }
 
     [Fact]
+    public void Load_PortTypeRepeatedOnOneTag_EachPortIsLabelledByItsOwnName()
+    {
+        // escounts' shape, with three of its four OTHER ports: one tag, told apart only by mask. The
+        // last keeps the bare name, and the earlier two are labelled under their qualified names
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true" />
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON5" input="ButtonLeftShoulder" />
+              <Mapping joycode="JOYCODE_1_BUTTON6" input="ButtonRightShoulder" />
+              <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "escounts", """
+            <InputLabels>
+              <Input name="OTHER:STROBE1:4">Collect</Input>
+              <Input name="OTHER:STROBE1:2">Continue</Input>
+              <Input name="OTHER">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("escounts.cfg", """
+            <mameconfig>
+              <system name="escounts">
+                <input>
+                  <port tag=":STROBE1" type="OTHER" mask="2"><newseq type="standard">JOYCODE_1_BUTTON6</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="4"><newseq type="standard">JOYCODE_1_BUTTON5</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="16"><newseq type="standard">JOYCODE_1_SLIDER2_NEG_SWITCH</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "escounts", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["ButtonLeftShoulder"].ShouldBe("Collect");
+        labels.LabelText["ButtonRightShoulder"].ShouldBe("Continue");
+        labels.LabelText["AxisTriggerRight"].ShouldBe("Bonus");
+    }
+
+    [Fact]
+    public void Load_RepeatedPortWhoseNudgesTheLaterLacks_BareNudgesStayDroppedFromTheBaseline()
+    {
+        // the earlier port's nudges move with it to its qualified name; the later port states
+        // none, and the bare nudge names must still not fall back to Controllers.xml's guess
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="P1_AD_STICK_X.dec" input="AxisLeftStickLeft" />
+                <Mapping name="P1_AD_STICK_X.inc" input="AxisLeftStickRight" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON1" input="ButtonA" />
+              <Mapping joycode="JOYCODE_1_BUTTON2" input="ButtonB" />
+              <Mapping joycode="JOYCODE_1_BUTTON3" input="ButtonX" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteMameCfg("twosticks.cfg", """
+            <mameconfig>
+              <system name="twosticks">
+                <input>
+                  <port tag=":A" type="P1_AD_STICK_X" mask="255">
+                    <newseq type="increment">JOYCODE_1_BUTTON1</newseq>
+                    <newseq type="decrement">JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                  <port tag=":B" type="P1_AD_STICK_X" mask="255">
+                    <newseq type="standard">JOYCODE_1_BUTTON3</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "twosticks", emulatorPath: MamePath);
+
+        ResolvedMapping mapping = LoadMapping(game);
+
+        mapping.ButtonToInput["P1_AD_STICK_X"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["P1_AD_STICK_X:A:255.inc"].ShouldBe(["ButtonA"]);
+        mapping.ButtonToInput["P1_AD_STICK_X:A:255.dec"].ShouldBe(["ButtonB"]);
+        mapping.ButtonToInput.GetValueOrDefault("P1_AD_STICK_X.inc", []).ShouldBeEmpty();
+        mapping.ButtonToInput.GetValueOrDefault("P1_AD_STICK_X.dec", []).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_QualifiedPortSharesAControlWithALabelledOne_TheLabelledOneStillLabelsIt()
+    {
+        // escounts' Y: its Pass button and its first OTHER port are both bound there. The OTHER
+        // port, now kept under its qualified name, carries no label, so it is no contender
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true" />
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON4" input="ButtonY" />
+              <Mapping joycode="JOYCODE_1_BUTTON6" input="ButtonRightShoulder" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "escounts", """
+            <InputLabels>
+              <Input name="P1_BUTTON1">Pass</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("escounts.cfg", """
+            <mameconfig>
+              <system name="escounts">
+                <input>
+                  <port tag=":STROBE0" type="P1_BUTTON1" mask="1"><newseq type="standard">JOYCODE_1_BUTTON4</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="1"><newseq type="standard">JOYCODE_1_BUTTON4</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="2"><newseq type="standard">JOYCODE_1_BUTTON6</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "escounts", emulatorPath: MamePath);
+
+        ResolvedMapping mapping = LoadMapping(game);
+        ResolvedLabels labels = LoadLabels(game, mapping);
+
+        mapping.ButtonToInput["OTHER:STROBE1:1"].ShouldBe(["ButtonY"]);
+        labels.LabelText["ButtonY"].ShouldBe("Pass");
+    }
+
+    [Fact]
     public void Load_PortNudgedByOtherControls_EachSequenceCarriesItsOwnLabel()
     {
         // airco22b's shape, and the reason the cfg loader stopped unioning a port's sequences:
