@@ -730,4 +730,70 @@ public class MameCfgLoaderTests
         // (not per-port — the mapping is shared across all translations)
         _joycodeMappingLoader.Received(1).Load();
     }
+
+    [Fact]
+    public void Load_EveryPortNotNamedByItsTagAndMask_AlsoAnswersToThem()
+    {
+        // a label written against a port's tag and mask finds it whatever its button is called:
+        // the last of a repeated type and a type the cfg has once both go by their bare names
+        StubXml("""
+            <mameconfig>
+              <system name='escounts'>
+                <input>
+                  <port tag=':STROBE1' type='OTHER' mask='1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                  <port tag=':STROBE1' type='OTHER' mask='16'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                  <port tag=':DIAL0' type='P1_DIAL' mask='255'>
+                    <newseq type='increment'>JOYCODE_1_BUTTON3</newseq>
+                    <newseq type='decrement'>JOYCODE_1_START</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldNotBeNull();
+        result.ToDictionary(r => r.Name, r => string.Join(" ", r.AlsoNamed)).ShouldBe(new Dictionary<string, string>
+        {
+            ["OTHER"] = "OTHER:STROBE1:16",
+            ["P1_DIAL"] = "P1_DIAL:DIAL0:255",
+            ["P1_DIAL.inc"] = "P1_DIAL:DIAL0:255.inc",
+            ["P1_DIAL.dec"] = "P1_DIAL:DIAL0:255.dec",
+            ["OTHER:STROBE1:1"] = "",
+        });
+    }
+
+    [Fact]
+    public void Load_PlaceholderLeftByAnEarlierPort_AnswersToNoQualifiedName()
+    {
+        // a bare nudge name kept only so the baseline stays dropped reaches nothing of this port's,
+        // so the later port's qualified nudge names don't exist to point at it
+        StubXml("""
+            <mameconfig>
+              <system name='twodials'>
+                <input>
+                  <port tag=':DIAL0' type='P1_DIAL' mask='255'>
+                    <newseq type='increment'>JOYCODE_1_BUTTON1</newseq>
+                    <newseq type='decrement'>JOYCODE_1_BUTTON2</newseq>
+                  </port>
+                  <port tag=':DIAL1' type='P1_DIAL' mask='255'>
+                    <newseq type='standard'>JOYCODE_1_START</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldNotBeNull();
+        result.Single(r => r.Name == "P1_DIAL").AlsoNamed.ShouldBe(["P1_DIAL:DIAL1:255"]);
+        result.Single(r => r.Name == "P1_DIAL.inc").AlsoNamed.ShouldBeEmpty();
+        result.Single(r => r.Name == "P1_DIAL.dec").AlsoNamed.ShouldBeEmpty();
+    }
 }

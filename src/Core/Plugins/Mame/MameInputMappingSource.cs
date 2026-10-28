@@ -85,11 +85,18 @@ public class MameInputMappingSource(
             mappings.AddRange(Entries(reach));
         }
 
+        var aliases = new Dictionary<string, string>();
+        foreach (MamePortReach reach in byName.Values)
+        {
+            foreach (string alias in reach.AlsoNamed) aliases[alias] = reach.Name;
+        }
+
         return new InputMappingConfig
         {
             Controller = baseline.Controller,
             AnalogToDigital = baseline.AnalogToDigital,
-            Mappings = mappings
+            Mappings = mappings,
+            ButtonAliases = aliases,
         };
     }
 
