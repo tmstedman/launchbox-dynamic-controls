@@ -71,8 +71,10 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             if (data == null || data.Labels.Count == 0) continue;
 
             _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}");
-            InputLabelsConfig? defaultData = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
-            Dictionary<string, string> merged = MergeWithDefaults(data, defaultData, mapping.ButtonAliases);
+            IReadOnlyList<InputLabelsConfig> defaultLayers = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
+            Dictionary<string, string> merged = MergeLayers(
+                [(data, $"{game.RomName}'s labels"), .. DefaultLayers(defaultLayers, game.Platform)],
+                mapping.ButtonAliases);
             ResolvedLabels resolved = TranslateToGeneric(merged, mapping) with { IsGameSpecific = true };
             if (resolved.LabelText.Count == 0) continue;
             return resolved;
@@ -83,55 +85,48 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
 
     /// <summary>
     /// Loads default labels and translates to generic input names.
-    /// Returns null if no default labels file exists.
+    /// Returns null if the platform has no default labels.
     /// </summary>
     private ResolvedLabels? LoadDefaultLabels(string platform, ResolvedMapping mapping)
     {
-        InputLabelsConfig? defaultData = _defaultLabelsLoader.LoadDefaultLabels(platform);
-        if (defaultData == null) return null;
+        IReadOnlyList<InputLabelsConfig> defaultLayers = _defaultLabelsLoader.LoadDefaultLabels(platform);
+        if (defaultLayers.Count == 0) return null;
 
-        _logger.Debug($"Default labels count: {defaultData.Labels.Count}");
-        return TranslateToGeneric(ByButtonSet(ToLabelDict(defaultData), mapping.ButtonAliases), mapping);
+        return TranslateToGeneric(MergeLayers(DefaultLayers(defaultLayers, platform), mapping.ButtonAliases), mapping);
     }
 
-    /// <summary>
-    /// Merges game labels with default labels. Default entries are added for any set of buttons
-    /// the game labels don't already name — compared once each side names its buttons one way,
-    /// so a game naming a port by another name of it still overrides the default for that port.
-    /// </summary>
-    private Dictionary<string, string> MergeWithDefaults(
-        InputLabelsConfig gameData, InputLabelsConfig? defaultData, IReadOnlyDictionary<string, string> aliases)
-    {
-        Dictionary<string, string> labels = ByButtonSet(ToLabelDict(gameData), aliases);
-        if (defaultData == null) return labels;
-
-        foreach ((string buttons, string text) in ByButtonSet(ToLabelDict(defaultData), aliases))
-        {
-            if (!labels.TryAdd(buttons, text)) continue;
-            _logger.Debug($"Inherited default: {buttons} -> {text}");
-        }
-        _logger.Debug($"Default labels count: {defaultData.Labels.Count}");
-
-        return labels;
-    }
+    private static IEnumerable<(InputLabelsConfig Labels, string Source)> DefaultLayers(
+        IReadOnlyList<InputLabelsConfig> layers, string platform) =>
+        layers.Select(layer => (layer, $"{platform} <Defaults>"));
 
     /// <summary>
-    /// Converts an InputLabelsConfig into a platform button name to label text dictionary.
+    /// Merges layers of labels, the one that wins first: the game's own, then each block of
+    /// defaults. Each layer is keyed by <see cref="ByButtonSet"/> on its own, and a later layer
+    /// adds only the sets of buttons no earlier one named — compared once each side names its
+    /// buttons one way, so a game or User entry naming a port by another name of it still
+    /// overrides the default for that port. Overriding is what layers are for, so only a clash
+    /// within one layer is reported.
     /// </summary>
-    private static Dictionary<string, string> ToLabelDict(InputLabelsConfig data)
+    private Dictionary<string, string> MergeLayers(
+        IEnumerable<(InputLabelsConfig Labels, string Source)> layers, IReadOnlyDictionary<string, string> aliases)
     {
-        var dict = new Dictionary<string, string>();
-        foreach (LabelEntry e in data.Labels)
+        var merged = new Dictionary<string, string>();
+        bool first = true;
+        foreach ((InputLabelsConfig labels, string source) in layers)
         {
-            dict[e.Name] = e.Label;
+            foreach ((string buttons, string text) in ByButtonSet(labels.Labels, aliases, source))
+            {
+                if (merged.TryAdd(buttons, text) && !first) _logger.Debug($"Inherited default: {buttons} -> {text}");
+            }
+            first = false;
         }
-        return dict;
+        return merged;
     }
 
     /// <summary>
     /// Translates platform button labels, keyed by <see cref="ByButtonSet"/>, to generic input
-    /// names using the input mapping. An
-    /// individual label is treated as a combination of one, so both resolve through the same
+    /// names using the input mapping. An individual label is treated as a combination of one, so
+    /// both resolve through the same
     /// rule: a generic takes a label's text only when some entry names exactly the buttons that
     /// reach it, no more and no fewer.
     ///
@@ -245,15 +240,16 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// Keys each label by the set of buttons it names (<see cref="ButtonSetKey"/>), with every
     /// button named by another name of it rewritten to the button it means, inside a combination
     /// too, so the rest of the matching sees one name per button. Two entries that then name the
-    /// same buttons — in another order, or one by each of its names — are the same label written
-    /// twice: identical text is no conflict, and different text keeps the entry written first.
+    /// same buttons — exactly, in another order, or one by each of its names — are the same label
+    /// written twice: identical text is no conflict, and different text keeps the entry written
+    /// first and logs, naming <paramref name="source"/>.
     /// </summary>
     private Dictionary<string, string> ByButtonSet(
-        Dictionary<string, string> platformLabels, IReadOnlyDictionary<string, string> aliases)
+        IEnumerable<LabelEntry> entries, IReadOnlyDictionary<string, string> aliases, string source)
     {
         var resolved = new Dictionary<string, string>();
         var writtenAs = new Dictionary<string, string>();
-        foreach ((string name, string text) in platformLabels)
+        foreach ((string name, string text) in entries.Select(e => (e.Name, e.Label)))
         {
             string buttons = ButtonSetKey(string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Select(button => aliases.GetValueOrDefault(button, button))));
@@ -261,7 +257,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             {
                 if (earlier != text)
                 {
-                    _logger.Error($"Label \"{name}\" names the same buttons as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
+                    _logger.Error($"{source}: label \"{name}\" names the same buttons as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
                 }
                 continue;
             }

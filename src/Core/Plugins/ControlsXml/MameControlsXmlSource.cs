@@ -15,7 +15,7 @@ public class MameControlsXmlSource(IControlsXmlLoader loader) : IInputLabelsLoad
 
     public bool IsEnabled(GlobalConfig config) => true;
 
-    public InputLabelsConfig? LoadDefaultLabels(string platform) => null;
+    public IReadOnlyList<InputLabelsConfig> LoadDefaultLabels(string platform) => [];
 
     public InputLabelsConfig? Load(GameInfo game)
     {

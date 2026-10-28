@@ -112,7 +112,7 @@ Each `IInputLabelsLoader` is tried in order. The first one with non-empty data f
 
 If no loader has game labels, the `<Defaults>` block of `Platforms/{platform}/Labels.xml` is used on its own — the pause/start labels common to the platform.
 
-Every entry in that `<Defaults>` block is inheritable. When a game *does* have its own labels, defaults are merged in for any platform button the game didn't name, so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels. Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
+Every entry in that `<Defaults>` block is inheritable. When a game *does* have its own labels, defaults are merged in for any set of platform buttons the game didn't name, so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels. The game's entries, the User `<Defaults>` and the shipped `<Defaults>` are layered in that order; whether two entries name the same buttons is decided by the set they name — in any order, and with a MAME port's `TYPE:tag:mask` read as the port it names — so a later layer is overridden however an earlier one spells the buttons. Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
 
 The `IsGameSpecific` flag tells the renderer "the game contributed at least one of its own label entries." This flips the meaning of `showIf="auto"` on a template — see below.
 

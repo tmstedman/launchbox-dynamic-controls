@@ -8,8 +8,9 @@ namespace DynamicControls.Labels;
 /// <c>Platforms/{platform}/Labels.xml</c> file that combines all game entries and platform defaults
 /// in one place. Both the <c>Defaults\</c> and <c>User\</c> tiers are read and merged at the entry
 /// level — User entries win over Defaults entries, matched first by <c>id</c> (database ID)
-/// then by <c>name</c> (ROM name). The <c>&lt;Defaults&gt;</c> block is merged the same way:
-/// User button entries override Defaults button entries by name.
+/// then by <c>name</c> (ROM name). The two <c>&lt;Defaults&gt;</c> blocks are returned as layers,
+/// User first, for <see cref="InputLabelsService"/> to merge: whether two entries name the same
+/// buttons depends on the mapping (a MAME port can be named two ways), which only it has.
 ///
 /// <para>File format. Each entry names a platform button in the <c>name</c> attribute and carries
 /// its display text as the element's content:</para>
@@ -61,11 +62,8 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         return result;
     }
 
-    public InputLabelsConfig? LoadDefaultLabels(string platform)
-    {
-        PlatformLabels? data = LoadPlatform(platform);
-        return data?.Defaults.Labels.Count > 0 ? data.Defaults : null;
-    }
+    public IReadOnlyList<InputLabelsConfig> LoadDefaultLabels(string platform) =>
+        LoadPlatform(platform)?.Defaults ?? [];
 
     private PlatformLabels? LoadPlatform(string platform)
     {
@@ -171,26 +169,10 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
             if (e.Name != null) { byName[e.Name] = e.Labels; byNormalizedName[e.Name.NormalizeRomName()] = e.Labels; }
         }
 
-        InputLabelsConfig mergedDefaults = MergeDefaults(defaults?.Defaults, user?.Defaults);
-        return new PlatformLabels(mergedDefaults, byId, byName, byNormalizedName);
-    }
-
-    private static InputLabelsConfig MergeDefaults(InputLabelsConfig? defaults, InputLabelsConfig? user)
-    {
-        var result = new InputLabelsConfig();
-        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-        foreach (LabelEntry e in user?.Labels ?? [])
-        {
-            result.Labels.Add(e);
-            seen.Add(e.Name);
-        }
-        foreach (LabelEntry e in defaults?.Labels ?? [])
-        {
-            if (!seen.Contains(e.Name))
-                result.Labels.Add(e);
-        }
-        return result;
+        InputLabelsConfig[] defaultLayers = [.. new[] { user?.Defaults, defaults?.Defaults }
+            .OfType<InputLabelsConfig>()
+            .Where(layer => layer.Labels.Count > 0)];
+        return new PlatformLabels(defaultLayers, byId, byName, byNormalizedName);
     }
 
     private sealed class PlatformFile
@@ -202,7 +184,7 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
     private sealed record GameEntry(int? Id, string? Name, InputLabelsConfig Labels);
 
     private sealed record PlatformLabels(
-        InputLabelsConfig Defaults,
+        IReadOnlyList<InputLabelsConfig> Defaults,
         IReadOnlyDictionary<int, InputLabelsConfig> ById,
         IReadOnlyDictionary<string, InputLabelsConfig> ByName,
         IReadOnlyDictionary<string, InputLabelsConfig> ByNormalizedName);

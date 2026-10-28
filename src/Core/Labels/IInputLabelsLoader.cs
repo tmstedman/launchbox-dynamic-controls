@@ -25,11 +25,12 @@ public interface IInputLabelsLoader
     InputLabelsConfig? Load(GameInfo game);
 
     /// <summary>
-    /// Loads the platform-default labels. For the file-based loader this comes from the
-    /// <c>&lt;Defaults&gt;</c> block of <c>Platforms/{platform}/Labels.xml</c>; plugin loaders (e.g. MAME
-    /// controls.xml) return null as they have no concept of platform defaults. All entries are
-    /// merged into game-specific labels by the service, with game-specific labels taking
-    /// precedence for any button defined in both.
+    /// Loads the platform-default labels as layers, the one that wins first. For the file-based
+    /// loader these are the <c>&lt;Defaults&gt;</c> blocks of <c>User\</c> then <c>Defaults\</c>
+    /// <c>Platforms/{platform}/Labels.xml</c>, each left out when empty; plugin loaders (e.g. MAME
+    /// controls.xml) return none, as they have no concept of platform defaults. The service merges
+    /// them under game-specific labels, an earlier layer taking precedence for any buttons named
+    /// in both.
     /// </summary>
-    InputLabelsConfig? LoadDefaultLabels(string platform);
+    IReadOnlyList<InputLabelsConfig> LoadDefaultLabels(string platform);
 }

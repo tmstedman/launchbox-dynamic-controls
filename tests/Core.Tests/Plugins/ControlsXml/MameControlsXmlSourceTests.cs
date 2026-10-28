@@ -53,11 +53,11 @@ public class MameControlsXmlSourceTests
     // ---- LoadDefaultLabels ----
 
     [Fact]
-    public void LoadDefaultLabels_AlwaysReturnsNull()
+    public void LoadDefaultLabels_AlwaysReturnsNoLayers()
     {
         // controls.xml is per-ROM only; this source never supplies platform defaults
-        _underTest.LoadDefaultLabels("Arcade").ShouldBeNull();
-        _underTest.LoadDefaultLabels("Sega Genesis").ShouldBeNull();
+        _underTest.LoadDefaultLabels("Arcade").ShouldBeEmpty();
+        _underTest.LoadDefaultLabels("Sega Genesis").ShouldBeEmpty();
     }
 
     // ---- Load: gating ----

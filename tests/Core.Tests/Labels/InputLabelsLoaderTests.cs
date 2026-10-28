@@ -63,13 +63,13 @@ public class InputLabelsLoaderTests
     }
 
     [Fact]
-    public void LoadDefaultLabels_NoPlatformFile_ReturnsNull()
+    public void LoadDefaultLabels_NoPlatformFile_ReturnsNoLayers()
     {
         _fs.FileExists(Arg.Any<string>()).Returns(false);
 
-        InputLabelsConfig? result = _underTest.LoadDefaultLabels("Sega Genesis");
+        IReadOnlyList<InputLabelsConfig> result = _underTest.LoadDefaultLabels("Sega Genesis");
 
-        result.ShouldBeNull();
+        result.ShouldBeEmpty();
     }
 
     // --- Path construction ---
@@ -275,14 +275,13 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? result = _underTest.LoadDefaultLabels("Sega Genesis");
+        IReadOnlyList<InputLabelsConfig> result = _underTest.LoadDefaultLabels("Sega Genesis");
 
-        result.ShouldNotBeNull();
-        result.Labels.Select(e => (e.Name, e.Label)).ShouldBe([("Start", "Pause")]);
+        result.Single().Labels.Select(e => (e.Name, e.Label)).ShouldBe([("Start", "Pause")]);
     }
 
     [Fact]
-    public void LoadDefaultLabels_NoDefaultsBlock_ReturnsNull()
+    public void LoadDefaultLabels_NoDefaultsBlock_ReturnsNoLayers()
     {
         string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         StubXml(path, """
@@ -291,9 +290,9 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? result = _underTest.LoadDefaultLabels("Sega Genesis");
+        IReadOnlyList<InputLabelsConfig> result = _underTest.LoadDefaultLabels("Sega Genesis");
 
-        result.ShouldBeNull();
+        result.ShouldBeEmpty();
     }
 
     // --- User / Defaults merge ---
@@ -341,7 +340,7 @@ public class InputLabelsLoaderTests
     }
 
     [Fact]
-    public void LoadDefaultLabels_UserDefaultsOverrideByButton()
+    public void LoadDefaultLabels_UserDefaultsComeFirst_EachTierWhole()
     {
         string defaultsPath = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
         string userPath = Path.Combine(UserPlatforms, "Sega Genesis", "Labels.xml");
@@ -356,11 +355,15 @@ public class InputLabelsLoaderTests
             </Labels>
             """);
 
-        InputLabelsConfig? result = _underTest.LoadDefaultLabels("Sega Genesis");
+        IReadOnlyList<InputLabelsConfig> result = _underTest.LoadDefaultLabels("Sega Genesis");
 
-        // User Start wins; Defaults A is kept (not present in User)
-        result!.Labels.Select(e => (e.Name, e.Label))
-            .ShouldBe([("Start", "Resume"), ("A", "Default A")]);
+        // each tier is its own layer, User first: which entries name the same buttons depends on
+        // the mapping, so the service merges them
+        result.Select(layer => layer.Labels.Select(e => (e.Name, e.Label)).ToList()).ShouldBe(
+        [
+            [("Start", "Resume")],
+            [("Start", "Pause"), ("A", "Default A")],
+        ]);
     }
 
     // --- User-only file (no Defaults counterpart) ---

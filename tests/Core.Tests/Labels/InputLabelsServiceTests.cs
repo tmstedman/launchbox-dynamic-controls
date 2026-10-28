@@ -100,9 +100,9 @@ public class InputLabelsServiceTests
         // given a game with its own labels and a default file
         GameInfo game = Game("OutRun");
 
-        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(
             ("Start", "Pause"),
-            ("C", "Cancel")));
+            ("C", "Cancel"))]);
 
         _loader.Load(game).Returns(Labels(
             ("A", "Brake"),
@@ -145,9 +145,9 @@ public class InputLabelsServiceTests
         // given a loader that has no game labels but does have defaults
         GameInfo game = Game("UnknownGame");
 
-        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(
             ("Start", "Pause"),
-            ("A", "Action")));
+            ("A", "Action"))]);
 
         _loader.Load(game).ReturnsNull();
 
@@ -167,7 +167,7 @@ public class InputLabelsServiceTests
     {
         // given a loader that has nothing at either tier
         GameInfo game = Game("UnknownGame");
-        _loader.LoadDefaultLabels("Sega Genesis").ReturnsNull();
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([]);
         _loader.Load(game).ReturnsNull();
 
         // when the service resolves labels
@@ -183,7 +183,7 @@ public class InputLabelsServiceTests
     {
         // given a loader that returns an empty (but non-null) game labels config
         GameInfo game = Game("OutRun");
-        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(("Start", "Pause")));
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
         _loader.Load(game).Returns(new InputLabelsConfig());
 
         // when the service resolves labels
@@ -287,7 +287,7 @@ public class InputLabelsServiceTests
     {
         // given a game label and a default for the same platform button
         GameInfo game = Game("OutRun");
-        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(("Start", "Pause")));
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
         _loader.Load(game).Returns(Labels(("Start", "Restart")));
 
         // when the service resolves labels
@@ -892,7 +892,7 @@ public class InputLabelsServiceTests
         // its other name
         GameInfo game = Game("OutRun");
         _loader.Load(game).Returns(Labels(("A:IN0:1", "Brake")));
-        _loader.LoadDefaultLabels("Sega Genesis").Returns(Labels(("A", "Start")));
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("A", "Start"))]);
         ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] }), ("A:IN0:1", "A"));
 
         // when the service resolves labels
@@ -937,5 +937,33 @@ public class InputLabelsServiceTests
         // then the second is the first written again, so the first stands and the clash is reported
         labels.LabelText["ButtonX"].ShouldBe("Brake");
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("A A:IN0:1") && s.Contains("names the same buttons as")));
+    }
+
+    [Fact]
+    public void Load_SameNameLabelledTwice_KeepsTheFirstAndLogsError()
+    {
+        // an exact repeat is the same label written twice, as a reordered one is
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A", "First"), ("A", "Second")));
+        ResolvedMapping mapping = Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] });
+
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        labels.LabelText["ButtonX"].ShouldBe("First");
+        _logger.Received().Error(Arg.Is<string>(s => s.StartsWith("OutRun's labels:") && s.Contains("names the same buttons as")));
+    }
+
+    [Fact]
+    public void Load_ClashWithinTheDefaults_IsReportedAsTheDefaults()
+    {
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).ReturnsNull();
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("A B", "Pause"), ("B A", "Resume"))]);
+        ResolvedMapping mapping = Mapping("Sega Genesis", new() { ["A"] = ["ButtonStart"], ["B"] = ["ButtonStart"] });
+
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        labels.LabelText["ButtonStart"].ShouldBe("Pause");
+        _logger.Received().Error(Arg.Is<string>(s => s.StartsWith("Sega Genesis <Defaults>:")));
     }
 }
