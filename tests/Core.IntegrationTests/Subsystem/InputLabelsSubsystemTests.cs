@@ -555,6 +555,43 @@ public class InputLabelsSubsystemTests
     }
 
     [Fact]
+    public void Load_GameWithItsOwnLabels_TakesTheUserDefaultsOverTheShippedOnes()
+    {
+        // game, then User <Defaults>, then shipped: C is the game's, Start the user's, B the
+        // shipped default no one else named
+        _dc.WriteDefaultLabels(Platform, """
+            <InputLabels>
+              <Input name="Start">Pause</Input>
+              <Input name="B">Cancel</Input>
+              <Input name="C">Shipped C</Input>
+            </InputLabels>
+            """);
+        _dc.WriteUserDefaultLabels(Platform, """
+            <InputLabels>
+              <Input name="Start">Resume</Input>
+              <Input name="C">User C</Input>
+            </InputLabels>
+            """);
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <Input name="A">Gas</Input>
+              <Input name="C">Game C</Input>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(
+            ("Start", ["ButtonStart"]), ("A", ["ButtonA"]), ("B", ["ButtonB"]), ("C", ["ButtonX"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(
+            ("ButtonStart", "Resume"),
+            ("ButtonA", "Gas"),
+            ("ButtonB", "Cancel"),
+            ("ButtonX", "Game C"));
+        labels.IsGameSpecific.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Load_UserDefaultNamesTheShippedOnesButtonsInAnotherOrder_OverridesItWithoutAClash()
     {
         // the two tiers are layers: the User entry overriding the shipped one is what it is for,
