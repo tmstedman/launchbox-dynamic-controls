@@ -156,6 +156,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         Dictionary<string, string> platformLabels,
         ResolvedMapping mapping)
     {
+        platformLabels = ResolveAliases(platformLabels, mapping.ButtonAliases);
         IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping = mapping.ButtonToInput;
         var labelsByButtonSet = new Dictionary<string, string>();
         foreach (KeyValuePair<string, string> entry in platformLabels)
@@ -241,6 +242,37 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         }
 
         return new ResolvedLabels(LabelText: labelText);
+    }
+
+    /// <summary>
+    /// Rewrites every button a label names by another name of it to the button it means, each
+    /// one inside a combination too, so the rest of the matching sees one name per button. Two
+    /// entries that then name the same buttons are the same label written twice: identical text
+    /// is no conflict, and different text keeps the entry written first.
+    /// </summary>
+    private Dictionary<string, string> ResolveAliases(
+        Dictionary<string, string> platformLabels, IReadOnlyDictionary<string, string> aliases)
+    {
+        if (aliases.Count == 0) return platformLabels;
+
+        var resolved = new Dictionary<string, string>();
+        var writtenAs = new Dictionary<string, string>();
+        foreach ((string name, string text) in platformLabels)
+        {
+            string buttons = string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Select(button => aliases.GetValueOrDefault(button, button)));
+            if (resolved.TryGetValue(buttons, out string? earlier))
+            {
+                if (earlier != text)
+                {
+                    _logger.Error($"Label \"{name}\" names the same button as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
+                }
+                continue;
+            }
+            resolved[buttons] = text;
+            writtenAs[buttons] = name;
+        }
+        return resolved;
     }
 
     private static IEnumerable<string> Buttons(IEnumerable<(string Button, (int Derived, int Position) Rank)> reachers) =>

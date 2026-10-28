@@ -31,6 +31,14 @@ public record InputMappingConfig
     /// platform's default controller.
     /// </summary>
     public string? Controller { get; set; }
+
+    /// <summary>
+    /// Other names a label may call a platform button by, each mapped to the button it means. Set
+    /// by a transform that knows them — MAME names a port by its type, tag and mask
+    /// (<c>OTHER:STROBE1:16</c>) where the button goes by its bare type — never read from a
+    /// file. Carried to <see cref="ResolvedMapping.ButtonAliases"/>.
+    /// </summary>
+    public Dictionary<string, string> ButtonAliases { get; set; } = [];
 }
 
 /// <summary>

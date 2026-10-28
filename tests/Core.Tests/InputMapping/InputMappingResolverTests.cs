@@ -272,4 +272,17 @@ public class InputMappingResolverTests
         var result = _underTest.Resolve(Platform, new InputMappingConfig { Mappings = mappings }, "Pad");
         return result.InputToButton.Values.All(result.ButtonToInput.ContainsKey);
     }
+
+    [Fact]
+    public void Resolve_CarriesButtonAliasesThrough()
+    {
+        // given a config naming a button by a second name
+        var config = MappingConfig() with { ButtonAliases = new() { ["OTHER:STROBE1:16"] = "OTHER" } };
+
+        // when resolving
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        // then the resolved mapping keeps it for the labels to read
+        result.ButtonAliases.ShouldBe(new Dictionary<string, string> { ["OTHER:STROBE1:16"] = "OTHER" });
+    }
 }

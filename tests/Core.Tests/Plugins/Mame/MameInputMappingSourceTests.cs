@@ -315,4 +315,18 @@ public class MameInputMappingSourceTests
         result.Mappings.Where(m => m.Name == name).Select(m => m.Input).ShouldBe(["ButtonC"]);
         result.Mappings.Where(m => m.Name == "BUTTON2").Select(m => m.Input).ShouldBe(["ButtonB"]);
     }
+
+    [Fact]
+    public void Transform_ButtonAlsoNamed_CarriesEachOtherNameToTheButton()
+    {
+        // given a cfg button that also answers to its port's tag and mask
+        _cfgLoader.Load(GameCfgPath).Returns([Reach("OTHER", "AxisTriggerRight") with { AlsoNamed = ["OTHER:STROBE1:16"] }]);
+
+        // when the transform runs
+        var result = _underTest.Transform(MameGame(), MappingConfig());
+
+        // then the config says which button the other name means
+        result.ShouldNotBeNull();
+        result.ButtonAliases.ShouldBe(new Dictionary<string, string> { ["OTHER:STROBE1:16"] = "OTHER" });
+    }
 }

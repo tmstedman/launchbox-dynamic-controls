@@ -137,10 +137,13 @@ cfg, bound or not — `P1_BUTTON1#2`, or `P1_BUTTON1:IN0#2` when it is the name 
 Both tag and mask are needed: `escounts` puts all four on one tag, and `gahaha`'s two sticks share
 a mask on different tags.
 
-Which port is "the last" is counted among those bound to player 1, so the names hold only while
-the cfg binds the ports the way the labels were written against: rebind `escounts`' Bonus port to
-player 2 and its Continue port becomes the bare `OTHER`, taking Bonus's label. Write them against
-the cfg pack's own bindings, as every Arcade label is.
+Every port also answers to its type, tag and mask, the last of a repeated type and a type the cfg
+has once included — `escounts`' Bonus is `OTHER:STROBE1:16` as well as `OTHER`. So name the ports
+of a repeated type by tag and mask throughout, all of them: the bare name belongs to whichever
+repeat is last among those bound to player 1 and moves with the cfg (rebind Bonus to player 2 and
+Continue's port becomes the bare `OTHER`), while the qualified names don't. Name one port by one
+form only; the same text under both is harmless, but different text keeps whichever entry comes
+first and logs the clash.
 
 ### Labels are captions, not prose
 

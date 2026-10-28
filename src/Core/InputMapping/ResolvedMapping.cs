@@ -58,4 +58,12 @@ public record ResolvedMapping(
     /// </summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> DerivedButtonToInput { get; init; } =
         new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>
+    /// Other names a label may call a platform button by, each mapped to the button in
+    /// <see cref="ButtonToInput"/> it means — a MAME port's type, tag and mask where its button
+    /// goes by the bare type. Read only when labels are matched to buttons; the button itself is
+    /// one button, so nothing else sees a second name.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> ButtonAliases { get; init; } = new Dictionary<string, string>();
 }

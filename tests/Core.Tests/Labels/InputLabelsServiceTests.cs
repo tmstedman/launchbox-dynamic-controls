@@ -831,4 +831,57 @@ public class InputLabelsServiceTests
             ("ButtonDpad", "Move"));
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
+
+    private static ResolvedMapping WithAliases(ResolvedMapping mapping, params (string Alias, string Button)[] aliases) =>
+        mapping with { ButtonAliases = aliases.ToDictionary(a => a.Alias, a => a.Button) };
+
+    [Fact]
+    public void Load_LabelNamesAButtonByItsOtherName_LandsOnThatButton()
+    {
+        // given a label written against a button's other name, alone and inside a combination
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A:IN0:1", "Brake"), ("B:IN0:2 C", "Both")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new()
+        {
+            ["A"] = ["ButtonX"],
+            ["B"] = ["ButtonA", "ButtonY"],
+            ["C"] = ["ButtonY"],
+        }), ("A:IN0:1", "A"), ("B:IN0:2", "B"));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        // then each reads as the button it names
+        labels.LabelText["ButtonX"].ShouldBe("Brake");
+        labels.LabelText["ButtonY"].ShouldBe("Both");
+    }
+
+    [Fact]
+    public void Load_OneButtonLabelledByBothNames_TheSameTextAgrees()
+    {
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A", "Brake"), ("A:IN0:1", "Brake")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] }), ("A:IN0:1", "A"));
+
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        labels.LabelText["ButtonX"].ShouldBe("Brake");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void Load_OneButtonLabelledByBothNames_DifferentTextKeepsTheFirstAndLogsError()
+    {
+        // given one button labelled twice, once by each of its names, saying different things
+        GameInfo game = Game("OutRun");
+        _loader.Load(game).Returns(Labels(("A", "Brake"), ("A:IN0:1", "Accelerate")));
+        ResolvedMapping mapping = WithAliases(Mapping("Sega Genesis", new() { ["A"] = ["ButtonX"] }), ("A:IN0:1", "A"));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, mapping);
+
+        // then the entry written first stands, and the clash is reported
+        labels.LabelText["ButtonX"].ShouldBe("Brake");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("A:IN0:1") && s.Contains("names the same button as")));
+    }
 }

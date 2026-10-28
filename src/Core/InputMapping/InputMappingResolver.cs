@@ -84,6 +84,7 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
             AnalogToDigital: xml.AnalogToDigital)
         {
             DerivedButtonToInput = derived.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value),
+            ButtonAliases = new Dictionary<string, string>(xml.ButtonAliases),
         };
     }
 
