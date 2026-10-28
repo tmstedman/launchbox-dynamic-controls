@@ -191,6 +191,50 @@ public class MameLabelsSubsystemTests
     }
 
     [Fact]
+    public void Load_EveryPortLabelledByItsTagAndMask_EachLandsOnItsOwnControl()
+    {
+        // escounts written by tag and mask throughout, the last OTHER port and the single P1_BUTTON1
+        // included: each finds its port whatever button name it ended up under
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Cabinet" default="true" />
+            </Controllers>
+            """);
+        _dc.WriteMameMapping("""
+            <JoycodeMapping>
+              <Mapping joycode="JOYCODE_1_BUTTON4" input="ButtonY" />
+              <Mapping joycode="JOYCODE_1_BUTTON5" input="ButtonLeftShoulder" />
+              <Mapping joycode="JOYCODE_1_SLIDER2_NEG_SWITCH" input="AxisTriggerRight" />
+            </JoycodeMapping>
+            """);
+        _dc.WriteGameLabels(Platform, "escounts", """
+            <InputLabels>
+              <Input name="P1_BUTTON1:STROBE0:1">Pass</Input>
+              <Input name="OTHER:STROBE1:4">Collect</Input>
+              <Input name="OTHER:STROBE1:16">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteMameCfg("escounts.cfg", """
+            <mameconfig>
+              <system name="escounts">
+                <input>
+                  <port tag=":STROBE0" type="P1_BUTTON1" mask="1"><newseq type="standard">JOYCODE_1_BUTTON4</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="4"><newseq type="standard">JOYCODE_1_BUTTON5</newseq></port>
+                  <port tag=":STROBE1" type="OTHER" mask="16"><newseq type="standard">JOYCODE_1_SLIDER2_NEG_SWITCH</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        GameInfo game = Game(platform: Platform, romName: "escounts", emulatorPath: MamePath);
+
+        ResolvedLabels labels = LoadLabels(game, LoadMapping(game));
+
+        labels.LabelText["ButtonY"].ShouldBe("Pass");
+        labels.LabelText["ButtonLeftShoulder"].ShouldBe("Collect");
+        labels.LabelText["AxisTriggerRight"].ShouldBe("Bonus");
+    }
+
+    [Fact]
     public void Load_QualifiedPortSharesAControlWithALabelledOne_TheLabelledOneStillLabelsIt()
     {
         // escounts' Y: its Pass button and its first OTHER port are both bound there. The OTHER

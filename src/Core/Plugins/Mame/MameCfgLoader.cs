@@ -166,6 +166,21 @@ public class MameCfgLoader(
             }
         }
 
+        // Every port still under a name other than its tag and mask -- the last of a repeated type,
+        // and every type the cfg has once -- also answers to them, so a label naming a port that
+        // way finds it whichever button it ended up as. A placeholder belongs to no port of this
+        // cfg, so it has none.
+        foreach ((string type, (string qualified, List<string> names)) in ownerByType)
+        {
+            foreach (string name in names.Where(name => !placeholders.Contains(name)))
+            {
+                string alias = qualified + name[type.Length..];
+                if (alias == name) continue;
+                int index = indexByName[name];
+                slots[index] = slots[index] with { AlsoNamed = [alias] };
+            }
+        }
+
         return [.. slots, .. displaced];
     }
 

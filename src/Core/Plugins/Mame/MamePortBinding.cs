@@ -12,6 +12,13 @@ public record MamePortReach(string Name, IReadOnlyList<string> Own, IReadOnlyLis
 {
     /// <summary>Everything the button reaches, own bindings first.</summary>
     public IReadOnlyList<string> Inputs => [.. Own, .. Derived];
+
+    /// <summary>
+    /// Other names a label may call this button by: its port's type, tag and mask
+    /// (<c>OTHER:STROBE1:16</c>) where the button goes by something else. Set by
+    /// <see cref="MameCfgLoader"/>, which knows each port's tag and mask.
+    /// </summary>
+    public IReadOnlyList<string> AlsoNamed { get; init; } = [];
 }
 
 /// <summary>
