@@ -158,7 +158,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         // Only buttons some label mentions can contend for a generic -- a button nobody labelled
         // is not a candidate driver even if the mapping happens to reach it too.
         var relevantButtons = new HashSet<string>(
-            labelsByButtonSet.Keys.SelectMany(name => name.Split(' ', StringSplitOptions.RemoveEmptyEntries)));
+            labelsByButtonSet.Keys.SelectMany(Names));
 
         // Record every relevant button that reaches each generic, and how directly: whether the
         // button binds it or only derives it, then where it sits in the button's list. Position
@@ -215,7 +215,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                 // to agree with.
 
                 string?[] ownTexts = [.. strongestOnly.Select(b =>
-                    labelsByButtonSet.TryGetValue(ButtonSetKey(b), out string? t) ? t : null)];
+                    labelsByButtonSet.TryGetValue(b, out string? t) ? t : null)];
                 if (ownTexts.All(t => t != null) && ownTexts.Distinct().Count() == 1)
                 {
                     labelText[generic] = ownTexts[0]!;
@@ -246,32 +246,30 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     private Dictionary<string, string> ByButtonSet(
         IEnumerable<LabelEntry> entries, IReadOnlyDictionary<string, string> aliases, string source)
     {
-        var resolved = new Dictionary<string, string>();
-        var writtenAs = new Dictionary<string, string>();
+        var resolved = new Dictionary<string, (string Text, string WrittenAs)>();
         foreach ((string name, string text) in entries.Select(e => (e.Name, e.Label)))
         {
-            string buttons = ButtonSetKey(string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .Select(button => aliases.GetValueOrDefault(button, button))));
-            if (resolved.TryGetValue(buttons, out string? earlier))
+            string buttons = ButtonSetKey(Names(name).Select(button => aliases.GetValueOrDefault(button, button)));
+            if (resolved.TryGetValue(buttons, out (string Text, string WrittenAs) earlier))
             {
-                if (earlier != text)
+                if (earlier.Text != text)
                 {
-                    _logger.Error($"{source}: label \"{name}\" names the same buttons as \"{writtenAs[buttons]}\" but says \"{text}\" rather than \"{earlier}\"; keeping \"{earlier}\".");
+                    _logger.Error($"{source}: label \"{name}\" names the same buttons as \"{earlier.WrittenAs}\" but says \"{text}\" rather than \"{earlier.Text}\"; keeping \"{earlier.Text}\".");
                 }
                 continue;
             }
-            resolved[buttons] = text;
-            writtenAs[buttons] = name;
+            resolved[buttons] = (text, name);
         }
-        return resolved;
+        return resolved.ToDictionary(e => e.Key, e => e.Value.Text);
     }
 
     private static IEnumerable<string> Buttons(IEnumerable<(string Button, (int Derived, int Position) Rank)> reachers) =>
         reachers.Select(r => r.Button).Distinct().OrderBy(b => b, StringComparer.Ordinal);
 
-    /// <summary>Normalizes a label's button name(s) into an order-independent lookup key.</summary>
-    private static string ButtonSetKey(string name) =>
-        string.Join(' ', name.Split(' ', StringSplitOptions.RemoveEmptyEntries).Distinct().OrderBy(b => b, StringComparer.Ordinal));
+    /// <summary>The buttons a label's space-separated <c>name</c> lists.</summary>
+    private static string[] Names(string name) => name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-
+    /// <summary>Normalizes a set of button names into an order-independent lookup key.</summary>
+    private static string ButtonSetKey(IEnumerable<string> buttons) =>
+        string.Join(' ', buttons.Distinct().OrderBy(b => b, StringComparer.Ordinal));
 }
