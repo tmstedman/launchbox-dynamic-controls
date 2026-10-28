@@ -769,6 +769,29 @@ public class MameCfgLoaderTests
     }
 
     [Fact]
+    public void Load_PortWithNoTagOrMask_AnswersToItsPosition()
+    {
+        // with nothing on the port to name it by, the name it would be displaced as is its place
+        // among its type, so that is what it also answers to
+        StubXml("""
+            <mameconfig>
+              <system name='game'>
+                <input>
+                  <port type='P1_BUTTON1'>
+                    <newseq type='standard'>JOYCODE_1_BUTTON1</newseq>
+                  </port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+
+        var result = _underTest.Load(CfgPath);
+
+        result.ShouldNotBeNull();
+        result.Single().AlsoNamed.ShouldBe(["P1_BUTTON1#1"]);
+    }
+
+    [Fact]
     public void Load_PlaceholderLeftByAnEarlierPort_AnswersToNoQualifiedName()
     {
         // a bare nudge name kept only so the baseline stays dropped reaches nothing of this port's,
