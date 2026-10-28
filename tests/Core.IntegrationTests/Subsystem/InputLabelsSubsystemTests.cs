@@ -38,10 +38,10 @@ public class InputLabelsSubsystemTests
     /// <summary>Uses the production factory so the loader/plugins/service wiring under test
     /// matches production. <see cref="InputLabelsLoader"/> is always the first loader; the
     /// MAME controls.xml source is appended and enable-filtered on <see cref="GlobalConfig.EnableMame"/>.</summary>
-    private InputLabelsService Build(bool enableMame = false) =>
+    private InputLabelsService Build(bool enableMame = false, ILogger? logger = null) =>
         InputLabelsFactory.Create(
             _dc.Lfs,
-            new NullLogger(),
+            logger ?? new NullLogger(),
             config: new GlobalConfig { EnableMame = enableMame });
 
     /// <summary>Builds a <see cref="ResolvedMapping"/> from a platform-button → generic-inputs
@@ -552,5 +552,54 @@ public class InputLabelsSubsystemTests
             ("ButtonStart", "Resume"),
             ("ButtonB", "Cancel"));
         labels.IsGameSpecific.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Load_UserDefaultNamesTheShippedOnesButtonsInAnotherOrder_OverridesItWithoutAClash()
+    {
+        // the two tiers are layers: the User entry overriding the shipped one is what it is for,
+        // however each spells the combination
+        _dc.WriteDefaultLabels(Platform, """
+            <InputLabels>
+              <Input name="A B">Pause</Input>
+            </InputLabels>
+            """);
+        _dc.WriteUserDefaultLabels(Platform, """
+            <InputLabels>
+              <Input name="B A">Resume</Input>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonStart"]), ("B", ["ButtonStart"]));
+        var logger = new ErrorRecordingLogger();
+
+        ResolvedLabels labels = Build(logger: logger).Load(Game(platform: Platform, romName: "Unknown"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonStart", "Resume"));
+        logger.Errors.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_UserDefaultNamesTheShippedOnesPortByItsTagAndMask_OverridesItWithoutAClash()
+    {
+        // Arcade's shipped default names escounts' Bonus port bare; a User default names it by tag
+        // and mask, which only the mapping can say is the same port
+        _dc.WriteDefaultLabels(Arcade, """
+            <InputLabels>
+              <Input name="OTHER">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteUserDefaultLabels(Arcade, """
+            <InputLabels>
+              <Input name="OTHER:STROBE1:16">Mine</Input>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("OTHER", ["AxisTriggerRight"]))
+            with { ButtonAliases = new Dictionary<string, string> { ["OTHER:STROBE1:16"] = "OTHER" } };
+        var logger = new ErrorRecordingLogger();
+
+        ResolvedLabels labels = Build(logger: logger).Load(Game(platform: Arcade, romName: "escounts"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("AxisTriggerRight", "Mine"));
+        logger.Errors.ShouldBeEmpty();
     }
 }
