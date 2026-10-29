@@ -756,6 +756,12 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36591" romName="animaljr">
+        <Input name="OTHER:IN1:2">1</Input>
+        <Input name="OTHER:IN1:4">2</Input>
+        <Input name="OTHER:IN1:8">3</Input>
+        <Input name="OTHER:IN1:16">4</Input>
+        <Input name="OTHER:IN1:32">5</Input>
+        <Input name="OTHER:IN1:64">6</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="182791" romName="animechmp">
@@ -5622,6 +5628,7 @@
     <Game launchBoxId="36388" romName="dingo">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="P1_BUTTON1:IN2:16">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -6625,6 +6632,9 @@
         <Input name="P1_BUTTON5">A</Input>
         <Input name="P1_BUTTON6">B</Input>
         <Input name="P1_BUTTON7">C</Input>
+        <Input name="OTHER:STROBE1:4">Collect</Input>
+        <Input name="OTHER:STROBE1:2">Continue</Input>
+        <Input name="OTHER:STROBE1:16">Bonus</Input>
         <Input name="START1">Start</Input>
     </Game>
     <Game launchBoxId="36576" romName="espgal">
@@ -6726,6 +6736,8 @@
         <Input name="P1_BUTTON1">Change</Input>
         <Input name="P1_BUTTON2">Select</Input>
         <Input name="P1_BUTTON3">Chase</Input>
+        <Input name="P1_POSITIONAL_V:P1:24">Bat</Input>
+        <Input name="P1_POSITIONAL_V:P1:7">Bunt</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -7792,12 +7804,15 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="418230" romName="gahaha">
-        <Input name="P1_JOYSTICK_UP">Right Stick</Input>
-        <Input name="P1_JOYSTICK_DOWN">Right Stick</Input>
+        <Input name="P1_AD_STICK_X:EXIO_ANALOG1:1023">Left Stick</Input>
+        <Input name="P1_AD_STICK_Y:EXIO_ANALOG2:1023">Left Stick</Input>
         <Input name="P1_AD_STICK_X">Right Stick</Input>
         <Input name="P1_AD_STICK_Y">Right Stick</Input>
-        <Input name="P1_BUTTON1">Left Stick Press / Button</Input>
-        <Input name="P1_BUTTON2">Right Stick Press / Button</Input>
+        <Input name="P1_BUTTON1">Left Button</Input>
+        <Input name="P1_BUTTON2">Right Button</Input>
+        <Input name="P1_JOYSTICK_UP">Select Up</Input>
+        <Input name="P1_JOYSTICK_DOWN">Select Down</Input>
+        <Input name="P1_BUTTON5">Enter</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -12571,6 +12586,10 @@
     <Game launchBoxId="37797" romName="magspeed">
         <Input name="P1_BUTTON1">Place Card Left</Input>
         <Input name="P1_BUTTON2">Place Card Right</Input>
+        <Input name="OTHER:P1:1">Select Card 1</Input>
+        <Input name="OTHER:P1:2">Select Card 2</Input>
+        <Input name="OTHER:P1:4">Select Card 3</Input>
+        <Input name="OTHER">Select Card 4</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -15314,6 +15333,8 @@
     </Game>
     <Game launchBoxId="38494" romName="pacslot">
         <Input name="P1_BUTTON1">Bet</Input>
+        <Input name="OTHER:IN0:16">Pac-Man</Input>
+        <Input name="OTHER:IN1:16">Ms. Pac-Man</Input>
         <Input name="P1_GAMBLE_PAYOUT">Payout</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -17514,6 +17535,9 @@
         <Input name="P1_BUTTON5">A</Input>
         <Input name="P1_BUTTON6">B</Input>
         <Input name="P1_BUTTON7">C</Input>
+        <Input name="OTHER:STROBE1:4">Collect</Input>
+        <Input name="OTHER:STROBE1:2">Continue</Input>
+        <Input name="OTHER">Bonus</Input>
         <Input name="START1">Start</Input>
     </Game>
     <Game launchBoxId="12682" romName="quantum">
@@ -17554,6 +17578,9 @@
         <Input name="P1_BUTTON5">A</Input>
         <Input name="P1_BUTTON6">B</Input>
         <Input name="P1_BUTTON7">C</Input>
+        <Input name="OTHER:STROBE1:4">Collect</Input>
+        <Input name="OTHER:STROBE1:2">Continue</Input>
+        <Input name="OTHER">Bonus</Input>
         <Input name="START1">Start</Input>
     </Game>
     <Game launchBoxId="213535" romName="qwak">
@@ -18377,6 +18404,8 @@
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Bowl</Input>
+        <Input name="OTHER:INPUTS:4">Hook Right</Input>
+        <Input name="OTHER">Hook Left</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -21436,12 +21465,15 @@
         <Input name="P1_BUTTON3">Gear 2</Input>
         <Input name="P1_BUTTON4">Gear 3</Input>
         <Input name="P1_BUTTON5">Gear 4</Input>
+        <Input name="P1_BUTTON2:IN1:128">Select Track</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39579" romName="sprint8">
         <Input name="P1_DIAL">Steering</Input>
+        <Input name="P1_BUTTON1">Accelerate</Input>
         <Input name="P1_BUTTON2">Change Gear</Input>
+        <Input name="P1_BUTTON2:IN1:2">Select Track</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -22044,6 +22076,7 @@
     </Game>
     <Game launchBoxId="39645" romName="stompin">
         <Input name="P1_BUTTON1">Button</Input>
+        <Input name="P1_BUTTON1:AN0:32">Stomp</Input>
         <Input name="P1_BUTTON2">Stomp</Input>
         <Input name="P1_BUTTON3">Stomp</Input>
         <Input name="P1_BUTTON4">Stomp</Input>
@@ -22369,6 +22402,8 @@
         <Input name="P1_BUTTON1">Change</Input>
         <Input name="P1_BUTTON2">Select</Input>
         <Input name="P1_BUTTON3">Chase</Input>
+        <Input name="P1_POSITIONAL_V:P1:24">Bat</Input>
+        <Input name="P1_POSITIONAL_V:P1:7">Bunt</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23449,6 +23484,7 @@
         <Input name="P1_BUTTON2">Bet 3</Input>
         <Input name="P1_BUTTON3">Select</Input>
         <Input name="P1_GAMBLE_PAYOUT">Payout</Input>
+        <Input name="OTHER">Decline Challenge</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="40236" romName="tkdensho">
@@ -23891,6 +23927,9 @@
         <Input name="P1_BUTTON5">A</Input>
         <Input name="P1_BUTTON6">B</Input>
         <Input name="P1_BUTTON7">C</Input>
+        <Input name="OTHER:STROBE1:4">Collect</Input>
+        <Input name="OTHER:STROBE1:2">Continue</Input>
+        <Input name="OTHER">Bonus</Input>
         <Input name="START1">Start</Input>
     </Game>
     <Game launchBoxId="40266" romName="tricktrp">

@@ -71,6 +71,7 @@ ddrkids	ButtonDpadDown		Down	improvement-kept	each direction names its own arrow
 ddrkids	ButtonDpadLeft		Left	improvement-kept	each direction names its own arrow; the card lumps all four
 ddrkids	ButtonDpadRight		Right	improvement-kept	each direction names its own arrow; the card lumps all four
 ddrkids	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the card lumps all four
+dingo	ButtonX		Shoot	improvement-kept	MAME's driver reads this second BUTTON1 as fire too ("the game reads both"); the card labels only A
 drivedge	AxisRightStickDown		2nd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickLeft		3rd Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
 drivedge	AxisRightStickRight		4th Gear	not-in-artwork-vocabulary	the author cannot draw this control on the card
@@ -97,6 +98,7 @@ dsftkd	ButtonDpadUp		Up	improvement-kept	each direction names its own arrow; the
 ecofghtr	AxisRightStick	Rotate Shoot Position		improvement-kept	each rotate button labels its own turn; the card calls the whole stick Rotate Shoot Position
 ecofghtr	AxisRightStickLeft		Rotate Left	improvement-kept	each half of the stick names its turn, as the card does on the triggers
 ecofghtr	AxisRightStickRight		Rotate Right	improvement-kept	each half of the stick names its turn, as the card does on the triggers
+exctleag	AxisTriggerRight		Bunt	improvement-kept	MAME's driver names this port P1 Bant Position; the card leaves RT blank
 exprraid	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
 exprraid	AxisLeftStickDown		Duck	improvement-kept	down is Duck; the card calls the whole control Move
 exprraid	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
@@ -119,6 +121,13 @@ fitegolf	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this
 fitegolf	ButtonDpadY		Select Slice Direction	not-in-artwork-vocabulary	the author cannot draw this control on the card
 funkyfig	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 funkyfig	AxisLeftStickUp		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+gahaha	ButtonA	Right Stick Press / Button	Right Button	improvement-kept	the cfg binds this button to A and the right stick click alike, so one name reads true on both; MAME leaves it unnamed
+gahaha	ButtonB		Enter	improvement-kept	MAME's driver names this port Enter; the card leaves B blank
+gahaha	ButtonDpadDown		Select Down	improvement-kept	MAME's driver names this port Select Down; the card leaves the D-pad blank
+gahaha	ButtonDpadUp		Select Up	improvement-kept	MAME's driver names this port Select Up; the card leaves the D-pad blank
+gahaha	ButtonLeftStick		Left Button	not-in-artwork-vocabulary	the author cannot draw this control on the card
+gahaha	ButtonRightStick		Right Button	not-in-artwork-vocabulary	the author cannot draw this control on the card
+gahaha	ButtonX	Left Stick Press / Button	Left Button	improvement-kept	the cfg binds this button to X and the left stick click alike, so one name reads true on both; MAME leaves it unnamed
 galspnbl	ButtonLeftShoulder	Left Flipper	Left Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
 galspnbl	ButtonRightShoulder	Right Flipper	Right Flipper / Launch	port-split-merged	merged into one label, gameplay role before system role
 gberet	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
@@ -188,6 +197,10 @@ ninjaw	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; 
 ninjaw	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
 offroadc	ButtonA	Boost	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
 offroadc	ButtonStart	Start	Boost / Start	port-split-merged	merged into one label, gameplay role before system role
+pacslot	ButtonX		Ms. Pac-Man	improvement-kept	MAME's driver names this port Ms. Pac-Man; the card leaves X blank
+pacslot	ButtonY		Pac-Man	improvement-kept	MAME's driver names this port Pac-Man; the card leaves Y blank
+propcycl	ButtonA	Select	Select / Start	port-split-merged	merged into one label, gameplay role before system role
+propcycl	ButtonStart	Start	Select / Start	port-split-merged	merged into one label, gameplay role before system role
 recordbr	AxisLeftStick	Move		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
 recordbr	AxisLeftStickLeft		Button 1	not-in-artwork-vocabulary	the author cannot draw this control on the card
 recordbr	AxisLeftStickRight		Button 2	not-in-artwork-vocabulary	the author cannot draw this control on the card
@@ -210,6 +223,7 @@ stratgyx	AxisRightStickLeft		Rotate	not-in-artwork-vocabulary	the author cannot 
 stratgyx	AxisRightStickRight		Rotate Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
 stunrun	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
 stunrun	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
+suprleag	AxisTriggerRight		Bunt	improvement-kept	MAME's driver names this port P1 Bant Position; the card leaves RT blank
 techbowl	ButtonA	Button	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 techbowl	ButtonStart	Start	Button / Start	port-split-merged	merged into one label, gameplay role before system role
 techromn	ButtonRightShoulder	Change Weapon	Change Weapon / Start	port-split-merged	merged into one label, gameplay role before system role
