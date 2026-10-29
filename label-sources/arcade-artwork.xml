@@ -8720,8 +8720,6 @@
     <Game romName="gahaha" title="GAHAHA Ippatsudou">
         <Label control="AxisLeftStick">Left Stick</Label>
         <Label control="AxisRightStick">Right Stick</Label>
-        <Label control="ButtonDpadUp">Right Stick</Label>
-        <Label control="ButtonDpadDown">Right Stick</Label>
         <Label control="ButtonA">Right Stick Press / Button</Label>
         <Label control="ButtonX">Left Stick Press / Button</Label>
         <Label control="ButtonStart">Start</Label>
@@ -24024,7 +24022,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Gear 2</Label>
         <Label control="ButtonB">Gear 4</Label>
-        <Label control="ButtonDpad">Select Track</Label>
+        <Label control="ButtonDpadRight">Select Track</Label>
         <Label control="ButtonX">Gear 3</Label>
         <Label control="ButtonY">Gear 1</Label>
         <Label control="ButtonStart">Start</Label>
@@ -24032,8 +24030,9 @@
     </Game>
     <Game romName="sprint8" title="Sprint 8">
         <Label control="AxisLeftStick">Steering</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Change Gear</Label>
-        <Label control="ButtonDpad">Select Track</Label>
+        <Label control="ButtonDpadRight">Select Track</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
