@@ -7622,8 +7622,8 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="34427" romName="frontlin">
-        <Input name="P1_JOYSTICKLEFT">Move</Input>
-        <Input name="P1_JOYSTICKRIGHT">Aim</Input>
+        <Input name="P1_JOYSTICKRIGHT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT">Aim</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="START1">Start</Input>
@@ -25855,8 +25855,8 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="7860" romName="wwestern">
-        <Input name="P1_JOYSTICKLEFT">Move</Input>
-        <Input name="P1_JOYSTICKRIGHT">Aim</Input>
+        <Input name="P1_JOYSTICKRIGHT">Move</Input>
+        <Input name="P1_JOYSTICKLEFT">Aim</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
