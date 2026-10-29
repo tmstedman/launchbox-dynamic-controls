@@ -7343,7 +7343,6 @@
     <Game romName="enforce" title="Enforce">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Special Fire / Laser</Label>
-        <Label control="ButtonB">Change Gear</Label>
         <Label control="ButtonDpad">Move Crosshair</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8029,10 +8028,10 @@
     </Game>
     <Game romName="fhboxers" title="Funky Head Boxers">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Left Punch</Label>
+        <Label control="AxisTriggerRight">Right Punch</Label>
         <Label control="ButtonA">Right Punch</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Left Punch</Label>
-        <Label control="ButtonRightShoulder">Right Punch</Label>
         <Label control="ButtonX">Left Punch</Label>
         <Label control="ButtonY">Dodge</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8401,10 +8400,10 @@
     <Game romName="forgottn" title="Forgotten Worlds">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate Shoot Position</Label>
+        <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Rotate Left</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10160,50 +10159,50 @@
     </Game>
     <Game romName="gtmr" title="1000 Miglia: Great 1000 Miles Rally">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gtmr2" title="Mille Miglia 2: Great 1000 Miles Rally">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gtmr2u" title="Great 1000 Miles Rally 2 USA">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gtmre" title="Great 1000 Miles Rally: Evolution Model!!!">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gtmrusa" title="Great 1000 Miles Rally: U.S.A Version!">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Brake</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -12027,8 +12026,8 @@
     </Game>
     <Game romName="joyfulr" title="Joyful Road / Munch Mobile">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Arm Left</Label>
         <Label control="AxisTriggerRight">Arm Right</Label>
-        <Label control="ButtonLeftShoulder">Arm Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -13622,9 +13621,9 @@
     </Game>
     <Game romName="loffire" title="Line of Fire / Bakudan Yarou">
         <Label control="AxisLeftStick">Move Crosshair</Label>
+        <Label control="AxisTriggerLeft">Missiles</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Missiles</Label>
-        <Label control="ButtonLeftShoulder">Missiles</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -15034,10 +15033,10 @@
     </Game>
     <Game romName="mnchmobl" title="Joyful Road / Munch Mobile">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Arm Left</Label>
         <Label control="AxisTriggerRight">Arm Right</Label>
         <Label control="ButtonA">A</Label>
         <Label control="ButtonB">B</Label>
-        <Label control="ButtonLeftShoulder">Arm Left</Label>
         <Label control="ButtonX">X</Label>
         <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
@@ -15420,10 +15419,10 @@
     <Game romName="mplanets" title="Mad Planets">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate</Label>
+        <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Rotate Left</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
@@ -19071,10 +19070,10 @@
     </Game>
     <Game romName="prehisle" title="Prehistoric Isle in 1930">
         <Label control="AxisLeftStick">Move</Label>
+        <Label control="AxisTriggerLeft">Arm Left</Label>
+        <Label control="AxisTriggerRight">Arm Right</Label>
         <Label control="ButtonA">Change Drone Position</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Arm Left</Label>
-        <Label control="ButtonRightShoulder">Arm Right</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -19170,9 +19169,9 @@
     <Game romName="propcycl" title="Prop Cycle">
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisRightStick">Throttle</Label>
+        <Label control="AxisTriggerLeft">Throttle Down</Label>
+        <Label control="AxisTriggerRight">Throttle Up</Label>
         <Label control="ButtonA">Select</Label>
-        <Label control="ButtonLeftShoulder">Throttle Down</Label>
-        <Label control="ButtonRightShoulder">Throttle Up</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -24725,9 +24724,9 @@
     <Game romName="stratgyx" title="Strategy X">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate</Label>
+        <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Rotate Left</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
