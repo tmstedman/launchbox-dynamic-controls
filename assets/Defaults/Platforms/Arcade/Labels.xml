@@ -7536,6 +7536,8 @@
     <Game launchBoxId="29091" romName="forgottn">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate Shoot Position</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
@@ -13740,6 +13742,8 @@
     <Game launchBoxId="12644" romName="mplanets">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_DIAL">Rotate</Input>
+        <Input name="P1_DIAL.dec">Rotate Left</Input>
+        <Input name="P1_DIAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Shoot</Input>
         <Input name="START1">Start</Input>
@@ -17093,7 +17097,9 @@
         <Input name="P1_AD_STICK_X">Steering</Input>
         <Input name="P1_AD_STICK_Y">Steering</Input>
         <Input name="P1_AD_STICK_Z">Throttle</Input>
-        <Input name="START1">Select</Input>
+        <Input name="P1_AD_STICK_Z.dec">Throttle Up</Input>
+        <Input name="P1_AD_STICK_Z.inc">Throttle Down</Input>
+        <Input name="START1">Select / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="38762" romName="prosoccr">
@@ -22113,7 +22119,7 @@
     <Game launchBoxId="39650" romName="stratgyx">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
-        <Input name="P1_BUTTON2">Rotate</Input>
+        <Input name="P1_BUTTON2">Rotate Left</Input>
         <Input name="P1_BUTTON3">Rotate Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>

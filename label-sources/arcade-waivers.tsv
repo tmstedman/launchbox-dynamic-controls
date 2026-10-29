@@ -219,7 +219,7 @@ spyhunt	ButtonStart	Start	Shift Up / Start	port-split-merged	merged into one lab
 startrgn	ButtonA	Start / Decide	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
 startrgn	ButtonStart	Start	Decide / Start	port-split-merged	merged into one label, gameplay role before system role
 stratgyx	AxisRightStick	Rotate		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
-stratgyx	AxisRightStickLeft		Rotate	not-in-artwork-vocabulary	the author cannot draw this control on the card
+stratgyx	AxisRightStickLeft		Rotate Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
 stratgyx	AxisRightStickRight		Rotate Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
 stunrun	ButtonA	Shoot	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
 stunrun	ButtonStart	Start	Shoot / Start	port-split-merged	merged into one label, gameplay role before system role
