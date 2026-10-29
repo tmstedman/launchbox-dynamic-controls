@@ -10122,8 +10122,8 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="gtg2" title="Golden Tee Golf II">
-        <Label control="AxisLeftStick">Move / Change Club</Label>
-        <Label control="ButtonA">Swing</Label>
+        <Label control="AxisLeftStick">Swing / Change Club</Label>
+        <Label control="ButtonDpad">Move Left &amp; Right</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>

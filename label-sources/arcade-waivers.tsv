@@ -138,6 +138,70 @@ gberet	ButtonDpad	Move		improvement-kept	labelled by direction: up jumps, as the
 gberet	ButtonDpadDown		Lie Down	improvement-kept	down is Lie Down; the card calls the whole control Move
 gberet	ButtonDpadUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move
 gberet	ButtonDpadX		Move	not-in-artwork-vocabulary	the author cannot draw this control on the card
+gt2k	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt2k	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt2k	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt2k	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt2kt500	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt2kt500	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt2kt500	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt2kt500	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt3d	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt3d	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt3d	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt3d	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt3dt231	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt3dt231	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt3dt231	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt3dt231	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt97	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt97	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt97	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt97	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt97t243	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt97t243	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt97t243	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt97t243	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt98	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt98	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt98	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt98	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt98t303	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt98t303	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt98t303	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt98t303	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt99	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt99	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt99	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt99	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gt99t400	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gt99t400	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gt99t400	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gt99t400	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gtclassc	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gtclassc	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gtclassc	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gtclassc	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gtdiamond	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gtdiamond	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gtdiamond	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gtdiamond	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gtg	AxisLeftStick	Move / Change Club		improvement-kept	the card lumps both joystick axes into one label; each axis names its own action
+gtg	AxisLeftStickX		Aim Left / Right	improvement-kept	the joystick's horizontal axis aims; the card lumps both axes
+gtg	AxisLeftStickY		Change Club	improvement-kept	the joystick's vertical axis changes club; the card lumps both axes
+gtg	ButtonDpad	Move Left & Right		improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
+gtg	ButtonDpadX		Aim Left / Right	improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
+gtg	ButtonDpadY		Change Club	improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
+gtg2	AxisLeftStick	Swing / Change Club		improvement-kept	the card lumps both trackball axes into one label; each axis names its own action
+gtg2	AxisLeftStickX		Change Club	improvement-kept	the trackball's horizontal axis changes club; the card lumps both axes
+gtg2	AxisLeftStickY		Swing	improvement-kept	the trackball's vertical axis swings; the card lumps both axes
+gtg2	ButtonDpad	Move Left & Right	Face Left / Right	improvement-kept	the two buttons turn the golfer to face left or right
+gtg2j	AxisLeftStick	Move / Change Club		improvement-kept	the card lumps both joystick axes into one label; each axis names its own action
+gtg2j	AxisLeftStickX		Aim Left / Right	improvement-kept	the joystick's horizontal axis aims; the card lumps both axes
+gtg2j	AxisLeftStickY		Change Club	improvement-kept	the joystick's vertical axis changes club; the card lumps both axes
+gtg2j	ButtonDpad	Move Left & Right		improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
+gtg2j	ButtonDpadX		Aim Left / Right	improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
+gtg2j	ButtonDpadY		Change Club	improvement-kept	one joystick reaches the stick and the D-pad, so the D-pad carries the same per-axis labels
 kengo	AxisLeftStick	Move		improvement-kept	labelled by direction: up jumps, as the cfg binds the jump button there; the card calls the whole control Move
 kengo	AxisLeftStickDown		Move	improvement-kept	down is still Move: what down does here is unconfirmed
 kengo	AxisLeftStickUp		Jump	improvement-kept	the up port carries the jump button; the card calls the whole control Move

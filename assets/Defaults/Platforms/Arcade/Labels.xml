@@ -8946,98 +8946,98 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="8732" romName="gt2k">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="8732" romName="gt2kt500">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36963" romName="gt3d">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36963" romName="gt3dt231">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36965" romName="gt97">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36965" romName="gt97t243">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36967" romName="gt98">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36967" romName="gt98t303">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36969" romName="gt99">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36969" romName="gt99t400">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="12264" romName="gtclassc">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="36967" romName="gtdiamond">
-        <Input name="P1_TRACKBALL_X">Swing / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Swing / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -9126,21 +9126,27 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="30285" romName="gtg">
-        <Input name="P1_JOYSTICK">Move Left &amp; Right</Input>
+        <Input name="P1_JOYSTICK_UP">Change Club</Input>
+        <Input name="P1_JOYSTICK_DOWN">Change Club</Input>
+        <Input name="P1_JOYSTICK_LEFT">Aim Left / Right</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Aim Left / Right</Input>
         <Input name="P1_BUTTON1">Swing</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="gtg2">
-        <Input name="P1_TRACKBALL_X">Move / Change Club</Input>
-        <Input name="P1_TRACKBALL_Y">Move / Change Club</Input>
-        <Input name="P1_BUTTON1">Move Left &amp; Right</Input>
-        <Input name="P1_BUTTON2">Move Left &amp; Right</Input>
+        <Input name="P1_TRACKBALL_X">Change Club</Input>
+        <Input name="P1_TRACKBALL_Y">Swing</Input>
+        <Input name="P1_BUTTON1">Face Left / Right</Input>
+        <Input name="P1_BUTTON2">Face Left / Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="gtg2j">
-        <Input name="P1_JOYSTICK">Move Left &amp; Right</Input>
+        <Input name="P1_JOYSTICK_UP">Change Club</Input>
+        <Input name="P1_JOYSTICK_DOWN">Change Club</Input>
+        <Input name="P1_JOYSTICK_LEFT">Aim Left / Right</Input>
+        <Input name="P1_JOYSTICK_RIGHT">Aim Left / Right</Input>
         <Input name="P1_BUTTON1">Swing</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
