@@ -7233,8 +7233,8 @@
     <Game romName="einning" title="Extra Inning / Ball Park II">
         <Label control="ButtonA">Pitch Right</Label>
         <Label control="ButtonB">Pitch Right</Label>
-        <Label control="ButtonLeftShoulder">Outfield Left</Label>
-        <Label control="ButtonRightShoulder">Outfield Right</Label>
+        <Label control="AxisTriggerLeft">Outfield Left</Label>
+        <Label control="AxisTriggerRight">Outfield Right</Label>
         <Label control="ButtonX">Pitch Fast</Label>
         <Label control="ButtonY">Slow Pitch</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8684,7 +8684,6 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="fuusenpn" title="Fuusen Pentai">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -8937,7 +8936,6 @@
     </Game>
     <Game romName="galpanis" title="Gals Panic S: Extra Edition">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Attack</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Draw</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8953,7 +8951,6 @@
     </Game>
     <Game romName="galpans2" title="Gals Panic S2">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Attack</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Draw</Label>
         <Label control="ButtonStart">Start</Label>
@@ -8961,7 +8958,6 @@
     </Game>
     <Game romName="galpans3" title="Gals Panic S3">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Attack</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Draw</Label>
         <Label control="ButtonStart">Start</Label>
@@ -9291,9 +9287,7 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="ggoemon" title="Ganbare Goemon">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Throw</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -9926,9 +9920,6 @@
         <Label control="AxisLeftStick">Steering</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Accelerate</Label>
-        <Label control="ButtonB">B</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -10133,7 +10124,6 @@
     <Game romName="gtg2" title="Golden Tee Golf II">
         <Label control="AxisLeftStick">Move / Change Club</Label>
         <Label control="ButtonA">Swing</Label>
-        <Label control="ButtonDpad">Move Left &amp; Right</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -10150,7 +10140,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Handbrake</Label>
         <Label control="ButtonB">Shift Down</Label>
-        <Label control="ButtonDpad">Change MT / AT</Label>
+        <Label control="ButtonDpadLeft">Change MT / AT</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonX">Shift Up</Label>
@@ -10212,7 +10202,7 @@
         <Label control="AxisTriggerLeft">Blue</Label>
         <Label control="AxisTriggerRight">Whail</Label>
         <Label control="ButtonA">Pick</Label>
-        <Label control="ButtonDpad">Red</Label>
+        <Label control="ButtonDpadUp">Red</Label>
         <Label control="ButtonLeftShoulder">Green</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10222,7 +10212,7 @@
         <Label control="AxisTriggerLeft">Blue</Label>
         <Label control="AxisTriggerRight">Whail</Label>
         <Label control="ButtonA">Pick</Label>
-        <Label control="ButtonDpad">Red</Label>
+        <Label control="ButtonDpadUp">Red</Label>
         <Label control="ButtonLeftShoulder">Green</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10232,7 +10222,7 @@
         <Label control="AxisTriggerLeft">Blue</Label>
         <Label control="AxisTriggerRight">Whail</Label>
         <Label control="ButtonA">Pick</Label>
-        <Label control="ButtonDpad">Red</Label>
+        <Label control="ButtonDpadUp">Red</Label>
         <Label control="ButtonLeftShoulder">Green</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10313,8 +10303,8 @@
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="AxisRightStick">Move</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Alt Fire</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
+        <Label control="AxisTriggerLeft">Alt Fire</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -10818,7 +10808,6 @@
     </Game>
     <Game romName="hellngt" title="Hell Night">
         <Label control="AxisLeftStick">Move Crosshair</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -10871,7 +10860,7 @@
     </Game>
     <Game romName="hidctch3" title="Hidden Catch 3">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonX">Select</Label>
+        <Label control="ButtonA">Select</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -11140,7 +11129,7 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="hrclass" title="Home Run Classic">
-        <Label control="ButtonB">Button</Label>
+        <Label control="ButtonA">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -11288,8 +11277,8 @@
     <Game romName="hwchamp" title="Heavyweight Champ">
         <Label control="AxisLeftStick">Left Hand / Move</Label>
         <Label control="AxisRightStick">Right Hand</Label>
-        <Label control="ButtonLeftShoulder">Dodge Left</Label>
-        <Label control="ButtonRightShoulder">Dodge Left</Label>
+        <Label control="AxisTriggerLeft">Dodge Left</Label>
+        <Label control="AxisTriggerRight">Dodge Left</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
         <Note>
@@ -11410,8 +11399,8 @@
     <Game romName="idsoccer" title="Indoor Soccer">
         <Label control="AxisLeftStick">Move Team Mate 1</Label>
         <Label control="AxisRightStick">Move Team Mate 2</Label>
-        <Label control="ButtonLeftShoulder">Shoot / Pass / Tackle 1</Label>
-        <Label control="ButtonRightShoulder">Shoot / Pass / Tackle 2</Label>
+        <Label control="AxisTriggerLeft">Shoot / Pass / Tackle 1</Label>
+        <Label control="AxisTriggerRight">Shoot / Pass / Tackle 2</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -11632,7 +11621,7 @@
     </Game>
     <Game romName="invasnab" title="Invasion: The Abductors">
         <Label control="AxisLeftStick">Move Crosshair</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
+        <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -12130,14 +12119,14 @@
     </Game>
     <Game romName="jungleh" title="Jungle Hunt">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Jump</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="junglek" title="Jungle King">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Jump</Label>
+        <Label control="ButtonX">Jump</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -12363,7 +12352,6 @@
         <Note>A large diagonal watermark reading "JUST MASH BUTTONS" is printed across most of the diagram, covering the stick, D-pad and all four face buttons. Start and Insert Coin sit outside its path and are legible; nothing else on the card carries visible text.</Note>
     </Game>
     <Game romName="keroppi" title="Kero Kero Keroppi's Let's Play Together">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -13569,7 +13557,6 @@
     <Game romName="llander" title="Lunar Lander">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Booster</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14217,9 +14204,7 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mariorou" title="Mario Roulette">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14357,7 +14342,6 @@
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14413,7 +14397,6 @@
     <Game romName="mazerbla" title="Mazer Blazer">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14463,7 +14446,6 @@
         <Label control="AxisTriggerLeft">Grenade</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonA">Grenade</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -14747,7 +14729,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Shift Down</Label>
         <Label control="ButtonB">Shift Up</Label>
-        <Label control="ButtonDpad">Change MT / AT</Label>
+        <Label control="ButtonDpadLeft">Change MT / AT</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonStart">Start / View</Label>
@@ -14985,10 +14967,8 @@
     <Game romName="mmatrix" title="Mars Matrix: Hyper Solid Shooting">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Cancel</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Select</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -14998,26 +14978,21 @@
         <Label control="ButtonB">Kick</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Quick Attack</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mmaze" title="Marchen Maze">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot / (Hold) Charge</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mmonkey" title="Minkey Monkey">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15035,110 +15010,77 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerLeft">Arm Left</Label>
         <Label control="AxisTriggerRight">Arm Right</Label>
-        <Label control="ButtonA">A</Label>
-        <Label control="ButtonB">B</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mnight" title="Mutant Night">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mofflott" title="Maze of Flott">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Boost</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot / Use Item</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="moguchan" title="Mogu Chan">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">A</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="mogura" title="Mogura Desse">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Mallet</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="momoko" title="Momoko 120%">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="momokoe" title="Momoko 120%">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="monopldx" title="Monopoly Deluxe">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Touch</Label>
-        <Label control="ButtonB">B</Label>
-        <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="monopoly" title="Monopoly">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Touch</Label>
-        <Label control="ButtonB">B</Label>
-        <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="monsterb" title="Monster Bash">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="monsterz" title="Monster Zero">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15147,7 +15089,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Gear 2</Label>
         <Label control="ButtonB">Gear 4</Label>
-        <Label control="ButtonDpad">Select Track</Label>
+        <Label control="ButtonDpadRight">Select Track</Label>
         <Label control="ButtonX">Gear 3</Label>
         <Label control="ButtonY">Gear 1</Label>
         <Label control="ButtonStart">Start</Label>
@@ -15156,10 +15098,7 @@
     <Game romName="monymony" title="Money Money">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Button</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15167,21 +15106,15 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerLeft">Go Faster</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
-        <Label control="ButtonA">A</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="moomesa" title="Wild West C.O.W.-Boys of Moo Mesa">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Jump</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15202,20 +15135,14 @@
     <Game romName="mooncrst" title="Moon Cresta">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="moonqsr" title="Moon Quasar">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonB">B</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">X</Label>
-        <Label control="ButtonY">Y</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -15417,7 +15344,6 @@
         <Label control="AxisRightStick">Rotate</Label>
         <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
-        <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
@@ -16413,8 +16339,8 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Gear 2</Label>
         <Label control="ButtonB">Gear 4</Label>
-        <Label control="ButtonDpadDown">Novice Track</Label>
-        <Label control="ButtonDpadLeft">Pro Track</Label>
+        <Label control="ButtonDpadLeft">Novice Track</Label>
+        <Label control="ButtonDpadRight">Pro Track</Label>
         <Label control="ButtonDpadUp">Expert Track</Label>
         <Label control="ButtonX">Gear 3</Label>
         <Label control="ButtonY">Gear 1</Label>
@@ -16722,7 +16648,6 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="officeye" title="Office Yeo In Cheon Ha">
-        <Label control="AxisLeftStick">L</Label>
         <Label control="ButtonA">Green</Label>
         <Label control="ButtonB">Blue</Label>
         <Label control="ButtonX">Red</Label>
@@ -18104,7 +18029,7 @@
         <Label control="AxisLeftStick">Menu Left &amp; Right</Label>
         <Label control="ButtonA">High Tom</Label>
         <Label control="ButtonB">Low Tom</Label>
-        <Label control="ButtonDpad">Snare</Label>
+        <Label control="ButtonDpadDown">Snare</Label>
         <Label control="ButtonLeftShoulder">Hi Hat</Label>
         <Label control="ButtonRightShoulder">Cymbal</Label>
         <Label control="ButtonX">Kick Drum</Label>
@@ -18115,7 +18040,7 @@
         <Label control="AxisLeftStick">Menu Left &amp; Right</Label>
         <Label control="ButtonA">High Tom</Label>
         <Label control="ButtonB">Low Tom</Label>
-        <Label control="ButtonDpad">Snare</Label>
+        <Label control="ButtonDpadDown">Snare</Label>
         <Label control="ButtonLeftShoulder">Hi Hat</Label>
         <Label control="ButtonRightShoulder">Cymbal</Label>
         <Label control="ButtonX">Kick Drum</Label>
@@ -19611,7 +19536,6 @@
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
     <Game romName="qad" title="Quiz &amp; Dragons: Capcom Quiz Game">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonA">2</Label>
         <Label control="ButtonB">3</Label>
         <Label control="ButtonX">1</Label>
@@ -21196,7 +21120,7 @@
         <Label control="ButtonA">Strong Attack</Label>
         <Label control="ButtonB">Special / Throw</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Fatal Flash</Label>
+        <Label control="AxisTriggerLeft">Fatal Flash</Label>
         <Label control="ButtonRightShoulder">Start Combo</Label>
         <Label control="ButtonX">Light Attack</Label>
         <Label control="ButtonY">Shift / Dodge</Label>
@@ -21209,7 +21133,7 @@
         <Label control="ButtonA">Strong Attack</Label>
         <Label control="ButtonB">Special / Throw</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Fatal Flash</Label>
+        <Label control="AxisTriggerLeft">Fatal Flash</Label>
         <Label control="ButtonRightShoulder">Start Combo</Label>
         <Label control="ButtonX">Light Attack</Label>
         <Label control="ButtonY">Shift / Dodge</Label>
@@ -21581,7 +21505,6 @@
     <Game romName="scrabble" title="Scrabble">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="ButtonA">Touch</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -22726,7 +22649,6 @@
         <Label control="ButtonB">Tilt / Shoot Reverse</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonY">Tilt / Shoot Reverse</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -23144,7 +23066,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Whip</Label>
         <Label control="ButtonA">Alaron / Use Amulet</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -23528,7 +23449,7 @@
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="AxisTriggerRight">(Hold) Pedal / Reverse</Label>
         <Label control="ButtonA">Change Weapon</Label>
-        <Label control="ButtonLeftShoulder">Brake</Label>
+        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -23825,7 +23746,6 @@
     </Game>
     <Game romName="speedrs" title="Speed Race">
         <Label control="AxisLeftStick">Steering</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonX">Change Gear</Label>
         <Label control="ButtonStart">Start</Label>
@@ -24032,7 +23952,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Gear 2</Label>
         <Label control="ButtonB">Gear 4</Label>
-        <Label control="ButtonDpad">Select Track</Label>
+        <Label control="ButtonDpadRight">Select Track</Label>
         <Label control="ButtonX">Gear 3</Label>
         <Label control="ButtonY">Gear 1</Label>
         <Label control="ButtonStart">Start</Label>
@@ -24953,7 +24873,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Gear 2</Label>
         <Label control="ButtonB">Gear 4</Label>
-        <Label control="ButtonDpad">Select Track</Label>
+        <Label control="ButtonDpadRight">Select Track</Label>
         <Label control="ButtonX">Gear 3</Label>
         <Label control="ButtonY">Gear 1</Label>
         <Label control="ButtonStart">Start</Label>
@@ -26248,7 +26168,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Aim</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
-        <Label control="ButtonLeftShoulder">Jump</Label>
+        <Label control="AxisTriggerLeft">Jump</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
@@ -26505,8 +26425,8 @@
     </Game>
     <Game romName="tokyowar" title="Tokyo Wars">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonLeftShoulder">Left Gun</Label>
-        <Label control="ButtonRightShoulder">Right Gun</Label>
+        <Label control="AxisTriggerLeft">Left Gun</Label>
+        <Label control="AxisTriggerRight">Right Gun</Label>
         <Label control="ButtonY">View Change</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -26669,8 +26589,8 @@
     <Game romName="tornbase" title="Tornado Baseball / Ball Park">
         <Label control="ButtonA">Pitch Right</Label>
         <Label control="ButtonB">Pitch Right</Label>
-        <Label control="ButtonLeftShoulder">Outfield Left</Label>
-        <Label control="ButtonRightShoulder">Outfield Right</Label>
+        <Label control="AxisTriggerLeft">Outfield Left</Label>
+        <Label control="AxisTriggerRight">Outfield Right</Label>
         <Label control="ButtonX">Pitch Fast</Label>
         <Label control="ButtonY">Slow Pitch</Label>
         <Label control="ButtonStart">Start</Label>
@@ -27437,6 +27357,7 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerLeft">Chin</Label>
         <Label control="AxisTriggerRight">Joe</Label>
+        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonA">Cross</Label>
         <Label control="ButtonB">Circle</Label>
         <Label control="ButtonX">Square</Label>
@@ -27659,7 +27580,7 @@
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonDpadLeft">Left View</Label>
         <Label control="ButtonDpadRight">Right View</Label>
-        <Label control="ButtonRightShoulder">Accelerate</Label>
+        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -27777,7 +27698,6 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">Shift Down</Label>
-        <Label control="ButtonDpad">Steering</Label>
         <Label control="ButtonDpadDown">VR2 / BLUE</Label>
         <Label control="ButtonDpadLeft">VR3 / YELLOW</Label>
         <Label control="ButtonDpadRight">VR4 / GREEN</Label>
@@ -28481,7 +28401,6 @@
         <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonB">Turbo</Label>
-        <Label control="ButtonDpad">Steering</Label>
         <Label control="ButtonX">(Hold) Go Faster</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
@@ -28564,7 +28483,7 @@
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Shift Down</Label>
         <Label control="ButtonB">Shift Up</Label>
-        <Label control="ButtonDpad">Change MT / AT</Label>
+        <Label control="ButtonDpadLeft">Change MT / AT</Label>
         <Label control="ButtonLeftShoulder">Shift Down</Label>
         <Label control="ButtonRightShoulder">Shift Up</Label>
         <Label control="ButtonStart">Start / View</Label>
@@ -29277,7 +29196,6 @@
         <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Shoot</Label>
-        <Label control="ButtonB">Shoot</Label>
         <Label control="ButtonX">Accelerate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
