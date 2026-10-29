@@ -3136,6 +3136,7 @@
     </Game>
     <Game launchBoxId="12128" romName="bubbles">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35773" romName="bubbletr">
@@ -13549,12 +13550,14 @@
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="38196" romName="moonaln">
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
         <Input name="P1_JOYSTICK_RIGHT">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="7846" romName="mooncrst">
@@ -20728,12 +20731,14 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Jump</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35073" romName="socbrawl">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Kick / Pass / Shoot</Input>
         <Input name="P1_BUTTON2">Tackle / Punch</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="35486" romName="soccer">
@@ -20747,6 +20752,7 @@
         <Input name="P1_BUTTON1">Shoot / Tackle / Long Pass</Input>
         <Input name="P1_BUTTON2">Short Pass / Header</Input>
         <Input name="P1_BUTTON3">Cross Ball</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39431" romName="soccerssa">
@@ -20754,11 +20760,13 @@
         <Input name="P1_BUTTON1">Shoot / Tackle / Long Pass</Input>
         <Input name="P1_BUTTON2">Short Pass / Header</Input>
         <Input name="P1_BUTTON3">Cross Ball</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39433" romName="sokonuke">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Jump</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39457" romName="sokyugrt">
@@ -20766,6 +20774,7 @@
         <Input name="P1_BUTTON1">Shoot / (Hold) Lock on</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
         <Input name="P1_BUTTON3">Change Weapon</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="12834" romName="solarfox">
@@ -20787,6 +20796,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Rotate Left</Input>
         <Input name="P1_BUTTON2">Rotate Right</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="31644" romName="soldivid">
@@ -20794,6 +20804,7 @@
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Attack</Input>
         <Input name="P1_BUTTON3">Change Magic</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39442" romName="solfigtr">
@@ -20801,18 +20812,21 @@
         <Input name="P1_BUTTON1">Punch</Input>
         <Input name="P1_BUTTON2">Jump</Input>
         <Input name="P1_BUTTON3">Kick</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39444" romName="solomon">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Add / Remove Block</Input>
         <Input name="P1_BUTTON2">Wand</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="solrwarr">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Jump</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="478908" romName="songjang">
@@ -20820,18 +20834,21 @@
         <Input name="P1_BUTTON1">Attack</Input>
         <Input name="P1_BUTTON2">Jump</Input>
         <Input name="P1_BUTTON3">Special</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="10890" romName="sonic">
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
         <Input name="P1_BUTTON1">Jump</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39449" romName="sonicbom">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="31795" romName="soniccar">
@@ -20863,23 +20880,27 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="7889" romName="sonicwi2">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Special</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="28716" romName="sonicwi3">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Special</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39448" romName="sonson">
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="39454" romName="sos">
@@ -25157,6 +25178,7 @@
         <Input name="P1_JOYSTICKRIGHT">Shoot</Input>
         <Input name="P1_TRACKBALL_X">Move</Input>
         <Input name="P1_TRACKBALL_Y">Move</Input>
+        <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="26890" romName="wakuwak7">
@@ -25815,11 +25837,15 @@
         <Input name="P1_TRACKBALL_X">Move Cursor</Input>
         <Input name="P1_TRACKBALL_Y">Move Cursor</Input>
         <Input name="P1_BUTTON1">Select</Input>
+        <Input name="START1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="40544" romName="wwallyja3p">
         <Input name="P1_TRACKBALL_X">Move Cursor</Input>
         <Input name="P1_TRACKBALL_Y">Move Cursor</Input>
         <Input name="P1_BUTTON1">Select</Input>
+        <Input name="START1">Start</Input>
+        <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="423150" romName="wwanpanm">
         <Input name="P1_JOYSTICK_LEFT">Move</Input>
@@ -25849,6 +25875,7 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Headlock / Moves / Attack</Input>
         <Input name="P1_BUTTON2">Moves / Pin / Whip</Input>
+        <Input name="START1">Start 1P vs CPU</Input>
         <Input name="START2">Start 2P Vs.</Input>
         <Input name="START3">Start 2P Co-Op</Input>
         <Input name="COIN1">Insert Coin</Input>
