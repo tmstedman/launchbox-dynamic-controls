@@ -10463,15 +10463,6 @@
     </Game>
     <Game romName="gwar" title="Guerrilla War">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Grenade</Label>
-        <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">Shoot</Label>
-        <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
-        <Note>Below the title, the card prints two rom names stacked: "gwar" then "gwarb (No Rotate)" — this image has no rotate controls at all, unlike the separate gwarb.jpg image which does.</Note>
-    </Game>
-    <Game romName="gwarb" title="Guerrilla War">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate Shooting Position</Label>
         <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
@@ -10483,6 +10474,17 @@
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
         <Note>Below the title, the card prints two rom names stacked: "gwar" then "gwarb", both without qualifier — unlike the separate gwar.jpg image, which marks the second name "(No Rotate)".</Note>
+    </Game>
+    <Game romName="gwarb" title="Guerrilla War">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonA">Grenade</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonLeftShoulder">Grenade</Label>
+        <Label control="ButtonRightShoulder">Shoot</Label>
+        <Label control="ButtonX">Shoot</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>Below the title, the card prints two rom names stacked: "gwar" then "gwarb (No Rotate)" — this image has no rotate controls at all, unlike the separate gwarb.jpg image which does.</Note>
     </Game>
     <Game romName="gwarrior" title="Galactic Warriors">
         <Label control="AxisLeftStick">Move</Label>
