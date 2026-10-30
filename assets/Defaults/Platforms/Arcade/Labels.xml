@@ -9303,6 +9303,8 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="P1_BUTTON2">Alt Fire</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>

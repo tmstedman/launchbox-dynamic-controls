@@ -10321,7 +10321,6 @@
     <Game romName="gunbustr" title="Gunbuster">
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="AxisRightStick">Move</Label>
-        <Label control="ButtonDpad">Move</Label>
         <Label control="AxisTriggerLeft">Alt Fire</Label>
         <Label control="AxisTriggerRight">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
