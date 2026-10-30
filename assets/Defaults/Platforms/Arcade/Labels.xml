@@ -8606,6 +8606,9 @@
     </Game>
     <Game launchBoxId="36991" romName="gondo">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Aim Direction / Rotate Left &amp; Right</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Alt Fire</Input>
         <Input name="START1">Start</Input>
@@ -10285,6 +10288,9 @@
     </Game>
     <Game launchBoxId="16248" romName="ikari">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Shoot Position</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="START1">Start</Input>
@@ -10300,6 +10306,9 @@
     </Game>
     <Game launchBoxId="29473" romName="ikari3w">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Attack Position</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Kick</Input>
         <Input name="P1_BUTTON2">Punch</Input>
         <Input name="P1_BUTTON3">Jump</Input>
@@ -10582,6 +10591,9 @@
     </Game>
     <Game launchBoxId="25589" romName="jackalr">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Turret</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="START1">Start</Input>
@@ -13225,6 +13237,9 @@
     </Game>
     <Game romName="midres">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Aim Direction / Rotate Left &amp; Right</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Jump</Input>
         <Input name="START1">Start</Input>
@@ -13232,6 +13247,9 @@
     </Game>
     <Game romName="midresbj">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Aim Direction / Rotate Left &amp; Right</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Jump</Input>
     </Game>
@@ -23456,6 +23474,9 @@
     </Game>
     <Game launchBoxId="40153" romName="timesold">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Shoot Position</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Special Attack</Input>
         <Input name="START1">Start</Input>
@@ -23736,6 +23757,9 @@
     </Game>
     <Game launchBoxId="25589" romName="topgunbl">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Turret</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Grenade</Input>
         <Input name="START1">Start</Input>
@@ -25718,6 +25742,9 @@
     </Game>
     <Game romName="worldwar">
         <Input name="P1_JOYSTICK">Move</Input>
+        <Input name="P1_POSITIONAL">Rotate Shoot Position</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Bomb</Input>
         <Input name="START1">Start</Input>
