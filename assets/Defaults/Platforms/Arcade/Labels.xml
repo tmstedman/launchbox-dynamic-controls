@@ -8543,6 +8543,8 @@
         <Input name="P1_PADDLE">Steering</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_PADDLE_V.inc">Brake</Input>
+        <Input name="P1_PADDLE_V.dec">Accelerate</Input>
     </Game>
     <Game launchBoxId="36927" romName="godzilla">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -8874,7 +8876,7 @@
     </Game>
     <Game launchBoxId="37047" romName="groundfx">
         <Input name="P1_AD_STICK_X">Steering</Input>
-        <Input name="P1_AD_STICK_Y">Steering</Input>
+        <Input name="P1_AD_STICK_Y">Accelerate</Input>
         <Input name="P1_BUTTON1">Brake</Input>
         <Input name="P1_BUTTON2">Shift Down</Input>
         <Input name="P1_BUTTON3">Shift Up</Input>
@@ -10278,6 +10280,8 @@
         <Input name="P1_JOYSTICKRIGHT">Move Team Mate 2</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_BUTTON1">Shoot / Pass / Tackle 2</Input>
+        <Input name="P1_BUTTON2">Shoot / Pass / Tackle 1</Input>
     </Game>
     <Game launchBoxId="37312" romName="igmo">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -13482,6 +13486,7 @@
         <Input name="P1_JOYSTICKRIGHT_RIGHT">Arm Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_JOYSTICKRIGHT_LEFT">Arm Left</Input>
     </Game>
     <Game launchBoxId="38263" romName="mnight">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -18936,6 +18941,7 @@
         <Input name="P1_BUTTON4">Shift / Dodge</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3 P1_BUTTON4">Fatal Flash</Input>
     </Game>
     <Game launchBoxId="39174" romName="sams64_2">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -18947,6 +18953,7 @@
         <Input name="P1_BUTTON4">Shift / Dodge</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_BUTTON2 P1_BUTTON3 P1_BUTTON4">Fatal Flash</Input>
     </Game>
     <Game launchBoxId="26866" romName="samsh5sp">
         <Input name="P1_JOYSTICK">Move</Input>
@@ -24744,6 +24751,8 @@
         <Input name="P1_BUTTON5">Left View</Input>
         <Input name="P1_BUTTON6">Right View</Input>
         <Input name="COIN1">Insert Coin</Input>
+        <Input name="P1_BUTTON1">Accelerate</Input>
+        <Input name="P1_BUTTON3">Accelerate</Input>
     </Game>
     <Game launchBoxId="8278" romName="varth">
         <Input name="P1_JOYSTICK">Move</Input>
