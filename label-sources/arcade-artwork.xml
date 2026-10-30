@@ -78,6 +78,20 @@
   the game, so the card's Start is the coin and there is no separate Insert Coin to label. A
   <Note> in each records what the card prints. tools/MamePorts/ports.xml finds the next one.
 
+  AxisTriggerLeft "Brake" and AxisTriggerRight "Accelerate" were removed from genpeitd, panicbom
+  and pgoal, which are not driving games: the card carries the racing layout's trigger labels
+  over a machine with only a joystick and buttons. A <Note> in each records what it prints.
+
+  AxisTriggerLeft "Brake" was removed from roadriot, speedrcr and spacegun, whose machines have
+  one pedal, the one on RT, and no brake. A <Note> in each records what the card prints.
+
+  AxisTriggerLeft "Arm Left" and AxisTriggerRight "Arm Right" were removed from prehisle: the
+  card prints Munch Mobile's trigger labels, and the machine has only a joystick and buttons.
+  A <Note> records what it prints.
+
+  AxisTriggerRight "Stroke Power" was removed from tsamurai and "(Hold) Turbo" from rmpgwt:
+  neither machine has a port the label could describe. A <Note> in each records what it prints.
+
   Seeded by hand from images read during the import's measurement step. The remainder comes
   from the bulk read.
 -->
@@ -9254,12 +9268,12 @@
     </Game>
     <Game romName="genpeitd" title="Genpei ToumaDen">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="ButtonA">Jump</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Attack</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT, the racing layout's trigger labels; the machine has no pedal or brake, only a joystick and buttons.</Note>
     </Game>
     <Game romName="getaway" title="Get A Way">
         <Label control="AxisLeftStick">Steering</Label>
@@ -17235,12 +17249,11 @@
     </Game>
     <Game romName="panicbom" title="Panic Bomber">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
-        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Rotate</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT and "Accelerate" on RT, the racing layout's trigger labels; the machine has no pedal or brake, only a joystick and buttons.</Note>
     </Game>
     <Game romName="panicr" title="Panic Road">
         <Label control="AxisLeftStick">Tilt</Label>
@@ -18170,8 +18183,6 @@
     </Game>
     <Game romName="pgoal" title="Pleasure Goal">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
-        <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Pass / Intercept</Label>
         <Label control="ButtonB">Trick Play / Change Player</Label>
         <Label control="ButtonDpad">Move</Label>
@@ -18179,6 +18190,7 @@
         <Label control="ButtonY">Save / Control Goalie</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT and "Accelerate" on RT, the racing layout's trigger labels; the machine has no pedal or brake, only a joystick and buttons.</Note>
     </Game>
     <Game romName="phantom2" title="Phantom II">
         <Label control="AxisLeftStick">Move</Label>
@@ -18998,13 +19010,12 @@
     </Game>
     <Game romName="prehisle" title="Prehistoric Isle in 1930">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerLeft">Arm Left</Label>
-        <Label control="AxisTriggerRight">Arm Right</Label>
         <Label control="ButtonA">Change Drone Position</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Arm Left" on LT and "Arm Right" on RT, the same trigger labels as Munch Mobile's card; the machine has no arms, only a joystick and buttons.</Note>
     </Game>
     <Game romName="preisle2" title="Prehistoric Isle 2">
         <Label control="AxisLeftStick">Move</Label>
@@ -20456,7 +20467,6 @@
     </Game>
     <Game romName="rmpgwt" title="Rampage: World Tour">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerRight">(Hold) Turbo</Label>
         <Label control="ButtonA">Jump</Label>
         <Label control="ButtonB">Kick</Label>
         <Label control="ButtonDpad">Move</Label>
@@ -20464,6 +20474,7 @@
         <Label control="ButtonY">Kick</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "(Hold) Turbo" on RT, but the machine has no port for it, only a joystick and three buttons.</Note>
     </Game>
     <Game romName="roadblst" title="Road Blasters">
         <Label control="AxisLeftStick">Steering</Label>
@@ -20503,12 +20514,12 @@
     </Game>
     <Game romName="roadriot" title="Road Riot 4WD">
         <Label control="AxisLeftStick">Steering</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT, but the machine has no brake: its one pedal is the accelerator on RT.</Note>
     </Game>
     <Game romName="roadrunn" title="Road Runner">
         <Label control="AxisLeftStick">Move</Label>
@@ -23455,10 +23466,10 @@
         <Label control="AxisLeftStick">Move Crosshair</Label>
         <Label control="AxisTriggerRight">(Hold) Pedal / Reverse</Label>
         <Label control="ButtonA">Change Weapon</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT, but the machine has no brake: its one pedal is the one on RT.</Note>
     </Game>
     <Game romName="spaceint" title="Space Intruder">
         <Label control="AxisLeftStick">Move</Label>
@@ -23741,7 +23752,6 @@
     </Game>
     <Game romName="speedrcr" title="Speed Racer">
         <Label control="AxisLeftStick">Steering</Label>
-        <Label control="AxisTriggerLeft">Brake</Label>
         <Label control="AxisTriggerRight">Accelerate</Label>
         <Label control="ButtonA">Weapon 1</Label>
         <Label control="ButtonB">Weapon 3</Label>
@@ -23749,6 +23759,7 @@
         <Label control="ButtonY">Weapon 2</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Brake" on LT, but the machine has no brake: its one pedal is the accelerator on RT.</Note>
     </Game>
     <Game romName="speedrs" title="Speed Race">
         <Label control="AxisLeftStick">Steering</Label>
@@ -26966,12 +26977,12 @@
     </Game>
     <Game romName="tsamurai" title="Samurai Nihon-Ichi">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisTriggerRight">Stroke Power</Label>
         <Label control="ButtonA">Attack High</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonX">Attack Low</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Stroke Power" on RT, but the machine has no port for it, only a joystick and two buttons.</Note>
     </Game>
     <Game romName="tsclass" title="Trap Shoot Classic">
         <Label control="ButtonA">Button</Label>
