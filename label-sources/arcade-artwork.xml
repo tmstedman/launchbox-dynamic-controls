@@ -18321,8 +18321,7 @@
     </Game>
     <Game romName="piratesh" title="Pirate Ship">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonDpadUp">Move</Label>
-        <Label control="ButtonDpadDown">Move</Label>
+        <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
     </Game>
