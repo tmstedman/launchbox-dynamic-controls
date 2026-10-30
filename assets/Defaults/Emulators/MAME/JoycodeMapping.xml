@@ -121,6 +121,8 @@
        axis like the sticks above — it needs just the one input the _SWITCH variant already uses. -->
   <Mapping joycode="JOYCODE_1_SLIDER1_NEG" input="AxisTriggerLeft" />
   <Mapping joycode="JOYCODE_1_SLIDER2_NEG" input="AxisTriggerRight" />
+  <Mapping joycode="JOYCODE_1_SLIDER1" input="AxisTriggerLeft" />
+  <Mapping joycode="JOYCODE_1_SLIDER2" input="AxisTriggerRight" />
 
   <!-- Start / Select -->
   <Mapping joycode="JOYCODE_1_START" input="ButtonStart" />
