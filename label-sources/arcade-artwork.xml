@@ -92,6 +92,9 @@
   AxisTriggerRight "Stroke Power" was removed from tsamurai and "(Hold) Turbo" from rmpgwt:
   neither machine has a port the label could describe. A <Note> in each records what it prints.
 
+  AxisTriggerRight on titlef and titlefu is transcribed "Dodge Right" where the card repeats
+  "Dodge Left": the cfg binds it to both levers' right. A <Note> in each records what it prints.
+
   Seeded by hand from images read during the import's measurement step. The remainder comes
   from the bulk read.
 -->
@@ -26206,19 +26209,19 @@
         <Label control="AxisLeftStick">Left Hand</Label>
         <Label control="AxisRightStick">Right Hand</Label>
         <Label control="AxisTriggerLeft">Dodge Left</Label>
-        <Label control="AxisTriggerRight">Dodge Left</Label>
+        <Label control="AxisTriggerRight">Dodge Right</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
-        <Note>Both triggers (LT and RT) print the identical text "Dodge Left" — transcribed exactly as printed rather than assumed to be a mirrored "Dodge Left"/"Dodge Right" pair, same as hwchamp's shoulder-button pair. Worth a human check against the cfg/database.</Note>
+        <Note>The card prints "Dodge Left" on RT as well as LT. RT is transcribed as "Dodge Right": the cfg binds it to both levers' right, as it binds LT to both levers' left.</Note>
     </Game>
     <Game romName="titlefu" title="Title Fight">
         <Label control="AxisLeftStick">Left Hand</Label>
         <Label control="AxisRightStick">Right Hand</Label>
         <Label control="AxisTriggerLeft">Dodge Left</Label>
-        <Label control="AxisTriggerRight">Dodge Left</Label>
+        <Label control="AxisTriggerRight">Dodge Right</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
-        <Note>Both triggers (LT and RT) print the identical text "Dodge Left" — transcribed exactly as printed rather than assumed to be a mirrored "Dodge Left"/"Dodge Right" pair, same as titlef's (this card's own clone) and hwchamp's shoulder-button pair. Worth a human check against the cfg/database.</Note>
+        <Note>The card prints "Dodge Left" on RT as well as LT. RT is transcribed as "Dodge Right": the cfg binds it to both levers' right, as it binds LT to both levers' left.</Note>
     </Game>
     <Game romName="tjumpman" title="Tobikose! Jumpman">
         <Label control="ButtonA">Select</Label>

@@ -23530,6 +23530,8 @@
         <Input name="P1_JOYSTICKRIGHT">Right Hand</Input>
         <Input name="P1_JOYSTICKRIGHT_LEFT">Right Hand</Input>
         <Input name="P1_JOYSTICKRIGHT_RIGHT">Right Hand</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT P1_JOYSTICKRIGHT_LEFT">Dodge Left</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT P1_JOYSTICKRIGHT_RIGHT">Dodge Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23540,6 +23542,8 @@
         <Input name="P1_JOYSTICKRIGHT">Right Hand</Input>
         <Input name="P1_JOYSTICKRIGHT_LEFT">Right Hand</Input>
         <Input name="P1_JOYSTICKRIGHT_RIGHT">Right Hand</Input>
+        <Input name="P1_JOYSTICKLEFT_LEFT P1_JOYSTICKRIGHT_LEFT">Dodge Left</Input>
+        <Input name="P1_JOYSTICKLEFT_RIGHT P1_JOYSTICKRIGHT_RIGHT">Dodge Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
