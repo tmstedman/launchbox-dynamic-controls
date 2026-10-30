@@ -146,6 +146,14 @@ transcription derived from the OCR dump misattributed 48% of its sentences and w
 than shipped. The note records the scorer's measured recall and what its predecessor's keyword
 filter silently threw away.
 
+## `snes-manuals.md`
+
+Provenance for the Super Nintendo pilot, a 20-game sample read off the printed manuals and gap-filled
+from StrategyWiki where the manual was silent. Method follows `genesis-manuals.md`; the note records
+the rule the two sources were combined under, which entries rest on the wiki alone, and the games
+whose controls change by vehicle or view and so are only partly labelled until several control sets
+per game are supported.
+
 ## Generated files live elsewhere
 
 Everything here is hand-edited and tracked. What `tools/LabelDump` produces goes to

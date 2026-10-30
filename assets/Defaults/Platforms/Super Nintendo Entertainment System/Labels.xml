@@ -1,0 +1,194 @@
+<Labels>
+    <Defaults>
+        <Input name="Start">Pause</Input>
+    </Defaults>
+
+    <Game launchBoxId="1573" romName="Axelay">
+        <Input name="Dpad-Any">Guide Ship</Input>
+        <Input name="B">Air-to-Air Missiles</Input>
+        <Input name="A">Air-to-Ground Missiles</Input>
+        <Input name="L">Weapon Select</Input>
+        <Input name="R">Weapon Select</Input>
+    </Game>
+
+    <Game launchBoxId="1255" romName="Chrono Trigger">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Action</Input>
+        <Input name="X">Menu</Input>
+        <Input name="Y">Character Switch</Input>
+        <Input name="B">Dash</Input>
+        <Input name="Select">World Map</Input>
+    </Game>
+
+    <Game launchBoxId="122" romName="Contra III - The Alien Wars">
+        <Input name="Dpad-Any">Move and Aim</Input>
+        <Input name="A">Helio Bomb</Input>
+        <Input name="X">Switch Weapon</Input>
+        <Input name="Y">Shoot</Input>
+    </Game>
+
+    <Game launchBoxId="131" romName="Donkey Kong Country">
+        <Input name="A">Switch Kong</Input>
+        <Input name="Select">Switch Kong</Input>
+        <Input name="B">Jump</Input>
+        <Input name="Y">Roll</Input>
+    </Game>
+
+    <Game launchBoxId="10779" romName="F-Zero">
+        <Input name="Dpad-Left">Steering</Input>
+        <Input name="Dpad-Right">Steering</Input>
+        <Input name="Dpad-Up">Nose Down</Input>
+        <Input name="Dpad-Down">Nose Up</Input>
+        <Input name="B">Throttle</Input>
+        <Input name="Y">Brake</Input>
+        <Input name="X">Brake</Input>
+        <Input name="A">Super Jet</Input>
+        <Input name="L">Shift Weight</Input>
+        <Input name="R">Shift Weight</Input>
+    </Game>
+
+    <Game launchBoxId="1913" romName="Final Fight">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="Y">Punch</Input>
+        <Input name="B">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="1315" romName="Kirby Super Star">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="Y">Inhale</Input>
+        <Input name="A">Swallow</Input>
+        <Input name="B">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="143" romName="Mega Man X">
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="B">Jump</Input>
+        <Input name="A">Dash</Input>
+        <Input name="Y">X-Buster</Input>
+        <Input name="L">Switch Weapons</Input>
+        <Input name="R">Switch Weapons</Input>
+        <Input name="Start">System Status</Input>
+    </Game>
+
+    <Game launchBoxId="2823" romName="Mortal Kombat II">
+        <Input name="Dpad-Left">Move</Input>
+        <Input name="Dpad-Right">Move</Input>
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="B">Low Punch</Input>
+        <Input name="Y">High Punch</Input>
+        <Input name="A">Low Kick</Input>
+        <Input name="X">High Kick</Input>
+        <Input name="L">Block</Input>
+        <Input name="R">Block</Input>
+    </Game>
+
+    <Game launchBoxId="2418" romName="Pilotwings">
+        <Input name="Dpad-Left">Turn Left</Input>
+        <Input name="Dpad-Right">Turn Right</Input>
+    </Game>
+
+    <Game launchBoxId="1253" romName="Secret of Mana">
+        <Input name="Dpad-Any">Walk</Input>
+        <Input name="B">Attack</Input>
+        <Input name="Y">Ring Commands</Input>
+        <Input name="X">Ally Ring Commands</Input>
+        <Input name="A">Dash</Input>
+        <Input name="Select">Switch Hero</Input>
+    </Game>
+
+    <Game launchBoxId="1730" romName="Star Fox">
+        <Input name="L">Roll Left</Input>
+        <Input name="R">Roll Right</Input>
+        <Input name="X">Speed Boost</Input>
+        <Input name="Y">Laser Blaster</Input>
+        <Input name="B">Retro-rocket</Input>
+        <Input name="A">Nova Bomb</Input>
+        <Input name="Select">Viewpoint</Input>
+    </Game>
+
+    <Game launchBoxId="3122" romName="Street Fighter II">
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Y">Light Punch</Input>
+        <Input name="X">Medium Punch</Input>
+        <Input name="L">Hard Punch</Input>
+        <Input name="B">Light Kick</Input>
+        <Input name="A">Medium Kick</Input>
+        <Input name="R">Hard Kick</Input>
+    </Game>
+
+    <Game launchBoxId="277" romName="Super Bomberman">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Set Bomb</Input>
+        <Input name="B">Detonate Bomb</Input>
+        <Input name="Y">Push Bomb</Input>
+        <Input name="L">Push Bomb</Input>
+        <Input name="X">Stop Bomb</Input>
+        <Input name="R">Stop Bomb</Input>
+    </Game>
+
+    <Game launchBoxId="1308" romName="Super Castlevania IV">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="B">Jump</Input>
+        <Input name="Y">Whip</Input>
+        <Input name="R">Special Item</Input>
+    </Game>
+
+    <Game launchBoxId="2224" romName="Super Ghouls'n Ghosts">
+        <Input name="Dpad-Left">Run</Input>
+        <Input name="Dpad-Right">Run</Input>
+        <Input name="Dpad-Up">Climb</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Y">Weapon</Input>
+        <Input name="B">Jump</Input>
+    </Game>
+
+    <Game launchBoxId="41" romName="Super Mario Kart">
+        <Input name="Dpad-Any">Steer</Input>
+        <Input name="Y">Brake</Input>
+        <Input name="B">Accelerate</Input>
+        <Input name="A">Use Items</Input>
+        <Input name="L">Hop</Input>
+        <Input name="R">Hop</Input>
+        <Input name="X">Rear View</Input>
+        <Input name="Select">Rear View</Input>
+    </Game>
+
+    <Game launchBoxId="136" romName="Super Mario World">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="A">Spin Jump</Input>
+        <Input name="B">Jump</Input>
+        <Input name="X">Accelerate</Input>
+        <Input name="Y">Accelerate</Input>
+        <Input name="L">Scroll Screen</Input>
+        <Input name="R">Scroll Screen</Input>
+        <Input name="Select">Drop Reserve Item</Input>
+    </Game>
+
+    <Game launchBoxId="299" romName="Super Metroid">
+        <Input name="Dpad-Up">Aim Up</Input>
+        <Input name="Dpad-Down">Kneel</Input>
+        <Input name="Dpad-Left">Run</Input>
+        <Input name="Dpad-Right">Run</Input>
+        <Input name="L">Aim Down</Input>
+        <Input name="R">Aim Up</Input>
+        <Input name="Y">Cancel</Input>
+        <Input name="X">Fire</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Dash</Input>
+        <Input name="Select">Cycle Special Item</Input>
+    </Game>
+
+    <Game launchBoxId="1307" romName="Super Punch-Out!!">
+        <Input name="Dpad-Up">Guard Up</Input>
+        <Input name="Dpad-Down">Duck</Input>
+        <Input name="Dpad-Left">Dodge Left</Input>
+        <Input name="Dpad-Right">Dodge Right</Input>
+        <Input name="Y">Left Punch</Input>
+        <Input name="B">Right Punch</Input>
+        <Input name="A">Knock Out Punch</Input>
+    </Game>
+
+</Labels>
