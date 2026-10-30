@@ -73,6 +73,11 @@
   tempest term2 trisport trivialp trophyh tshoot viper warlords wcbowl wcbowl140 wcbowldx
   wecleman wfortune wheelrun whodunit wildplt wolfpack zektor.
 
+  ButtonBack "Insert Coin" was removed from headon, pong, powerdrv and safari, whose machines
+  define no START port and whose cfgs bind the coin to ButtonStart: inserting the coin starts
+  the game, so the card's Start is the coin and there is no separate Insert Coin to label. A
+  <Note> in each records what the card prints. tools/MamePorts/ports.xml finds the next one.
+
   Seeded by hand from images read during the import's measurement step. The remainder comes
   from the bulk read.
 -->
@@ -10744,7 +10749,7 @@
         <Label control="ButtonA">Speed Up</Label>
         <Label control="ButtonDpad">Move</Label>
         <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Insert Coin" on View, its usual layout, but the cabinet has no separate start: inserting the coin starts the game, so the coin is the Start above.</Note>
     </Game>
     <Game romName="headon2" title="Head On 2">
         <Label control="AxisLeftStick">Move</Label>
@@ -18615,7 +18620,7 @@
     <Game romName="pong" title="Pong">
         <Label control="AxisLeftStick">Move</Label>
         <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Insert Coin" on View, its usual layout, but the cabinet has no separate start: inserting the coin starts the game, so the coin is the Start above.</Note>
     </Game>
     <Game romName="pongd" title="Pong Doubles">
         <Label control="AxisLeftStick">Move</Label>
@@ -18923,7 +18928,7 @@
         <Label control="ButtonX">Wheelie</Label>
         <Label control="ButtonY">4WD / 2WD</Label>
         <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Insert Coin" on View, its usual layout, but the cabinet has no separate start: inserting the coin starts the game, so the coin is the Start above.</Note>
     </Game>
     <Game romName="powerins" title="Power Instinct">
         <Label control="AxisLeftStick">Move</Label>
@@ -21067,7 +21072,7 @@
         <Label control="ButtonLeftShoulder">Aim Down</Label>
         <Label control="ButtonRightShoulder">Aim Up</Label>
         <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card also prints "Insert Coin" on View, its usual layout, but the cabinet has no separate start: inserting the coin starts the game, so the coin is the Start above.</Note>
     </Game>
     <Game romName="safarir" title="Safari Rally">
         <Label control="AxisLeftStick">Move</Label>
