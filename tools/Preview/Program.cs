@@ -30,6 +30,8 @@ const string Usage = """
                          (or .jpg) as its own backdrop, falling back to --backdrop where
                          there is none. Platform defaults always use --backdrop.
       --backdrop-blur <r>  blur radius over the backdrop. Default: 60, the theme's own.
+      --backdrop-stretch stretch the backdrop to the canvas, distorting its aspect, instead of
+                         the theme's UniformToFill crop.
       --scrim <hex>      colour laid over the blurred backdrop. Default: 90000000 (ARGB),
                          the theme's own. 0 to see the artwork undimmed.
       --no-title         draw the pause-screen frame alone, without the band above it that
@@ -54,7 +56,7 @@ const int MaxGamesPerPlatform = 50;
 string root = "assets", platform = "", rom = "", output = "", cfgPack = "", fontPath = "", bg = "101014";
 string backdrop = "", backdropDir = "", scrim = "90000000", backdropBlur = "60";
 string titlesPath = "";
-bool noLabels = false, all = false, noTitle = false;
+bool noLabels = false, all = false, noTitle = false, backdropStretch = false;
 for (int i = 0; i < args.Length; i++)
 {
     string? Next() => i + 1 < args.Length ? args[++i] : null;
@@ -74,6 +76,7 @@ for (int i = 0; i < args.Length; i++)
         "--backdrop" => backdrop = Next() ?? "",
         "--backdrops" => backdropDir = Next() ?? "",
         "--backdrop-blur" => backdropBlur = Next() ?? "",
+        "--backdrop-stretch" => Set(ref backdropStretch),
         "--scrim" => scrim = Next() ?? "",
         "--no-title" => Set(ref noTitle),
         "--titles" => titlesPath = Next() ?? "",
@@ -234,7 +237,7 @@ bool Draw(SweepTarget target, string explicitPath = "")
     if (noLabels) model.InputLabels.Clear();
 
     var backdropLayer = new OverlayRenderer.Backdrop(
-        BackdropFor(target), backdropRadius, scrimColour);
+        BackdropFor(target), backdropRadius, scrimColour, backdropStretch);
     // With a title the backdrop spans the whole taller image, so the frame is drawn bare on a
     // transparent canvas and TitleFrame lays background and backdrop beneath it.
     using SKBitmap bitmap = noTitle

@@ -48,8 +48,11 @@ public static class OverlayRenderer
     /// tone and busyness, not a pixel match — which is what judging label legibility needs.
     /// Reproducing the crop would mean re-implementing the theme's grid here, the one thing
     /// this renderer must not do.</para>
+    ///
+    /// <para><c>Stretch</c> fills the canvas exactly instead, distorting the aspect — the whole
+    /// screenshot shows, where <c>UniformToFill</c> crops a vertical game's to a band.</para>
     /// </summary>
-    public readonly record struct Backdrop(string? Path, double Radius, SKColor Scrim)
+    public readonly record struct Backdrop(string? Path, double Radius, SKColor Scrim, bool Stretch = false)
     {
         /// <summary>The theme's <c>BlurEffect Radius="60"</c> over its <c>#90000000</c> grid.</summary>
         public static Backdrop For(string? path) =>
@@ -94,10 +97,12 @@ public static class OverlayRenderer
         if (source == null) return;
 
         // UniformToFill: cover the canvas and let the long side overflow, where the controller
-        // photo below uses Uniform and fits inside.
+        // photo below uses Uniform and fits inside. Stretch ignores the aspect and fills it.
         float scale = Math.Max((float)width / source.Width, (float)height / source.Height);
         float w = source.Width * scale, h = source.Height * scale;
-        var dest = SKRect.Create((width - w) / 2, (height - h) / 2, w, h);
+        SKRect dest = backdrop.Stretch
+            ? SKRect.Create(0, 0, width, height)
+            : SKRect.Create((width - w) / 2, (height - h) / 2, w, h);
 
         using (var paint = new SKPaint { FilterQuality = SKFilterQuality.High, IsAntialias = true })
         {
