@@ -166,6 +166,8 @@ Then the filter computes per-input Y-offset adjustments for collapsing Groups: m
 - **MappedDefault** — a platform button drives the input and it's that button's natural target. The platform button's own file wins (`B.png` before `ButtonA.png`), falling back to the generic.
 - **Remapped** — a platform button drives the input, but that button naturally targets something else. The image follows the *physical* button, so the player sees what they're actually pressing.
 
+Before any of these, a declared `<Whole>` that two or more platform buttons drive between them looks for the platform's picture of those buttons together (`CombinedImage`: `{platform}/{buttons, sorted by name and space-joined}.png`, so swapping two buttons between the parts names the same file). It exists because the covering button the classification would otherwise pick can be a wider control — `C-Any` reaches all four C directions, so it covers the left-right pair too — and its picture is of more than the row stands for. A file that isn't there falls through to the three cases unchanged.
+
 Namespace: `src/Core/Rendering/`. Entry point: `InputRenderingService`. The render pass only ever sees resolved types — it doesn't know about platforms or emulators (see [Renderer doesn't know about platforms or emulators](#renderer-doesnt-know-about-platforms-or-emulators)).
 
 ### 6. Assembling the model

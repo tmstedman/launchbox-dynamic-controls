@@ -81,6 +81,283 @@ public class InputImageResolverTests
         path.ShouldBe("platform/C-Any.png");
     }
 
+    // ---- a composite driven by several buttons together ----
+
+    private static readonly string[] CParts = ["AxisRightStickLeft", "AxisRightStickRight"];
+
+    /// <summary>Nintendo 64's C cluster as the mapping carries it: each C button driving its own
+    /// direction, and C-Any, the control standing for all four, covering the pair too.</summary>
+    private static ResolvedMapping CClusterMapping(string left = "C-Left", string right = "C-Right") =>
+        MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                [left] = ["AxisRightStickLeft"],
+                [right] = ["AxisRightStickRight"],
+                ["C-Any"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
+            },
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickLeft"] = left,
+                ["AxisRightStickRight"] = right,
+            },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                [left] = ["AxisRightStickLeft"],
+                [right] = ["AxisRightStickRight"],
+                ["C-Any"] = ["AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight"],
+            });
+
+    private Template CPairTemplate() =>
+        TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStickX"] = CParts,
+        });
+
+    private static readonly InputImageDefinition CPairImage =
+        new(X: 0, Y: 0, ImageFile: "AxisRightStickX.png", UseImageFile: "AxisLeftStickX.png");
+
+    /// <summary>Every file the template has and the platform doesn't: later stubs name the ones it does.</summary>
+    private void StubNothingStyled() =>
+        _imageSource.Resolve(Arg.Any<string>(), Platform, Controller)
+            .Returns(call => new ResolvedImagePaths(call.ArgAt<string>(0), null));
+
+    [Fact]
+    public void Resolve_CompositeDrivenByTwoButtons_TakesTheImageNamedForBoth()
+    {
+        StubNothingStyled();
+        // C-Any covers the pair too, and used to win: its four-circle picture for two directions.
+        // The picture of the two buttons that drive it is the better answer when the platform
+        // has one, named for them in alphabetical order.
+        _imageSource.Resolve("AxisLeftStickX.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisLeftStickX.png", null));
+        _imageSource.Resolve("C-Left C-Right.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Left C-Right.png", "platform/C-Left C-Right.png"));
+        _imageSource.Resolve("C-Any.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
+
+        string path = _underTest.Resolve(CPairImage, Input("AxisRightStickX"), CClusterMapping(), CPairTemplate());
+
+        path.ShouldBe("platform/C-Left C-Right.png");
+        // and the debug log names the buttons, not a classification that played no part
+        _logger.Received().Debug("Button image: AxisRightStickX <- C-Left C-Right (the buttons driving its parts)");
+        _logger.DidNotReceive().Debug(Arg.Is<string>(m => m.Contains("(no platform mapping)")));
+    }
+
+    [Fact]
+    public void Resolve_VerticalCompositeDrivenByTwoButtons_NamesThemByName()
+    {
+        // The up-down pair is its own Whole. The buttons are named in alphabetical order, so Down
+        // comes before Up, whatever order the template lists the parts in.
+        StubNothingStyled();
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStickY.png", UseImageFile: "AxisLeftStickY.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStickY"] = ["AxisRightStickUp", "AxisRightStickDown"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Down"] = ["AxisRightStickDown"],
+                ["C-Up"] = ["AxisRightStickUp"],
+            },
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickDown"] = "C-Down",
+                ["AxisRightStickUp"] = "C-Up",
+            });
+        _imageSource.Resolve("C-Down C-Up.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Down C-Up.png", "platform/C-Down C-Up.png"));
+
+        string path = _underTest.Resolve(image, Input("AxisRightStickY"), mapping, template);
+
+        path.ShouldBe("platform/C-Down C-Up.png");
+    }
+
+    [Fact]
+    public void Resolve_CompositeDrivenByTwoButtonsWithNoNamedImage_KeepsTheCoveringButtonsImage()
+    {
+        StubNothingStyled();
+        // Nothing named for the pair: what a platform without that art drew before is unchanged.
+        _imageSource.Resolve("AxisLeftStickX.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisLeftStickX.png", null));
+        _imageSource.Resolve("C-Left C-Right.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Left C-Right.png", null));
+        _imageSource.Resolve("C-Any.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
+
+        string path = _underTest.Resolve(CPairImage, Input("AxisRightStickX"), CClusterMapping(), CPairTemplate());
+
+        path.ShouldBe("platform/C-Any.png");
+    }
+
+    [Fact]
+    public void Resolve_PairWithItsButtonsSwapped_DrawsTheSameImage()
+    {
+        // C-Right now drives the left direction and C-Left the right one. The two buttons are the
+        // same, so the picture of them is too: the name is the sorted set of buttons, not which
+        // part each drives this game.
+        StubNothingStyled();
+        _imageSource.Resolve("C-Left C-Right.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Left C-Right.png", "platform/C-Left C-Right.png"));
+        ResolvedMapping swapped = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Left"] = ["AxisRightStickRight"],
+                ["C-Right"] = ["AxisRightStickLeft"],
+            },
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickLeft"] = "C-Right",
+                ["AxisRightStickRight"] = "C-Left",
+            });
+
+        string path = _underTest.Resolve(CPairImage, Input("AxisRightStickX"), swapped, CPairTemplate());
+
+        path.ShouldBe("platform/C-Left C-Right.png");
+    }
+
+    [Fact]
+    public void Resolve_PairNamedForButtonsOfUnrelatedNames_SortsThemOrdinally()
+    {
+        // Any two buttons name a pair, not only a platform's C buttons: the name is the ordinal
+        // sort, whichever drives which part.
+        StubNothingStyled();
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Z"] = ["AxisRightStickLeft"],
+                ["A"] = ["AxisRightStickRight"],
+            },
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickLeft"] = "Z",
+                ["AxisRightStickRight"] = "A",
+            });
+
+        _underTest.Resolve(CPairImage, Input("AxisRightStickX"), mapping, CPairTemplate());
+
+        _imageSource.Received(1).Resolve("A Z.png", Platform, Controller);
+    }
+
+    [Fact]
+    public void Resolve_CompositeWithOnlySomeOfItsPartsDriven_DoesNotLookForANamedCombination()
+    {
+        // Three of four parts have a button, three different ones; the fourth has none. A name
+        // for those three would picture a control that is missing a direction.
+        StubNothingStyled();
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonDpad.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["ButtonDpad"] = ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Dpad-Up"] = ["ButtonDpadUp"],
+                ["Dpad-Down"] = ["ButtonDpadDown"],
+                ["Dpad-Left"] = ["ButtonDpadLeft"],
+            },
+            inputToButton: new Dictionary<string, string>
+            {
+                ["ButtonDpadUp"] = "Dpad-Up",
+                ["ButtonDpadDown"] = "Dpad-Down",
+                ["ButtonDpadLeft"] = "Dpad-Left",
+            });
+
+        _underTest.Resolve(image, Input("ButtonDpad"), mapping, template);
+
+        _imageSource.DidNotReceive().Resolve(Arg.Is<string>(s => s.Contains(' ')), Platform, Controller);
+    }
+
+    [Fact]
+    public void Resolve_CompositeDrivenByOneButton_DoesNotLookForANamedCombination()
+    {
+        // One button is the covering button's business; a "name" of one button would only be
+        // that button's own image looked up a second time.
+        var input = Input("AxisRightStick");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStick.png");
+        Template template = TemplateOf(imageSource: _imageSource, wholes: new Dictionary<string, IReadOnlyList<string>>()
+        {
+            ["AxisRightStick"] = ["AxisRightStickLeft", "AxisRightStickRight"],
+        });
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            buttonToInput: new Dictionary<string, IReadOnlyList<string>> { ["C-Any"] = CParts },
+            inputToButton: new Dictionary<string, string> { ["AxisRightStickLeft"] = "C-Any", ["AxisRightStickRight"] = "C-Any" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>> { ["C-Any"] = CParts });
+        _imageSource.Resolve("AxisRightStick.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisRightStick.png", null));
+        _imageSource.Resolve("C-Any.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
+
+        string path = _underTest.Resolve(image, input, mapping, template);
+
+        path.ShouldBe("platform/C-Any.png");
+        _imageSource.Received(1).Resolve("C-Any.png", Platform, Controller);
+        // the cover chose it, so the log names no combination
+        _logger.DidNotReceive().Debug(Arg.Is<string>(m => m.Contains("the buttons driving its parts")));
+    }
+
+    [Fact]
+    public void Resolve_CompositeWithOnePartUndriven_DoesNotLookForANamedCombination()
+    {
+        StubNothingStyled();
+        // A part no button drives leaves nothing to name the pair by.
+        ResolvedMapping mapping = CClusterMapping() with
+        {
+            InputToButton = new Dictionary<string, string> { ["AxisRightStickLeft"] = "C-Left" },
+        };
+        _imageSource.Resolve("AxisLeftStickX.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisLeftStickX.png", null));
+
+        _underTest.Resolve(CPairImage, Input("AxisRightStickX"), mapping, CPairTemplate());
+
+        _imageSource.DidNotReceive().Resolve(Arg.Is<string>(s => s.Contains(' ')), Platform, Controller);
+    }
+
+    [Fact]
+    public void Resolve_CompositeNamedForButtonsWithPathCharacters_LooksUpASafeFileName()
+    {
+        StubNothingStyled();
+        // Arcade buttons are MAME port names (OTHER:STROBE1:2); a path can't hold every character
+        // a name can, and the slash is the one no filesystem does.
+        _imageSource.Resolve("AxisLeftStickX.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("AxisLeftStickX.png", null));
+
+        _underTest.Resolve(CPairImage, Input("AxisRightStickX"),
+            CClusterMapping(left: "P1/A", right: "P1/B"), CPairTemplate());
+
+        _imageSource.Received(1).Resolve("P1_A P1_B.png", Platform, Controller);
+    }
+
+    [Fact]
+    public void Resolve_ButtonDrivesTheCompositeDirectly_DoesNotLookForANamedCombination()
+    {
+        StubNothingStyled();
+        // A button bound straight at the whole stands for it outright.
+        ResolvedMapping mapping = CClusterMapping() with
+        {
+            InputToButton = new Dictionary<string, string>
+            {
+                ["AxisRightStickX"] = "C-Any",
+                ["AxisRightStickLeft"] = "C-Left",
+                ["AxisRightStickRight"] = "C-Right",
+            },
+        };
+        _imageSource.Resolve("C-Any.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
+
+        string path = _underTest.Resolve(CPairImage, Input("AxisRightStickX"), mapping, CPairTemplate());
+
+        path.ShouldBe("platform/C-Any.png");
+        _imageSource.DidNotReceive().Resolve("C-Left C-Right.png", Platform, Controller);
+    }
+
     [Fact]
     public void Resolve_CompositeCoveredByMoreThanOneButton_IsUnmapped()
     {

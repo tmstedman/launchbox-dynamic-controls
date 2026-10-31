@@ -36,6 +36,8 @@ When rendering a button the plugin picks the most-specific image that exists on 
 
 One exception to "most-specific wins": when the current platform has *no* button mapped to that generic input, the generic image is used even if platform art exists — showing a Genesis `C` button on a controller slot the game can't reach would mislead. An `<Input useImage="…">` is exempt, because it is explicitly borrowing another input's artwork.
 
+A `<Whole>` that several platform buttons drive together also looks for the platform's picture of those buttons, before any of the above: `{Platform}/{buttons, sorted by name and space-joined}.png`. Nintendo 64's `AxisRightStickX` (parts `AxisRightStickLeft AxisRightStickRight`, driven by `C-Left` and `C-Right`) finds `Nintendo 64/C-Left C-Right.png`, and its `AxisRightStickY` finds `Nintendo 64/C-Down C-Up.png`, where otherwise `C-Any` — which reaches all four C directions, so covers each pair too — would lend its four-circle picture. The name is the sorted set of buttons driving the parts in this game, so swapping two of them, in a per-game mapping or a RetroArch remap, gives the same name and the same picture; a file that isn't there changes nothing, and a whole driven by one button, or bound to one directly, doesn't look. Button names go through the same file-name clean-up as everything else here, so a name containing a character the operating system forbids in file names has it replaced by `_` — on Windows a MAME port such as `OTHER:STROBE1:2` is looked up as `OTHER_STROBE1_2`, where macOS and Linux keep the colon.
+
 Image files must be `.png`. Paths 1–3 are relative to the template folder; path 4 is relative to `Templates\`.
 
 ## Generic input names
