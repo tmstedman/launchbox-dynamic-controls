@@ -11775,16 +11775,12 @@
     </Game>
     <Game romName="jackal" title="Jackal">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Rotate Turret</Label>
-        <Label control="AxisTriggerLeft">Rotate Left</Label>
-        <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonA">Grenade</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Grenade</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card draws the rotary scheme (Rotate Left/Right, Rotate Turret, bumper copies). jackal has no rotary port; that is jackalr's. Corrected here to the buttons it does have.</Note>
     </Game>
     <Game romName="jackalr" title="Jackal">
         <Label control="AxisLeftStick">Move</Label>
@@ -26360,15 +26356,6 @@
     </Game>
     <Game romName="tnk3" title="T.N.K III">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="ButtonA">Canon</Label>
-        <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonX">Machine Gun</Label>
-        <Label control="ButtonStart">Start</Label>
-        <Label control="ButtonBack">Insert Coin</Label>
-        <Note>Card also underlines "tnk3b (No Rotary)" as a second applicable rom name alongside "tnk3", with this same no-rotate control scheme. But tnk3b's own dedicated card (tnk3b.jpg) shows a full rotate control scheme (Rotate Left/Right on LT/RT, Rotate Turret on the right stick) — a cross-image contradiction, not resolved here.</Note>
-    </Game>
-    <Game romName="tnk3b" title="T.N.K III">
-        <Label control="AxisLeftStick">Move</Label>
         <Label control="AxisRightStick">Rotate Turret</Label>
         <Label control="AxisTriggerLeft">Rotate Left</Label>
         <Label control="AxisTriggerRight">Rotate Right</Label>
@@ -26379,7 +26366,16 @@
         <Label control="ButtonX">Machine Gun</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
-        <Note>Card underlines both "tnk3" and "tnk3b" together, with this full rotate control scheme. But the separate tnk3.jpg card, titled "tnk3b (No Rotary)" alongside "tnk3", shows no rotate controls at all — a cross-image contradiction, not resolved here.</Note>
+        <Note>The card names "tnk3" and "tnk3b (No Rotary)" together on one picture with the rotary scheme; its rotary controls are the tnk3 set, since tnk3 is the rotary version and tnk3b has no rotary port. tnk3b's own card shows no rotary controls.</Note>
+    </Game>
+    <Game romName="tnk3b" title="T.N.K III">
+        <Label control="AxisLeftStick">Move</Label>
+        <Label control="ButtonA">Canon</Label>
+        <Label control="ButtonDpad">Move</Label>
+        <Label control="ButtonX">Machine Gun</Label>
+        <Label control="ButtonStart">Start</Label>
+        <Label control="ButtonBack">Insert Coin</Label>
+        <Note>tnk3b is the no-rotary version. The card shows no rotary controls, which fits: tnk3b has no positional port. The two cards were transcribed under each other's rom name and are now swapped.</Note>
     </Game>
     <Game romName="tnzs" title="The NewZealand Story">
         <Label control="AxisLeftStick">Move</Label>
