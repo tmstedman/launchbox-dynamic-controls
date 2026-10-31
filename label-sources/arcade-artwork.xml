@@ -26531,16 +26531,12 @@
     </Game>
     <Game romName="topgunr" title="Top Gunner">
         <Label control="AxisLeftStick">Move</Label>
-        <Label control="AxisRightStick">Rotate Turret</Label>
-        <Label control="AxisTriggerLeft">Rotate Left</Label>
-        <Label control="AxisTriggerRight">Rotate Right</Label>
         <Label control="ButtonA">Grenade</Label>
         <Label control="ButtonDpad">Move</Label>
-        <Label control="ButtonLeftShoulder">Grenade</Label>
-        <Label control="ButtonRightShoulder">Shoot</Label>
         <Label control="ButtonX">Shoot</Label>
         <Label control="ButtonStart">Start</Label>
         <Label control="ButtonBack">Insert Coin</Label>
+        <Note>The card draws the rotary scheme (Rotate Left/Right, Rotate Turret, bumper copies), shared with topgunbl. topgunr has no rotary port; that is topgunbl's. Corrected here to the buttons it does have.</Note>
     </Game>
     <Game romName="tophuntr" title="Top Hunter: Roddy &amp; Cathy">
         <Label control="AxisLeftStick">Move</Label>
