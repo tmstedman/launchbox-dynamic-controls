@@ -24862,12 +24862,15 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game romName="vformula">
-        <Input name="P1_JOYSTICK_UP">VR1 / RED</Input>
-        <Input name="P1_JOYSTICK_DOWN">VR2 / BLUE</Input>
-        <Input name="P1_JOYSTICK_LEFT">VR3 / YELLOW</Input>
-        <Input name="P1_JOYSTICK_RIGHT">VR4 / GREEN</Input>
-        <Input name="P1_BUTTON1">Shift Up</Input>
-        <Input name="P1_BUTTON3">Shift Down</Input>
+        <Input name="P1_PEDAL">Accelerate</Input>
+        <Input name="P1_PEDAL2">Brake</Input>
+        <Input name="P1_PADDLE">Steering</Input>
+        <Input name="P1_BUTTON3">VR1 / RED</Input>
+        <Input name="P1_BUTTON4">VR2 / BLUE</Input>
+        <Input name="P1_BUTTON5">VR3 / YELLOW</Input>
+        <Input name="P1_BUTTON6">VR4 / GREEN</Input>
+        <Input name="P1_BUTTON7">Shift Down</Input>
+        <Input name="P1_BUTTON8">Shift Up</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>

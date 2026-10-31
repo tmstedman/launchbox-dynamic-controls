@@ -318,11 +318,6 @@ vanguard	AxisRightStickDown		Shoot Down	not-in-artwork-vocabulary	the author can
 vanguard	AxisRightStickLeft		Shoot Left	not-in-artwork-vocabulary	the author cannot draw this control on the card
 vanguard	AxisRightStickRight		Shoot Right	not-in-artwork-vocabulary	the author cannot draw this control on the card
 vanguard	AxisRightStickUp		Shoot Up	not-in-artwork-vocabulary	the author cannot draw this control on the card
-vformula	AxisLeftStick	Steering		not-in-artwork-vocabulary	the pipeline answers with parts the card has no word for
-vformula	AxisLeftStickDown		VR2 / BLUE	not-in-artwork-vocabulary	the author cannot draw this control on the card
-vformula	AxisLeftStickLeft		VR3 / YELLOW	not-in-artwork-vocabulary	the author cannot draw this control on the card
-vformula	AxisLeftStickRight		VR4 / GREEN	not-in-artwork-vocabulary	the author cannot draw this control on the card
-vformula	AxisLeftStickUp		VR1 / RED	not-in-artwork-vocabulary	the author cannot draw this control on the card
 victlap	ButtonB	Shift Down	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
 victlap	ButtonDpadDown	Menu DOWN	Shift Up / Menu DOWN	port-split-merged	merged into one label, gameplay role before system role
 victlap	ButtonDpadUp	Menu UP	Shift Down / Menu UP	port-split-merged	merged into one label, gameplay role before system role
