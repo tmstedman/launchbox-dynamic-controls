@@ -267,8 +267,12 @@ string TitleFor(SweepTarget target) =>
     : titles.TryGetValue(target.RomName, out string? title) ? title
     : target.RomName;
 
+// The rom name is only worth printing where it is a short name nobody would guess (an Arcade
+// set's "sf2ce"); everywhere else the title above it is already the rom name or a better one.
 static string SubtitleFor(SweepTarget target) =>
-    target.IsPlatformDefault ? "platform default" : $"{target.Platform} · {target.RomName}";
+    target.IsPlatformDefault ? "platform default"
+    : target.Platform == "Arcade" ? $"{target.Platform} · {target.RomName}"
+    : target.Platform;
 
 // romName -> title from a transcription in arcade-artwork.xml's shape. Read leniently: a missing
 // or unreadable file costs only the titles, never the render.
