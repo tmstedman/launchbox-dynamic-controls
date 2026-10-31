@@ -154,6 +154,14 @@ the rule the two sources were combined under, which entries rest on the wiki alo
 whose controls change by vehicle or view and so are only partly labelled until several control sets
 per game are supported.
 
+## `n64-manuals.md`
+
+Provenance for the Nintendo 64 pilot, an 18-game sample read off the printed manuals. Method follows
+`genesis-manuals.md`; the note records that StrategyWiki was not consulted, which entries are the
+reader's inference or wording rather than the manual's, the games whose controls change by vehicle
+and so are only partly labelled until several control sets per game are supported, and the games
+whose manuals print no controls page and so have few labels or none.
+
 ## Generated files live elsewhere
 
 Everything here is hand-edited and tracked. What `tools/LabelDump` produces goes to

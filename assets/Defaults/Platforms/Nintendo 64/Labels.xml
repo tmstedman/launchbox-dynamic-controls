@@ -1,10 +1,217 @@
 <Labels>
-    <Game romName="Super Mario 64">
-        <Input name="B">Punch</Input>
-        <Input name="A">Jump</Input>
-        <Input name="Z">Crouch</Input>
+    <Defaults>
+        <Input name="Start">Pause</Input>
+    </Defaults>
+
+    <Game launchBoxId="160" romName="007 - GoldenEye">
         <Input name="Stick-Any">Move</Input>
-        <Input name="C-Any">Camera</Input>
-        <Input name="Start">Start</Input>
+        <Input name="L">Aim</Input>
+        <Input name="R">Aim</Input>
+        <Input name="Z">Use Weapon</Input>
+        <Input name="A">Change Weapon</Input>
+        <Input name="B">Reload</Input>
+        <Input name="C-Up">Look Down</Input>
+        <Input name="C-Down">Look Up</Input>
+        <Input name="C-Left">Side Step Left</Input>
+        <Input name="C-Right">Side Step Right</Input>
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Look Down</Input>
+        <Input name="Dpad-Left">Side Step Left</Input>
+        <Input name="Dpad-Right">Side Step Right</Input>
     </Game>
+
+    <Game launchBoxId="237" romName="1080 Snowboarding">
+        <Input name="A">Jump</Input>
+        <Input name="C-Up">Change Camera Angle</Input>
+        <Input name="C-Down">See Behind Rider</Input>
+    </Game>
+
+    <Game launchBoxId="162" romName="Banjo-Kazooie">
+        <Input name="Stick-Any">Run, Walk, Tiptoe</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Attack</Input>
+        <Input name="Z">Crouch</Input>
+        <Input name="R">Center Camera</Input>
+        <Input name="C-Up">Camera Zoom</Input>
+        <Input name="C-Down">Camera Zoom</Input>
+        <Input name="C-Left">Rotate Camera</Input>
+        <Input name="C-Right">Rotate Camera</Input>
+    </Game>
+
+    <Game launchBoxId="249" romName="Conker's Bad Fur Day">
+        <Input name="Stick-Any">Run, Walk Or Tiptoe</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Attack</Input>
+        <Input name="Z">Crouch</Input>
+        <Input name="L">Skip Cut Scene</Input>
+        <Input name="C-Left">Rotate Camera</Input>
+        <Input name="C-Right">Rotate Camera</Input>
+        <Input name="C-Up">Camera Zoom</Input>
+        <Input name="C-Down">Align Camera</Input>
+    </Game>
+
+    <Game launchBoxId="10836" romName="F-Zero X">
+        <Input name="L">Time Difference</Input>
+    </Game>
+
+    <Game launchBoxId="262" romName="Kirby 64 - The Crystal Shards">
+        <Input name="A">Jump/Swim/Fly</Input>
+        <Input name="B">Inhale</Input>
+        <Input name="L">Lift</Input>
+        <Input name="R">Lift</Input>
+        <Input name="C-Any">Lift</Input>
+        <Input name="Dpad-Left">Walk</Input>
+        <Input name="Dpad-Right">Walk</Input>
+        <Input name="Dpad-Down">Duck</Input>
+    </Game>
+
+    <Game launchBoxId="175" romName="Legend of Zelda, The - Majora's Mask">
+        <Input name="Stick-Any">Move</Input>
+        <Input name="Start">Subscreens</Input>
+        <Input name="L">Show Or Hide Map</Input>
+        <Input name="R">Raise Shield</Input>
+        <Input name="Z">Z-Targeting</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Swing Sword</Input>
+        <Input name="C-Up">Change Perspective</Input>
+        <Input name="C-Left">Use Items</Input>
+        <Input name="C-Down">Use Items</Input>
+        <Input name="C-Right">Use Items</Input>
+    </Game>
+
+    <Game launchBoxId="161" romName="Legend of Zelda, The - Ocarina of Time">
+        <Input name="Stick-Any">Move</Input>
+        <Input name="Start">Subscreen</Input>
+        <Input name="Z">Z Targeting</Input>
+        <Input name="R">Raise Shield</Input>
+        <Input name="A">Action</Input>
+        <Input name="B">Swing Sword</Input>
+        <Input name="C-Up">Change Viewpoint</Input>
+        <Input name="C-Left">Use Item</Input>
+        <Input name="C-Down">Use Item</Input>
+        <Input name="C-Right">Use Item</Input>
+    </Game>
+
+    <Game launchBoxId="42" romName="Mario Party">
+        <Input name="A">Hit Dice Blocks</Input>
+        <Input name="B">Cancel</Input>
+        <Input name="R">Map View</Input>
+        <Input name="Stick-Any">Move Cursor</Input>
+    </Game>
+
+    <Game launchBoxId="1149" romName="Mortal Kombat Trilogy">
+        <Input name="A">Low Punch</Input>
+        <Input name="B">High Punch</Input>
+        <Input name="C-Up">High Kick</Input>
+        <Input name="C-Right">Low Kick</Input>
+        <Input name="C-Down">Run</Input>
+        <Input name="L">Run</Input>
+        <Input name="R">Block</Input>
+        <Input name="Dpad-Up">Jump</Input>
+        <Input name="Dpad-Down">Crouch</Input>
+        <Input name="Dpad-Left">Move Character</Input>
+        <Input name="Dpad-Right">Move Character</Input>
+    </Game>
+
+    <Game launchBoxId="141" romName="Paper Mario">
+        <Input name="Stick-Any">Walk/Run</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Hammer</Input>
+        <Input name="Z">Spin</Input>
+        <Input name="C-Up">Status Bar</Input>
+        <Input name="C-Left">Use Item</Input>
+        <Input name="C-Down">Use Party Member's Ability</Input>
+        <Input name="C-Right">Change Party Member</Input>
+    </Game>
+
+    <Game launchBoxId="173" romName="Perfect Dark">
+        <Input name="Stick-Any">Move</Input>
+        <Input name="L">Aim</Input>
+        <Input name="R">Aim</Input>
+        <Input name="Z">Fire</Input>
+        <Input name="A">Cycle Weapon</Input>
+        <Input name="B">Activate</Input>
+        <Input name="C-Up">Look Up</Input>
+        <Input name="C-Down">Look Down</Input>
+        <Input name="C-Left">Strafe Left</Input>
+        <Input name="C-Right">Strafe Right</Input>
+        <Input name="Dpad-Up">Look Up</Input>
+        <Input name="Dpad-Down">Look Down</Input>
+        <Input name="Dpad-Left">Strafe Left</Input>
+        <Input name="Dpad-Right">Strafe Right</Input>
+    </Game>
+
+    <Game launchBoxId="961" romName="Pilotwings 64">
+        <Input name="R">Switch Viewpoint</Input>
+    </Game>
+
+    <Game launchBoxId="4" romName="Star Fox 64">
+        <Input name="Stick-Any">Move Vehicle</Input>
+        <Input name="A">Fire Laser</Input>
+        <Input name="B">Smart Bomb</Input>
+        <Input name="Z">Tilt Left</Input>
+        <Input name="R">Tilt Right</Input>
+        <Input name="C-Up">Change Camera Angle</Input>
+        <Input name="C-Left">Turbo</Input>
+        <Input name="C-Right">Respond To ROB</Input>
+        <Input name="C-Down">Brake</Input>
+    </Game>
+
+    <Game launchBoxId="403" romName="Star Wars - Rogue Squadron">
+        <Input name="Stick-Any">Craft Movement</Input>
+        <Input name="A">Thrust</Input>
+        <Input name="B">Fire Blasters</Input>
+        <Input name="Z">Brakes</Input>
+        <Input name="L">Switch View</Input>
+        <Input name="R">Roll</Input>
+        <Input name="C-Up">Look Around</Input>
+        <Input name="C-Down">Fire Mode</Input>
+        <Input name="C-Left">Fire Secondary</Input>
+        <Input name="C-Right">Special</Input>
+        <Input name="Dpad-Up">Cockpit View</Input>
+        <Input name="Dpad-Right">Close Outside View</Input>
+        <Input name="Dpad-Down">Standard View</Input>
+        <Input name="Dpad-Left">Drop Camera</Input>
+    </Game>
+
+    <Game launchBoxId="216" romName="Super Mario 64">
+        <Input name="Stick-Any">Move</Input>
+        <Input name="A">Jump</Input>
+        <Input name="B">Punch</Input>
+        <Input name="Z">Crouch</Input>
+        <Input name="C-Up">Get Close</Input>
+        <Input name="C-Down">Pull Away</Input>
+        <Input name="C-Left">Circle Left</Input>
+        <Input name="C-Right">Circle Right</Input>
+    </Game>
+
+    <Game launchBoxId="68" romName="Turok - Dinosaur Hunter">
+        <Input name="C-Up">Forwards</Input>
+        <Input name="C-Down">Backwards</Input>
+        <Input name="C-Left">Strafe Left</Input>
+        <Input name="C-Right">Strafe Right</Input>
+        <Input name="Stick-Up">Look/Aim Downwards</Input>
+        <Input name="Stick-Down">Look/Aim Upwards</Input>
+        <Input name="Stick-Left">Look/Face Left</Input>
+        <Input name="Stick-Right">Look/Face Right</Input>
+        <Input name="Z">Fire Weapon</Input>
+        <Input name="R">Jump</Input>
+        <Input name="L">Toggle Map On/Off</Input>
+        <Input name="A">Weapon Select</Input>
+        <Input name="B">Weapon Select</Input>
+        <Input name="Dpad-Any">Toggle Run/Walk</Input>
+    </Game>
+
+    <Game launchBoxId="411" romName="Wave Race 64">
+        <Input name="Stick-Left">Handling</Input>
+        <Input name="Stick-Right">Handling</Input>
+        <Input name="Stick-Up">Shift Center Of Gravity</Input>
+        <Input name="Stick-Down">Shift Center Of Gravity</Input>
+        <Input name="A">Throttle</Input>
+        <Input name="Z">Throttle</Input>
+        <Input name="B">Dampen The Waves</Input>
+        <Input name="R">Slide</Input>
+        <Input name="C-Any">Change Camera Angle</Input>
+    </Game>
+
 </Labels>
