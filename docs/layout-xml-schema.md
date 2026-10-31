@@ -88,6 +88,8 @@ Which of the two is drawn depends on the input's mapping state, so styled art do
 | A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic |
 | No platform button drives it | The generic — **unless** the Input sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
 
+A declared `<Whole>` that two or more platform buttons drive between them tries one more file first, `{platform}/{those buttons, sorted by name and space-joined}.png` (`Nintendo 64/C-Left C-Right.png` for the C cluster's horizontal pair), and keeps the rows above when it isn't there.
+
 This lets templates supply platform-aware artwork (e.g. Genesis `A`/`B`/`C` art on an Xbox chassis) without forking the template, and without a platform's art leaking onto buttons that platform doesn't have.
 
 ## Element reference

@@ -194,17 +194,69 @@ public class Nintendo64EndToEndTests
         overlay.RenderedImages.Where(i => i.InputName == "AxisRightStickLeft").ShouldBeEmpty();
         overlay.RenderedImages.Where(i => i.InputName == "AxisRightStickRight").ShouldBeEmpty();
 
-        // and it draws the N64's own C-Any artwork rather than the generic axis glyph: the whole
-        // pair is covered by one platform button, so the axis classifies as MappedDefault against
-        // it and the platform's picture wins, as it does for every other mapped input. That is
-        // the point of naming the axis -- when the pair rendered as one of its own directions
-        // instead, the button covering it was C-Left, and the row showed a single left arrow
-        // while standing for both directions.
+        // and it draws the N64's own picture of the two buttons driving the pair, named for them
+        // in alphabetical order. C-Any also covers the pair, being the control standing for
+        // all four, and used to win: a four-circle picture beside a row that stands for two.
+        // Naming the axis is what keeps the row from being drawn as one of its own directions,
+        // when the button covering it was C-Left and the row showed a single left arrow.
         overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickX").Source
-            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Any.png"));
+            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Left C-Right.png"));
 
         // and the rows that remain read horizontal pair, then the vertical directions
         overlay.ShouldStackInOrder(
             "AxisRightStickX", "AxisRightStickUp", "AxisRightStickDown");
+    }
+
+    /// <summary>
+    /// The vertical pair, the counterpart of <see cref="Nintendo64_AgreeingCDirectionPair_MergesOnTheRightStick"/>:
+    /// Up and Down agree and Left and Right do not, so the up-down row draws the picture named for
+    /// the two buttons driving it, named in alphabetical order (Down before Up), rather than C-Any's.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_AgreeingCVerticalPair_DrawsTheUpDownImage()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "CVerticalPairTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabel("AxisRightStickY", "Look");
+        overlay.ShouldHaveLabel("AxisRightStickLeft", "Strafe Left");
+        overlay.ShouldHaveLabel("AxisRightStickRight", "Strafe Right");
+        overlay.RenderedImages.Where(i => i.InputName is "AxisRightStickUp" or "AxisRightStickDown").ShouldBeEmpty();
+
+        overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickY").Source
+            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Down C-Up.png"));
+    }
+
+    /// <summary>
+    /// The horizontal pair with C-Left and C-Right swapped by the game's own mapping. The two
+    /// buttons behind the pair are the same, so it draws the same picture as when they are not
+    /// swapped; the lookup name is the sorted set of buttons, not which direction each one
+    /// drives this game.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_SwappedCLeftAndRight_DrawTheSamePairImage()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "CSwapPairTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabel("AxisRightStickX", "Strafe");
+        overlay.RenderedImages.Single(i => i.InputName == "AxisRightStickX").Source
+            .ShouldEndWith(Path.Combine("Nintendo 64", "C-Left C-Right.png"));
     }
 }

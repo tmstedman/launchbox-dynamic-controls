@@ -21,4 +21,19 @@
     <Input name="C-Left">Strafe</Input>
     <Input name="C-Right">Strafe</Input>
   </Game>
+  <!-- The vertical counterpart: Up and Down agree, Left and Right do not. -->
+  <Game romName="CVerticalPairTest">
+    <Input name="C-Up">Look</Input>
+    <Input name="C-Down">Look</Input>
+    <Input name="C-Left">Strafe Left</Input>
+    <Input name="C-Right">Strafe Right</Input>
+  </Game>
+  <!-- CDirectionPairTest with C-Left and C-Right swapped in ControllerOverrides: each now drives
+       the other's direction, so the same two buttons stand behind the horizontal pair. -->
+  <Game romName="CSwapPairTest">
+    <Input name="C-Up">Look Up</Input>
+    <Input name="C-Down">Look Down</Input>
+    <Input name="C-Left">Strafe</Input>
+    <Input name="C-Right">Strafe</Input>
+  </Game>
 </Labels>
