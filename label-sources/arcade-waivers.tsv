@@ -340,3 +340,5 @@ checkman	ButtonStart	Start	Tiles Left / 1P Start	port-split-merged	merged into o
 checkman	ButtonA	Tiles Right	Tiles Right / 2P Start	port-split-merged	merged into one label, gameplay role before system role
 darkadv	ButtonRightShoulder	Map	Map / Start	port-split-merged	merged into one label, gameplay role before system role
 darkadv	ButtonStart	Start	Map / Start	port-split-merged	merged into one label, gameplay role before system role
+tokyowar	ButtonY	View Change	View Change / Start	port-split-merged	merged into one label
+tokyowar	ButtonStart	Start	View Change / Start	port-split-merged	merged into one label

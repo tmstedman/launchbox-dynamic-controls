@@ -6478,7 +6478,8 @@
         <Input name="P1_JOYSTICK_DOWN">Pitch Right</Input>
         <Input name="P1_JOYSTICK_LEFT">Pitch Fast</Input>
         <Input name="P1_JOYSTICK_RIGHT">Pitch Right</Input>
-        <Input name="P1_BUTTON1">Outfield Right</Input>
+        <Input name="P1_BUTTON2">Outfield Left</Input>
+        <Input name="P1_BUTTON3">Outfield Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -10470,6 +10471,7 @@
     <Game launchBoxId="28785" romName="invasnab">
         <Input name="P1_LIGHTGUN_X">Move Crosshair</Input>
         <Input name="P1_LIGHTGUN_Y">Move Crosshair</Input>
+        <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23504,9 +23506,10 @@
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="40107" romName="tinstar">
-        <Input name="P1_JOYSTICKLEFT">Move</Input>
-        <Input name="P1_JOYSTICKRIGHT">Aim</Input>
+        <Input name="P1_JOYSTICKLEFT">Aim</Input>
+        <Input name="P1_JOYSTICKRIGHT">Move</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
+        <Input name="P1_BUTTON2">Jump</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23648,6 +23651,9 @@
         <Input name="P1_JOYSTICK">Move</Input>
         <Input name="P1_BUTTON1">Canon</Input>
         <Input name="P1_BUTTON2">Machine Gun</Input>
+        <Input name="P1_POSITIONAL">Rotate Turret</Input>
+        <Input name="P1_POSITIONAL.dec">Rotate Left</Input>
+        <Input name="P1_POSITIONAL.inc">Rotate Right</Input>
         <Input name="START1">Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
@@ -23713,7 +23719,9 @@
     </Game>
     <Game launchBoxId="40178" romName="tokyowar">
         <Input name="P1_PADDLE">Move</Input>
-        <Input name="START1">View Change</Input>
+        <Input name="P1_BUTTON4">Left Gun</Input>
+        <Input name="P1_BUTTON5">Right Gun</Input>
+        <Input name="START1">View Change / Start</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="155541" romName="tomagic">
@@ -23779,6 +23787,7 @@
     <Game launchBoxId="208490" romName="topgunnr">
         <Input name="P1_AD_STICK_X">Move</Input>
         <Input name="P1_AD_STICK_Y">Move</Input>
+        <Input name="P1_PADDLE">Horizon View</Input>
         <Input name="P1_BUTTON1">Shoot</Input>
         <Input name="P1_BUTTON2">Shield</Input>
         <Input name="START1">Start</Input>
@@ -23850,7 +23859,8 @@
         <Input name="P1_JOYSTICK_DOWN">Pitch Right</Input>
         <Input name="P1_JOYSTICK_LEFT">Pitch Fast</Input>
         <Input name="P1_JOYSTICK_RIGHT">Pitch Right</Input>
-        <Input name="P1_BUTTON1">Outfield Right</Input>
+        <Input name="P1_BUTTON2">Outfield Left</Input>
+        <Input name="P1_BUTTON3">Outfield Right</Input>
         <Input name="COIN1">Insert Coin</Input>
     </Game>
     <Game launchBoxId="40213" romName="torus">

@@ -33,7 +33,6 @@ rushatck	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so 
 soniccar	ButtonDpad	Steering	Signal Left or Right	port-split	one port drives two controls the card labels differently
 thrilld	ButtonLeftShoulder	Shift Down	Shift Up	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
 thrilld	ButtonRightShoulder	Shift Up	Shift Down	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
-tokyowar	ButtonStart	Start	View Change	port-split	one port drives two controls the card labels differently
 trojan	ButtonA	Jump	Move	port-split-both-gameplay	both roles are gameplay, so no merged wording is truthful
 truckk	ButtonStart	Start	Horn	port-split	one port drives two controls the card labels differently
 windheat	ButtonLeftShoulder	Shift Down	Shift Up	port-split	one port drives two controls the card labels differently
