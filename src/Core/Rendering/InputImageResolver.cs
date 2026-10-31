@@ -47,6 +47,11 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
         string path = combined?.Path ?? SelectImagePath(state, image, generic, styled, mapping, template);
         if (combined != null) LogCombined(input.Name, combined.Value.Buttons, path);
         else LogResolution(state, input.Name, path);
+        // Only the generic can be a placeholder: a styled path is found by existing. Probes for a
+        // platform file that isn't there come back with a missing generic too, which is why the
+        // check lives here, on the path actually chosen, rather than in the resolver.
+        if (path == generic && !resolved.GenericExists)
+            _logger.Error($"Image not found: {path}");
         return path;
     }
 

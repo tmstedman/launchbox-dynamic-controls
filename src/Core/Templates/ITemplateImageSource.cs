@@ -22,7 +22,11 @@ public interface ITemplateImageSource
 /// Resolved generic and platform-styled paths for a template image. The styled path is the
 /// most-specific existing file (Controller → Platform priority); null when no platform-specific
 /// variant exists. The generic path is always set — either the template-local file, the
-/// shared-root fallback, or a placeholder template-local path when neither exists on disk.
+/// shared-root fallback, or a placeholder template-local path when neither exists on disk —
+/// <paramref name="GenericExists"/> says which, since the path alone doesn't.
 /// </summary>
 [ExcludeFromCodeCoverage]
-public record ResolvedImagePaths(string Generic, string? Styled);
+public record ResolvedImagePaths(string Generic, string? Styled)
+{
+    public bool GenericExists { get; init; } = true;
+}

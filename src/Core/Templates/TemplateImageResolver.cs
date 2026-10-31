@@ -98,7 +98,7 @@ public class TemplateImageResolver(ILogger logger, IFileSystem fs, IImageHeader 
             : sharedExists ? sharedFallbackPath
             : templateLocalPath;
 
-        ResolvedImagePaths result = new(genericPath, styledPath);
+        ResolvedImagePaths result = new(genericPath, styledPath) { GenericExists = templateLocalExists || sharedExists };
         _cache[key] = result;
         return result;
     }

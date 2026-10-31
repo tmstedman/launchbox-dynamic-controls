@@ -183,7 +183,7 @@ public class InputImageResolverTests
         _imageSource.Resolve("AxisLeftStickX.png", Platform, Controller)
             .Returns(new ResolvedImagePaths("AxisLeftStickX.png", null));
         _imageSource.Resolve("C-Left C-Right.png", Platform, Controller)
-            .Returns(new ResolvedImagePaths("C-Left C-Right.png", null));
+            .Returns(new ResolvedImagePaths("C-Left C-Right.png", null) { GenericExists = false });
         _imageSource.Resolve("C-Any.png", Platform, Controller)
             .Returns(new ResolvedImagePaths("C-Any.png", "platform/C-Any.png"));
 
@@ -356,6 +356,40 @@ public class InputImageResolverTests
 
         path.ShouldBe("platform/C-Any.png");
         _imageSource.DidNotReceive().Resolve("C-Left C-Right.png", Platform, Controller);
+    }
+
+    // ---- an image the template doesn't have ----
+
+    [Fact]
+    public void Resolve_GenericIsAPlaceholder_LogsAnError()
+    {
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png");
+        _imageSource.Resolve("ButtonA.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("t/ButtonA.png", null) { GenericExists = false });
+
+        string path = _underTest.Resolve(image, Input("ButtonA"), Mapping(), TestTemplate());
+
+        path.ShouldBe("t/ButtonA.png");
+        _logger.Received(1).Error("Image not found: t/ButtonA.png");
+    }
+
+    [Fact]
+    public void Resolve_ChosenImageIsPlatformStyled_LogsNothingEvenIfTheGenericIsAbsent()
+    {
+        // A platform file with no generic counterpart is fine; only the image drawn matters.
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png");
+        _imageSource.Resolve("ButtonA.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("t/ButtonA.png", "platform/ButtonA.png") { GenericExists = false });
+        _imageSource.Resolve("B.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("t/B.png", "platform/B.png") { GenericExists = false });
+        ResolvedMapping mapping = Mapping(
+            inputToButton: new() { ["ButtonA"] = "B" },
+            naturalButtonToInput: new() { ["B"] = ["ButtonA"] });
+
+        string path = _underTest.Resolve(image, Input("ButtonA"), mapping, TestTemplate());
+
+        path.ShouldBe("platform/B.png");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
     [Fact]
