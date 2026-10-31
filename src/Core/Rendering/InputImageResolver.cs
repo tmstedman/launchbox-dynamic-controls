@@ -34,16 +34,55 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
         ResolvedMapping mapping,
         Template template)
     {
-        MappingState state = Classify(input.Name, mapping, template.Layout.Wholes.GetValueOrDefault(input.Name, []));
+        IReadOnlyList<string> parts = template.Layout.Wholes.GetValueOrDefault(input.Name, []);
+        MappingState state = Classify(input.Name, mapping, parts);
 
         string imageFile = image.UseImageFile ?? image.ImageFile;
         ResolvedImagePaths resolved = template.ImageSource.Resolve(imageFile, mapping.Platform, mapping.Controller);
         string generic = resolved.Generic;
         string? styled = resolved.Styled;
 
-        string path = SelectImagePath(state, image, generic, styled, mapping, template);
-        LogResolution(state, input.Name, path);
+        (string Buttons, string Path)? combined =
+            mapping.InputToButton.ContainsKey(input.Name) ? null : CombinedImage(parts, mapping, template);
+        string path = combined?.Path ?? SelectImagePath(state, image, generic, styled, mapping, template);
+        if (combined != null) LogCombined(input.Name, combined.Value.Buttons, path);
+        else LogResolution(state, input.Name, path);
         return path;
+    }
+
+    /// <summary>
+    /// The platform's picture of the buttons that drive <paramref name="parts"/> together, found
+    /// as <c>{buttons, space-joined}.png</c> in the platform folder — Nintendo 64's
+    /// <c>C-Left C-Right.png</c> for the two horizontal directions of the C cluster. Null
+    /// when the parts are driven by fewer than two buttons (one button is the cover's business,
+    /// below), when any part is driven by none, or when no such file exists. Carries the button
+    /// names with the path, since the classification the other log line reports is not what chose it.
+    ///
+    /// <para>The name is a fact about the set of buttons, not about which one currently drives
+    /// which part, so the buttons are sorted by name. Swapping C-Left and C-Right so each drives
+    /// the other's direction leaves the same two buttons and so the same picture. The platform's
+    /// own mapping can't supply an order that survives that: a per-game or RetroArch remap
+    /// <em>is</em> the mapping's natural state, so ordering by where each button naturally sits
+    /// would follow the swap.</para>
+    ///
+    /// <para>Tried before the covering button because that one accepts a wider control: C-Any
+    /// reaches all four C directions, so it covers the two horizontal ones too and would draw its
+    /// four-circle picture for a pair.</para>
+    /// </summary>
+    private static (string Buttons, string Path)? CombinedImage(
+        IReadOnlyList<string> parts, ResolvedMapping mapping, Template template)
+    {
+        List<string> buttons = [];
+        foreach (string part in parts)
+        {
+            if (!mapping.InputToButton.TryGetValue(part, out string? button)) return null;
+            if (!buttons.Contains(button)) buttons.Add(button);
+        }
+        if (buttons.Count < 2) return null;
+
+        string name = string.Join(' ', buttons.OrderBy(b => b, StringComparer.Ordinal).Select(b => b.SafeFileName()));
+        string? path = template.ImageSource.Resolve($"{name}.png", mapping.Platform, mapping.Controller).Styled;
+        return path == null ? null : (name, path);
     }
 
     internal string SelectImagePath(
@@ -146,6 +185,12 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     /// </summary>
     private static string? RemappedPlatformImage(string platformButton, Template template, ResolvedMapping mapping) =>
         template.ImageSource.Resolve($"{platformButton}.png", mapping.Platform, mapping.Controller).Styled;
+
+    private void LogCombined(string inputName, string buttons, string path)
+    {
+        _logger.Debug($"Button image: {inputName} <- {buttons} (the buttons driving its parts)");
+        _logger.Debug($"Button image resolved: {path}");
+    }
 
     private void LogResolution(MappingState state, string inputName, string path)
     {
