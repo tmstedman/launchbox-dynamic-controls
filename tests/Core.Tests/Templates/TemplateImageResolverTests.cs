@@ -139,6 +139,8 @@ public class TemplateImageResolverTests
 
         // then the shared-root path is returned as generic
         paths.Generic.ShouldBe(shared);
+        // and is a real file, not a placeholder
+        paths.GenericExists.ShouldBeTrue();
     }
 
     [Fact]
