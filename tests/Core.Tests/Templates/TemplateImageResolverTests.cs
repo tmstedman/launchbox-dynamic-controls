@@ -153,6 +153,19 @@ public class TemplateImageResolverTests
         // then the template-local path is returned anyway so callers see a deterministic path
         paths.Generic.ShouldBe(Path.Combine(TemplatesDir, "x", "ButtonA.png"));
         paths.Styled.ShouldBeNull();
+        // and says it is a placeholder, which the path alone doesn't
+        paths.GenericExists.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void ResolveImagePath_TemplateLocalExists_GenericExists()
+    {
+        string local = Path.Combine(TemplatesDir, "x", "ButtonA.png");
+        _fs.FileExists(local).Returns(true);
+
+        ResolvedImagePaths paths = _underTest.ResolveImagePath("x", "ButtonA.png", platform: null);
+
+        paths.GenericExists.ShouldBeTrue();
     }
 
     // --- Caching ---
