@@ -151,10 +151,11 @@ public class ArcadeEndToEndTests
                 new(Input: "AxisTriggerRight",    Src: "Line_AxisTriggerRight.png",                              Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "ButtonRightShoulder.png", W: 64,  H: 42,  Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonRightShoulder", Src: "Line_ButtonRightShoulder.png",                              Opacity: 0.3, BlurRadius: 8.0),
-                // group-level decorations — both stick multi-line overlays appear; no LineDpad_Multi
+                // group-level decorations — the left stick's fanned-out line, and the right stick's
+                // single line, which its directions stack down from; no LineDpad_Multi
                 new(Input: null,                  Src: "Line_MetaButtons.png"),
                 new(Input: null,                  Src: "Line_AxisLeftStick_Multi.png"),
-                new(Input: null,                  Src: "Line_AxisRightStick_Multi.png"));
+                new(Input: null,                  Src: "Line_AxisRightStick.png"));
                 #pragma warning restore format
 
         overlay.ShouldHaveLabels(
