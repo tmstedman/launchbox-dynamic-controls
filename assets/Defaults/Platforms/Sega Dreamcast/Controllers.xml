@@ -23,17 +23,12 @@
         <Mapping name="L-Right" input="AxisLeftStickRight" />
     </Controller>
 
-    <!-- Full Controller = Panther DC Controller (2 analog sticks + all buttons).
-         Inherits the base button set from Arcade Stick and adds C/Z/D plus both analog sticks. -->
-    <Controller name="Full Controller" inheritFrom="Arcade Stick">
+    <!-- Panther Flightstick (2 analog sticks + all buttons).
+         Inherits the base buttons and left analog stick from Pad and adds C/Z/D plus the right analog stick. -->
+    <Controller name="Panther Flightstick" inheritFrom="Pad">
         <Mapping name="C" input="ButtonLeftShoulder" />
         <Mapping name="Z" input="ButtonRightShoulder" />
         <Mapping name="D" input="ButtonBack" />
-        <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
-        <Mapping name="L-Up" input="AxisLeftStickUp" />
-        <Mapping name="L-Down" input="AxisLeftStickDown" />
-        <Mapping name="L-Left" input="AxisLeftStickLeft" />
-        <Mapping name="L-Right" input="AxisLeftStickRight" />
         <Control name="R-Any" mappings="R-Up R-Down R-Left R-Right" />
         <Mapping name="R-Up" input="AxisRightStickUp" />
         <Mapping name="R-Down" input="AxisRightStickDown" />

@@ -27,8 +27,8 @@
         <Controller name="Densha de Go!">
             <Retropad id="2305" />
         </Controller>
-        <!-- Full Controller = Panther DC Controller (2 analog sticks + all buttons) -->
-        <Controller name="Full Controller">
+        <!-- Panther Flightstick (2 analog sticks + all buttons) -->
+        <Controller name="Panther Flightstick">
             <Retropad id="2561" />
         </Controller>
     </Controllers>
