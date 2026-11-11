@@ -85,9 +85,9 @@
             <Overlay src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Label x="-19" y="+22" align="right" />
         </Input>
-        <Input name="ButtonRightStick" style="show-if-label" x="1249" y="658" height="44" width="44">
-            <Overlay src="Line_ButtonRightStick.png" x="-298" y="-108" />
-            <Label x="+60" y="+22" />
+        <Input name="ButtonRightStick" style="show-if-label" x="877" y="740" height="44" width="44">
+            <Overlay src="Line_AxisRightStick.png" x="+21" y="-170" />
+            <Label x="+22" y="+68" align="center" />
         </Input>
         <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
         <OneOf>
@@ -177,18 +177,18 @@
             <!-- All four directions individually agree: render the single stick icon. See
                  AxisLeftStick above for why this needs both the outer and inner Condition. -->
             <Condition inputs="AxisRightStick" match="agree">
-                <Input name="AxisRightStick" style="show-if-label" x="867" y="740" height="64" width="64">
-                    <Overlay src="Line_AxisRightStick.png" x="+31" y="-170" />
-                    <Label x="+32" y="+88" align="center" />
+                <Input name="AxisRightStick" style="show-if-label" x="1229" y="648" height="64" width="64">
+                    <Overlay src="Line_ButtonRightStick.png" x="-278" y="-98" />
+                    <Label x="+80" y="+32" />
                 </Input>
             </Condition>
             <!-- Two or three directions share one label, the rest genuinely blank: same
                  mechanism as AxisLeftStick above, but this Group has no vAlign (defaults to
-                 "top"), and its y="+15" is its own manual nudge on top of the computed center. -->
+                 "top"), and its y="+17" is its own manual nudge on top of the computed center. -->
             <Condition inputs="AxisRightStick" atLeast="2" match="agree">
-                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
-                    <Label inputs="AxisRightStick" x="+52" y="+15" fontSize="24" />
+                <Overlay src="Line_ButtonRightStick.png" x="951" y="550" />
+                <Container x="1254" y="663" gap="45" collapse="true" style="small-label-vacate">
+                    <Label inputs="AxisRightStick" x="+52" y="+17" fontSize="24" />
                     <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
                     <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34" />
                     <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34" />
@@ -202,35 +202,35 @@
                  other by being listed first, and the bare Container in each is the default that
                  draws when the pair does not agree. -->
             <Condition inputs="AxisRightStick" atLeast="1" match="label">
-                <Overlay src="Line_AxisRightStick_Multi.png" x="898" y="575" />
-                <Container x="882" y="772" gap="45" collapse="true" style="small-label-vacate">
+                <Overlay src="Line_ButtonRightStick.png" x="951" y="550" />
+                <Container x="1254" y="663" gap="45" collapse="true" style="small-label-vacate">
                     <OneOf>
                         <Condition inputs="AxisRightStickX" match="agree">
                             <Input name="AxisRightStickX" useImage="AxisLeftStickX" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                         </Condition>
                         <Container gap="45" collapse="true" style="small-label-vacate">
                             <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                             <Input name="AxisRightStickRight" useImage="AxisLeftStickRight" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                         </Container>
                     </OneOf>
                     <OneOf>
                         <Condition inputs="AxisRightStickY" match="agree">
                             <Input name="AxisRightStickY" useImage="AxisLeftStickY" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                         </Condition>
                         <Container gap="45" collapse="true" style="small-label-vacate">
                             <Input name="AxisRightStickUp" useImage="AxisLeftStickUp" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                             <Input name="AxisRightStickDown" useImage="AxisLeftStickDown" height="34" width="34">
-                                <Label x="+52" y="+15" />
+                                <Label x="+52" y="+17" />
                             </Input>
                         </Container>
                     </OneOf>
