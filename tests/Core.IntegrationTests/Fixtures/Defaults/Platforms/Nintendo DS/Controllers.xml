@@ -14,10 +14,10 @@
         <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
         <!-- Emulator specific controls -->
-        <Mapping name="AxisTriggerLeft" input="AxisTriggerLeft" />
-        <Mapping name="AxisTriggerRight" input="AxisTriggerRight" />
-        <Mapping name="ButtonLeftStick" input="ButtonLeftStick" />
-        <Mapping name="ButtonRightStick" input="ButtonRightStick" />
+        <Mapping name="MicNoise" input="AxisTriggerLeft" />
+        <Mapping name="SwapScreens" input="AxisTriggerRight" />
+        <Mapping name="CloseLid" input="ButtonLeftStick" />
+        <Mapping name="ToggleTouchStick" input="ButtonRightStick" />
         <Control name="MoveTouchStick" mappings="MoveTouchStick-Up MoveTouchStick-Down MoveTouchStick-Left MoveTouchStick-Right" />
         <Mapping name="MoveTouchStick-Up" input="AxisRightStickUp" />
         <Mapping name="MoveTouchStick-Down" input="AxisRightStickDown" />

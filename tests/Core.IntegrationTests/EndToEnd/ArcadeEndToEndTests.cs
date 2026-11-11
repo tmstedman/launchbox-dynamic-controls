@@ -96,7 +96,8 @@ public class ArcadeEndToEndTests
 
     /// <summary>
     /// Dual 8-way joystick (JOYSTICKLEFT=Move, JOYSTICKRIGHT=Fire): both sticks fully active with
-    /// directional labels, the right-stick directions reusing left-stick images via useImage.
+    /// directional labels, the right-stick directions reusing left-stick images via useImage. The
+    /// game labels no button, but its own right-stick labels still draw the face-button column, dim.
     /// </summary>
     [Fact]
     public void Arcade_Robotron()
@@ -116,11 +117,21 @@ public class ArcadeEndToEndTests
         t.ShouldHaveBaseImage("BaseImage.png", width: 1600, height: 1000);
         t.ShouldHaveImages(
                 #pragma warning disable format
-                // no BUTTON labels — face buttons render once each (top-level only, no Stack/line decorations)
+                // no BUTTON labels — face buttons dim on the controller
                 new(Input: "ButtonA",             Src: "ButtonA.png",             W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonB",             Src: "ButtonB.png",             W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonX",             Src: "ButtonX.png",             W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
                 new(Input: "ButtonY",             Src: "ButtonY.png",             W: 64,  H: 64, Opacity: 0.3, BlurRadius: 8.0),
+                // ...and the face-button column still draws, dim, because the game itself labels
+                // the right stick, whose labels sit in that column below them (match="game-label")
+                new(Input: "ButtonY",             Src: "ButtonY.png",             W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonY",             Src: "Line_ButtonY.png",                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "ButtonB.png",             W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonB",             Src: "Line_ButtonB.png",                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonA",             Src: "ButtonA.png",             W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonA",             Src: "Line_ButtonA.png",                       Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "ButtonX.png",             W: 44,  H: 44, Opacity: 0.3, BlurRadius: 8.0),
+                new(Input: "ButtonX",             Src: "Line_ButtonX.png",                       Opacity: 0.3, BlurRadius: 8.0),
                 // Start and Insert Coin — both active (inherited defaults)
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 44,  H: 44),
                 new(Input: "ButtonStart",         Src: "ButtonStart.png",         W: 34,  H: 34), // top-level + Stack

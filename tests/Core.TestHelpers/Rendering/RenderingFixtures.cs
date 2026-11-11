@@ -20,13 +20,15 @@ public static class RenderingFixtures
         ResolvedMapping? mapping = null,
         IReadOnlyDictionary<string, string>? labelText = null,
         bool isGameSpecific = false,
-        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null)
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null,
+        IReadOnlySet<string>? gameLabelled = null)
     {
         return new(
             Mapping: mapping ?? EmptyMapping(),
             LabelText: labelText ?? new Dictionary<string, string>(),
             IsGameSpecific: isGameSpecific,
-            Wholes: wholes ?? StandardWholes);
+            Wholes: wholes ?? StandardWholes,
+            GameLabelled: gameLabelled);
     }
 
     /// <summary>The composites the shipped template declares, as a test default.</summary>

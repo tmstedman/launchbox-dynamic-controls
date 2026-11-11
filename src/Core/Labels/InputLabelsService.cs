@@ -72,10 +72,11 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
 
             _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}");
             IReadOnlyList<InputLabelsConfig> defaultLayers = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
-            Dictionary<string, string> merged = MergeLayers(
+            (Dictionary<string, string> merged, HashSet<string> gameKeys) = MergeLayers(
                 [(data, $"{game.RomName}'s labels"), .. DefaultLayers(defaultLayers, game.Platform)],
-                mapping.ButtonAliases);
-            ResolvedLabels resolved = TranslateToGeneric(merged, mapping) with { IsGameSpecific = true };
+                mapping.ButtonAliases,
+                firstLayerIsGame: true);
+            ResolvedLabels resolved = TranslateToGeneric(merged, gameKeys, mapping) with { IsGameSpecific = true };
             if (resolved.LabelText.Count == 0) continue;
             return resolved;
         }
@@ -92,7 +93,9 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         IReadOnlyList<InputLabelsConfig> defaultLayers = _defaultLabelsLoader.LoadDefaultLabels(platform);
         if (defaultLayers.Count == 0) return null;
 
-        return TranslateToGeneric(MergeLayers(DefaultLayers(defaultLayers, platform), mapping.ButtonAliases), mapping);
+        (Dictionary<string, string> merged, HashSet<string> gameKeys) =
+            MergeLayers(DefaultLayers(defaultLayers, platform), mapping.ButtonAliases, firstLayerIsGame: false);
+        return TranslateToGeneric(merged, gameKeys, mapping);
     }
 
     private static IEnumerable<(InputLabelsConfig Labels, string Source)> DefaultLayers(
@@ -105,22 +108,29 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// adds only the sets of buttons no earlier one named — compared once each side names its
     /// buttons one way, so a game or User entry naming a port by another name of it still
     /// overrides the default for that port. Overriding is what layers are for, so only a clash
-    /// within one layer is reported.
+    /// within one layer is reported. Also returns which of the merged sets the game's own layer
+    /// supplied (none unless <paramref name="firstLayerIsGame"/>), so a label can later be told
+    /// from one inherited beneath it.
     /// </summary>
-    private Dictionary<string, string> MergeLayers(
-        IEnumerable<(InputLabelsConfig Labels, string Source)> layers, IReadOnlyDictionary<string, string> aliases)
+    private (Dictionary<string, string> Merged, HashSet<string> GameKeys) MergeLayers(
+        IEnumerable<(InputLabelsConfig Labels, string Source)> layers,
+        IReadOnlyDictionary<string, string> aliases,
+        bool firstLayerIsGame)
     {
         var merged = new Dictionary<string, string>();
+        var gameKeys = new HashSet<string>();
         bool first = true;
         foreach ((InputLabelsConfig labels, string source) in layers)
         {
             foreach ((string buttons, string text) in ByButtonSet(labels.Labels, aliases, source))
             {
-                if (merged.TryAdd(buttons, text) && !first) _logger.Debug($"Inherited from {source}: {buttons} -> {text}");
+                if (!merged.TryAdd(buttons, text)) continue;
+                if (first && firstLayerIsGame) gameKeys.Add(buttons);
+                else if (!first) _logger.Debug($"Inherited from {source}: {buttons} -> {text}");
             }
             first = false;
         }
-        return merged;
+        return (merged, gameKeys);
     }
 
     /// <summary>
@@ -151,6 +161,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// </summary>
     private ResolvedLabels TranslateToGeneric(
         Dictionary<string, string> labelsByButtonSet,
+        HashSet<string> gameKeys,
         ResolvedMapping mapping)
     {
         IReadOnlyDictionary<string, IReadOnlyList<string>> inputMapping = mapping.ButtonToInput;
@@ -184,12 +195,22 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
         }
 
         var labelText = new Dictionary<string, string>();
+        var gameLabelled = new HashSet<string>();
+
+        // A generic is the game's own when every label it took its text from is: one an inherited
+        // default merely agreed with is not the game speaking for it.
+        void Take(string generic, string text, IEnumerable<string> keys)
+        {
+            labelText[generic] = text;
+            if (keys.All(gameKeys.Contains)) gameLabelled.Add(generic);
+        }
+
         foreach ((string generic, List<(string Button, (int Derived, int Position) Rank)> reachers) in reachersByGeneric)
         {
             string[] all = [.. Buttons(reachers)];
             if (labelsByButtonSet.TryGetValue(string.Join(' ', all), out string? text))
             {
-                labelText[generic] = text;
+                Take(generic, text, [string.Join(' ', all)]);
                 _logger.Debug($"Label: '{string.Join(' ', all)}' -> generic: {generic} -> {text}");
                 continue;
             }
@@ -198,7 +219,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             string[] strongestOnly = [.. Buttons(reachers.Where(r => r.Rank == strongest))];
             if (strongestOnly.Length != all.Length && labelsByButtonSet.TryGetValue(string.Join(' ', strongestOnly), out string? narrowedText))
             {
-                labelText[generic] = narrowedText;
+                Take(generic, narrowedText, [string.Join(' ', strongestOnly)]);
                 _logger.Debug($"Label: '{string.Join(' ', strongestOnly)}' -> generic: {generic} -> {narrowedText}");
                 continue;
             }
@@ -218,7 +239,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
                     labelsByButtonSet.TryGetValue(b, out string? t) ? t : null)];
                 if (ownTexts.All(t => t != null) && ownTexts.Distinct().Count() == 1)
                 {
-                    labelText[generic] = ownTexts[0]!;
+                    Take(generic, ownTexts[0]!, strongestOnly);
                     _logger.Debug($"Label: '{string.Join(' ', strongestOnly)}' agree -> generic: {generic} -> {ownTexts[0]}");
                     continue;
                 }
@@ -232,7 +253,7 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             }
         }
 
-        return new ResolvedLabels(LabelText: labelText);
+        return new ResolvedLabels(LabelText: labelText, GameLabelled: gameLabelled);
     }
 
     /// <summary>

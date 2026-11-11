@@ -717,6 +717,62 @@ public class InputRenderingSubsystemTests
         result.Images.Select(i => i.InputName).ShouldBe(["AxisTriggerLeft", "ButtonLeftShoulder"]);
     }
 
+    [Theory]
+    [InlineData(new[] { "AxisRightStickUp" }, true)]    // the game labelled a direction of the stick
+    [InlineData(new[] { "AxisRightStick" }, true)]      // the game labelled the stick as a whole
+    [InlineData(new string[0], false)]                  // the label was inherited from defaults
+    public void Render_ConditionMatchGameLabel_DrawsChildrenOnlyForLabelsTheGameWrote(string[] gameLabelled, bool drawn)
+    {
+        // The face-button cluster is also drawn when the game labels the right stick, but not
+        // when the stick's label is a platform default (the DS touch stick). Both look alike to
+        // match="label"; only the game-written one satisfies match="game-label".
+        var buttonY = Input(
+            name: "ButtonY",
+            images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonY.png")]);
+        var condition = new ConditionElement(
+            ConditionMode.AtLeast, ["AxisRightStick"], ConditionMatch.GameLabel, [buttonY], AtLeast: 1);
+        _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
+
+        // the stick's text sits on one direction, or on the whole with nothing on its parts
+        IReadOnlyDictionary<string, string> text = gameLabelled is ["AxisRightStick"]
+            ? Dict(("AxisRightStick", "Shoot"))
+            : Dict(("AxisRightStickUp", "Shoot"));
+
+        // when the service renders labels carrying that provenance
+        RenderResult result = _service.Render(
+            TemplateOf([condition]),
+            MappingOf(("X", "ButtonY")),
+            new ResolvedLabels(text, IsGameSpecific: true, GameLabelled: new HashSet<string>(gameLabelled)));
+
+        // then the cluster is drawn only for the game's own label
+        result.Images.Select(i => i.InputName).ShouldBe(drawn ? ["ButtonY"] : []);
+    }
+
+    [Fact]
+    public void Render_ConditionMatchGameLabel_GameLabelledWhole_DoesNotClaimAPartWithItsOwnDefault()
+    {
+        // A whole's label is copied onto its parts only when none has a label of its own, so a
+        // part that already carries a default keeps it, and keeps it as the default's, not the game's.
+        var buttonY = Input(
+            name: "ButtonY",
+            images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonY.png")]);
+        var condition = new ConditionElement(
+            ConditionMode.AtLeast, ["AxisRightStickUp"], ConditionMatch.GameLabel, [buttonY], AtLeast: 1);
+        _images.With(src: "ButtonY.png", generic: "ButtonY.png", platform: Genesis, controller: ThreeButton);
+
+        // given the game labels the stick as a whole, and Up's own text is inherited
+        var labels = new ResolvedLabels(
+            Dict(("AxisRightStick", "Aim"), ("AxisRightStickUp", "Look up")),
+            IsGameSpecific: true,
+            GameLabelled: new HashSet<string> { "AxisRightStick" });
+
+        // when the service renders a condition asking about Up alone
+        RenderResult result = _service.Render(TemplateOf([condition]), MappingOf(("X", "ButtonY")), labels);
+
+        // then Up does not count as game-labelled
+        result.Images.ShouldBeEmpty();
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(

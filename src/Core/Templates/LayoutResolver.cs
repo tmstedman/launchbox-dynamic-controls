@@ -401,13 +401,14 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             "mapping" => ConditionMatch.Mapped,
             "auto" => ConditionMatch.Auto,
             "agree" => ConditionMatch.Agree,
+            "game-label" => ConditionMatch.GameLabel,
             _ => LogUnknownConditionMatch(value)
         };
     }
 
     private ConditionMatch LogUnknownConditionMatch(string value)
     {
-        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping, auto, agree. Defaulting to label.");
+        _logger.Error($"Unknown Condition match value: \"{value}\". Expected: label, mapping, auto, agree, game-label. Defaulting to label.");
         return ConditionMatch.Label;
     }
 

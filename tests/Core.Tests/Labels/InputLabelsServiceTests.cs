@@ -124,6 +124,60 @@ public class InputLabelsServiceTests
     }
 
     [Fact]
+    public void Load_GameLabels_MarksOnlyTheInputsTheGameLabelled()
+    {
+        // given a game that labels A and B, over defaults that label Start and C
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(
+            ("Start", "Pause"),
+            ("C", "Cancel"))]);
+        _loader.Load(game).Returns(Labels(
+            ("A", "Brake"),
+            ("B", "Accelerate")));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the inputs the game spoke for are marked, and the inherited ones are not
+        labels.GameLabelled.ShouldBe(["ButtonX", "ButtonA"], ignoreOrder: true);
+        labels.LabelText.ContainsKey("ButtonStart").ShouldBeTrue();
+        labels.GameLabelled.ShouldNotContain("ButtonStart");
+        labels.GameLabelled.ShouldNotContain("ButtonB");
+    }
+
+    [Fact]
+    public void Load_GameLabelOverridingADefault_IsMarkedGameLabelled()
+    {
+        // given a game whose own Start entry shadows the default one
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
+        _loader.Load(game).Returns(Labels(("Start", "Begin")));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the game's text wins and it counts as the game's
+        labels.LabelText["ButtonStart"].ShouldBe("Begin");
+        labels.GameLabelled.ShouldContain("ButtonStart");
+    }
+
+    [Fact]
+    public void Load_DefaultLabelsOnly_MarksNothingGameLabelled()
+    {
+        // given no game labels at all
+        GameInfo game = Game("UnknownGame");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
+        _loader.Load(game).ReturnsNull();
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the label is there but none of it is the game's
+        labels.LabelText.ContainsKey("ButtonStart").ShouldBeTrue();
+        labels.GameLabelled.ShouldBeEmpty();
+    }
+
+    [Fact]
     public void Load_DpadMirrorEntries_PropagateLabelToBothGenericInputs()
     {
         // given a game with a single Dpad-Up label and a mapping that mirrors Dpad onto the left stick

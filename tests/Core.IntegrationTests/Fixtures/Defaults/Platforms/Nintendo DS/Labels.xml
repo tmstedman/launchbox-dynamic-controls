@@ -1,0 +1,17 @@
+<Labels>
+    <Defaults>
+        <Input name="Select">Select</Input>
+        <Input name="Start">Start</Input>
+        <!-- Emulator specific functionality -->
+        <Input name="MicNoise">Make microphone noise</Input>
+        <Input name="SwapScreens">Swap screens</Input>
+        <Input name="CloseLid">Close lid</Input>
+        <Input name="ToggleTouchStick">Toggle touch joystick</Input>
+        <Input name="MoveTouchStick">Move touch joystick</Input>
+    </Defaults>
+    <!-- Labels no face button: the touch stick's inherited label must not draw the face-button column -->
+    <Game romName="Metroid Prime Hunters">
+        <Input name="Dpad-Any">Move</Input>
+        <Input name="L">Fire</Input>
+    </Game>
+</Labels>

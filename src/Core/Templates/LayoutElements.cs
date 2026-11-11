@@ -136,7 +136,13 @@ public enum ConditionMatch
     /// <summary>Label mode when the game contributed its own labels, Mapped mode otherwise —
     /// mirrors <see cref="Rendering.VisibilityFlags.IsVisible"/>'s handling of
     /// <see cref="ShowIfCondition.Auto"/>.</summary>
-    Auto
+    Auto,
+
+    /// <summary>The name has label text that came from the game's own entry. A label inherited
+    /// from a <c>&lt;Defaults&gt;</c> block does not count, though it reads as a label everywhere
+    /// else: a platform that labels an emulator function by default (a touch stick, a lid) would
+    /// otherwise look to the layout like a game that had said something about that input.</summary>
+    GameLabel
 }
 
 /// <summary>
