@@ -344,6 +344,46 @@ public class VisibilityEvaluatorTests
         _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
     }
 
+    [Fact]
+    public void AnyVisible_ConditionMatchGameLabel_LabelOnlyInherited_ReturnsFalse()
+    {
+        // given a game-specific result in which the name's label was inherited from defaults --
+        // a Label-match Condition would pass here, a GameLabel one must not
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["A"] = "Move touch joystick" },
+            isGameSpecific: true,
+            gameLabelled: new HashSet<string>());
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.GameLabel, [], AtLeast: 1);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchGameLabel_LabelFromTheGame_ReturnsTrue()
+    {
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["A"] = "Shoot" },
+            isGameSpecific: true,
+            gameLabelled: new HashSet<string> { "A" });
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["A"], ConditionMatch.GameLabel, [], AtLeast: 1);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void AnyVisible_ConditionMatchGameLabel_NamedComposite_AsksAboutItsParts()
+    {
+        // the game labelled one direction of the stick: naming the stick expands to its parts,
+        // so that is enough for atLeast=1
+        VisibilityContext ctx = Ctx(
+            labelText: new Dictionary<string, string> { ["AxisRightStickUp"] = "Throttle Up" },
+            isGameSpecific: true,
+            gameLabelled: new HashSet<string> { "AxisRightStickUp" });
+        var condition = new ConditionElement(ConditionMode.AtLeast, ["AxisRightStick"], ConditionMatch.GameLabel, [], AtLeast: 1);
+
+        _underTest.AnyVisible(condition, ctx).ShouldBeTrue();
+    }
+
     // Regression guard: match="auto" used to be unrecognized (only label/mapping were valid),
     // silently defaulting to label -- which stranded a Condition gating a ROM with no labels at
     // all (not game-specific, no defaults either), even when the named input was mapped fine.

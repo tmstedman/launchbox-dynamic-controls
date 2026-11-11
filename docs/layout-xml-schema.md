@@ -438,7 +438,7 @@ A container whose children render only when an explicit check passes against nam
 | `inputs` | string (space-separated generic input names) | one of `inputs`/`none` | The inputs to check. A [`<Whole>`](#whole--a-composite-control) name expands to its parts, so one name can ask about a whole stick |
 | `atLeast` | positive integer | no | How many of them must match. Default: **all of them**. `atLeast="1"` is the old `any`; omitting it is the old `all` |
 | `none` | string (space-separated generic input names) | one of `inputs`/`none` | True when *no* named input matches. `atLeast` does not apply |
-| `match` | `label` \| `mapping` \| `auto` \| `agree` | no | What "matches" means for each name — see below. Default `label` |
+| `match` | `label` \| `mapping` \| `auto` \| `agree` \| `game-label` | no | What "matches" means for each name — see below. Default `label` |
 
 **`match` modes**:
 
@@ -448,8 +448,11 @@ A container whose children render only when an explicit check passes against nam
 | `mapping` | The named input is mapped (`IsMapped`) |
 | `auto` | `label` when the game contributed its own labels, `mapping` otherwise — mirrors `showIf="auto"` (see [`showIf` modes](#showif-modes)) |
 | `agree` | At least `atLeast` of the names carry label text, **all of it identical**, and the rest carry none at all |
+| `game-label` | The named input has label text that came from the game's own entry. A label inherited from a `<Defaults>` block does not count |
 
 `agree` exists because counting cannot tell two different pictures apart. A stick whose directions read Up/Down/Left/Right separately has four labels; one labelled once as a unit also has four — identical ones. Both satisfy `match="label"` with every name, and they are drawn completely differently: one merged label against four of their own. The "rest carry none" clause is what stops a direction with its own genuinely different text from being smoothed into a shared label it never had — that's a real per-direction remap and keeps what it says.
+
+`game-label` exists because every other mode reads an inherited default and a game's own label alike. A game's entry always has the platform's `<Defaults>` merged in beneath it, so "the game is labelled" says nothing about a particular input. The Xbox template uses it to draw the face-button cluster, faded, when the game itself labels the right stick, without drawing it for a platform that labels an emulator function on the stick by default (the DS touch stick). A label the game wrote for a composite as a whole counts for its parts, and `<Condition>` cannot mix modes, so "a labelled face button, or a game-labelled stick" is two `<Condition>`s under a `<OneOf>`.
 
 So `<Condition inputs="AxisLeftStick" atLeast="2" match="agree">` reads directly as *two or more of this stick's directions say the same thing, and nothing contradicts them* — the case where one merged label is the honest render.
 
@@ -481,7 +484,7 @@ The parser emits errors to the configured `ILogger` for:
 - `<Input showIf="X">` (or `<Container>`/`<Overlay>`) where `X` isn't a known mode
 - `<Condition>` with zero, or both, of `inputs`/`none` set, or `atLeast` alongside `none` (the whole `<Condition>` is skipped)
 - `<Condition atLeast="X">` where `X` isn't a positive whole number (every named input is required instead)
-- `<Condition match="X">` where `X` isn't `label`, `mapping`, `auto`, or `agree` (falls back to `label`)
+- `<Condition match="X">` where `X` isn't `label`, `mapping`, `auto`, `agree`, or `game-label` (falls back to `label`)
 - `<Whole>` without `name`, or with `parts` naming fewer than two inputs (the declaration is skipped)
 - `<Whole>` repeating a `name` already declared (the first declaration is kept)
 - A loose `<Label>` (see [Loose `<Label>`](#loose-label)) with no enclosing `<Input>` at all, ambient or otherwise

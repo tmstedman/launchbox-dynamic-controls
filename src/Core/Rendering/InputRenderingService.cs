@@ -49,7 +49,8 @@ public class InputRenderingService(
             Mapping: mapping,
             LabelText: labelText,
             IsGameSpecific: labels.IsGameSpecific,
-            Wholes: template.Layout.Wholes);
+            Wholes: template.Layout.Wholes,
+            GameLabelled: GameLabelledWithParts(labels, template.Layout.Wholes));
         FilteredLayout layout = _layoutFilter.Filter(template, ctx);
 
         var allLabels = new List<RenderedLabel>();
@@ -79,5 +80,27 @@ public class InputRenderingService(
         }
 
         return new RenderResult(allLabels, allImages);
+    }
+
+    /// <summary>
+    /// The game-labelled inputs, plus the parts of any composite the game labelled as a whole
+    /// when none of those parts has a label of its own — that is when
+    /// <see cref="WholeLabelCollapser"/> copies the whole's label onto them, so they carry the
+    /// game's text and a condition asking about them must see it as the game's. Where a part does
+    /// have a label, nothing is copied and every part keeps whoever wrote its own.
+    /// </summary>
+    private static IReadOnlySet<string> GameLabelledWithParts(
+        ResolvedLabels labels,
+        IReadOnlyDictionary<string, IReadOnlyList<string>> wholes)
+    {
+        IReadOnlySet<string> gameLabelled = labels.GameLabelled;
+        HashSet<string>? widened = null;
+        foreach ((string whole, IReadOnlyList<string> parts) in wholes)
+        {
+            if (!gameLabelled.Contains(whole) || parts.Any(labels.LabelText.ContainsKey)) continue;
+            widened ??= [.. gameLabelled];
+            widened.UnionWith(parts);
+        }
+        return widened ?? gameLabelled;
     }
 }

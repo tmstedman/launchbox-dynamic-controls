@@ -61,26 +61,54 @@
             </Container>
         </Condition>
         <!-- Same reasoning as the meta-buttons cluster above. -->
-        <Condition inputs="ButtonY ButtonB ButtonA ButtonX" atLeast="1" match="label">
-            <Container x="1249" y="318" gap="80" style="input-label">
-                <Input name="ButtonY" height="44" width="44">
-                    <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonB" height="44" width="44">
-                    <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonA" height="44" width="44">
-                    <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
-                    <Label x="+60" y="+22" />
-                </Input>
-                <Input name="ButtonX" height="44" width="44">
-                    <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
-                    <Label x="+60" y="+22" />
-                </Input>
-            </Container>
-        </Condition>
+        <!-- The face buttons are also drawn, faded, when the game itself labels the right stick:
+             its label sits in the column below them, and without them that column looks
+             detached from the controller. Only the game's own label counts - a platform that
+             labels an emulator function on the stick by default (the DS touch stick) would
+             otherwise draw four faded buttons beside every game. The two clusters are one
+             cluster written twice; change them together. -->
+        <OneOf>
+            <Condition inputs="ButtonY ButtonB ButtonA ButtonX" atLeast="1" match="label">
+                <Container x="1249" y="318" gap="80" style="input-label">
+                    <Input name="ButtonY" height="44" width="44">
+                        <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonB" height="44" width="44">
+                        <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonA" height="44" width="44">
+                        <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonX" height="44" width="44">
+                        <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                </Container>
+            </Condition>
+            <Condition inputs="AxisRightStick" atLeast="1" match="game-label">
+                <Container x="1249" y="318" gap="80" style="input-label">
+                    <Input name="ButtonY" height="44" width="44">
+                        <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonB" height="44" width="44">
+                        <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonA" height="44" width="44">
+                        <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                    <Input name="ButtonX" height="44" width="44">
+                        <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                        <Label x="+60" y="+22" />
+                    </Input>
+                </Container>
+            </Condition>
+        </OneOf>
         <Input name="ButtonLeftStick" style="show-if-label" x="307" y="477" height="44" width="44">
             <Overlay src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Label x="-19" y="+22" align="right" />

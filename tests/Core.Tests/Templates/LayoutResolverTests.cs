@@ -966,6 +966,19 @@ public class TemplateLayoutResolverTests
     }
 
     [Fact]
+    public void Resolve_ConditionMatchGameLabel_Parses()
+    {
+        // "game-label" is the one match that tells a label the game wrote from one inherited
+        // from the platform's defaults, which every other match reads alike.
+        TestLayout config = new TestLayout().Condition(c => c.Inputs("A").AtLeast(1).Match("game-label").Input("A"));
+
+        ConditionElement condition = _underTest.Resolve(config, _imageSource).Elements.FirstCondition();
+
+        condition.Match.ShouldBe(ConditionMatch.GameLabel);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
     public void Resolve_ConditionMatchAgree_Parses()
     {
         // "agree" is what separates a cluster labelled once as a unit from parts that each say

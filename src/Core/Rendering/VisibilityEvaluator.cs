@@ -107,6 +107,8 @@ public class VisibilityEvaluator : IVisibilityEvaluator
             ConditionMatch.Auto => ctx.IsGameSpecific
                 ? !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name))
                 : IsMapped(ctx.Mapping, name),
+            ConditionMatch.GameLabel => ctx.GameLabelled.Contains(name)
+                && !string.IsNullOrEmpty(ctx.LabelText.GetValueOrDefault(name)),
             _ => throw new InvalidOperationException($"Unhandled ConditionMatch: {condition.Match}")
         };
 
@@ -229,13 +231,19 @@ public class VisibilityEvaluator : IVisibilityEvaluator
 /// inputs it is made of — see <see cref="WholeNode"/>. Carried here rather than read
 /// from a fixed table in Core, so which inputs form a stick is the template's statement about
 /// the controller it draws. Empty for a template declaring none.</param>
+/// <param name="GameLabelled">The inputs whose label text came from the game's own entry rather
+/// than an inherited default — what <see cref="ConditionMatch.GameLabel"/> asks about. Empty when
+/// every label is a default.</param>
 [ExcludeFromCodeCoverage]
 public record VisibilityContext(
     ResolvedMapping Mapping,
     IReadOnlyDictionary<string, string> LabelText,
     bool IsGameSpecific,
-    IReadOnlyDictionary<string, IReadOnlyList<string>>? Wholes = null)
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? Wholes = null,
+    IReadOnlySet<string>? GameLabelled = null)
 {
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Wholes { get; init; } =
         Wholes ?? new Dictionary<string, IReadOnlyList<string>>();
+
+    public IReadOnlySet<string> GameLabelled { get; init; } = GameLabelled ?? new HashSet<string>();
 }

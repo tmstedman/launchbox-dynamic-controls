@@ -14,7 +14,15 @@ namespace DynamicControls.Labels;
 /// XML is treated as if it didn't exist, so this flag also means "the game contributed at least
 /// one of its own label entries." Used by the renderer's showIf="auto" rule to switch into
 /// label-mode only when the game has its own labels — purely-inherited defaults don't count.</param>
+/// <param name="GameLabelled">The generic input names whose text came from the game's own entry,
+/// as opposed to a <c>&lt;Defaults&gt;</c> block merged in beneath it. A game that labels only
+/// its buttons still inherits every default, so <paramref name="IsGameSpecific"/> cannot say
+/// whether a particular input was spoken for; this can. Empty when the labels are all defaults.</param>
 [ExcludeFromCodeCoverage]
 public record ResolvedLabels(
     IReadOnlyDictionary<string, string> LabelText,
-    bool IsGameSpecific = false);
+    bool IsGameSpecific = false,
+    IReadOnlySet<string>? GameLabelled = null)
+{
+    public IReadOnlySet<string> GameLabelled { get; init; } = GameLabelled ?? new HashSet<string>();
+}
