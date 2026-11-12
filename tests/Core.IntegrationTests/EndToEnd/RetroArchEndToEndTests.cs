@@ -340,7 +340,8 @@ public class RetroArchEndToEndTests
 
     /// <summary>
     /// PS2 cfg-level d-pad hat swap (up↔down): the Jump/Crouch labels land on the opposite Dpad
-    /// direction. No PS2 Dpad art exists, so images are unchanged — the swap shows only via labels.
+    /// direction, and only the labels move. A row of the d-pad list is a fixedImage, so its arrow
+    /// keeps saying which way to press: "↑ Crouch" is what pressing up does now.
     /// </summary>
     [Fact]
     public void SonyPlaystation2_CrashBandicoot_RetroArchCfgDpadHatSwap()
@@ -365,8 +366,9 @@ public class RetroArchEndToEndTests
                 new(Input: "ButtonDpad",          Src: "ButtonDpad.png",                   W: 135, H: 135),
                 // Dpad OneOf first alt fires (directional Stack visible). Up/Down active (labels remapped
                 // here); Left/Right have neither label nor mapping, so now vacate their slot entirely
-                // instead of rendering dim. Image: Remapped lookup tries "Dpad-Down.png"/"Dpad-Up.png" in
-                // PS2 folder — neither exists, so falls back to the render's own generic
+                // instead of rendering dim. Image: each row's own arrow, not the one its button
+                // normally sends -- PS2 has art of its own, so without fixedImage Up would draw
+                // ButtonDpadDown.png
                 new(Input: "ButtonDpadUp",        Src: "ButtonDpadUp.png",                 W: 34,  H: 34),
                 new(Input: "ButtonDpadDown",      Src: "ButtonDpadDown.png",               W: 34,  H: 34),
                 new(Input: null,                  Src: "Line_ButtonDpad_Multi.png"),
@@ -576,5 +578,54 @@ public class RetroArchEndToEndTests
             new(Input: "ButtonStart", Text: "Start"),          // inherited default
             new(Input: "ButtonBack",  Text: "Select"));        // inherited default
         #pragma warning restore format
+    }
+
+    /// <summary>
+    /// A game remap putting Dpad-Left on Genesis B, which sits at the template's A position. The
+    /// platform has a picture of B but none of a d-pad direction, so with nothing of its own to
+    /// show the position drew its generic A glyph, a button the player isn't pressing there. It
+    /// shows the left arrow, the picture of what that button normally drives, instead.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_Columns_RetroArchRmpDpadLeftOntoFaceButton_ShowsTheLeftArrow()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "Columns (World)",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "genesis_plus_gx_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("ButtonA", @"Templates\Xbox Series X\ButtonDpadLeft.png".AsFixturePath());
+        string glyph = @"Templates\Xbox Series X\ButtonA.png".AsFixturePath();
+        overlay.RenderedImages.ShouldNotContain(i => i.InputName == "ButtonA" && i.Source == glyph);
+    }
+
+    /// <summary>
+    /// The same Dpad-Left landing on LT, where the Genesis pad has no button at all. Genesis has
+    /// art of its own, so its overlay pictures the emulated controller and LT shows the left
+    /// arrow too, rather than an LT glyph for a trigger the game never receives.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_ColumnsIII_RetroArchRmpDpadLeftOntoTrigger_ShowsTheLeftArrow()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "Columns III (USA)",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "genesis_plus_gx_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("AxisTriggerLeft", @"Templates\Xbox Series X\ButtonDpadLeft.png".AsFixturePath());
+        string glyph = @"Templates\Xbox Series X\AxisTriggerLeft.png".AsFixturePath();
+        overlay.RenderedImages.ShouldNotContain(i => i.InputName == "AxisTriggerLeft" && i.Source == glyph);
     }
 }

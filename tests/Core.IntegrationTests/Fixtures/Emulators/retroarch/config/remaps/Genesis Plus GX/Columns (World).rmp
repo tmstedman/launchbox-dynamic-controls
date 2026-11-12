@@ -1,0 +1,2 @@
+# Genesis B (RetroPad B) sends Left (RetroPad id 6), so the template's A position is pressed as a left arrow.
+input_player1_btn_b = "6"

@@ -869,6 +869,69 @@ public class InputRenderingSubsystemTests
             .ShouldBe([@"Nintendo 64\C-Up.png", @"Nintendo 64\C-Down.png"], ignoreOrder: true);
     }
 
+    [Fact]
+    public void Render_DpadDirectionMovedOntoAFaceButton_OnAPlatformWithArt_ShowsItsArrow()
+    {
+        // given Dpad-Left remapped onto ButtonA on Genesis, which has art (A.png) but none for a
+        // d-pad direction
+        Template template = TemplateOf(
+            [Input("ButtonA", images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png")])]);
+        ResolvedMapping mapping = RemappedOf(
+            Genesis,
+            natural: [("A", "ButtonA"), ("Dpad-Left", "ButtonDpadLeft")],
+            current: [("Dpad-Left", "ButtonA")]);
+        _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then the A position draws the left arrow the player is pressing, not its own glyph
+        result.Images.Single(i => i.InputName == "ButtonA").Source.ShouldBe("ButtonDpadLeft.png");
+    }
+
+    [Fact]
+    public void Render_DpadDirectionMovedOntoAFaceButton_OnAPlatformWithoutArt_KeepsThePositionsOwnPicture()
+    {
+        // given the same move on a platform with no art of its own: its overlay pictures the
+        // player's own pad
+        const string arcade = "Arcade";
+        Template template = TemplateOf(
+            [Input("ButtonA", images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png")])]);
+        ResolvedMapping mapping = RemappedOf(
+            arcade,
+            natural: [("P1_BUTTON1", "ButtonA"), ("P1_JOYSTICK_LEFT", "ButtonDpadLeft")],
+            current: [("P1_JOYSTICK_LEFT", "ButtonA")]);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then the position keeps its own glyph
+        result.Images.Single(i => i.InputName == "ButtonA").Source.ShouldBe("ButtonA.png");
+    }
+
+    [Fact]
+    public void Render_FixedRowsSwappedOnAPlatformWithNoDpadArt_KeepTheirArrows()
+    {
+        // given Crash Bandicoot's hat swap on PS2, which pictures its own buttons (Cross.png) but
+        // not the d-pad, so an unfixed row would draw the arrow its button usually sends
+        const string ps2 = "Sony Playstation 2";
+        Template template = TemplateOf(
+            [new Container(Children: [FixedRow("ButtonDpadUp"), FixedRow("ButtonDpadDown")], Overlays: [])],
+            fixedImageInputs: ["ButtonDpadUp", "ButtonDpadDown"]);
+        ResolvedMapping mapping = RemappedOf(
+            ps2,
+            natural: [("Cross", "ButtonA"), ("Dpad-Up", "ButtonDpadUp"), ("Dpad-Down", "ButtonDpadDown")],
+            current: [("Dpad-Down", "ButtonDpadUp"), ("Dpad-Up", "ButtonDpadDown")]);
+        _images.With(src: "Cross.png", generic: "Cross.png", styled: @"Sony Playstation 2\Cross.png", platform: ps2);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then each row keeps its own arrow
+        result.Images.Single(i => i.InputName == "ButtonDpadUp").Source.ShouldBe("ButtonDpadUp.png");
+        result.Images.Single(i => i.InputName == "ButtonDpadDown").Source.ShouldBe("ButtonDpadDown.png");
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(

@@ -78,9 +78,9 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     /// <para>The name is a fact about the set of buttons, not about which one currently drives
     /// which part, so the buttons are sorted by name. Swapping C-Left and C-Right so each drives
     /// the other's direction leaves the same two buttons and so the same picture. The platform's
-    /// own mapping can't supply an order that survives that: a per-game or RetroArch remap
-    /// <em>is</em> the mapping's natural state, so ordering by where each button naturally sits
-    /// would follow the swap.</para>
+    /// own mapping can't supply an order that survives that: a per-game remap <em>is</em> the
+    /// mapping's natural state, so ordering by where each button naturally sits would follow the
+    /// swap.</para>
     ///
     /// <para>Tried before the covering button because that one accepts a wider control: C-Any
     /// reaches all four C directions, so it covers the two horizontal ones too and would draw its
@@ -121,9 +121,12 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
 
             // The physical button at this position normally drives a different input. Image
             // follows the physical button: look for {platformButton}.png in the platform folder
-            // so the player sees the cabinet button they're actually pressing. Falls back to
-            // this render's own generic if no platform-specific file exists.
-            Remapped r => RemappedPlatformImage(r.PlatformButton, template, mapping) ?? generic,
+            // so the player sees the cabinet button they're actually pressing. Without one, the
+            // picture of what that button normally drives where the platform pictures its own
+            // buttons, else this render's own generic.
+            Remapped r => RemappedPlatformImage(r.PlatformButton, template, mapping)
+                ?? NaturalInputImage(r, image, template, mapping)
+                ?? generic,
 
             _ => throw new InvalidOperationException($"Unhandled MappingState subtype: {state.GetType().Name}")
         };
@@ -198,10 +201,51 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     /// For a Remapped input, returns the platform-specific image path that makes the player see
     /// the physical button they're pressing rather than the logical role it's been remapped to.
     /// Resolves {platformButton}.png from the platform folder — identical lookup to MappedDefault.
-    /// Returns null if no platform-specific file exists — Resolve falls back to the owning render's generic.
+    /// Returns null if no platform-specific file exists — the Remapped case then falls back to
+    /// <see cref="NaturalInputImage"/>, then to the owning render's generic.
     /// </summary>
     private static string? RemappedPlatformImage(string platformButton, Template template, ResolvedMapping mapping) =>
         template.ImageSource.Resolve($"{platformButton}.png", mapping.Platform, mapping.Controller).Styled;
+
+    /// <summary>
+    /// For a Remapped input whose physical button has no picture of its own, the generic picture
+    /// of an input that button normally drives. Dpad-Left swapped onto the position <c>ButtonA</c>
+    /// draws has no <c>Dpad-Left.png</c>, and this render's own generic would put the A glyph
+    /// there, where the player is pressing a left arrow.
+    ///
+    /// <para>Only on a platform with a picture of at least one of its own buttons. Its overlay
+    /// pictures the emulated controller, so a position shows what the game receives there:
+    /// Dpad-Left is an arrow whether it lands on Genesis's A or on LT, where the Genesis pad has
+    /// no button at all. A platform picturing none (Arcade) pictures the player's own pad
+    /// instead, so the position's own glyph is the right picture and this returns null. It also
+    /// keeps a cfg's numbering from reaching the picture, since Arcade's default assignments are
+    /// guesses: a button rebound onto the X position would otherwise draw the Y it was guessed to
+    /// be. Asking about the buttons rather than whether a <c>{platform}</c> folder exists means a
+    /// folder holding only a <see cref="CombinedImage"/> picture doesn't count.</para>
+    ///
+    /// <para>Null too for a render borrowing another asset (<c>useImage</c>), whose generic is an
+    /// arbitrary reference rather than a picture of the position, and when none of the button's
+    /// natural inputs has a picture on disk. A button naturally driving several (a d-pad
+    /// direction and the stick it mirrors onto) lists its primary first.</para>
+    /// </summary>
+    private static string? NaturalInputImage(
+        Remapped remapped, InputImageDefinition image, Template template, ResolvedMapping mapping)
+    {
+        if (image.UseImageFile != null) return null;
+        if (!PicturesItsOwnButtons(template, mapping)) return null;
+
+        foreach (string natural in remapped.DefaultGenerics)
+        {
+            ResolvedImagePaths resolved = template.ImageSource.Resolve($"{natural}.png", mapping.Platform, mapping.Controller);
+            if (resolved.GenericExists) return resolved.Generic;
+        }
+        return null;
+    }
+
+    /// <summary>Whether the platform has a picture of any of its controller's own buttons, found
+    /// the way <see cref="ResolveMappedImage"/> finds one.</summary>
+    private static bool PicturesItsOwnButtons(Template template, ResolvedMapping mapping) =>
+        mapping.NaturalButtonToInput.Keys.Any(button => ResolveMappedImage(template, button, mapping) != null);
 
     /// <summary>
     /// Whether a button usually drawn by a fixed image now drives this input, or, for a declared
