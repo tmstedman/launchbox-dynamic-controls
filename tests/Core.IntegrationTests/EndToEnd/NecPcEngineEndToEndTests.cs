@@ -45,4 +45,50 @@ public class NecPcEngineEndToEndTests
             new(Input: "ButtonStart", Text: "Pause"));        // Run — inherited default, grandparent
             #pragma warning restore format
     }
+
+    /// <summary>
+    /// The same platform resolved as its <b>non-default</b> 2-Button controller, asserting the
+    /// images rather than the labels.
+    ///
+    /// <para>Each variant keeps its own art for the same button names — <c>2-Button\I.png</c> is a
+    /// different drawing from <c>6-Button\I.png</c>, a pad with two buttons rather than six. The
+    /// variant folder is also the only thing that distinguishes them, so a selection that silently
+    /// fell back to the platform default, or past the platform folder to the generic
+    /// <c>ButtonB.png</c>, would still produce a render and still label it correctly. Only the
+    /// resolved path says which pad the player is looking at.</para>
+    ///
+    /// <para>Every platform renders under its own default in the baselines, so these files are
+    /// reached by nothing else: 6-Button carries <c>default="true"</c> here and in the shipped
+    /// data, which leaves 2-Button's and 3-Button's art unexercised.</para>
+    /// </summary>
+    [Fact]
+    public void NecPcEngine_Bomberman_TwoButton_DrawsItsOwnVariantArt()
+    {
+        var game = new GameInfo(
+            Platform: "NEC PC Engine",
+            RomName: "Bomberman (Japan)",   // ControllerOverrides picks the 2-Button controller
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("ButtonB",
+            @"Templates\Xbox Series X\NEC PC Engine\2-Button\I.png".AsFixturePath());
+        overlay.ShouldHaveImage("ButtonA",
+            @"Templates\Xbox Series X\NEC PC Engine\2-Button\II.png".AsFixturePath());
+
+        // III belongs to the richer variants, so its input keeps the generic art and dims
+        overlay.ShouldHaveImage("ButtonX",
+            @"Templates\Xbox Series X\ButtonX.png".AsFixturePath());
+
+        overlay.ShouldHaveLabels(
+            #pragma warning disable format
+            new(Input: "ButtonB",     Text: "Bomb"),
+            new(Input: "ButtonA",     Text: "Detonate"),
+            new(Input: "ButtonStart", Text: "Pause"));
+            #pragma warning restore format
+    }
 }
