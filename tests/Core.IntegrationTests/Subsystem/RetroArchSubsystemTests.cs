@@ -152,6 +152,11 @@ public class RetroArchSubsystemTests
     private static string RmpSwap(string slot, string coreId) =>
         $"input_player1_btn_{slot} = \"{coreId}\"";
 
+    /// <summary>An rmp stick binding (<c>input_player1_stk_{direction}</c>), the direction by
+    /// RetroArch's own name for it: <c>r_y+</c> is the right stick's down.</summary>
+    private static string RmpStick(string direction, string coreId) =>
+        $"input_player1_stk_{direction} = \"{coreId}\"";
+
     private static PlatformControllersConfig GenesisPlatform() => PlatformConfig(
         ControllerDef(
             name: "6-Button",
@@ -184,6 +189,35 @@ public class RetroArchSubsystemTests
           </Controller>
         </Controllers>
         """;
+
+    /// <summary>A Nintendo 64 pad for the plugin alone: its stick on the left stick, its C buttons
+    /// on the right.</summary>
+    private static PlatformControllersConfig N64Pad() => PlatformConfig(
+        ControllerDef(
+            name: "Pad",
+            isDefault: true,
+            mappings:
+            [
+                ("B", "ButtonA"), ("A", "ButtonB"),
+                ("Stick-Right", "AxisLeftStickRight"),
+                ("C-Up", "AxisRightStickUp"), ("C-Down", "AxisRightStickDown"),
+                ("C-Left", "AxisRightStickLeft"), ("C-Right", "AxisRightStickRight"),
+            ]));
+
+    /// <summary>Stages an N64 install with the given game remap and resolves it against
+    /// <see cref="N64Pad"/>.</summary>
+    private InputMappingConfig ResolveN64(string rmp)
+    {
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: N64CoreDll, displayName: N64CoreDisplayName);
+        StageGameRmp(rmp, N64CoreDisplayName);
+
+        InputMappingConfig? result = Resolve(
+            Game(platform: N64Platform, emulatorPath: RetroArchExe, romDirectory: RomDir, retroArchCore: N64CoreDll),
+            N64Pad());
+        result.ShouldNotBeNull();
+        return result;
+    }
 
     // ---- gating ----
 
@@ -601,6 +635,96 @@ public class RetroArchSubsystemTests
         // the stick's don't, and stay derived, so a binding of its own would still outrank them
         mapping.DerivedButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
         mapping.DerivedButtonToInput["Dpad-Down"].ShouldBe(["AxisLeftStickDown"]);
+    }
+
+    [Fact]
+    public void Load_StickRemap_InvertedStickSwapsTheButtonsOnIt()
+    {
+        // the right stick's y axis inverted: down (r_y+) pushes up (23), up (r_y-) pushes down (22)
+        InputMappingConfig result = ResolveN64(rmp: $"{RmpStick("r_y+", "23")}\n{RmpStick("r_y-", "22")}");
+
+        result.Mappings.ShouldContainEntry("C-Up", "AxisRightStickDown");
+        result.Mappings.ShouldContainEntry("C-Down", "AxisRightStickUp");
+        result.Mappings.ShouldNotContainEntry("C-Up", "AxisRightStickUp");
+    }
+
+    [Fact]
+    public void Load_OneEndOfAStickAxisSwitchedOff_TakesTheWholeAxisAway()
+    {
+        // RetroArch takes the axis from the core once either end is remapped and gives back only
+        // the ends that are, so switching the right stick's left off leaves its right dead too
+        InputMappingConfig result = ResolveN64(rmp: RmpStick("r_x-", "-1"));
+
+        result.Mappings.ShouldNotContain(e => e.Input == "AxisRightStickLeft");
+        result.Mappings.ShouldNotContain(e => e.Input == "AxisRightStickRight");
+        // the other axis is untouched
+        result.Mappings.ShouldContainEntry("C-Up", "AxisRightStickUp");
+    }
+
+    [Fact]
+    public void Load_OneEndOfAStickAxisSentToAButton_TheOtherEndPressesNothing()
+    {
+        // the right stick's down sent to RetroPad B (id 0), whose position the N64's B holds
+        InputMappingConfig result = ResolveN64(rmp: RmpStick("r_y+", "0"));
+
+        result.Mappings.ShouldContainEntry("B", "AxisRightStickDown");
+        result.Mappings.ShouldNotContain(e => e.Input == "AxisRightStickUp");
+    }
+
+    [Fact]
+    public void Load_StickDirectionRemappedToAButton_PressesThatButton()
+    {
+        // the left stick's right sent to RetroPad B (id 0), whose position the N64's B holds
+        InputMappingConfig result = ResolveN64(rmp: RmpStick("l_x+", "0"));
+
+        result.Mappings.ShouldContainEntry("B", "AxisLeftStickRight");
+        result.Mappings.ShouldNotContainEntry("Stick-Right", "AxisLeftStickRight");
+    }
+
+    [Theory]
+    [InlineData(AnalogToDigitalMode.Left, "l_x+", "AxisLeftStickRight")]
+    [InlineData(AnalogToDigitalMode.Right, "r_x+", "AxisRightStickRight")]
+    public void Load_RemapOfTheStickStandingInForTheDpad_IsIgnored(
+        AnalogToDigitalMode mode, string direction, string stickRight)
+    {
+        // RetroArch reads a stick taken for the Dpad as nothing to its remapper, so remapping one
+        // of its directions does nothing in the game
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageGameRmp(RmpStick(direction, "0"));
+
+        InputMappingConfig? result = Resolve(
+            Game(emulatorPath: RetroArchExe, romDirectory: RomDir, retroArchCore: CoreDll),
+            PlatformConfig(ControllerDef(
+                name: "3-Button",
+                isDefault: true,
+                analogToDigital: mode,
+                mappings: [("B", "ButtonA"), ("Dpad-Right", "ButtonDpadRight")])));
+
+        result.ShouldNotBeNull();
+        result.Mappings.ShouldNotContain(e => e.Input == stickRight);
+    }
+
+    [Fact]
+    public void Load_RemapOfTheOtherStick_OnAMirroredController_Applies()
+    {
+        // a pad mirroring its Dpad onto the left stick that also binds the right stick (the
+        // Virtual Boy's right pad): only the mirrored stick is out of the remapper's reach
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageGameRmp(RmpStick("r_x+", "0"));
+
+        InputMappingConfig? result = Resolve(
+            Game(emulatorPath: RetroArchExe, romDirectory: RomDir, retroArchCore: CoreDll),
+            PlatformConfig(ControllerDef(
+                name: "Pad",
+                isDefault: true,
+                analogToDigital: AnalogToDigitalMode.Left,
+                mappings: [("B", "ButtonA"), ("R-Right", "AxisRightStickRight")])));
+
+        result.ShouldNotBeNull();
+        result.Mappings.ShouldContainEntry("B", "AxisRightStickRight");
+        result.Mappings.ShouldNotContainEntry("R-Right", "AxisRightStickRight");
     }
 
     // ---- root-directory detection ----

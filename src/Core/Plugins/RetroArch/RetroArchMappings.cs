@@ -58,6 +58,31 @@ internal static class RetroArchMappings
         { 20, "r_x_plus" }, { 21, "r_x_minus" }, { 22, "r_y_plus" }, { 23, "r_y_minus" },
     };
 
+    // Analog stick direction -> its coreId (inverse of AnalogIdToSlot): the id a stick direction
+    // keeps when nothing remaps it
+    internal static readonly Dictionary<string, int> AnalogSlotToId =
+        AnalogIdToSlot.ToDictionary(e => e.Value, e => e.Key);
+
+    // RetroArch's own name for each stick direction in a remap file -> RetroPad slot name.
+    // rmp: input_player1_stk_r_y+ = "23"  → the right stick's down now pushes it up
+    internal static readonly Dictionary<string, string> StickRemapSuffixToSlot = new()
+    {
+        { "l_x+", "l_x_plus" }, { "l_x-", "l_x_minus" }, { "l_y+", "l_y_plus" }, { "l_y-", "l_y_minus" },
+        { "r_x+", "r_x_plus" }, { "r_x-", "r_x_minus" }, { "r_y+", "r_y_plus" }, { "r_y-", "r_y_minus" },
+    };
+
+    // Each stick direction -> the other end of its axis. Remapping either end takes the axis from
+    // the core whole, and RetroArch gives back only the ends that are remapped.
+    internal static readonly Dictionary<string, string> StickAxisOtherEnd = new()
+    {
+        { "l_x_plus", "l_x_minus" }, { "l_x_minus", "l_x_plus" }, { "l_y_plus", "l_y_minus" }, { "l_y_minus", "l_y_plus" },
+        { "r_x_plus", "r_x_minus" }, { "r_x_minus", "r_x_plus" }, { "r_y_plus", "r_y_minus" }, { "r_y_minus", "r_y_plus" },
+    };
+
+    // The coreId a slot has when nothing remaps it: a button's, or a stick direction's.
+    internal static int? IdOfSlot(string slot) =>
+        SlotToId.TryGetValue(slot, out int id) || AnalogSlotToId.TryGetValue(slot, out id) ? id : null;
+
     // The slot a remap's coreId sends a button to — a button or a stick direction — or null for
     // -1 (disabled) and anything else RetroArch doesn't define.
     internal static string? TargetSlotOf(int coreId) =>

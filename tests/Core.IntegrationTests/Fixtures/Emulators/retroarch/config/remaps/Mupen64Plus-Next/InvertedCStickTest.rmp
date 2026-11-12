@@ -1,0 +1,4 @@
+# The right stick's y axis inverted, the commonest stick remap: down (r_y+) pushes up (23), up
+# (r_y-) pushes down (22). On an N64 core the right stick is the C buttons.
+input_player1_stk_r_y+ = "23"
+input_player1_stk_r_y- = "22"

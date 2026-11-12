@@ -171,6 +171,15 @@ public class RetroArchCfgSwapResolverTests
     }
 
     [Fact]
+    public void ResolveSwaps_StickAxisBinding_IsNotRead()
+    {
+        // a cfg binds a RetroPad slot to a physical control, the reverse of a remap: read as a swap,
+        // a one-sided binding would put the button on the wrong stick, so stick axes stay unread
+        Resolve(gameLevel: new Dictionary<string, string> { ["input_player1_l_x_plus_axis"] = "+3" }).ShouldBeEmpty();
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("stick-axis swaps not supported")));
+    }
+
+    [Fact]
     public void ResolveSwaps_AxisEntry_ValueMapsToStickSlot_LogsAndIsSkipped()
     {
         // "+0" is in AxisValueToSlot (→ "l_x_plus") but "l_x_plus" has no discrete coreId

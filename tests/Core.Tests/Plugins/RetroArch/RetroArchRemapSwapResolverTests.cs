@@ -6,8 +6,10 @@ namespace DynamicControls.Core.Tests.Plugins.RetroArch;
 /// <summary>
 /// Unit tests for <see cref="RetroArchRemapSwapResolver"/>. Focus: (1) btn swap entries —
 /// non-canonical coreId, canonical skip, non-integer, disabled (−1), unknown slot;
-/// (2) axis swap entries — non-canonical, canonical skip, unknown value, value maps to stick slot;
-/// (3) unrecognized key prefixes are silently skipped; (4) null Game level returns empty.
+/// (2) stk entries — a stick direction by RetroArch's own name, and the other end of its axis
+/// left pressing nothing; (3) axis swap entries — non-canonical, canonical skip, unknown value,
+/// value maps to stick slot; (4) unrecognized key prefixes are silently skipped; (5) null Game
+/// level returns empty.
 /// </summary>
 public class RetroArchRemapSwapResolverTests
 {
@@ -68,6 +70,57 @@ public class RetroArchRemapSwapResolverTests
     {
         Resolve(new Dictionary<string, string> { ["input_player1_btn_a"] = "-1" })
             .ShouldBeDictionaryOf(("a", -1));
+    }
+
+    // ---- stk entries (input_player1_stk_{RetroArch's stick direction} = {coreId}) ----
+
+    #pragma warning disable format
+    [Theory]
+    [InlineData("r_y+", "23", "r_y_plus",  23, "r_y_minus")] // right stick down → up
+    [InlineData("l_x+", "0",  "l_x_plus",  0,  "l_x_minus")] // left stick right → the south face button
+    [InlineData("r_x-", "-1", "r_x_minus", -1, "r_x_plus")]  // right stick left → nothing
+    #pragma warning restore format
+    public void ResolveSwaps_StkEntry_NonCanonicalCoreId_ProducesSwap_AndTheAxisOtherEndPressesNothing(
+        string suffix, string value, string expectedSlot, int expectedId, string otherEnd)
+    {
+        // RetroArch takes the axis from the core once either end is remapped, and gives back only
+        // the ends that are
+        Resolve(new Dictionary<string, string> { [$"input_player1_stk_{suffix}"] = value })
+            .ShouldBeDictionaryOf((expectedSlot, expectedId), (otherEnd, -1));
+    }
+
+    [Fact]
+    public void ResolveSwaps_BothEndsOfAStickAxisRemapped_NeitherPressesNothing()
+    {
+        // an inverted axis: each end gives the other back
+        Resolve(new Dictionary<string, string>
+        {
+            ["input_player1_stk_r_y+"] = "23",
+            ["input_player1_stk_r_y-"] = "22",
+        }).ShouldBeDictionaryOf(("r_y_plus", 23), ("r_y_minus", 22));
+    }
+
+    [Fact]
+    public void ResolveSwaps_OtherEndWrittenAsItself_StillPressesNothing()
+    {
+        // an entry naming its own id is no remap, so it doesn't give the axis back
+        Resolve(new Dictionary<string, string>
+        {
+            ["input_player1_stk_r_x+"] = "0",
+            ["input_player1_stk_r_x-"] = "21",
+        }).ShouldBeDictionaryOf(("r_x_plus", 0), ("r_x_minus", -1));
+    }
+
+    [Fact]
+    public void ResolveSwaps_StkEntry_CanonicalCoreId_IsSkipped()
+    {
+        Resolve(new Dictionary<string, string> { ["input_player1_stk_r_y+"] = "22" }).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void ResolveSwaps_StkEntry_UnknownDirection_IsSkipped()
+    {
+        Resolve(new Dictionary<string, string> { ["input_player1_stk_z_q+"] = "0" }).ShouldBeEmpty();
     }
 
     // ---- axis entries (input_player1_axis_{slot} = {axisValue}) ----

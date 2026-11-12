@@ -203,6 +203,73 @@ public class RetroArchSwapApplierTests
         ], ignoreOrder: true);
     }
 
+    [Fact]
+    public void Apply_StickDirectionsSwapped_SwapsTheButtonsOnThem()
+    {
+        // given a Nintendo 64 pad, its C buttons on the right stick, and a remap inverting the
+        // stick's y axis: down (r_y_plus) pushes up (23), up (r_y_minus) pushes down (22)
+        InputMappingConfig baseConfig = MappingConfig(mappings:
+        [
+            ("C-Up", "AxisRightStickUp"),
+            ("C-Down", "AxisRightStickDown"),
+        ]);
+        var swaps = new Dictionary<string, int> { ["r_y_plus"] = 23, ["r_y_minus"] = 22 };
+
+        // when Apply runs
+        var result = _underTest.Apply(baseConfig, swaps);
+
+        // then pushing the stick down presses C-Up, and up presses C-Down
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("C-Up", "AxisRightStickDown"),
+            ("C-Down", "AxisRightStickUp"),
+        ], ignoreOrder: true);
+    }
+
+    [Theory]
+    [InlineData(AnalogToDigitalMode.Left, "l_x_plus")]
+    [InlineData(AnalogToDigitalMode.Right, "r_x_plus")]
+    public void Apply_RemapOfTheStickStandingInForTheDpad_IsSkipped(AnalogToDigitalMode mode, string stickRight)
+    {
+        // given a pad whose stick stands in for the Dpad, and a remap sending that stick's right
+        // to the south face button: RetroArch's remapper never sees a stick taken that way
+        InputMappingConfig baseConfig = MappingConfig(
+            analogToDigital: mode,
+            mappings: [("Cross", "ButtonA"), ("Dpad-Right", "ButtonDpadRight")]);
+        var swaps = new Dictionary<string, int> { [stickRight] = 0 };
+
+        // when Apply runs
+        var result = _underTest.Apply(baseConfig, swaps);
+
+        // then nothing changes
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("Cross", "ButtonA"),
+            ("Dpad-Right", "ButtonDpadRight"),
+        ], ignoreOrder: true);
+    }
+
+    [Fact]
+    public void Apply_RemapOfTheOtherStick_OnAMirroredController_Applies()
+    {
+        // given a pad mirroring its Dpad onto the left stick that also binds the right stick (the
+        // Virtual Boy's right pad), and a remap sending the right stick's right to south
+        InputMappingConfig baseConfig = MappingConfig(
+            analogToDigital: AnalogToDigitalMode.Left,
+            mappings: [("Cross", "ButtonA"), ("R-Right", "AxisRightStickRight")]);
+        var swaps = new Dictionary<string, int> { ["r_x_plus"] = 0 };
+
+        // when Apply runs
+        var result = _underTest.Apply(baseConfig, swaps);
+
+        // then only the mirrored stick is out of the remapper's reach: this one is remapped
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("Cross", "ButtonA"),
+            ("Cross", "AxisRightStickRight"),
+        ], ignoreOrder: true);
+    }
+
     // ---- robustness ----
 
     [Fact]

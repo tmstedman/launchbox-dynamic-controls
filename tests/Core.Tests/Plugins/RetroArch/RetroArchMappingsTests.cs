@@ -19,6 +19,22 @@ public class RetroArchMappingsTests
         RoundTrip(RetroArchMappings.SlotToId, RetroArchMappings.IdToSlot);
 
     [Fact]
+    public void AnalogSlotToId_RoundTripsAnalogIdToSlot() =>
+        RoundTrip(RetroArchMappings.AnalogIdToSlot, RetroArchMappings.AnalogSlotToId);
+
+    [Fact]
+    public void StickAxisOtherEnd_IsItsOwnInverse() =>
+        RoundTrip(RetroArchMappings.StickAxisOtherEnd, RetroArchMappings.StickAxisOtherEnd);
+
+    [Theory]
+    [InlineData("l_x_plus", "l_x_minus")]
+    [InlineData("r_y_minus", "r_y_plus")]
+    public void StickAxisOtherEnd_PairsTheTwoEndsOfOneAxis(string end, string otherEnd)
+    {
+        RetroArchMappings.StickAxisOtherEnd[end].ShouldBe(otherEnd);
+    }
+
+    [Fact]
     public void BtnNumberToSlot_RoundTripsSlotToBtnNumber() =>
         RoundTrip(RetroArchMappings.SlotToBtnNumber, RetroArchMappings.BtnNumberToSlot);
 
@@ -85,6 +101,29 @@ public class RetroArchMappingsTests
     public void TargetSlotOf_ReachesButtonsAndStickDirections(int coreId, string? expectedSlot)
     {
         RetroArchMappings.TargetSlotOf(coreId).ShouldBe(expectedSlot);
+    }
+
+    [Theory]
+    [InlineData("l_x+", "AxisLeftStickRight")]
+    [InlineData("l_x-", "AxisLeftStickLeft")]
+    [InlineData("l_y+", "AxisLeftStickDown")]
+    [InlineData("l_y-", "AxisLeftStickUp")]
+    [InlineData("r_x+", "AxisRightStickRight")]
+    [InlineData("r_x-", "AxisRightStickLeft")]
+    [InlineData("r_y+", "AxisRightStickDown")]
+    [InlineData("r_y-", "AxisRightStickUp")]
+    public void StickRemapSuffixToSlot_NamesTheStickDirectionRetroArchMeans(string suffix, string expectedGeneric)
+    {
+        RetroArchMappings.RetroPadToGeneric[RetroArchMappings.StickRemapSuffixToSlot[suffix]].ShouldBe(expectedGeneric);
+    }
+
+    [Theory]
+    [InlineData("b", 0)]
+    [InlineData("r_y_plus", 22)]
+    [InlineData("zzz", null)]
+    public void IdOfSlot_KnowsButtonsAndStickDirections(string slot, int? expectedId)
+    {
+        RetroArchMappings.IdOfSlot(slot).ShouldBe(expectedId);
     }
 
     // ---- SDL/XInput physical button anchors ----
