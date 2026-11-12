@@ -654,6 +654,32 @@ public class RetroArchEndToEndTests
     }
 
     /// <summary>
+    /// A remap inverting the right stick's y axis, the commonest stick remap. On an N64 core the
+    /// right stick is the C buttons, so pushing it down now presses C-Up: the stick list's rows
+    /// trade labels, and each keeps its own C picture (fixedImage), so its arrow still says which
+    /// way to push.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_RetroArchRmpInvertedRightStick_SwapsCUpAndCDownLabels()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "InvertedCStickTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "mupen64plus_next_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabel("AxisRightStickUp", "Look Down");
+        overlay.ShouldHaveLabel("AxisRightStickDown", "Look Up");
+        overlay.ShouldHaveImage("AxisRightStickUp", @"Templates\Xbox Series X\Nintendo 64\C-Up.png".AsFixturePath());
+        overlay.ShouldHaveImage("AxisRightStickDown", @"Templates\Xbox Series X\Nintendo 64\C-Down.png".AsFixturePath());
+    }
+
+    /// <summary>
     /// A remap swapping the Dpad's up and down on the Genesis, whose left stick stands in for the
     /// Dpad (analogToDigital). RetroArch works out the stick's Dpad presses from the stick
     /// itself, after any remap, so the Dpad rows swap their labels and the stick's don't: pushing

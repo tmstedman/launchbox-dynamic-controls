@@ -47,4 +47,10 @@
   <Game romName="CDownOnL3Test">
     <Input name="C-Down">Zoom Out</Input>
   </Game>
+  <!-- Paired with a RetroArch remap inverting the right stick's y axis: C-Up's and C-Down's
+       labels trade rows, each row keeping its own C picture. -->
+  <Game romName="InvertedCStickTest">
+    <Input name="C-Up">Look Up</Input>
+    <Input name="C-Down">Look Down</Input>
+  </Game>
 </Labels>

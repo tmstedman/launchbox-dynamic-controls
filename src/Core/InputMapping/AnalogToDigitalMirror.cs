@@ -69,6 +69,11 @@ public static class AnalogToDigitalMirror
             .Select(e => new MappingEntry { Name = e.Name, Input = map[e.Input], Derived = true });
     }
 
+    /// <summary>Whether <paramref name="generic"/> is a direction of the stick
+    /// <paramref name="mode"/> mirrors the Dpad onto.</summary>
+    public static bool IsMirroredStickDirection(string generic, AnalogToDigitalMode mode) =>
+        MapFor(mode).Values.Contains(generic);
+
     private static IReadOnlyDictionary<string, string> MapFor(AnalogToDigitalMode mode) => mode switch
     {
         AnalogToDigitalMode.Left => DpadToLeftStick,

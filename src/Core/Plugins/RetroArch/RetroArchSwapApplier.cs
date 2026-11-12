@@ -25,6 +25,9 @@ public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier
     ///   slot's generic position is added at the source's, read from the original base so
     ///   simultaneous remaps don't see each other's intermediate state. A slot with no
     ///   original base entry (e.g. l2 on a 3-button controller) only adds without removing.
+    /// A remap of a direction of the stick standing in for the Dpad (analogToDigital) is skipped:
+    /// RetroArch reads that stick as nothing as a stick, to its remapper as much as to the core.
+    /// Only a remap file's stk_ entries name a stick direction as the one remapped.
     /// Handles pure swaps (A↔B each removed and re-added at the other position), copies
     /// (l2 also does B), and disabled slots (coreId == -1, only remove).
     /// </summary>
@@ -44,6 +47,11 @@ public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier
         foreach ((string? slot, int coreId) in swaps)
         {
             if (!RetroArchMappings.RetroPadToGeneric.TryGetValue(slot, out string? sourceGeneric)) continue;
+            if (OnTheMirroredStick(sourceGeneric, baseConfig.AnalogToDigital))
+            {
+                _logger.Debug($"RetroArch swap of '{slot}' skipped: that stick stands in for the Dpad, and RetroArch's remapper doesn't see it");
+                continue;
+            }
 
             if (originalByGeneric.ContainsKey(sourceGeneric))
                 removes.Add(sourceGeneric);
@@ -65,4 +73,9 @@ public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier
             Mappings = [.. baseConfig.Mappings.Where(m => !removes.Contains(m.Input)), .. additions]
         };
     }
+
+    /// <summary>Whether <paramref name="generic"/> is a direction of the stick a mirrored
+    /// controller reads as its Dpad.</summary>
+    private static bool OnTheMirroredStick(string generic, AnalogToDigitalMode? mode) =>
+        mode is AnalogToDigitalMode m && AnalogToDigitalMirror.IsMirroredStickDirection(generic, m);
 }
