@@ -85,7 +85,7 @@ Which of the two is drawn depends on the input's mapping state, so styled art do
 | Input state | Image drawn |
 |---|---|
 | A platform button drives it, as that button's natural target | `{platformButton}.png` from the styled tiers, else the generic |
-| A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic. A `fixedImage` Input ignores a remap from another fixed position and takes the row above, or the one below where no button usually sits — see [`<Input>`](#input--a-generic-input) |
+| A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else, on a platform with a picture of at least one of its own buttons, the generic of the input the pressed button naturally drives (a d-pad direction moved onto a face button or a trigger draws its arrow); else the generic. A `fixedImage` Input ignores a remap from another fixed position and takes the row above, or the one below where no button usually sits — see [`<Input>`](#input--a-generic-input) |
 | No platform button drives it | The generic — **unless** the Input sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
 
 A declared `<Whole>` that two or more platform buttons drive between them tries one more file first, `{platform}/{those buttons, sorted by name and space-joined}.png` (`Nintendo 64/C-Left C-Right.png` for the C cluster's horizontal pair), and keeps the rows above when it isn't there.

@@ -45,6 +45,21 @@ public class InputImageResolverTests
     private void StubResolve(string src, string generic, string? styled = null) =>
         _imageSource.Resolve(src, Platform, Controller).Returns(new ResolvedImagePaths(generic, styled));
 
+    /// <summary>Gives <paramref name="mapping"/>'s controller a button the platform has a picture
+    /// of, as Genesis and PS2 have and Arcade hasn't: such a platform pictures its emulated
+    /// controller, so a remapped button with no picture shows what it normally drives.</summary>
+    private ResolvedMapping OnAPlatformPicturingItsButtons(ResolvedMapping mapping)
+    {
+        StubResolve("Start.png", generic: "/template/Start.png", styled: "/template/styled/Start.png");
+        return mapping with
+        {
+            NaturalButtonToInput = new Dictionary<string, IReadOnlyList<string>>(mapping.NaturalButtonToInput)
+            {
+                ["Start"] = ["ButtonStart"],
+            },
+        };
+    }
+
     // ---- a declared composite no button drives directly ----
 
     [Fact]
@@ -609,21 +624,138 @@ public class InputImageResolverTests
     [Fact]
     public void Resolve_Remapped_FallsBackToGeneric_WhenNoPlatformNamedStyledFile()
     {
-        // given a Remapped input but no platform-specific file
+        // given a Remapped input on a platform with art of its own, but no platform-specific file
         var input = Input("ButtonA");
         var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png");
         var mapping = Mapping(
             inputToButton: new() { ["ButtonA"] = "Cross" },
             naturalButtonToInput: new() { ["Cross"] = ["ButtonB"] });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
         StubResolve("ButtonA.png", generic: "/template/ButtonA.png");
         StubResolve("Cross.png", generic: "/template/Cross.png"); // no styled
+        _imageSource.Resolve("ButtonB.png", Platform, Controller)  // nor a picture of what Cross drives
+            .Returns(new ResolvedImagePaths("/template/ButtonB.png", null) { GenericExists = false });
 
         // when resolving
         var path = _underTest.Resolve(image, input, mapping, TestTemplate());
 
-        // then the owning render's own generic is used as the fallback (so the player at least
-        // sees the input's intended artwork rather than nothing)
+        // then the owning render's own generic is the last resort (so the player at least sees
+        // the input's intended artwork rather than nothing)
         path.ShouldBe("/template/ButtonA.png");
+    }
+
+    [Fact]
+    public void Resolve_Remapped_NoPlatformFileForThePhysicalButton_ShowsWhatItNormallyDrives()
+    {
+        // given Dpad-Left swapped onto the position ButtonA draws, on a platform with art of its
+        // own but no Dpad-Left.png (a d-pad direction has no face-button picture)
+        var input = Input("ButtonA");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png");
+        var mapping = Mapping(
+            inputToButton: new() { ["ButtonA"] = "Dpad-Left" },
+            naturalButtonToInput: new() { ["Dpad-Left"] = ["ButtonDpadLeft", "AxisLeftStickLeft"] });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
+        StubResolve("ButtonA.png", generic: "/template/ButtonA.png");
+        _imageSource.Resolve("Dpad-Left.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("/template/Dpad-Left.png", null) { GenericExists = false });
+        StubResolve("ButtonDpadLeft.png", generic: "/template/ButtonDpadLeft.png");
+
+        // when resolving
+        var path = _underTest.Resolve(image, input, mapping, TestTemplate());
+
+        // then the player sees the left arrow they are pressing, not the A glyph of the slot it
+        // landed in -- the same swap in the other direction already shows B at the d-pad's spot,
+        // because B.png exists
+        path.ShouldBe("/template/ButtonDpadLeft.png");
+    }
+
+    [Fact]
+    public void Resolve_Remapped_OntoAPositionThePlatformHasNoButtonAt_ShowsWhatItNormallyDrives()
+    {
+        // given Dpad-Left swapped onto LT, where the platform's pad has no button of its own
+        var input = Input("AxisTriggerLeft");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisTriggerLeft.png");
+        var mapping = Mapping(
+            inputToButton: new() { ["AxisTriggerLeft"] = "Dpad-Left" },
+            naturalButtonToInput: new() { ["Dpad-Left"] = ["ButtonDpadLeft"] });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
+        StubResolve("AxisTriggerLeft.png", generic: "/template/AxisTriggerLeft.png");
+        _imageSource.Resolve("Dpad-Left.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("/template/Dpad-Left.png", null) { GenericExists = false });
+        StubResolve("ButtonDpadLeft.png", generic: "/template/ButtonDpadLeft.png");
+
+        // when resolving
+        var path = _underTest.Resolve(image, input, mapping, TestTemplate());
+
+        // then it is the same arrow as on a face button: the picture follows the button, not
+        // whether the platform has a button where it landed
+        path.ShouldBe("/template/ButtonDpadLeft.png");
+    }
+
+    [Fact]
+    public void Resolve_Remapped_PlatformWithNoArtOfItsOwn_KeepsThePositionsOwnGeneric()
+    {
+        // an arcade cfg rebinding: the X position is driven by a button that naturally drives Y,
+        // on a platform with no art. Its overlay pictures the player's own pad, so the position's
+        // own glyph is the right one -- and Y is only the cabinet default's guess at that button
+        var input = Input("ButtonX");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonX.png");
+        var mapping = Mapping(
+            inputToButton: new() { ["ButtonX"] = "P1_BUTTON4" },
+            naturalButtonToInput: new() { ["P1_BUTTON4"] = ["ButtonY"] });
+        StubResolve("ButtonX.png", generic: "/template/ButtonX.png");
+        StubResolve("ButtonY.png", generic: "/template/ButtonY.png");
+        StubResolve("P1_BUTTON4.png", generic: "/template/P1_BUTTON4.png");
+
+        var path = _underTest.Resolve(image, input, mapping, TestTemplate());
+
+        path.ShouldBe("/template/ButtonX.png");
+    }
+
+    [Fact]
+    public void Resolve_Remapped_PlatformFolderHoldingOnlyACombinedPicture_KeepsThePositionsOwnGeneric()
+    {
+        // an Arcade folder holding one CombinedImage picture (named after MAME ports) and no
+        // picture of any single button: the overlay still pictures the player's own pad
+        const string root = @"C:\plugin";
+        string templateDir = Path.Combine(root, "Templates", "T");
+        IFileSystem fs = TestFs.Create();
+        fs.DirectoryExists(Path.Combine(templateDir, "Arcade")).Returns(true);
+        fs.FileExists(Path.Combine(templateDir, "Arcade", "P1_BUTTON1 P1_BUTTON2.png")).Returns(true);
+        fs.FileExists(Path.Combine(templateDir, "ButtonX.png")).Returns(true);
+        fs.FileExists(Path.Combine(templateDir, "ButtonY.png")).Returns(true);
+        var resolver = new TemplateImageResolver(_logger, fs, Substitute.For<IImageHeader>(), root);
+        Template template = TemplateOf(imageSource: new TemplateImageSource(resolver, "T"));
+        // a cfg rebinding P1_BUTTON4, which Controllers.xml guesses is ButtonY, onto X
+        ResolvedMapping mapping = MappingOf(
+            platform: "Arcade", controller: null,
+            inputToButton: new Dictionary<string, string> { ["ButtonX"] = "P1_BUTTON4" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>> { ["P1_BUTTON4"] = ["ButtonY"] });
+
+        var path = _underTest.Resolve(new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonX.png"), Input("ButtonX"), mapping, template);
+
+        path.ShouldBe(Path.Combine(templateDir, "ButtonX.png"));
+    }
+
+    [Fact]
+    public void Resolve_RemappedBorrowingRender_NoPlatformFile_KeepsTheBorrowedGeneric()
+    {
+        // a render that borrows another input's artwork (useImage) draws that asset, not a
+        // picture of its own position, so it has no "what the button normally drives" to show
+        var input = Input("AxisRightStickLeft");
+        var image = new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStickLeft.png", UseImageFile: "AxisLeftStickLeft.png");
+        var mapping = Mapping(
+            inputToButton: new() { ["AxisRightStickLeft"] = "Dpad-Left" },
+            naturalButtonToInput: new() { ["Dpad-Left"] = ["ButtonDpadLeft"] });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
+        StubResolve("AxisLeftStickLeft.png", generic: "/template/AxisLeftStickLeft.png");
+        _imageSource.Resolve("Dpad-Left.png", Platform, Controller)
+            .Returns(new ResolvedImagePaths("/template/Dpad-Left.png", null) { GenericExists = false });
+        StubResolve("ButtonDpadLeft.png", generic: "/template/ButtonDpadLeft.png");
+
+        var path = _underTest.Resolve(image, input, mapping, TestTemplate());
+
+        path.ShouldBe("/template/AxisLeftStickLeft.png");
     }
 
     // ---- fixedImage: a picture that is all that says which control it is ----
@@ -658,6 +790,54 @@ public class InputImageResolverTests
         var path = _underTest.Resolve(FixedImageOf("AxisRightStickUp"), input, mapping, template);
 
         path.ShouldBe("/template/Nintendo 64/C-Up.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedImageRemapped_NoArtForTheButtonUsuallyThere_KeepsItsOwnGeneric()
+    {
+        // Crash Bandicoot's up/down hat swap on PS2, which has art but none for the d-pad: the up
+        // row stays an up arrow, where an unfixed one would draw the down arrow its button sends
+        var input = Input("ButtonDpadUp");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Dpad-Down" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Dpad-Up"] = ["ButtonDpadUp"],
+                ["Dpad-Down"] = ["ButtonDpadDown"],
+            },
+            naturalInputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Dpad-Up" });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
+        StubResolve("ButtonDpadUp.png", generic: "/template/ButtonDpadUp.png");
+        StubResolve("ButtonDpadDown.png", generic: "/template/ButtonDpadDown.png");
+        StubResolve("Dpad-Up.png", generic: "/template/Dpad-Up.png");
+        StubResolve("Dpad-Down.png", generic: "/template/Dpad-Down.png");
+        Template template = TemplateWithFixedImages("ButtonDpadUp", "ButtonDpadDown");
+
+        var path = _underTest.Resolve(FixedImageOf("ButtonDpadUp"), input, mapping, template);
+
+        path.ShouldBe("/template/ButtonDpadUp.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedImageRemappedOntoAPositionWithNoButtonOfItsOwn_KeepsItsOwnGeneric()
+    {
+        // drawn as with nothing remapped, where no button drives it at all
+        var input = Input("AxisTriggerLeft");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string> { ["AxisTriggerLeft"] = "Dpad-Left" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>> { ["Dpad-Left"] = ["ButtonDpadLeft"] },
+            naturalInputToButton: new Dictionary<string, string> { ["ButtonDpadLeft"] = "Dpad-Left" });
+        mapping = OnAPlatformPicturingItsButtons(mapping);
+        StubResolve("AxisTriggerLeft.png", generic: "/template/AxisTriggerLeft.png");
+        StubResolve("ButtonDpadLeft.png", generic: "/template/ButtonDpadLeft.png");
+        StubResolve("Dpad-Left.png", generic: "/template/Dpad-Left.png");
+        Template template = TemplateWithFixedImages("AxisTriggerLeft", "ButtonDpadLeft");
+
+        var path = _underTest.Resolve(FixedImageOf("AxisTriggerLeft"), input, mapping, template);
+
+        path.ShouldBe("/template/AxisTriggerLeft.png");
     }
 
     [Fact]

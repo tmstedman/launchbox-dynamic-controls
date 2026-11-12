@@ -36,7 +36,7 @@ When rendering a button the plugin picks the most-specific image that exists on 
 
 One exception to "most-specific wins": when the current platform has *no* button mapped to that generic input, the generic image is used even if platform art exists — showing a Genesis `C` button on a controller slot the game can't reach would mislead. An `<Input useImage="…">` is exempt, because it is explicitly borrowing another input's artwork.
 
-When an emulator remap moves a button to another position (a RetroArch remap file or a MAME cfg), the position shows that button's art, so the player sees what they're pressing: Genesis `B` swapped onto the `ButtonX` slot draws `B.png` there.
+When an emulator remap moves a button to another position (a RetroArch remap file or a MAME cfg), the position shows that button's art, so the player sees what they're pressing: Genesis `B` swapped onto the `ButtonX` slot draws `B.png` there. A button with no platform art of its own, such as a d-pad direction moved onto a face button or a trigger, draws the generic image of what it normally does (`ButtonDpadLeft.png`) instead of the position's own glyph. That happens only on a platform with a picture of at least one of its own buttons: that art pictures the emulated controller, so each position shows what the game receives there. Arcade has none, so its overlay pictures the player's own pad, and every position keeps its own generic image; a combined picture (below) on its own doesn't change that. A per-game ControllerOverrides file doesn't count as a remap here: it redefines what each button does for that game, so its buttons are drawn as if the controller had always worked that way.
 
 An `<Input fixedImage="true">` is for an image that is all that tells the player which of their controls it is. The shipped template sets it on the direction lists, whose rows share one line to the d-pad or stick. When a remap moves the button from one fixed position onto another, as when a cfg swaps up and down, the fixed image draws what it would with nothing moved, so its arrow doesn't point the wrong way; its label still moves. A button from anywhere else, such as a face button moved onto a direction, still shows its own picture, which can't be read as a direction. A template that lists directions should set it on every row: without it, a swap between two directions draws each row with the other's picture. See [layout-xml-schema.md](layout-xml-schema.md#input--a-generic-input).
 
@@ -191,7 +191,7 @@ it, and a new name is appended. Root-level inheritance is transitive and control
 
 Create `Templates\{TemplateName}\{Platform}\` and add one `.png` per platform button. File names must match the `name` attributes in the Controllers file (e.g. `One.png`, `Two.png`).
 
-If the platform buttons happen to map cleanly onto the generic images you can skip this step and rely on the generic fallbacks — the overlay will still show the correct button positions, just with generic artwork.
+If the platform buttons happen to map cleanly onto the generic images you can skip this step and rely on the generic fallbacks — the overlay will still show the correct button positions, just with generic artwork. Without a picture of any of its buttons, though, the platform is treated like Arcade when an emulator remaps it: a d-pad direction moved onto a face button keeps that button's glyph instead of showing its arrow.
 
 ### 3. Add controller variant images (optional)
 

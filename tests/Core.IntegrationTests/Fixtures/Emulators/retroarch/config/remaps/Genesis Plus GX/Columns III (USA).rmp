@@ -1,0 +1,2 @@
+# L2 (no Genesis button of its own) sends Left (RetroPad id 6), so the template's LT position is pressed as a left arrow.
+input_player1_btn_l2 = "6"
