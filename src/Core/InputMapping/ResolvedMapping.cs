@@ -27,8 +27,7 @@ namespace DynamicControls.InputMapping;
 /// default on this controller.</param>
 /// <param name="NaturalInputToButton">Snapshot of InputToButton from the selected controller's
 /// natural mapping (plus any AnalogToDigital mirror), taken before game-specific transforms
-/// run. Lets consumers tell whether a generic input's natural physical button still exists in
-/// the current mapping, even if it has been remapped to drive a different action.</param>
+/// run: which button drives each generic input by default on this controller.</param>
 /// <param name="AnalogToDigital">Which stick (if any) the Dpad is mirrored onto for this
 /// game/platform. Resolved with game-XML-overrides-platform inheritance; null when no mirroring
 /// applies.</param>

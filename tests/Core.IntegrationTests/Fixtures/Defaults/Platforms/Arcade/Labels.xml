@@ -52,4 +52,9 @@
     <Input name="P1_BUTTON1 P1_BUTTON3">Back Wide</Input>
     <Input name="P1_BUTTON2 P1_BUTTON3">Lock On Spread</Input>
   </Game>
+  <Game romName="headon">
+    <!-- The coin starts the game, so headon.cfg puts COIN1 on the Start button and binds
+         nothing to Back. -->
+    <Input name="P1_BUTTON1">Speed Up</Input>
+  </Game>
 </Labels>

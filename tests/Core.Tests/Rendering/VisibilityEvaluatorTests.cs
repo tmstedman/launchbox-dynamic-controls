@@ -110,11 +110,10 @@ public class VisibilityEvaluatorTests
     }
 
     [Fact]
-    public void GetVisibilityFlags_RemappedButNaturalButtonStillPresent_SetsIsMapped()
+    public void GetVisibilityFlags_NaturalButtonMovedElsewhere_ClearsIsMapped()
     {
-        // given an input that isn't currently mapped, but its natural physical button is still
-        // present in the mapping (driving some other input) — the on-screen slot still belongs
-        // to a real button, so it should count as mapped
+        // given an input whose natural button a config moved onto another input, leaving nothing
+        // driving this one (MAME putting Insert Coin on the Start button leaves Back unbound)
         var input = Input(name: "ButtonA");
         VisibilityContext ctx = Ctx(
             mapping: MappingOf(
@@ -125,8 +124,8 @@ public class VisibilityEvaluatorTests
         // when flags are evaluated
         VisibilityFlags flags = _underTest.GetVisibilityFlags(input, ctx);
 
-        // then IsMapped is true via the natural-button fallback — this is the remap-survival path
-        flags.IsMapped.ShouldBeTrue();
+        // then IsMapped is false — pressing this position does nothing, wherever A went
+        flags.IsMapped.ShouldBeFalse();
     }
 
     [Fact]

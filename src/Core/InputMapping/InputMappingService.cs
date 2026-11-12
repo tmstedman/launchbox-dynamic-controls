@@ -48,9 +48,9 @@ public class InputMappingService(
         }
 
         // Transforms shuffle which action a physical button drives; the source baseline is still
-        // the natural state, so overwrite the snapshot with the baseline's reverse. That keeps a
-        // button visible when its action has been remapped away (e.g. ButtonB after MAME swaps
-        // BUTTON2 onto ButtonA).
+        // the natural state, so overwrite the snapshot with the baseline's reverse. That is what
+        // InputImageResolver compares against to tell a button the transform moved from one in
+        // its usual place.
         ResolvedMapping baselineMapping = _resolver.Resolve(
             game.Platform,
             baseline,

@@ -775,4 +775,30 @@ public class ArcadeEndToEndTests
             new(Input: "ButtonBack",       Text: "Insert Coin"));
             #pragma warning restore format
     }
+
+    /// <summary>
+    /// Head On's coin starts the game, so its cfg puts Insert Coin on the Start button and binds
+    /// nothing to Back. Pressing Back does nothing, so every Back glyph draws dimmed. The glyph on
+    /// the controller's body used to stay lit, because the button that usually sits there was
+    /// still bound somewhere, while its own row in the list beneath was already dimmed.
+    /// </summary>
+    [Fact]
+    public void Arcade_HeadOn_PositionWhoseButtonMovedAwayDrawsDimmed()
+    {
+        var game = new GameInfo(
+            Platform: "Arcade",
+            RomName: "headon",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: MameEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("ButtonStart", @"Templates\Xbox Series X\ButtonStart.png".AsFixturePath(), expectedOpacity: 1);
+        var back = overlay.RenderedImages.Where(i => i.InputName == "ButtonBack").ToList();
+        back.ShouldNotBeEmpty();
+        back.ShouldAllBe(i => i.Opacity < 1);
+    }
 }

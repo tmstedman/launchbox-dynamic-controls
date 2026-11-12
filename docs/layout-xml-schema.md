@@ -450,7 +450,7 @@ A container whose children render only when an explicit check passes against nam
 | Mode | Passes when |
 |---|---|
 | `label` | The named input has non-empty label text (`HasLabel`) |
-| `mapping` | The named input is mapped (`IsMapped`) |
+| `mapping` | A platform button drives the named input (`IsMapped`) |
 | `auto` | `label` when the game contributed its own labels, `mapping` otherwise — mirrors `showIf="auto"` (see [`showIf` modes](#showif-modes)) |
 | `agree` | At least `atLeast` of the names carry label text, **all of it identical**, and the rest carry none at all |
 | `game-label` | The named input has label text that came from the game's own entry. A label inherited from a `<Defaults>` block does not count |
