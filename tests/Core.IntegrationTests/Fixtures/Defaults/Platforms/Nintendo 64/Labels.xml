@@ -36,4 +36,15 @@
     <Input name="C-Left">Strafe</Input>
     <Input name="C-Right">Strafe</Input>
   </Game>
+  <!-- Paired with a RetroArch remap sending L3 to the right stick's down, in a game that labels
+       the C buttons only as a cluster: C-Any reaches whatever its members reach, the left-stick
+       click included. -->
+  <Game romName="CAnyOnL3Test">
+    <Input name="C-Any">Camera</Input>
+  </Game>
+  <!-- Paired with a RetroArch remap sending L3 to the right stick's down: C-Down's label
+       belongs at the left-stick click as well as on the stick. -->
+  <Game romName="CDownOnL3Test">
+    <Input name="C-Down">Zoom Out</Input>
+  </Game>
 </Labels>

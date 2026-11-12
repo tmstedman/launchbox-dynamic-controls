@@ -16,7 +16,10 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// <c>RetroArchMappingSourceFactory.Create</c> assembles them, driven through
 /// <see cref="RetroArchMappingSource.Load"/>. Each test stages a realistic RetroArch install in an
 /// in-memory <see cref="MockFileSystem"/> (retroarch.cfg + info + per-core xml + cfg/rmp cascade
-/// files) and asserts on the returned <see cref="InputMappingConfig"/>. Focuses on emergent
+/// files) and asserts on the returned <see cref="InputMappingConfig"/>; where only the resolved
+/// mapping shows the answer (the natural snapshot, a control's reach, the Dpad mirror), the whole
+/// <see cref="InputMappingService"/> runs with the plugins in it and the test asserts on its
+/// <see cref="ResolvedMapping"/>. Focuses on emergent
 /// behaviours that unit tests for individual collaborators can't catch — display-name resolution
 /// driving the config subfolder, cfg/rmp variant override priority, the game-level swap-detection
 /// trust boundary, swap-application order, and portable-vs-APPDATA cfg root selection.
@@ -27,6 +30,9 @@ public class RetroArchSubsystemTests
     private const string CoreDll = "genesis_plus_gx_libretro";
     private const string CoreDisplayName = "Genesis Plus GX";
     private const string Rom = "OutRun";
+    private const string N64Platform = "Nintendo 64";
+    private const string N64CoreDll = "mupen64plus_next_libretro";
+    private const string N64CoreDisplayName = "Mupen64Plus-Next";
 
     private static readonly string RootDir = Path.DirectorySeparatorChar + "dc";
     private static readonly string RetroArchDir = Path.Combine(RootDir, "Emulators", "retroarch");
@@ -57,6 +63,19 @@ public class RetroArchSubsystemTests
         InputMappingConfig? baseline = plugins.Source.Load(game, platform);
         if (baseline == null) return null;
         return plugins.Transform.Transform(game, baseline) ?? baseline;
+    }
+
+    /// <summary>The whole mapping service with RetroArch's plugins in it, for what only the
+    /// resolved mapping shows: the natural snapshot, a control's reach, the Dpad mirror. It reads
+    /// Controllers.xml itself, so the platform has to be staged on the filesystem.</summary>
+    private InputMappingService Service()
+    {
+        RetroArchPlugins plugins = Build();
+        return InputMappingFactory.Create(
+            _dc.Lfs, _dc.Fs, _logger,
+            config: new GlobalConfig { EnableRetroArch = true },
+            sources: [plugins.Source],
+            transforms: [plugins.Transform]);
     }
 
     // ---- staging helpers ----
@@ -111,9 +130,9 @@ public class RetroArchSubsystemTests
     /// <summary>Writes the game-level .rmp under <c>{retroArchDir}/config/remaps/{display}/{rom}.rmp</c>.
     /// Creating any file here also ensures the remaps directory exists, which
     /// <see cref="RetroArchRemapLoader"/> checks before walking layers.</summary>
-    private void StageGameRmp(string body) =>
+    private void StageGameRmp(string body, string displayName = CoreDisplayName) =>
         _dc.WriteFile(
-            Path.Combine(RetroArchDir, "config", "remaps", CoreDisplayName, Rom + ".rmp"),
+            Path.Combine(RetroArchDir, "config", "remaps", displayName, Rom + ".rmp"),
             body);
 
     // ---- cfg/rmp body builders ----
@@ -149,6 +168,22 @@ public class RetroArchSubsystemTests
             mappings: [
                 ("A", "ButtonX"), ("B", "ButtonA"), ("C", "ButtonB")
             ]));
+
+    /// <summary>The Nintendo 64 pad as Controllers.xml declares it: its C buttons on the right
+    /// stick, and C-Any, the cluster, standing for all four.</summary>
+    private const string N64ControllersXml = """
+        <Controllers>
+          <Controller name="Pad" default="true">
+            <Mapping name="B" input="ButtonA" />
+            <Mapping name="A" input="ButtonB" />
+            <Control name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
+            <Mapping name="C-Up" input="AxisRightStickUp" />
+            <Mapping name="C-Down" input="AxisRightStickDown" />
+            <Mapping name="C-Left" input="AxisRightStickLeft" />
+            <Mapping name="C-Right" input="AxisRightStickRight" />
+          </Controller>
+        </Controllers>
+        """;
 
     // ---- gating ----
 
@@ -490,6 +525,50 @@ public class RetroArchSubsystemTests
 
         // The two disagreeing is what makes the remap detectable at all.
         mapping.NaturalButtonToInput.ShouldNotBe(mapping.ButtonToInput);
+    }
+
+    // ---- the sticks ----
+
+    [Fact]
+    public void Load_ButtonSentToTheMirroredStick_PressesNothing()
+    {
+        // B sent to the left stick's up (id 19) on a Genesis whose left stick stands in for the
+        // Dpad. RetroArch builds that stick's Dpad presses from the physical stick, never from the
+        // remapper's output, and a Dpad-only core reads no stick, so B does nothing in the game.
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageGameRmp(RmpSwap("b", "19"));
+
+        InputMappingConfig? result = Resolve(
+            Game(emulatorPath: RetroArchExe, romDirectory: RomDir, retroArchCore: CoreDll),
+            GenesisPlatform());
+
+        result.ShouldNotBeNull();
+        result.Mappings.ShouldNotContain(e => e.Input == "ButtonA");
+    }
+
+    [Fact]
+    public void Scenario_ButtonRemappedOntoAStickDirection_PressesThatDirectionsButton()
+    {
+        // input_player1_btn_l3 = "22": L3 sends the right stick's down, which an N64 core reads
+        // as C-Down. A remap target past the sixteen buttons is a stick direction.
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: N64CoreDll, displayName: N64CoreDisplayName);
+        StageGameRmp(RmpSwap("l3", "22"), N64CoreDisplayName);
+        _dc.WritePlatform(N64Platform, N64ControllersXml);
+
+        ResolvedMapping mapping = Service().Load(Game(
+            platform: N64Platform,
+            emulatorPath: RetroArchExe,
+            romDirectory: RomDir,
+            retroArchCore: N64CoreDll));
+
+        // C-Down presses at the left-stick click as well as on the stick
+        mapping.ButtonToInput["C-Down"].ShouldBe(["AxisRightStickDown", "ButtonLeftStick"], ignoreOrder: true);
+        // C-Any, the cluster, reaches it too, through C-Down and so derived
+        mapping.DerivedButtonToInput["C-Any"].ShouldContain("ButtonLeftStick");
+        // and the snapshot keeps C-Down on the stick alone, so the move shows as a remap
+        mapping.NaturalButtonToInput["C-Down"].ShouldBe(["AxisRightStickDown"]);
     }
 
     // ---- root-directory detection ----

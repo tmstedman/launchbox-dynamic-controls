@@ -49,6 +49,20 @@ internal static class RetroArchMappings
     internal static readonly Dictionary<int, string> IdToSlot =
         SlotToId.ToDictionary(e => e.Value, e => e.Key);
 
+    // coreId -> analog stick direction, the other targets a remap can send a button to: RetroArch's
+    // own ids for them, which follow the sixteen buttons (+x is right, +y is down).
+    // rmp: input_player1_btn_l3 = "22"  → L3 now pushes the right stick down
+    internal static readonly Dictionary<int, string> AnalogIdToSlot = new()
+    {
+        { 16, "l_x_plus" }, { 17, "l_x_minus" }, { 18, "l_y_plus" }, { 19, "l_y_minus" },
+        { 20, "r_x_plus" }, { 21, "r_x_minus" }, { 22, "r_y_plus" }, { 23, "r_y_minus" },
+    };
+
+    // The slot a remap's coreId sends a button to — a button or a stick direction — or null for
+    // -1 (disabled) and anything else RetroArch doesn't define.
+    internal static string? TargetSlotOf(int coreId) =>
+        IdToSlot.TryGetValue(coreId, out string? slot) || AnalogIdToSlot.TryGetValue(coreId, out slot) ? slot : null;
+
     // RetroPad slot name -> canonical SDL/XInput physical button number.
     // cfg: input_player1_a_btn = "1"  → slot "a", physical btn 1 (canonical, no swap)
     // cfg: input_player1_a_btn = "0"  → slot "a", physical btn 0 (non-canonical → swap detected)

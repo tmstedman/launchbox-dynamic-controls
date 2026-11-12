@@ -60,6 +60,33 @@ public class RetroArchMappingsTests
         RetroArchMappings.SlotToId[slot].ShouldBe(expectedId);
     }
 
+    // ---- the analog directions a remap can send a button to (RetroArch's RARCH_ANALOG_* ids) ----
+
+    [Theory]
+    [InlineData(16, "AxisLeftStickRight")]
+    [InlineData(17, "AxisLeftStickLeft")]
+    [InlineData(18, "AxisLeftStickDown")]   // +y is down
+    [InlineData(19, "AxisLeftStickUp")]
+    [InlineData(20, "AxisRightStickRight")]
+    [InlineData(21, "AxisRightStickLeft")]
+    [InlineData(22, "AxisRightStickDown")]
+    [InlineData(23, "AxisRightStickUp")]
+    public void AnalogIdToSlot_NamesTheStickDirectionRetroArchMeans(int coreId, string expectedGeneric)
+    {
+        RetroArchMappings.RetroPadToGeneric[RetroArchMappings.AnalogIdToSlot[coreId]].ShouldBe(expectedGeneric);
+    }
+
+    [Theory]
+    [InlineData(0, "b")]
+    [InlineData(15, "r3")]
+    [InlineData(22, "r_y_plus")]
+    [InlineData(-1, null)]   // disabled
+    [InlineData(24, null)]   // past the last stick direction
+    public void TargetSlotOf_ReachesButtonsAndStickDirections(int coreId, string? expectedSlot)
+    {
+        RetroArchMappings.TargetSlotOf(coreId).ShouldBe(expectedSlot);
+    }
+
     // ---- SDL/XInput physical button anchors ----
 
     [Theory]

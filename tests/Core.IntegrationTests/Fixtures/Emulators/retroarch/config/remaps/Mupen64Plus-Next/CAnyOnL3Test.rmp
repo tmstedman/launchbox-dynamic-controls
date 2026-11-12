@@ -1,0 +1,2 @@
+# L3 sends the right stick's down (id 22), C-Down on an N64 core, in a game that labels only C-Any.
+input_player1_btn_l3 = "22"

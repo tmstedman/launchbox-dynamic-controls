@@ -99,7 +99,8 @@ public class RetroArchRemapSwapResolverTests
     [Fact]
     public void ResolveSwaps_AxisEntry_ValueMapsToStickSlot_IsSkipped()
     {
-        // "+0" is in AxisValueToSlot (→ "l_x_plus") but "l_x_plus" has no discrete coreId
+        // "+0" is in AxisValueToSlot (→ "l_x_plus"), a stick direction, and an axis entry's target
+        // is looked up among the sixteen buttons only
         Resolve(new Dictionary<string, string> { ["input_player1_axis_l2"] = "+0" }).ShouldBeEmpty();
     }
 

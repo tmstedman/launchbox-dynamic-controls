@@ -20,9 +20,10 @@ public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier
     /// <summary>
     /// Applies slot→coreId swaps to a base mapping. For each entry:
     /// - The slot's physical button leaves its original generic position (removed from base).
-    /// - If the entry targets another valid slot, the slot's physical button is added at that
-    ///   slot's generic position, labelled with the original platform button there (so
-    ///   simultaneous remaps don't see each other's intermediate state). A slot with no
+    /// - If the entry targets another slot — one of the sixteen buttons, or a stick direction,
+    ///   which a remap can also send a button to — the platform button the base maps at that
+    ///   slot's generic position is added at the source's, read from the original base so
+    ///   simultaneous remaps don't see each other's intermediate state. A slot with no
     ///   original base entry (e.g. l2 on a 3-button controller) only adds without removing.
     /// Handles pure swaps (A↔B each removed and re-added at the other position), copies
     /// (l2 also does B), and disabled slots (coreId == -1, only remove).
@@ -47,7 +48,7 @@ public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier
             if (originalByGeneric.ContainsKey(sourceGeneric))
                 removes.Add(sourceGeneric);
 
-            if (!RetroArchMappings.IdToSlot.TryGetValue(coreId, out string? targetSlot)) continue;
+            if (RetroArchMappings.TargetSlotOf(coreId) is not string targetSlot) continue;
             if (!RetroArchMappings.RetroPadToGeneric.TryGetValue(targetSlot, out string? targetGeneric)) continue;
 
             if (originalByGeneric.TryGetValue(targetGeneric, out MappingEntry? targetEntry))
