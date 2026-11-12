@@ -161,6 +161,48 @@ public class RetroArchSwapApplierTests
         ], ignoreOrder: true);
     }
 
+    [Fact]
+    public void Apply_ButtonSentToAStickDirection_AddsThatDirectionsButtonAtTheSource()
+    {
+        // given a Nintendo 64 pad, whose C buttons sit on the right stick, and a remap sending L3 to
+        // the right stick's down (coreId 22)
+        InputMappingConfig baseConfig = MappingConfig(mappings:
+        [
+            ("C-Up", "AxisRightStickUp"),
+            ("C-Down", "AxisRightStickDown"),
+        ]);
+        var swaps = new Dictionary<string, int> { ["l3"] = 22 };
+
+        // when Apply runs
+        var result = _underTest.Apply(baseConfig, swaps);
+
+        // then clicking the left stick presses C-Down, which still sits on the right stick too
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("C-Up", "AxisRightStickUp"),
+            ("C-Down", "AxisRightStickDown"),
+            ("C-Down", "ButtonLeftStick"),
+        ], ignoreOrder: true);
+    }
+
+    [Fact]
+    public void Apply_ButtonSentToAStickDirectionTheBaseDoesntMap_RemovesSourceAndAddsNothing()
+    {
+        // given a pad with no right stick, and a remap sending Circle (slot "a") to its down
+        var swaps = new Dictionary<string, int> { ["a"] = 22 };
+
+        // when Apply runs
+        var result = _underTest.Apply(SonyPad(), swaps);
+
+        // then Circle no longer does anything the platform has a button for, same as disabling it
+        result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
+        [
+            ("Cross", "ButtonA"),
+            ("Triangle", "ButtonY"),
+            ("Square", "ButtonX"),
+        ], ignoreOrder: true);
+    }
+
     // ---- robustness ----
 
     [Fact]

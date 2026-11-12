@@ -196,6 +196,8 @@ Reads the per-game MAME `cfg/` files to detect JOYCODE remaps, contributed as an
 
 Reads the RetroArch cfg cascade and per-game `.rmp` remaps to detect game-specific controller variant overrides and button swaps on top of the platform's base mapping. Only active when the configured emulator is RetroArch.
 
+A remap can send a button to another button or to one of the eight stick directions (RetroArch's ids 16–23, after the sixteen buttons). Either way the platform button at the target appears at the button too, so a Nintendo 64 remap sending L3 to the right stick's down shows C-Down at the left stick's click. A stick's own directions aren't read as remap sources, in a remap file or a cfg.
+
 **What the plugin resolves vs. what it trusts** — `Controllers.xml` is treated as already incorporating all non-game-specific configuration: the joypad driver choice, core-level cfg overrides, and core-level remaps. The plugin only resolves game-specific overrides on top of that base. Button swaps are not re-derived from non-game-specific layers because resolving them requires knowing the physical controller's button layout via RetroArch's autoconfig — a per-hardware mapping the plugin cannot reliably reconstruct. Which controller type is active (`input_libretro_device_p1`) is the exception: it is an explicit discrete choice with no hardware dependency, so it is read from the full remap cascade (game → content-dir → core → common, first match wins).
 
 ## Other namespaces

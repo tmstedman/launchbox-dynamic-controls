@@ -606,6 +606,54 @@ public class RetroArchEndToEndTests
     }
 
     /// <summary>
+    /// A remap sending L3 to the right stick's down (C-Down on an N64 core), in a game that labels
+    /// the C buttons only as a cluster (C-Any). The cluster reaches whatever its members reach, so
+    /// the left-stick click shows C-Down's picture with "Camera", like the rest of the cluster.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_RetroArchRmpL3OntoRightStickDown_ClusterLabelReachesTheLeftStickClick()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "CAnyOnL3Test",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "mupen64plus_next_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabel("ButtonLeftStick", "Camera");
+        overlay.ShouldHaveImage("ButtonLeftStick", @"Templates\Xbox Series X\Nintendo 64\C-Down.png".AsFixturePath());
+    }
+
+    /// <summary>
+    /// A real Super Mario 64 remap, filed under a test name, sending L3 to the right stick's down
+    /// (id 22), which N64 cores read as C-Down. A remap can send a button to any of the eight
+    /// stick directions as well as the sixteen buttons, so clicking the left stick zooms the
+    /// camera out: it shows C-Down's picture and label, which stay on the right stick too.
+    /// </summary>
+    [Fact]
+    public void Nintendo64_RetroArchRmpL3OntoRightStickDown_ShowsCDownAtTheLeftStickClick()
+    {
+        var game = new GameInfo(
+            Platform: "Nintendo 64",
+            RomName: "CDownOnL3Test",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "mupen64plus_next_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("ButtonLeftStick", @"Templates\Xbox Series X\Nintendo 64\C-Down.png".AsFixturePath());
+        overlay.ShouldHaveLabel("ButtonLeftStick", "Zoom Out");
+        overlay.ShouldHaveLabel("AxisRightStickDown", "Zoom Out");
+    }
+
+    /// <summary>
     /// The same Dpad-Left landing on LT, where the Genesis pad has no button at all. Genesis has
     /// art of its own, so its overlay pictures the emulated controller and LT shows the left
     /// arrow too, rather than an LT glyph for a trigger the game never receives.

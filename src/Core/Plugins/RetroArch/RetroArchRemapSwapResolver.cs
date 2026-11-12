@@ -43,7 +43,7 @@ public class RetroArchRemapSwapResolver(ILogger logger) : IRetroArchSwapResolver
 
             if (!RetroArchMappings.SlotToId.TryGetValue(slot, out int defaultId) || coreId == defaultId) continue;
             swaps[slot] = coreId;
-            string? targetName = RetroArchMappings.IdToSlot.GetValueOrDefault(coreId);
+            string? targetName = RetroArchMappings.TargetSlotOf(coreId);
             _logger.Debug($"RetroArch remap entry: '{slot}' -> core ID {coreId} ({targetName ?? "?"})");
         }
         return swaps;
