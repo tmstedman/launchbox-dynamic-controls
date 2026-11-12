@@ -1,0 +1,4 @@
+# The Dpad's up and down swapped (RetroPad ids 4 and 5). The left stick, which RetroArch reads as
+# the Dpad on a Genesis core, still presses the Dpad the controller started with.
+input_player1_btn_up = "5"
+input_player1_btn_down = "4"

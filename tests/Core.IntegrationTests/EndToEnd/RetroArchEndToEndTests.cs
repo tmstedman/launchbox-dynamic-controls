@@ -654,6 +654,32 @@ public class RetroArchEndToEndTests
     }
 
     /// <summary>
+    /// A remap swapping the Dpad's up and down on the Genesis, whose left stick stands in for the
+    /// Dpad (analogToDigital). RetroArch works out the stick's Dpad presses from the stick
+    /// itself, after any remap, so the Dpad rows swap their labels and the stick's don't: pushing
+    /// the stick up still jumps.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_RetroArchRmpDpadSwap_LeftStickKeepsTheDpadItStartedWith()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "DpadSwapTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "genesis_plus_gx_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveLabel("ButtonDpadUp", "Crouch");
+        overlay.ShouldHaveLabel("ButtonDpadDown", "Jump");
+        overlay.ShouldHaveLabel("AxisLeftStickUp", "Jump");
+        overlay.ShouldHaveLabel("AxisLeftStickDown", "Crouch");
+    }
+
+    /// <summary>
     /// The same Dpad-Left landing on LT, where the Genesis pad has no button at all. Genesis has
     /// art of its own, so its overlay pictures the emulated controller and LT shows the left
     /// arrow too, rather than an LT glyph for a trigger the game never receives.

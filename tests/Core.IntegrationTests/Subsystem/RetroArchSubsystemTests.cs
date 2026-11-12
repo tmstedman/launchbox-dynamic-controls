@@ -571,6 +571,38 @@ public class RetroArchSubsystemTests
         mapping.NaturalButtonToInput["C-Down"].ShouldBe(["AxisRightStickDown"]);
     }
 
+    [Fact]
+    public void Scenario_DpadSwap_MirroredStickKeepsTheDpadItStartedWith()
+    {
+        // The Dpad's up and down swapped in a remap file, on a Genesis whose left stick stands in
+        // for the Dpad. RetroArch works out the stick's Dpad presses from the stick itself, after
+        // any remap, so the stick still presses the Dpad the controller started with.
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageGameRmp($"{RmpSwap("up", "5")}\n{RmpSwap("down", "4")}");
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="3-Button" default="true" analogToDigital="left">
+                <Mapping name="B" input="ButtonA" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+              </Controller>
+            </Controllers>
+            """);
+
+        ResolvedMapping mapping = Service().Load(Game(
+            emulatorPath: RetroArchExe,
+            romDirectory: RomDir,
+            retroArchCore: CoreDll));
+
+        // the Dpad's own positions swap
+        mapping.ButtonToInput["Dpad-Up"].ShouldContain("ButtonDpadDown");
+        mapping.ButtonToInput["Dpad-Down"].ShouldContain("ButtonDpadUp");
+        // the stick's don't, and stay derived, so a binding of its own would still outrank them
+        mapping.DerivedButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
+        mapping.DerivedButtonToInput["Dpad-Down"].ShouldBe(["AxisLeftStickDown"]);
+    }
+
     // ---- root-directory detection ----
 
     [Fact]

@@ -56,12 +56,28 @@ public class InputMappingResolver(ILogger logger) : IInputMappingResolver
 
         if (xml.AnalogToDigital is AnalogToDigitalMode mode)
         {
-            var ownCounts = buttonToInput.ToDictionary(e => e.Key, e => e.Value.Count);
-            AnalogToDigitalMirror.Mirror(buttonToInput, mode);
-            foreach ((string button, List<string> inputs) in buttonToInput)
+            if (xml.DpadMirrorSource is { } source)
             {
-                foreach (string mirrored in inputs.Skip(ownCounts[button]))
-                    AddDerived(derived, button, mirrored);
+                // The stick presses another mapping's Dpad (see InputMappingConfig.DpadMirrorSource):
+                // its entries join this mapping's, derived, after each button's own bindings.
+                foreach (MappingEntry mirrored in AnalogToDigitalMirror.EntriesFor(source, mode))
+                {
+                    if (!buttonToInput.TryGetValue(mirrored.Name, out List<string>? list))
+                        buttonToInput[mirrored.Name] = list = [];
+                    if (list.Contains(mirrored.Input)) continue;
+                    list.Add(mirrored.Input);
+                    AddDerived(derived, mirrored.Name, mirrored.Input);
+                }
+            }
+            else
+            {
+                var ownCounts = buttonToInput.ToDictionary(e => e.Key, e => e.Value.Count);
+                AnalogToDigitalMirror.Mirror(buttonToInput, mode);
+                foreach ((string button, List<string> inputs) in buttonToInput)
+                {
+                    foreach (string mirrored in inputs.Skip(ownCounts[button]))
+                        AddDerived(derived, button, mirrored);
+                }
             }
 
             _logger.Debug($"Applied AnalogToDigital mirror (Dpad -> {mode.ToString().ToLowerInvariant()} stick)");

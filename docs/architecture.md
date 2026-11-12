@@ -83,11 +83,11 @@ The resolution chain (highest priority wins):
 2. **Emulator-specific** — RetroArch core config + per-content overrides
 3. **Platform default** — the controller selected from `Platforms/{platform}/Controllers.xml`
 
-On top of whichever source wins, the first applicable `IInputMappingTransform` runs — transforms are first-match-wins like sources, not a chain each layering onto the last. MAME is the only one today: it overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
+On top of whichever source wins, the first applicable `IInputMappingTransform` runs — transforms are first-match-wins like sources, not a chain each layering onto the last. There are two: MAME's overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen, and RetroArch's applies the button swaps in the game's cfg and remap file. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
 
 (All paths resolve through the `Defaults/`+`User/` layering — see [Config layering](#config-layering).)
 
-After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once.
+After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once. When a transform has swapped buttons, the stick mirrors whichever Dpad the transform names (`InputMappingConfig.DpadMirrorSource`), else the transformed one. RetroArch's names the Dpad as it was before its swaps, because RetroArch works out the stick's Dpad presses from the stick itself, after any remap: swapping the Dpad's up and down swaps the Dpad's labels but not the stick's.
 
 Last, after any transform, `ControlResolver` resolves the `<Control>` declarations in the platform's `Controllers.xml` — a platform button that stands for several others, like `Dpad-Any` for the four directions. It reaches whatever its members currently reach.
 
