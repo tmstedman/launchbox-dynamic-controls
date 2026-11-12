@@ -15,6 +15,11 @@ namespace DynamicControls.Plugins.RetroArch;
 /// made a swap invisible as a remap, and left a whole-control label unable to follow its
 /// directions — the same shape MAME's cfg has always had.</para>
 ///
+/// <para>It also names the source's mapping as the Dpad a stick standing in for the Dpad
+/// presses (<see cref="InputMappingConfig.DpadMirrorSource"/>): RetroArch works out that stick's
+/// Dpad presses from the stick itself, after remapping, so a swap of the Dpad's buttons never
+/// reaches it.</para>
+///
 /// <para>Returns null when RetroArch's configuration contributes no swaps, leaving the source's
 /// mapping as it stands.</para>
 /// </summary>
@@ -51,6 +56,6 @@ public class RetroArchSwapTransform(
             _logger.Debug($"RetroArch remap applied: {rmpSwaps} swaps");
         }
 
-        return current;
+        return current with { DpadMirrorSource = baseline.Mappings };
     }
 }

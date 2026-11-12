@@ -42,12 +42,7 @@ public static class AnalogToDigitalMirror
     /// </summary>
     public static void Mirror(Dictionary<string, List<string>> buttonToInput, AnalogToDigitalMode mode)
     {
-        IReadOnlyDictionary<string, string> map = mode switch
-        {
-            AnalogToDigitalMode.Left => DpadToLeftStick,
-            AnalogToDigitalMode.Right => DpadToRightStick,
-            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown AnalogToDigitalMode")
-        };
+        IReadOnlyDictionary<string, string> map = MapFor(mode);
         foreach (List<string> generics in buttonToInput.Values)
         {
             var toAdd = generics
@@ -58,6 +53,28 @@ public static class AnalogToDigitalMirror
             generics.AddRange(toAdd);
         }
     }
+
+    /// <summary>
+    /// What <see cref="Mirror"/> would give <paramref name="mappings"/>' own Dpad directions, as
+    /// derived entries a resolver can take alongside another mapping's. For a mapping an
+    /// emulator's config has swapped: RetroArch works out the stick's Dpad presses from the stick
+    /// itself, after any remap, so the stick presses the Dpad the controller started with, not
+    /// wherever a swap moved its buttons.
+    /// </summary>
+    public static IEnumerable<MappingEntry> EntriesFor(IEnumerable<MappingEntry> mappings, AnalogToDigitalMode mode)
+    {
+        IReadOnlyDictionary<string, string> map = MapFor(mode);
+        return mappings
+            .Where(e => map.ContainsKey(e.Input))
+            .Select(e => new MappingEntry { Name = e.Name, Input = map[e.Input], Derived = true });
+    }
+
+    private static IReadOnlyDictionary<string, string> MapFor(AnalogToDigitalMode mode) => mode switch
+    {
+        AnalogToDigitalMode.Left => DpadToLeftStick,
+        AnalogToDigitalMode.Right => DpadToRightStick,
+        _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, "Unknown AnalogToDigitalMode")
+    };
 }
 
 /// <summary>

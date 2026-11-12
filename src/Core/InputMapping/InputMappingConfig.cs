@@ -39,6 +39,14 @@ public record InputMappingConfig
     /// file. Carried to <see cref="ResolvedMapping.ButtonAliases"/>.
     /// </summary>
     public Dictionary<string, string> ButtonAliases { get; set; } = [];
+
+    /// <summary>
+    /// The mappings whose Dpad the analogToDigital mirror copies onto the stick; null means this
+    /// config's own. Set by a transform whose emulator has the stick press the Dpad the
+    /// controller started with whatever its own swaps did — RetroArch works out a stick's Dpad
+    /// presses from the stick itself, after remapping — and never read from a file.
+    /// </summary>
+    public List<MappingEntry>? DpadMirrorSource { get; set; }
 }
 
 /// <summary>

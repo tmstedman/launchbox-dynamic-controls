@@ -454,6 +454,55 @@ public class InputMappingSubsystemTests
         mapping.InputToButton.ShouldBe(mapping.NaturalInputToButton);
     }
 
+    private const string MirroredPad = """
+        <Controllers>
+          <Controller name="Pad" default="true" analogToDigital="left">
+            <Mapping name="B" input="ButtonA" />
+            <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+          </Controller>
+        </Controllers>
+        """;
+
+    [Fact]
+    public void Load_TransformNamesTheDpadToMirror_StickMirrorsThatDpad()
+    {
+        // a transform can say which Dpad a mirrored stick presses -- RetroArch's names the one the
+        // controller started with -- so a swap putting B on the Dpad's up leaves the stick's up
+        // with Dpad-Up
+        _dc.WritePlatform(Platform, MirroredPad);
+        var transform = new StubMappingTransform((_, baseline) =>
+        {
+            InputMappingConfig swapped = MappingConfig(
+                controller: baseline.Controller,
+                analogToDigital: baseline.AnalogToDigital,
+                mappings: [("B", "ButtonA"), ("B", "ButtonDpadUp")]);
+            swapped.DpadMirrorSource = baseline.Mappings;
+            return swapped;
+        });
+
+        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput["B"].ShouldBe(["ButtonA", "ButtonDpadUp"]);
+        mapping.ButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
+        mapping.DerivedButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
+    }
+
+    [Fact]
+    public void Load_TransformNamingNoDpad_StickMirrorsTheTransformedDpad()
+    {
+        // one that names none -- MAME's -- has its own mapping mirrored, wherever it put the Dpad
+        _dc.WritePlatform(Platform, MirroredPad);
+        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings: [("B", "ButtonA"), ("B", "ButtonDpadUp")]));
+
+        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput["B"].ShouldBe(["ButtonA", "ButtonDpadUp", "AxisLeftStickUp"]);
+        mapping.ButtonToInput.ContainsKey("Dpad-Up").ShouldBeFalse();
+    }
+
     // ---- interaction scenarios ----
     // The cross-cutting cases — multiple features composing through the full pipeline at once.
 

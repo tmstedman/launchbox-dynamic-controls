@@ -127,6 +127,20 @@ public class RetroArchSwapTransformTests
     }
 
     [Fact]
+    public void Transform_NamesTheBaselineAsTheDpadTheStickPresses()
+    {
+        // RetroArch works out a stick's Dpad presses after remapping, so a stick standing in for
+        // the Dpad keeps pressing the one the controller started with
+        StubOverrides(cfg: null, rmp: Overrides(new Dictionary<string, int> { ["up"] = 0 }));
+        InputMappingConfig baseline = Baseline();
+
+        InputMappingConfig? result = _underTest.Transform(Game(), baseline);
+
+        result.ShouldNotBeNull();
+        result.DpadMirrorSource.ShouldBeSameAs(baseline.Mappings);
+    }
+
+    [Fact]
     public void Transform_AppliesTheFirstSwapsToTheBaselineItWasGiven()
     {
         // the transform amends what the source produced; it must not rebuild a mapping of its own

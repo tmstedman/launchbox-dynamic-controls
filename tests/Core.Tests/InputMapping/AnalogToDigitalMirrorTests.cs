@@ -157,6 +157,28 @@ public class AnalogToDigitalMirrorTests
     // ---- Default branch (unknown AnalogToDigitalMode value) ----
 
     [Fact]
+    public void EntriesFor_GivesEachDpadDirectionItsStickDirection_AsDerived()
+    {
+        // given a mapping binding two Dpad directions and a face button
+        MappingEntry[] mappings =
+        [
+            new() { Name = "Dpad-Up", Input = "ButtonDpadUp" },
+            new() { Name = "Dpad-Left", Input = "ButtonDpadLeft" },
+            new() { Name = "B", Input = "ButtonA" },
+        ];
+
+        // when taking the entries the right stick's mirror would add
+        var entries = EntriesFor(mappings, Right).ToList();
+
+        // then each Dpad direction reaches its stick direction, derived, and the face button nothing
+        entries.Select(e => (e.Name, e.Input, e.Derived)).ShouldBe(
+        [
+            ("Dpad-Up", "AxisRightStickUp", true),
+            ("Dpad-Left", "AxisRightStickLeft", true),
+        ]);
+    }
+
+    [Fact]
     public void Mirror_UnknownMode_Throws()
     {
         // given an AnalogToDigitalMode value outside the defined cases (e.g. a future addition

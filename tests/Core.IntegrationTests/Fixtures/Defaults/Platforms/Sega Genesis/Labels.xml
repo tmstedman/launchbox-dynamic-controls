@@ -68,4 +68,10 @@
   <Game romName="UserMappingTest">
     <Input name="Y">Special Attack</Input>
   </Game>
+  <!-- Paired with a RetroArch remap swapping the Dpad's up and down: the Dpad rows swap their
+       labels, the left stick's keep theirs. -->
+  <Game romName="DpadSwapTest">
+    <Input name="Dpad-Up">Jump</Input>
+    <Input name="Dpad-Down">Crouch</Input>
+  </Game>
 </Labels>

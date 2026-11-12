@@ -131,6 +131,27 @@ public class InputMappingResolverTests
     }
 
     [Fact]
+    public void Resolve_WithADpadMirrorSource_MirrorsThatDpadNotItsOwn()
+    {
+        // given a swapped mapping, Dpad-Up moved onto B's position and B onto the Dpad's up, that
+        // names the mapping from before the swap as the Dpad its stick presses
+        var before = MappingConfig(mappings: [("B", "ButtonA"), ("Dpad-Up", "ButtonDpadUp")]);
+        var config = MappingConfig(
+            analogToDigital: AnalogToDigitalMode.Left,
+            mappings: [("B", "ButtonDpadUp"), ("Dpad-Up", "ButtonA")]);
+        config.DpadMirrorSource = before.Mappings;
+
+        // when resolving
+        var result = _underTest.Resolve(Platform, config, controller: "Pad");
+
+        // then the stick's up stays Dpad-Up's, derived, rather than following B onto the Dpad
+        result.ButtonToInput.ShouldBeDictionaryOf(
+            ("B", ["ButtonDpadUp"]),
+            ("Dpad-Up", ["ButtonA", "AxisLeftStickUp"]));
+        result.DerivedButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
+    }
+
+    [Fact]
     public void Resolve_PassesThroughPlatformControllerAndAnalogToDigital()
     {
         // given a config with AnalogToDigital set
