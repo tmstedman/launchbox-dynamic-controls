@@ -212,14 +212,12 @@ public class VisibilityEvaluator : IVisibilityEvaluator
     }
 
     /// <summary>
-    /// True if the given generic input name is mapped: either a platform button drives it now,
-    /// or its natural physical button is still present in the mapping (so the on-screen position
-    /// still belongs to a real button even after a MAME/RetroArch remap).
+    /// True if a platform button drives the given generic input now. A position whose usual
+    /// button a MAME or RetroArch config moved elsewhere does nothing when pressed, so it counts
+    /// as unmapped, the same as <c>InputImageResolver</c> already classifies it.
     /// </summary>
     private static bool IsMapped(ResolvedMapping mapping, string name) =>
-        mapping.InputToButton.ContainsKey(name)
-        || (mapping.NaturalInputToButton.TryGetValue(name, out string? natural)
-            && mapping.ButtonToInput.ContainsKey(natural));
+        mapping.InputToButton.ContainsKey(name);
 }
 
 /// <summary>
