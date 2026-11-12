@@ -17,7 +17,8 @@ public static class TemplateFixtures
         ITemplateImageSource? imageSource = null,
         IReadOnlyList<ILayoutElement>? elements = null,
         IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
-        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null)
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null,
+        IReadOnlySet<string>? fixedImageInputs = null)
     {
         IReadOnlyList<ILayoutElement> elementList = elements ?? [];
         return new(
@@ -29,7 +30,8 @@ public static class TemplateFixtures
                 DefaultFontSize: defaultFontSize,
                 DefaultMinOpacity: defaultMinOpacity,
                 DefaultInactiveBlurRadius: defaultInactiveBlurRadius,
-                Wholes: wholes),
+                Wholes: wholes,
+                FixedImageInputs: fixedImageInputs),
             ImageSource: imageSource ?? new NoOpImageSource());
     }
 

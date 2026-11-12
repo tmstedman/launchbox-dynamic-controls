@@ -42,7 +42,8 @@ internal class TestLayout
         string? showIf = null,
         double? fontSize = null,
         double? minOpacity = null,
-        double? inactiveBlurRadius = null)
+        double? inactiveBlurRadius = null,
+        bool? fixedImage = null)
     {
         _config.Head.NamedStyles[name] = new StyleNode
         {
@@ -50,6 +51,7 @@ internal class TestLayout
             FontSize = fontSize,
             MinOpacity = minOpacity,
             InactiveBlurRadius = inactiveBlurRadius,
+            FixedImage = fixedImage,
         };
         return this;
     }
@@ -135,6 +137,7 @@ internal class InputBuilder(string name)
     public InputBuilder FontSize(double v)                  { Node.FontSize = v;             return this; }
     public InputBuilder MinOpacity(double v)                { Node.MinOpacity = v;           return this; }
     public InputBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
+    public InputBuilder FixedImage(bool v)                  { Node.FixedImage = v;           return this; }
     public InputBuilder At(double x, double y)              { Node.X = Coordinate.Absolute(x); Node.Y = Coordinate.Absolute(y); return this; }
     public InputBuilder Offset(double dx, double dy)        { Node.X = Coordinate.Relative(dx); Node.Y = Coordinate.Relative(dy); return this; }
     public InputBuilder Size(double w, double h)            { Node.Width = w; Node.Height = h; return this; }
@@ -183,6 +186,7 @@ internal class ContainerBuilder
     public ContainerBuilder FontSize(double v)                  { Node.FontSize = v;             return this; }
     public ContainerBuilder MinOpacity(double v)                { Node.MinOpacity = v;           return this; }
     public ContainerBuilder InactiveBlurRadius(double v)        { Node.InactiveBlurRadius = v;   return this; }
+    public ContainerBuilder FixedImage(bool v)                  { Node.FixedImage = v;           return this; }
 
     public ContainerBuilder Input(string name, Action<InputBuilder>? build = null) { Node.Children.Add(TestLayout.BuildInput(name, build)); return this; }
     public ContainerBuilder Container(Action<ContainerBuilder> build)             { Node.Children.Add(TestLayout.BuildContainer(build));   return this; }

@@ -85,6 +85,11 @@ public record StyleNode
     /// <summary>Fallback blur radius for inactive render and overlay elements. Null means use
     /// the global default from RenderingDefaults.</summary>
     public double? InactiveBlurRadius { get; set; }
+
+    /// <summary>Whether the bundle's images ignore a remap (see <see cref="IStyledNode.FixedImage"/>).
+    /// Layered with Input's own `fixedImage` — explicit wins. Not used by the unnamed
+    /// template-wide defaults form.</summary>
+    public bool? FixedImage { get; set; }
 }
 
 /// <summary>
@@ -143,6 +148,15 @@ public interface IStyledNode
     /// children/Overlays inherit if they don't set their own.</summary>
     double? InactiveBlurRadius { get; }
 
+    /// <summary>Whether this element's own image ignores a remap that moved another fixed
+    /// image's button onto it, and the default its children inherit if they don't set their own.
+    /// True where nothing else on screen tells the player which of their controls the image stands
+    /// for — a row in a list of directions, which shares one line to the controller with the rest
+    /// — so the picture has to say it, and drawing the direction a swap moved there would point
+    /// the wrong way. A button from anywhere else still shows its own picture, which can't be read
+    /// as a direction.</summary>
+    bool? FixedImage { get; }
+
     /// <summary>Default font size for labels reachable from this element that don't set their
     /// own fontSize.</summary>
     double? FontSize { get; }
@@ -185,6 +199,9 @@ public record ContainerNode : ILayoutNode, IStyledNode
 
     /// <inheritdoc />
     public double? InactiveBlurRadius { get; set; }
+
+    /// <inheritdoc />
+    public bool? FixedImage { get; set; }
 
     /// <inheritdoc />
     public double? FontSize { get; set; }
@@ -277,6 +294,9 @@ public record InputNode : ILayoutNode, IStyledNode
     /// <summary>InactiveBlurRadius for this Input's own image, and the default for its Overlays
     /// that don't set their own.</summary>
     public double? InactiveBlurRadius { get; set; }
+
+    /// <inheritdoc />
+    public bool? FixedImage { get; set; }
 
     /// <summary>Default font size for labels in this input that don't set their own fontSize.
     /// Sits between the Label's explicit fontSize and the named style's fontSize in the resolution

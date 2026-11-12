@@ -111,6 +111,37 @@ public class TemplateSubsystemTests
         label.FontSize.ShouldBe(22);
     }
 
+    [Fact]
+    public void Load_FixedImageStyle_ReachesRowsThroughNestedContainersAndIsRecorded()
+    {
+        // The shipped template's shape: every direction-list Container, nested ones included,
+        // names the style, since an empty nested Container would stop the outer one's value.
+        var t = Load("""
+            <ControllerTemplate>
+              <Head>
+                <Style name="row" fixedImage="true" />
+              </Head>
+              <Body>
+                <Input name="ButtonDpad" x="0" y="0" />
+                <Container style="row">
+                  <Input name="ButtonDpadLeft" />
+                  <Container style="row">
+                    <Input name="ButtonDpadUp" />
+                    <Input name="ButtonDpadDown" fixedImage="false" />
+                  </Container>
+                </Container>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        var byName = AllInputs(t.Layout.Elements).ToDictionary(i => i.Name);
+        byName["ButtonDpad"].InputImages.Single().FixedImage.ShouldBeFalse();
+        byName["ButtonDpadLeft"].InputImages.Single().FixedImage.ShouldBeTrue();
+        byName["ButtonDpadUp"].InputImages.Single().FixedImage.ShouldBeTrue();
+        byName["ButtonDpadDown"].InputImages.Single().FixedImage.ShouldBeFalse();  // its own false wins
+        t.Layout.FixedImageInputs.ShouldBe(["ButtonDpadLeft", "ButtonDpadUp"], ignoreOrder: true);
+    }
+
     // ---- coordinate resolution ----
 
     [Fact]

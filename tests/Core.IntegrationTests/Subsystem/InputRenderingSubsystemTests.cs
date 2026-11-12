@@ -773,6 +773,102 @@ public class InputRenderingSubsystemTests
         result.Images.ShouldBeEmpty();
     }
 
+    // ---- remapped images: what a position draws once a transform moves its button ----
+
+    private const string Nintendo64 = "Nintendo 64";
+
+    [Fact]
+    public void Render_FixedRowsSwappedWithEachOther_KeepTheirOwnPictures()
+    {
+        // given a list of fixed rows for the right stick, and a cfg swapping C-Up and C-Down
+        // between them; the platform has a picture of each C button
+        Template template = TemplateOf(
+            [new Container(Children: [FixedRow("AxisRightStickUp"), FixedRow("AxisRightStickDown")], Overlays: [])],
+            fixedImageInputs: ["AxisRightStickUp", "AxisRightStickDown"]);
+        ResolvedMapping mapping = RemappedOf(
+            Nintendo64,
+            natural: [("C-Up", "AxisRightStickUp"), ("C-Down", "AxisRightStickDown")],
+            current: [("C-Down", "AxisRightStickUp"), ("C-Up", "AxisRightStickDown")]);
+        _images.With(src: "C-Up.png", generic: "C-Up.png", styled: @"Nintendo 64\C-Up.png", platform: Nintendo64);
+        _images.With(src: "C-Down.png", generic: "C-Down.png", styled: @"Nintendo 64\C-Down.png", platform: Nintendo64);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then each row still shows the direction it is: its icon is all that says which way to
+        // press, and the other row's picture would point the wrong way
+        result.Images.Single(i => i.InputName == "AxisRightStickUp").Source.ShouldBe(@"Nintendo 64\C-Up.png");
+        result.Images.Single(i => i.InputName == "AxisRightStickDown").Source.ShouldBe(@"Nintendo 64\C-Down.png");
+    }
+
+    [Fact]
+    public void Render_ButtonFromAnUnfixedPositionMovedOntoAFixedRow_ShowsItsOwnPicture()
+    {
+        // given Genesis A, usually drawn at the unfixed ButtonA, remapped onto the d-pad list's
+        // up row
+        Template template = TemplateOf(
+            [Input("ButtonA", images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "ButtonA.png")]),
+             new Container(Children: [FixedRow("ButtonDpadUp")], Overlays: [])],
+            fixedImageInputs: ["ButtonDpadUp"]);
+        ResolvedMapping mapping = RemappedOf(
+            Genesis,
+            natural: [("A", "ButtonA"), ("Dpad-Up", "ButtonDpadUp")],
+            current: [("A", "ButtonDpadUp")]);
+        _images.With(src: "A.png", generic: "A.png", styled: @"Sega Genesis\A.png", platform: Genesis);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then the row shows A, which can't be read as a direction
+        result.Images.Single(i => i.InputName == "ButtonDpadUp").Source.ShouldBe(@"Sega Genesis\A.png");
+    }
+
+    [Fact]
+    public void Render_FixedRowNothingDrives_KeepsItsOwnGeneric()
+    {
+        // given C-Up moved off the right stick's up row onto ButtonA, leaving the row undriven
+        Template template = TemplateOf(
+            [new Container(Children: [FixedRow("AxisRightStickUp")], Overlays: [])],
+            fixedImageInputs: ["AxisRightStickUp"]);
+        ResolvedMapping mapping = RemappedOf(
+            Nintendo64,
+            natural: [("C-Up", "AxisRightStickUp")],
+            current: [("C-Up", "ButtonA")]);
+        _images.With(src: "C-Up.png", generic: "C-Up.png", styled: @"Nintendo 64\C-Up.png", platform: Nintendo64);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then fixedImage leaves it Unmapped, drawn as its own generic rather than the picture of
+        // a button that is no longer there
+        result.Images.Single(i => i.InputName == "AxisRightStickUp").Source.ShouldBe("AxisRightStickUp.png");
+    }
+
+    [Fact]
+    public void Render_InputDrawnBothFixedAndUnfixed_OnlyTheFixedPictureIgnoresTheSwap()
+    {
+        // given the right stick's up and down each drawn twice, as fixed rows of a list and as
+        // unfixed pictures elsewhere, with a cfg swapping C-Up and C-Down
+        Template template = TemplateOf(
+            [new Container(Children: [FixedRow("AxisRightStickUp"), FixedRow("AxisRightStickDown")], Overlays: []),
+             Input("AxisRightStickUp", images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStickUp.png")]),
+             Input("AxisRightStickDown", images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: "AxisRightStickDown.png")])],
+            fixedImageInputs: ["AxisRightStickUp", "AxisRightStickDown"]);
+        ResolvedMapping mapping = RemappedOf(
+            Nintendo64,
+            natural: [("C-Up", "AxisRightStickUp"), ("C-Down", "AxisRightStickDown")],
+            current: [("C-Down", "AxisRightStickUp"), ("C-Up", "AxisRightStickDown")]);
+        _images.With(src: "C-Up.png", generic: "C-Up.png", styled: @"Nintendo 64\C-Up.png", platform: Nintendo64);
+        _images.With(src: "C-Down.png", generic: "C-Down.png", styled: @"Nintendo 64\C-Down.png", platform: Nintendo64);
+
+        // when the service renders
+        RenderResult result = _service.Render(template, mapping, LabelsOf());
+
+        // then fixedImage is decided per picture: the row keeps its own, the other follows the swap
+        result.Images.Where(i => i.InputName == "AxisRightStickUp").Select(i => i.Source)
+            .ShouldBe([@"Nintendo 64\C-Up.png", @"Nintendo 64\C-Down.png"], ignoreOrder: true);
+    }
+
     // ---- helpers ----
 
     private static InputDefinition Input(
@@ -789,10 +885,17 @@ public class InputRenderingSubsystemTests
             Children: []);
     }
 
+    /// <summary>An input drawn as a row of a direction list: its image is fixedImage.</summary>
+    private static InputDefinition FixedRow(string name) =>
+        Input(name, images: [new InputImageDefinition(X: 0, Y: 0, ImageFile: $"{name}.png", FixedImage: true)]);
+
+    /// <param name="fixedImageInputs">What a loaded template would record for the fixedImage
+    /// renders among <paramref name="elements"/>.</param>
     private Template TemplateOf(
         ILayoutElement[] elements,
         IReadOnlyDictionary<InputDefinition, CollapseInfo>? collapseInfo = null,
-        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null) =>
+        IReadOnlyDictionary<string, IReadOnlyList<string>>? wholes = null,
+        string[]? fixedImageInputs = null) =>
         TemplateFixtures.TemplateOf(
             elements: elements,
             imageSource: _images,
@@ -800,7 +903,8 @@ public class InputRenderingSubsystemTests
             defaultMinOpacity: 0.3,
             defaultInactiveBlurRadius: 8,
             collapseInfo: collapseInfo,
-            wholes: wholes ?? DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures.StandardWholes);
+            wholes: wholes ?? DynamicControls.Core.TestHelpers.Rendering.RenderingFixtures.StandardWholes,
+            fixedImageInputs: fixedImageInputs?.ToHashSet());
 
     private static ResolvedMapping MappingOf(params (string PlatformButton, string Input)[] entries)
     {
@@ -817,6 +921,19 @@ public class InputRenderingSubsystemTests
             NaturalInputToButton: entries.ToDictionary(e => e.Input, e => e.PlatformButton),
             AnalogToDigital: null);
     }
+
+    /// <summary>A mapping whose buttons usually drive <paramref name="natural"/> and now drive
+    /// <paramref name="current"/>, as after a RetroArch or MAME transform's swap.</summary>
+    private static ResolvedMapping RemappedOf(
+        string platform, (string Button, string Input)[] natural, (string Button, string Input)[] current) =>
+        new(
+            Platform: platform,
+            Controller: null,
+            ButtonToInput: current.ToDictionary(e => e.Button, e => (IReadOnlyList<string>)[e.Input]),
+            InputToButton: current.ToDictionary(e => e.Input, e => e.Button),
+            NaturalButtonToInput: natural.ToDictionary(e => e.Button, e => (IReadOnlyList<string>)[e.Input]),
+            NaturalInputToButton: natural.ToDictionary(e => e.Input, e => e.Button),
+            AnalogToDigital: null);
 
     private static IReadOnlyDictionary<string, IReadOnlyList<string>> Dict(params (string Key, string[] Value)[] entries) =>
         entries.ToDictionary(e => e.Key, e => (IReadOnlyList<string>)e.Value);

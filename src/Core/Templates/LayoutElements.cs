@@ -244,6 +244,9 @@ public record InputDefinition(
 /// the template default. 0 means hidden.</param>
 /// <param name="InactiveBlurRadius">Blur radius when ShowIf conditions are not met. Null means
 /// fall back to the template default.</param>
+/// <param name="FixedImage">From `fixedImage`: when a remap moved another fixed image's button
+/// here, the image is chosen as if nothing were remapped, because nothing else on screen tells
+/// the player which of their controls it stands for.</param>
 [ExcludeFromCodeCoverage]
 public record InputImageDefinition(
     double X,
@@ -254,7 +257,8 @@ public record InputImageDefinition(
     string? UseImageFile = null,
     ShowIfCondition ShowIf = ShowIfCondition.Always,
     double? MinOpacity = null,
-    double? InactiveBlurRadius = null);
+    double? InactiveBlurRadius = null,
+    bool FixedImage = false);
 
 /// <summary>
 /// Resolved canvas position, dimensions, and image path for a single overlay within an
