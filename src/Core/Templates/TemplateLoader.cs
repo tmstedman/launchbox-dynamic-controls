@@ -127,6 +127,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         if (ReadDouble(styleNode, "fontSize") is double fontSize) style.FontSize = fontSize;
         if (ReadDouble(styleNode, "minOpacity") is double minOpacity) style.MinOpacity = minOpacity;
         if (ReadDouble(styleNode, "inactiveBlurRadius") is double blur) style.InactiveBlurRadius = blur;
+        style.FixedImage = ReadBool(styleNode, "fixedImage", "Style");
         return style;
     }
 
@@ -208,6 +209,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
 
         if (ReadDouble(inputNode, "minOpacity") is double minOpacity) input.MinOpacity = minOpacity;
         if (ReadDouble(inputNode, "inactiveBlurRadius") is double blur) input.InactiveBlurRadius = blur;
+        input.FixedImage = ReadBool(inputNode, "fixedImage", $"Input '{name}'");
         if (ReadDouble(inputNode, "fontSize") is double fontSize) input.FontSize = fontSize;
         if (ReadCoordinate(inputNode, "x", $"Input '{name}'") is Coordinate ix) input.X = ix;
         if (ReadCoordinate(inputNode, "y", $"Input '{name}'") is Coordinate iy) input.Y = iy;
@@ -250,7 +252,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// string. Unlike the old &lt;Group&gt; it replaced, a Container never decides its own
     /// inclusion — it's always rendered once reached; wrap it in an explicit &lt;Condition&gt;
     /// when gating is wanted. Its style attributes (style/showIf/minOpacity/inactiveBlurRadius/
-    /// fontSize) are the same shape as an Input's own — see <see cref="IStyledNode"/> — and
+    /// fixedImage/fontSize) are the same shape as an Input's own — see <see cref="IStyledNode"/> — and
     /// cascade to its member Inputs and Overlay children the same way an Input's own attributes
     /// cascade to its Labels and Overlays. A Container says nothing about identity: a loose
     /// &lt;Label&gt; inside one names its own Inputs (see <see cref="LabelNode.Inputs"/>).
@@ -270,6 +272,7 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
         if (string.Equals(containerNode.Attributes["collapse"]?.Value, "true", StringComparison.OrdinalIgnoreCase)) container.Collapse = true;
         if (ReadDouble(containerNode, "minOpacity") is double minOpacity) container.MinOpacity = minOpacity;
         if (ReadDouble(containerNode, "inactiveBlurRadius") is double blur) container.InactiveBlurRadius = blur;
+        container.FixedImage = ReadBool(containerNode, "fixedImage", "Container");
         if (ReadDouble(containerNode, "fontSize") is double fontSize) container.FontSize = fontSize;
 
         foreach (XmlElement child in containerNode.ChildNodes.OfType<XmlElement>())
@@ -381,6 +384,17 @@ public class TemplateLoader(ILogger logger, IFileSystem fs, string rootDir) : IT
     /// field's default.</summary>
     private static double? ReadDouble(XmlElement node, string attr) =>
         TryParseDouble(node.Attributes[attr]?.Value, out double v) ? v : null;
+
+    /// <summary>Returns the value of a true/false attribute, or null if the attribute is absent.
+    /// Null rather than false, since an explicit false has to be able to override a style's true.
+    /// Anything else is logged and treated as absent.</summary>
+    private bool? ReadBool(XmlElement node, string attr, string context)
+    {
+        if (node.Attributes[attr]?.Value is not string s) return null;
+        if (bool.TryParse(s, out bool b)) return b;
+        _logger.Error($"{context}: {attr}=\"{s}\" is not true or false; ignoring it");
+        return null;
+    }
 
     /// <summary>Returns the parsed value of a coordinate attribute, or null if the attribute is
     /// absent. If the attribute is present but not a valid coordinate, logs an error and returns

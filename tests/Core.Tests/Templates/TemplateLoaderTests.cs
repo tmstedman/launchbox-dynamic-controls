@@ -262,6 +262,48 @@ public class TemplateLoaderTests
     }
 
     [Fact]
+    public void LoadLayout_FixedImage_ParsedOnStyleContainerAndInput()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Head>
+                <Style name='row' fixedImage='true' />
+              </Head>
+              <Body>
+                <Container fixedImage='TRUE'>
+                  <Input name='A' fixedImage='false' />
+                  <Input name='B' />
+                </Container>
+              </Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Head.NamedStyles["row"].FixedImage.ShouldBe(true);
+        ContainerNode container = result.Elements.OfType<ContainerNode>().Single();
+        container.FixedImage.ShouldBe(true);
+        // an explicit false is kept apart from an absent one, so it can override a style's true
+        container.Children.OfType<InputNode>().Single(i => i.Name == "A").FixedImage.ShouldBe(false);
+        container.Children.OfType<InputNode>().Single(i => i.Name == "B").FixedImage.ShouldBeNull();
+    }
+
+    [Fact]
+    public void LoadLayout_FixedImageNeitherTrueNorFalse_IsLoggedAndIgnored()
+    {
+        StubLayoutXml("""
+            <ControllerTemplate>
+              <Body><Input name='A' fixedImage='yes' /></Body>
+            </ControllerTemplate>
+            """);
+
+        LayoutDocument result = _underTest.LoadLayout("x")!;
+
+        result.Elements.OfType<InputNode>().Single().FixedImage.ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Input 'A'") && s.Contains("fixedImage=\"yes\"")));
+    }
+
+    [Fact]
     public void LoadLayout_InputMissingName_IsSkippedAndLogged()
     {
         // given two inputs where one has no name attribute

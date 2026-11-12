@@ -4,7 +4,10 @@
         <Style name="auto-blur" showIf="auto" minOpacity="0.3" />
         <Style name="mapped-input-blur" showIf="mapping" minOpacity="0.3" inactiveBlurRadius="6" />
         <Style name="small-label-blur" showIf="label" minOpacity="0.3" inactiveBlurRadius="6" fontSize="22" />
-        <Style name="small-label-vacate" showIf="label" inactiveBlurRadius="6" fontSize="22" />
+        <!-- The rows of the direction lists. A list shares one line to its control, so a row's
+             icon is all that says which way to press: fixedImage keeps a row from showing a
+             direction a cfg swapped in from another row, which would point the wrong way. -->
+        <Style name="small-label-vacate" showIf="label" inactiveBlurRadius="6" fontSize="22" fixedImage="true" />
         <Style name="input-label" showIf="label" minOpacity="0.3" inactiveBlurRadius="8" />
         <Style name="show-if-label" showIf="label" />
         <Whole name="ButtonDpad" parts="ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight" />

@@ -53,17 +53,17 @@ Allowed values:
 
 ### Style cascade
 
-`style`, `showIf`, `minOpacity`, `inactiveBlurRadius`, and `fontSize` all resolve through the same cascade, and every element that carries visual attributes participates in it — `<Input>` and `<Container>` as origins whose result flows down to whatever they contain, `<Overlay>`/`<Label>` as the leaves at the end of it. Each attribute is resolved in priority order:
+`style`, `showIf`, `minOpacity`, `inactiveBlurRadius`, `fixedImage`, and `fontSize` all resolve through the same cascade, and every element that carries visual attributes participates in it — `<Input>` and `<Container>` as origins whose result flows down to whatever they contain, `<Overlay>`/`<Label>` as the leaves at the end of it. Each attribute is resolved in priority order:
 
 1. **Explicit attribute on the element itself** — `<Input minOpacity="0.5">`, `<Container style="foo">`
 2. **Named style reference** — `style="foo"` looks up the `<Style name="foo">` in `<Head>`
 3. **Whatever's already ambient** — the nearest enclosing `<Input>`/`<Container>`'s own resolved value, itself resolved the same way
-4. **Template default** — the unnamed `<Style>` in `<Head>` (`fontSize`/`minOpacity`/`inactiveBlurRadius` only — the unnamed form doesn't carry `showIf`, see `<Style>` below)
-5. **Built-in default** — `fontSize=28`, `minOpacity=0`, `inactiveBlurRadius=0`, `showIf` *(omitted)*
+4. **Template default** — the unnamed `<Style>` in `<Head>` (`fontSize`/`minOpacity`/`inactiveBlurRadius` only — the unnamed form doesn't carry `showIf` or `fixedImage`, see `<Style>` below)
+5. **Built-in default** — `fontSize=28`, `minOpacity=0`, `inactiveBlurRadius=0`, `fixedImage=false`, `showIf` *(omitted)*
 
 Explicit attributes always win. Use a named style, or a `<Container>`'s own attributes, to share visual treatment across many inputs without repeating it on each one.
 
-**One exception**: a `<Container>` that sets nothing of its own for `showIf`/`minOpacity`/`inactiveBlurRadius` does *not* pass an ambient value through to its members (tier 3 is skipped for those three attributes specifically, though not for `fontSize`, which always keeps falling through). A `<Container>` exists to declare a shared value *for its own members*, not to relay whatever its enclosing `<Input>` happened to set for a completely different purpose — an analog stick's own `auto-blur` fade, say, isn't meant to reach four levels down into a `small-label-vacate` direction inside it and turn its vacate-to-zero into a fade instead. A `<Container>` that *does* set its own explicit value still passes it to members exactly as you'd expect; only an empty one stops being a pass-through for someone else's ambient value.
+**One exception**: a `<Container>` that sets nothing of its own for `showIf`/`minOpacity`/`inactiveBlurRadius`/`fixedImage` does *not* pass an ambient value through to its members (tier 3 is skipped for those four attributes specifically, though not for `fontSize`, which always keeps falling through). A `<Container>` exists to declare a shared value *for its own members*, not to relay whatever its enclosing `<Input>` happened to set for a completely different purpose — an analog stick's own `auto-blur` fade, say, isn't meant to reach four levels down into a `small-label-vacate` direction inside it and turn its vacate-to-zero into a fade instead. A `<Container>` that *does* set its own explicit value still passes it to members exactly as you'd expect; only an empty one stops being a pass-through for someone else's ambient value.
 
 ### Image resolution
 
@@ -85,7 +85,7 @@ Which of the two is drawn depends on the input's mapping state, so styled art do
 | Input state | Image drawn |
 |---|---|
 | A platform button drives it, as that button's natural target | `{platformButton}.png` from the styled tiers, else the generic |
-| A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic |
+| A platform button drives it, but the button naturally targets another input | `{platformButton}.png` from the styled tiers, so the player sees the button they're physically pressing; else the generic. A `fixedImage` Input ignores a remap from another fixed position and takes the row above, or the one below where no button usually sits — see [`<Input>`](#input--a-generic-input) |
 | No platform button drives it | The generic — **unless** the Input sets `useImage`, which is borrowing another input's asset and so honours that asset's styled variant |
 
 A declared `<Whole>` that two or more platform buttons drive between them tries one more file first, `{platform}/{those buttons, sorted by name and space-joined}.png` (`Nintendo 64/C-Left C-Right.png` for the C cluster's horizontal pair), and keeps the rows above when it isn't there.
@@ -133,6 +133,7 @@ Two distinct uses, distinguished by the presence of `name`:
 | `fontSize` | double | no | |
 | `minOpacity` | double | no | Opacity when `showIf` condition is not met; `0` = hidden, `1` = always full opacity |
 | `inactiveBlurRadius` | double | no | Blur radius when `showIf` condition is not met; `0` = no blur |
+| `fixedImage` | bool | no | Only meaningful on named styles — see [`<Input>`](#input--a-generic-input) |
 
 ### `<Whole>` — a composite control
 
@@ -178,6 +179,7 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 | `showIf` | enum | no | Governs this Input's own image; falls through to whatever's reachable from it that sets its own (`<Overlay>`, a nested `<Input>`, ...) — see [Style cascade](#style-cascade) |
 | `minOpacity` | double | no | Governs this Input's own image; falls through the same way |
 | `inactiveBlurRadius` | double | no | Governs this Input's own image; falls through the same way |
+| `fixedImage` | bool | no | Draw this Input's own image as if nothing were remapped; falls through the same way. See below |
 | `fontSize` | double | no | Falls through to `<Label>` the same way |
 | `x` | coordinate | no | Also the position of this Input's own image. Origin for nested elements with relative coords. Default `+0` |
 | `y` | coordinate | no | Same. Default `+0` |
@@ -187,12 +189,14 @@ The unit of the layout. An Input has a `name` matching a generic input identifie
 
 **`useImage` and asset borrowing**: When `useImage` is set, the Input is "borrowing" another input's artwork. The image resolution chain still applies, so a borrowed image gets its platform-specific variant even when the *borrowing* input isn't mapped. This is how `AxisRightStickUp` shows the same up-arrow as `AxisLeftStickUp` without copying the asset.
 
+**`fixedImage` and remaps**: an image normally follows a remap, showing the button an emulator config moved onto that position (see [Image resolution](#image-resolution)). That suits an image whose position already says which of the player's controls it is, such as a face button with its own line to the controller drawing. Set `fixedImage="true"` where nothing else does: in a list of directions sharing one line to their control, the icon is all that says which way to press, and drawing the direction a remap moved there would point the player the wrong way. When the button moved there usually sits at a fixed position too (a cfg swapping up and down), a fixed image is drawn as it would be with nothing remapped. Its label still moves, so the row reads "↑ Crouch" when pressing up crouches. A button from anywhere else, such as a face button moved onto a direction, still shows its own picture, which can't be read as a direction. An input counts as fixed if any `<Input>` drawing it is. A fixed `<Whole>`, such as an axis row, counts as moved when a button from another fixed position drives one of its parts. A position that nothing drives at all is unaffected. A template that lists directions should set it on every row: without it, a swap between two directions draws each row with the other's picture. The shipped template sets it once, on the `small-label-vacate` style every direction-list `<Container>` names.
+
 **Children** (any combination, any order):
 - `<Label>` — label text
 - `<Overlay>` — additional image
 - `<Input>`, `<Container>`, `<OneOf>`, `<Condition>` — nested layout
 
-**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's `showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` are what the child falls through to via the [style cascade](#style-cascade) when the child sets none of its own — same as a `<Label>`/`<Overlay>` reachable from the parent would. Nesting one `<Input>` inside another is unusual in practice, though — the shipped template no longer does it at all.
+**Nested Input semantics**: A nested `<Input>` inside another Input establishes a parent-child relationship. The parent's `showIf`/`minOpacity`/`inactiveBlurRadius`/`fixedImage`/`fontSize` are what the child falls through to via the [style cascade](#style-cascade) when the child sets none of its own — same as a `<Label>`/`<Overlay>` reachable from the parent would. Nesting one `<Input>` inside another is unusual in practice, though — the shipped template no longer does it at all.
 
 **This is *not* how a composite control's `showIf="auto"` fan-out works, even though it used to be.** A control declared as a [`<Whole>`](#whole--a-composite-control) lights up when any of its parts has a label or mapping, but that fan-out is sourced from that declaration, not from `Children` nesting — so the direction inputs live as top-level *siblings* of their composite's own bare `<Input>`, not nested inside it:
 
@@ -331,7 +335,7 @@ A vertical list of inputs, each spaced `gap` pixels below the last. Which slot s
 Two purposes remain:
 
 1. **Shared overlays**: an `<Overlay>` declared at the container level renders once whenever the container itself is reached, instead of being repeated on every member.
-2. **Shared style**: `style`/`showIf`/`minOpacity`/`inactiveBlurRadius`/`fontSize` declared on the Container flow to its member Inputs and Overlay children the same way an Input's own attributes flow to its Labels and Overlays — see [Style cascade](#style-cascade), including the one exception that applies only here (an *empty* Container doesn't relay a wrapping Input's own ambient value through to members).
+2. **Shared style**: `style`/`showIf`/`minOpacity`/`inactiveBlurRadius`/`fixedImage`/`fontSize` declared on the Container flow to its member Inputs and Overlay children (`fixedImage` to Inputs only, since an Overlay never follows a remap) the same way an Input's own attributes flow to its Labels and Overlays — see [Style cascade](#style-cascade), including the one exception that applies only here (an *empty* Container doesn't relay a wrapping Input's own ambient value through to members).
 
 **These two don't always compose for free.** A direct-child `<Overlay>` cascades style from the Container exactly like a member Input does — so if the overlay sets no `showIf`/`minOpacity`/`inactiveBlurRadius` of its own (the common case for a decorative line/frame), it silently starts inheriting whatever style you hoist onto the Container for the *members'* sake. If that's not what you want, move the `<Overlay>` to sit *outside* the Container instead — as a loose `<Overlay>` sibling (see [Loose `<Overlay>`](#loose-overlay)), still inside the same wrapping `<Condition>` so its existence-gating is unchanged. Position is unaffected if it's already absolute; a relative one needs converting, since it'll resolve against a different ambient origin outside the Container.
 
@@ -359,6 +363,7 @@ Two purposes remain:
 | `showIf` | enum | no | Default for member Inputs/Overlays that don't set their own — see [Style cascade](#style-cascade) |
 | `minOpacity` | double | no | Same |
 | `inactiveBlurRadius` | double | no | Same |
+| `fixedImage` | bool | no | Same |
 | `fontSize` | double | no | Same |
 
 **`vAlign`** shifts the container's whole origin *before* slots are laid out, so it changes where every child ends up, not just one of them:
@@ -469,7 +474,7 @@ If no `<Condition>` (nor any other) alternative in an enclosing `<OneOf>` passes
 - Element names are case-sensitive. `<input>` is silently ignored.
 - Attribute values are parsed culture-invariantly — use `.` as the decimal separator.
 - Numbers (`width`, `height`, `gap`, `fontSize`, `minOpacity`, `inactiveBlurRadius`) are `double`. NaN signals "use the natural value" for `width`/`height`.
-- Boolean attributes (currently just `collapse`) accept `"true"` case-insensitively. Any other value is treated as `false`.
+- `collapse` accepts `"true"` case-insensitively; any other value is treated as `false`. `fixedImage` accepts `true` or `false`, case-insensitively, since an explicit `false` has to override a style's `true`; any other value is logged and ignored.
 - Coordinates (`x`, `y`) accept `+N`, `-N`, or plain `N`. A leading `+` makes it relative even when `N` is positive — without the `+`, it's absolute.
 - The order of children matters in `<Container>` (slot index), `<OneOf>` (alternative priority), and `<Body>` (document order is preserved through the render output).
 
@@ -482,6 +487,7 @@ The parser emits errors to the configured `ILogger` for:
 - Unknown element where one of `<Head>`, `<Body>`, `<Input>`, `<Overlay>`, `<Label>`, `<Container>`, `<OneOf>`, `<Condition>` was expected
 - `style="X"` (on `<Input>`, `<Container>`, `<Overlay>`, or `<Label>`) where `X` isn't a `<Style name="X">` in `<Head>`
 - `<Input showIf="X">` (or `<Container>`/`<Overlay>`) where `X` isn't a known mode
+- `fixedImage="X"` (on `<Input>`, `<Container>` or `<Style>`) where `X` isn't `true` or `false` (the attribute is ignored)
 - `<Condition>` with zero, or both, of `inputs`/`none` set, or `atLeast` alongside `none` (the whole `<Condition>` is skipped)
 - `<Condition atLeast="X">` where `X` isn't a positive whole number (every named input is required instead)
 - `<Condition match="X">` where `X` isn't `label`, `mapping`, `auto`, `agree`, or `game-label` (falls back to `label`)

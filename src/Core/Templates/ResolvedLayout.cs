@@ -15,15 +15,22 @@ namespace DynamicControls.Templates;
 /// is made of — see <see cref="WholeNode"/>. Read wherever a name has to be expanded into the
 /// controls behind it: a composite's visibility is the union of its parts', and its image is
 /// classified by the platform button driving all of them.</param>
+/// <param name="FixedImageInputs">Every input some render draws with <c>fixedImage</c>, so the
+/// image resolver can tell a button moved from one of those positions from one moved from
+/// anywhere else.</param>
 public record ResolvedLayout(
     IReadOnlyList<ILayoutElement> Elements,
     IReadOnlyDictionary<InputDefinition, CollapseInfo> CollapseInfo,
     double DefaultFontSize,
     double DefaultMinOpacity,
     double DefaultInactiveBlurRadius,
-    IReadOnlyDictionary<string, IReadOnlyList<string>>? Wholes = null)
+    IReadOnlyDictionary<string, IReadOnlyList<string>>? Wholes = null,
+    IReadOnlySet<string>? FixedImageInputs = null)
 {
     /// <summary>Never null, so a caller never has to ask whether the template declared any.</summary>
     public IReadOnlyDictionary<string, IReadOnlyList<string>> Wholes { get; init; } =
         Wholes ?? new Dictionary<string, IReadOnlyList<string>>();
+
+    /// <summary>Never null, like <see cref="Wholes"/>.</summary>
+    public IReadOnlySet<string> FixedImageInputs { get; init; } = FixedImageInputs ?? new HashSet<string>();
 }

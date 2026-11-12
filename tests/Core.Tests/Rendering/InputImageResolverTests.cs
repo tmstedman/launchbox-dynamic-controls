@@ -626,6 +626,167 @@ public class InputImageResolverTests
         path.ShouldBe("/template/ButtonA.png");
     }
 
+    // ---- fixedImage: a picture that is all that says which control it is ----
+
+    private static InputImageDefinition FixedImageOf(string inputName) =>
+        new(X: 0, Y: 0, ImageFile: $"{inputName}.png", FixedImage: true);
+
+    /// <summary>A template some of whose renders draw these inputs with fixedImage.</summary>
+    private Template TemplateWithFixedImages(params string[] inputNames) =>
+        TemplateOf(imageSource: _imageSource, fixedImageInputs: new HashSet<string>(inputNames));
+
+    [Fact]
+    public void Resolve_FixedImageRemapped_DrawsThePlatformArtOfTheButtonUsuallyThere()
+    {
+        // Nintendo 64 with C-Up and C-Down swapped: the right-stick list's up row is pressed as
+        // C-Down now, but its icon is all that says "up", so it keeps the C-Up picture
+        var input = Input("AxisRightStickUp");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string> { ["AxisRightStickUp"] = "C-Down" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Up"] = ["AxisRightStickUp"],
+                ["C-Down"] = ["AxisRightStickDown"],
+            },
+            naturalInputToButton: new Dictionary<string, string> { ["AxisRightStickUp"] = "C-Up" });
+        StubResolve("AxisRightStickUp.png", generic: "/template/AxisRightStickUp.png");
+        StubResolve("C-Up.png", generic: "/template/C-Up.png", styled: "/template/Nintendo 64/C-Up.png");
+        StubResolve("C-Down.png", generic: "/template/C-Down.png", styled: "/template/Nintendo 64/C-Down.png");
+        Template template = TemplateWithFixedImages("AxisRightStickUp", "AxisRightStickDown");
+
+        var path = _underTest.Resolve(FixedImageOf("AxisRightStickUp"), input, mapping, template);
+
+        path.ShouldBe("/template/Nintendo 64/C-Up.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedImageNothingDrivesIt_IsNotDrawnAsTheButtonUsuallyThere()
+    {
+        // fixedImage undoes a remap only: a position whose button moved away and that nothing
+        // drives now is Unmapped either way, and an absent button's platform art would mislead
+        var input = Input("ButtonDpadUp");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>> { ["Dpad-Up"] = ["ButtonDpadUp"] },
+            naturalInputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Dpad-Up" });
+        StubResolve("ButtonDpadUp.png", generic: "/template/ButtonDpadUp.png");
+        StubResolve("Dpad-Up.png", generic: "/template/Dpad-Up.png", styled: "/template/styled/Dpad-Up.png");
+
+        var path = _underTest.Resolve(FixedImageOf("ButtonDpadUp"), input, mapping, TestTemplate());
+
+        path.ShouldBe("/template/ButtonDpadUp.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_AButtonFromAnUnfixedPositionMovedOnto_FollowsTheRemap()
+    {
+        // PS2 Cross (usually ButtonA, drawn unfixed) remapped onto the d-pad list's up row
+        var input = Input("ButtonDpadUp");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Cross" },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Dpad-Up"] = ["ButtonDpadUp"],
+                ["Cross"] = ["ButtonA"],
+            },
+            naturalInputToButton: new Dictionary<string, string> { ["ButtonDpadUp"] = "Dpad-Up" });
+        StubResolve("ButtonDpadUp.png", generic: "/template/ButtonDpadUp.png");
+        StubResolve("Cross.png", generic: "/template/Cross.png", styled: "/template/Sony Playstation 2/Cross.png");
+        Template template = TemplateWithFixedImages("ButtonDpadUp");
+
+        var path = _underTest.Resolve(FixedImageOf("ButtonDpadUp"), input, mapping, template);
+
+        path.ShouldBe("/template/Sony Playstation 2/Cross.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedWhole_APartsButtonMovedFromAnotherFixedPosition_DrawsWhatItWouldWithNothingMoved()
+    {
+        // the right-stick list's up-down axis row, with a cfg rotating the C cluster so C-Left and
+        // C-Right drive up and down: the axis has no button of its own, so its picture is chosen
+        // by the buttons driving its parts, and those came from other fixed rows
+        var input = Input("AxisRightStickY");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickUp"] = "C-Left",
+                ["AxisRightStickDown"] = "C-Right",
+                ["AxisRightStickLeft"] = "C-Up",
+                ["AxisRightStickRight"] = "C-Down",
+            },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["C-Up"] = ["AxisRightStickUp"],
+                ["C-Down"] = ["AxisRightStickDown"],
+                ["C-Left"] = ["AxisRightStickLeft"],
+                ["C-Right"] = ["AxisRightStickRight"],
+            },
+            naturalInputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickUp"] = "C-Up",
+                ["AxisRightStickDown"] = "C-Down",
+                ["AxisRightStickLeft"] = "C-Left",
+                ["AxisRightStickRight"] = "C-Right",
+            });
+        StubResolve("AxisRightStickY.png", generic: "/template/AxisRightStickY.png");
+        StubResolve("C-Down C-Up.png", generic: "/template/C-Down C-Up.png", styled: "/template/Nintendo 64/C-Down C-Up.png");
+        StubResolve("C-Left C-Right.png", generic: "/template/C-Left C-Right.png", styled: "/template/Nintendo 64/C-Left C-Right.png");
+        Template template = TemplateOf(
+            imageSource: _imageSource,
+            wholes: new Dictionary<string, IReadOnlyList<string>> { ["AxisRightStickY"] = ["AxisRightStickUp", "AxisRightStickDown"] },
+            fixedImageInputs: new HashSet<string>
+            {
+                "AxisRightStickY", "AxisRightStickUp", "AxisRightStickDown", "AxisRightStickLeft", "AxisRightStickRight",
+            });
+
+        var path = _underTest.Resolve(FixedImageOf("AxisRightStickY"), input, mapping, template);
+
+        // then it keeps the up-down pair's picture, as its own rows keep theirs
+        path.ShouldBe("/template/Nintendo 64/C-Down C-Up.png");
+    }
+
+    [Fact]
+    public void Resolve_FixedWhole_APartsButtonFromAnUnfixedPosition_FollowsTheSwap()
+    {
+        // the same axis row, with Z (usually the right trigger, drawn unfixed) moved onto up:
+        // Z's picture can't be read as a direction, so the axis shows the buttons now driving it,
+        // as a single row would show Z
+        var input = Input("AxisRightStickY");
+        ResolvedMapping mapping = MappingOf(
+            platform: Platform, controller: Controller,
+            inputToButton: new Dictionary<string, string>
+            {
+                ["AxisRightStickUp"] = "Z",
+                ["AxisRightStickDown"] = "C-Down",
+            },
+            naturalButtonToInput: new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Z"] = ["AxisTriggerRight"],
+                ["C-Up"] = ["AxisRightStickUp"],
+                ["C-Down"] = ["AxisRightStickDown"],
+            },
+            naturalInputToButton: new Dictionary<string, string>
+            {
+                ["AxisTriggerRight"] = "Z",
+                ["AxisRightStickUp"] = "C-Up",
+                ["AxisRightStickDown"] = "C-Down",
+            });
+        StubResolve("AxisRightStickY.png", generic: "/template/AxisRightStickY.png");
+        StubResolve("C-Down Z.png", generic: "/template/C-Down Z.png", styled: "/template/Nintendo 64/C-Down Z.png");
+        StubResolve("C-Down C-Up.png", generic: "/template/C-Down C-Up.png", styled: "/template/Nintendo 64/C-Down C-Up.png");
+        Template template = TemplateOf(
+            imageSource: _imageSource,
+            wholes: new Dictionary<string, IReadOnlyList<string>> { ["AxisRightStickY"] = ["AxisRightStickUp", "AxisRightStickDown"] },
+            fixedImageInputs: new HashSet<string> { "AxisRightStickY", "AxisRightStickUp", "AxisRightStickDown" });
+
+        var path = _underTest.Resolve(FixedImageOf("AxisRightStickY"), input, mapping, template);
+
+        path.ShouldBe("/template/Nintendo 64/C-Down Z.png");
+    }
+
     // ---- default arms (unknown MappingState subtype) ----
 
     [Fact]

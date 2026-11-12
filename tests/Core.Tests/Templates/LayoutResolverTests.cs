@@ -466,6 +466,83 @@ public class TemplateLayoutResolverTests
         member.InputImages.Single().MinOpacity.ShouldBe(0.5);
     }
 
+    // --- fixedImage ---
+
+    [Fact]
+    public void Resolve_FixedImage_ReachesMembersFromTheContainersNamedStyle()
+    {
+        // the shipped template's shape: every direction-list Container names one style
+        TestLayout config = new TestLayout()
+            .NamedStyle("row", fixedImage: true)
+            .Container(g => g.Style("row").Input("ButtonDpadUp"));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.FirstContainer().Children.FirstInput().InputImages.Single().FixedImage.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_InputsOwnFalseWinsOverTheContainers()
+    {
+        TestLayout config = new TestLayout()
+            .Container(g => g.FixedImage(true).Input("ButtonDpadUp", i => i.FixedImage(false)));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.FirstContainer().Children.FirstInput().InputImages.Single().FixedImage.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_AbsentEverywhere_IsFalse()
+    {
+        TestLayout config = new TestLayout().Input("ButtonA");
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.FirstInput().InputImages.Single().FixedImage.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_NotPassedThroughAContainerSettingNothing()
+    {
+        // the same stop the other image settings make: a wrapping Input's own value is about
+        // its own glyph, not the rows of a list inside it
+        TestLayout config = new TestLayout()
+            .Input("AxisLeftStick", i => i.FixedImage(true)
+                .ChildContainer(g => g.Input("AxisLeftStickUp")));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        InputDefinition member = result.FirstInput().Children.FirstContainer().Children.FirstInput();
+        member.InputImages.Single().FixedImage.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_RecordsWhichInputsAreDrawnFixed()
+    {
+        TestLayout config = new TestLayout()
+            .Input("ButtonA")
+            .Container(g => g.FixedImage(true).Input("ButtonDpadUp"));
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.FixedImageInputs.ShouldBe(["ButtonDpadUp"], ignoreOrder: true);
+    }
+
+    [Fact]
+    public void Resolve_FixedImage_AnInputDrawnBothWays_IsRecordedAsFixed()
+    {
+        // a row of a fixed list, then the same input drawn again unfixed: the later one doesn't
+        // take it back
+        TestLayout config = new TestLayout()
+            .Container(g => g.FixedImage(true).Input("ButtonDpadUp"))
+            .Input("ButtonDpadUp");
+
+        ResolvedLayout result = _underTest.Resolve(config, _imageSource);
+
+        result.FixedImageInputs.ShouldBe(["ButtonDpadUp"], ignoreOrder: true);
+    }
+
     // --- Image filename derivation ---
 
     [Fact]

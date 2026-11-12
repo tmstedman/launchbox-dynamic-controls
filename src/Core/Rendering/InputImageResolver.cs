@@ -36,6 +36,18 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     {
         IReadOnlyList<string> parts = template.Layout.Wholes.GetValueOrDefault(input.Name, []);
         MappingState state = Classify(input.Name, mapping, parts);
+        if (image.FixedImage && MovedFromAFixedPosition(state, parts, mapping, template))
+        {
+            // The template says only this picture tells the player which of their controls this
+            // is, so a button moved here from another such picture (one direction of a list
+            // swapped for another) would point the wrong way: everything from here on reads the
+            // mapping as though nothing had been moved, which classifies MappedDefault or
+            // Unmapped. A button from anywhere else keeps its own picture, which can't be read as
+            // a direction.
+            _logger.Debug($"Button image: {input.Name} is fixed, drawn as if not remapped");
+            mapping = Unremapped(mapping);
+            state = Classify(input.Name, mapping, parts);
+        }
 
         string imageFile = image.UseImageFile ?? image.ImageFile;
         ResolvedImagePaths resolved = template.ImageSource.Resolve(imageFile, mapping.Platform, mapping.Controller);
@@ -190,6 +202,32 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     /// </summary>
     private static string? RemappedPlatformImage(string platformButton, Template template, ResolvedMapping mapping) =>
         template.ImageSource.Resolve($"{platformButton}.png", mapping.Platform, mapping.Controller).Styled;
+
+    /// <summary>
+    /// Whether a button usually drawn by a fixed image now drives this input, or, for a declared
+    /// composite, one of its parts. A whole's picture is chosen by the buttons driving its parts
+    /// (<see cref="CombinedImage"/>, <see cref="ButtonCovering"/>), not by one of its own, so
+    /// without the parts an axis row would follow a swap its own direction rows ignore.
+    /// </summary>
+    private static bool MovedFromAFixedPosition(
+        MappingState state, IReadOnlyList<string> parts, ResolvedMapping mapping, Template template)
+    {
+        IReadOnlySet<string> fixedInputs = template.Layout.FixedImageInputs;
+        if (state is Remapped r && r.DefaultGenerics.Any(fixedInputs.Contains)) return true;
+        return parts.Any(part =>
+            mapping.InputToButton.TryGetValue(part, out string? button)
+            && mapping.NaturalButtonToInput.TryGetValue(button, out IReadOnlyList<string>? natural)
+            && !natural.Contains(part)
+            && natural.Any(fixedInputs.Contains));
+    }
+
+    /// <summary><paramref name="mapping"/> as it stood before any transform's swap: the natural
+    /// snapshot standing in for the current mapping.</summary>
+    private static ResolvedMapping Unremapped(ResolvedMapping mapping) => mapping with
+    {
+        ButtonToInput = mapping.NaturalButtonToInput,
+        InputToButton = mapping.NaturalInputToButton,
+    };
 
     private void LogCombined(string inputName, string buttons, string path)
     {

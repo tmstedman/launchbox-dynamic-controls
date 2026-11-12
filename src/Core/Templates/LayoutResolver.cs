@@ -34,11 +34,13 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         double defaultInactiveBlurRadius = style?.InactiveBlurRadius ?? RenderingDefaults.InactiveBlurRadius;
 
         var collapseInfo = new Dictionary<InputDefinition, CollapseInfo>(ReferenceEqualityComparer.Instance);
+        var fixedImageInputs = new HashSet<string>();
         var ctx = new BuildContext(
             ImageSource: imageSource,
             NamedStyles: config.Head.NamedStyles,
             CollapseInfo: collapseInfo,
-            Style: new ComputedStyle(ShowIf: null, MinOpacity: null, InactiveBlurRadius: null, FontSize: defaultFontSize));
+            FixedImageInputs: fixedImageInputs,
+            Style: new ComputedStyle(ShowIf: null, MinOpacity: null, InactiveBlurRadius: null, FixedImage: null, FontSize: defaultFontSize));
 
         var elements = config.Elements.Select(e => BuildNode(e, ctx)).ToList();
         return new ResolvedLayout(
@@ -47,7 +49,8 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             DefaultFontSize: defaultFontSize,
             DefaultMinOpacity: defaultMinOpacity,
             DefaultInactiveBlurRadius: defaultInactiveBlurRadius,
-            Wholes: BuildWholes(config.Head.Wholes));
+            Wholes: BuildWholes(config.Head.Wholes),
+            FixedImageInputs: fixedImageInputs);
     }
 
     /// <summary>
@@ -127,7 +130,10 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             UseImageFile: inputXml.UseImage != null ? $"{inputXml.UseImage}.png" : null,
             ShowIf: showIf,
             MinOpacity: computed.MinOpacity,
-            InactiveBlurRadius: computed.InactiveBlurRadius);
+            InactiveBlurRadius: computed.InactiveBlurRadius,
+            FixedImage: computed.FixedImage ?? false);
+        // An input counts as fixed if any render draws it so -- see ResolvedLayout.FixedImageInputs.
+        if (image.FixedImage) ctx.FixedImageInputs.Add(name);
         _logger.Debug($"Input image: {name} at ({inputOriginX},{inputOriginY}) showIf={showIf}");
 
         var overlays = new List<OverlayDefinition>();
@@ -429,7 +435,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         // IStyledNode — it has no showIf/minOpacity/inactiveBlurRadius of its own (see
         // IStyledNode's doc comment for why), only style (for fontSize) and fontSize itself.
         ComputedStyle computed = ResolveStyle(
-            labelXml.Style, showIf: null, minOpacity: null, inactiveBlurRadius: null, labelXml.FontSize,
+            labelXml.Style, showIf: null, minOpacity: null, inactiveBlurRadius: null, fixedImage: null, labelXml.FontSize,
             ctx, "Label");
         var label = new LabelDefinition(
             X: labelXml.X.Resolve(ctx.OriginX),
@@ -500,7 +506,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         // IStyledNode, since it has no fontSize of its own (it never renders text).
         ComputedStyle computed = ResolveStyle(
             overlayXml.Style, overlayXml.ShowIf, overlayXml.MinOpacity, overlayXml.InactiveBlurRadius,
-            fontSize: null, ctx, $"Overlay src=\"{overlayXml.Src}\"");
+            fixedImage: null, fontSize: null, ctx, $"Overlay src=\"{overlayXml.Src}\"");
         ShowIfCondition showIf = ParseShowIf(computed.ShowIf);
         _logger.Debug($"Overlay: {overlayXml.Src} at ({overlayXml.X},{overlayXml.Y}) showIf={showIf}");
         return new OverlayDefinition(
@@ -523,13 +529,13 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// doc comment); a leaf calls <see cref="ResolveStyle"/> directly with its own fields.
     /// </summary>
     private ComputedStyle Resolve(IStyledNode node, BuildContext ctx, string errorContext, bool cascadeAmbient = true) =>
-        ResolveStyle(node.Style, node.ShowIf, node.MinOpacity, node.InactiveBlurRadius, node.FontSize, ctx, errorContext, cascadeAmbient);
+        ResolveStyle(node.Style, node.ShowIf, node.MinOpacity, node.InactiveBlurRadius, node.FixedImage, node.FontSize, ctx, errorContext, cascadeAmbient);
 
     /// <summary>
     /// Resolves the named style reference (if any), logging once if it names a style that isn't
     /// declared in &lt;Head&gt;, then merges each attribute in precedence order: this element's
     /// own explicit value, then the named style's, then — for <c>showIf</c>/<c>minOpacity</c>/
-    /// <c>inactiveBlurRadius</c>, only when <paramref name="cascadeAmbient"/> is true — whatever
+    /// <c>inactiveBlurRadius</c>/<c>fixedImage</c>, only when <paramref name="cascadeAmbient"/> is true — whatever
     /// was already ambient in <paramref name="ctx"/>.
     ///
     /// <para><paramref name="cascadeAmbient"/> is false only for <see cref="ContainerNode"/>
@@ -564,7 +570,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
     /// <c>Resolve</c> method, so it's always non-null by the time anything reads it.</para>
     /// </summary>
     private ComputedStyle ResolveStyle(
-        string? style, string? showIf, double? minOpacity, double? inactiveBlurRadius, double? fontSize,
+        string? style, string? showIf, double? minOpacity, double? inactiveBlurRadius, bool? fixedImage, double? fontSize,
         BuildContext ctx, string errorContext, bool cascadeAmbient = true)
     {
         StyleNode? namedStyle = null;
@@ -575,6 +581,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
             ShowIf: showIf ?? namedStyle?.ShowIf ?? (cascadeAmbient ? ctx.Style.ShowIf : null),
             MinOpacity: minOpacity ?? namedStyle?.MinOpacity ?? (cascadeAmbient ? ctx.Style.MinOpacity : null),
             InactiveBlurRadius: inactiveBlurRadius ?? namedStyle?.InactiveBlurRadius ?? (cascadeAmbient ? ctx.Style.InactiveBlurRadius : null),
+            FixedImage: fixedImage ?? namedStyle?.FixedImage ?? (cascadeAmbient ? ctx.Style.FixedImage : null),
             FontSize: fontSize ?? namedStyle?.FontSize ?? ctx.Style.FontSize);
     }
 
@@ -598,10 +605,11 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
 
     /// <summary>
     /// Context for the template tree walk. Carries the per-build inputs that are constant across
-    /// all Build* calls (ImageSource, NamedStyles, CollapseInfo accumulator) alongside the
+    /// all Build* calls (ImageSource, NamedStyles, the CollapseInfo and FixedImageInputs
+    /// accumulators) alongside the
     /// <see cref="ComputedStyle"/> currently ambient — the style cascade's whole state at this
-    /// point in the tree. The CollapseInfo dictionary is a single shared reference across all
-    /// <c>with</c> clones — mutations are visible to every BuildContainer call.
+    /// point in the tree. The CollapseInfo dictionary and FixedImageInputs set are single shared
+    /// references across all <c>with</c> clones — mutations are visible to every Build* call.
     /// Use <c>with</c> to produce an inputCtx/containerCtx with <see cref="Style"/> set to that
     /// element's own <see cref="ComputedStyle"/>; nested Inputs receive that same context too —
     /// but since a nested Input always overrides <see cref="Style"/> from its own
@@ -623,6 +631,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         ITemplateImageSource ImageSource,
         Dictionary<string, StyleNode> NamedStyles,
         Dictionary<InputDefinition, CollapseInfo> CollapseInfo,
+        HashSet<string> FixedImageInputs,
         ComputedStyle Style,
         double OriginX = 0,
         double OriginY = 0,
@@ -645,6 +654,7 @@ public class LayoutResolver(ILogger logger) : ILayoutResolver
         string? ShowIf,
         double? MinOpacity,
         double? InactiveBlurRadius,
+        bool? FixedImage,
         double FontSize);
 
     /// <summary>
