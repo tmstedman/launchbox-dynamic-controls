@@ -130,8 +130,8 @@
             <Overlay style="line" minOpacity="0" src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Label x="-19" y="+22" align="right" />
         </Input>
-        <Input name="ButtonRightStick" style="show-if-label" x="877" y="740" height="44" width="44">
-            <Overlay style="line" minOpacity="0" src="Line_ButtonRightStick.png" x="+21" y="-170" />
+        <Input name="ButtonRightStick" style="show-if-label" x="932" y="730" height="44" width="44">
+            <Overlay style="line" minOpacity="0" src="Line_ButtonRightStick.png" x="-34" y="-160" />
             <Label x="+22" y="+68" align="center" />
         </Input>
         <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
