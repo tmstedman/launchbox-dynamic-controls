@@ -10,6 +10,8 @@
         <Style name="small-label-vacate" showIf="label" inactiveBlurRadius="6" fontSize="22" fixedImage="true" />
         <Style name="input-label" showIf="label" minOpacity="0.3" inactiveBlurRadius="8" />
         <Style name="show-if-label" showIf="label" />
+        <!-- The connector lines: when their input is dimmed they fade and blur only slightly. -->
+        <Style name="line" minOpacity="0.3" inactiveBlurRadius="3" />
         <Whole name="ButtonDpad" parts="ButtonDpadUp ButtonDpadDown ButtonDpadLeft ButtonDpadRight" />
         <Whole name="AxisLeftStick" parts="AxisLeftStickUp AxisLeftStickDown AxisLeftStickLeft AxisLeftStickRight" />
         <Whole name="AxisRightStick" parts="AxisRightStickUp AxisRightStickDown AxisRightStickLeft AxisRightStickRight" />
@@ -27,34 +29,45 @@
     <Body>
         <Input name="ButtonGuide" style="auto-blur" x="771" y="262" height="68" width="68" />
         <Input name="AxisTriggerLeft" style="auto-blur" x="307" y="116" height="65" width="65">
-            <Overlay src="Line_AxisTriggerLeft.png" x="+81" y="+30" />
+            <Overlay style="line" src="Line_AxisTriggerLeft.png" x="+81" y="+30" />
             <Label x="-19" y="+32" align="right" />
         </Input>
         <Input name="ButtonLeftShoulder" style="auto-blur" x="307" y="203" height="42" width="64">
-            <Overlay src="Line_ButtonLeftShoulder.png" x="+85" y="+24" />
+            <Overlay style="line" src="Line_ButtonLeftShoulder.png" x="+85" y="+24" />
             <Label x="-19" y="+21" align="right" />
         </Input>
         <Input name="AxisTriggerRight" style="auto-blur" x="1228" y="116" height="65" width="65">
-            <Overlay src="Line_AxisTriggerRight.png" x="-207" y="+30" />
+            <Overlay style="line" src="Line_AxisTriggerRight.png" x="-207" y="+30" />
             <Label x="+81" y="+32" />
         </Input>
         <Input name="ButtonRightShoulder" style="auto-blur" x="1229" y="203" height="42" width="64">
-            <Overlay src="Line_ButtonRightShoulder.png" x="-144" y="+24" />
+            <Overlay style="line" src="Line_ButtonRightShoulder.png" x="-144" y="+24" />
             <Label x="+80" y="+21" />
         </Input>
         <Input name="ButtonY" style="auto-blur" x="970" y="292" height="64" width="64" />
         <Input name="ButtonX" style="auto-blur" x="912" y="345" height="64" width="64" />
         <Input name="ButtonA" style="auto-blur" x="970" y="401" height="64" width="64" />
         <Input name="ButtonB" style="auto-blur" x="1026" y="350" height="64" width="64" />
-        <Input name="ButtonStart" style="mapped-input-blur" x="832" y="356" height="44" width="44" />
-        <Input name="ButtonBack" style="mapped-input-blur" x="714" y="356" height="44" width="44" />
+        <!-- Each button owns its leg of the line down to the labels, so the leg is as bright as
+             its button; the join below them is shared and always bright. The legs are drawn only
+             when the cluster is, hence the same Condition as below. -->
+        <Input name="ButtonStart" style="auto-blur" x="832" y="356" height="44" width="44">
+            <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
+                <Overlay style="line" src="Line_ButtonStart.png" x="-129" y="+50" />
+            </Condition>
+        </Input>
+        <Input name="ButtonBack" style="auto-blur" x="714" y="356" height="44" width="44">
+            <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
+                <Overlay style="line" src="Line_ButtonBack.png" x="-11" y="+50" />
+            </Condition>
+        </Input>
         <!-- A Container never decides its own inclusion, so this explicit Condition is what
              replaces the old Group's implicit "any member visible" check: without it, this
              cluster would fade to the template default instead of disappearing entirely when
              neither button has a label. -->
         <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-            <Overlay src="Line_MetaButtons.png" x="703" y="406" />
-            <Container x="666" y="661" gap="45" style="small-label-blur">
+            <Overlay style="line" src="Line_MetaButtons.png" x="703" y="406" />
+            <Container x="666" y="661" gap="45" collapse="true" style="small-label-vacate">
                 <Input name="ButtonStart" height="34" width="34">
                     <Label x="+51" y="+17" />
                 </Input>
@@ -74,19 +87,19 @@
             <Condition inputs="ButtonY ButtonB ButtonA ButtonX" atLeast="1" match="label">
                 <Container x="1249" y="318" gap="80" style="input-label">
                     <Input name="ButtonY" height="44" width="44">
-                        <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                        <Overlay style="line" src="Line_ButtonY.png" x="-209" y="+5" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonB" height="44" width="44">
-                        <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                        <Overlay style="line" src="Line_ButtonB.png" x="-166" y="+13" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonA" height="44" width="44">
-                        <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                        <Overlay style="line" src="Line_ButtonA.png" x="-218" y="-18" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonX" height="44" width="44">
-                        <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                        <Overlay style="line" src="Line_ButtonX.png" x="-304" y="-142" />
                         <Label x="+60" y="+22" />
                     </Input>
                 </Container>
@@ -94,30 +107,30 @@
             <Condition inputs="AxisRightStick" atLeast="1" match="game-label">
                 <Container x="1249" y="318" gap="80" style="input-label">
                     <Input name="ButtonY" height="44" width="44">
-                        <Overlay src="Line_ButtonY.png" x="-209" y="+5" />
+                        <Overlay style="line" src="Line_ButtonY.png" x="-209" y="+5" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonB" height="44" width="44">
-                        <Overlay src="Line_ButtonB.png" x="-166" y="+13" />
+                        <Overlay style="line" src="Line_ButtonB.png" x="-166" y="+13" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonA" height="44" width="44">
-                        <Overlay src="Line_ButtonA.png" x="-218" y="-18" />
+                        <Overlay style="line" src="Line_ButtonA.png" x="-218" y="-18" />
                         <Label x="+60" y="+22" />
                     </Input>
                     <Input name="ButtonX" height="44" width="44">
-                        <Overlay src="Line_ButtonX.png" x="-304" y="-142" />
+                        <Overlay style="line" src="Line_ButtonX.png" x="-304" y="-142" />
                         <Label x="+60" y="+22" />
                     </Input>
                 </Container>
             </Condition>
         </OneOf>
         <Input name="ButtonLeftStick" style="show-if-label" x="307" y="477" height="44" width="44">
-            <Overlay src="Line_ButtonLeftStick.png" x="+80" y="-56" />
+            <Overlay style="line" minOpacity="0" src="Line_ButtonLeftStick.png" x="+80" y="-56" />
             <Label x="-19" y="+22" align="right" />
         </Input>
         <Input name="ButtonRightStick" style="show-if-label" x="877" y="740" height="44" width="44">
-            <Overlay src="Line_ButtonRightStick.png" x="+21" y="-170" />
+            <Overlay style="line" minOpacity="0" src="Line_ButtonRightStick.png" x="+21" y="-170" />
             <Label x="+22" y="+68" align="center" />
         </Input>
         <Input name="AxisLeftStick" style="auto-blur" x="539" y="309" height="124" width="124" />
@@ -130,7 +143,7 @@
                  threshold defaults to every part, so naming the stick asks about all four. -->
             <Condition inputs="AxisLeftStick" match="agree">
                 <Input name="AxisLeftStick" style="show-if-label" x="307" y="339" height="64" width="64">
-                    <Overlay src="Line_AxisLeftStick.png" x="+79" y="+31" />
+                    <Overlay style="line" src="Line_AxisLeftStick.png" x="+79" y="+31" />
                     <Label x="-19" y="+32" align="right" />
                 </Input>
             </Condition>
@@ -140,7 +153,7 @@
                  directions actually survive this game, for any vAlign — the y="+17" below is
                  a small manual nudge on top of that computed center, not a replacement for it. -->
             <Condition inputs="AxisLeftStick" atLeast="2" match="agree">
-                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Overlay style="line" src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                 <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <Label inputs="AxisLeftStick" x="-24" y="+17" align="right" fontSize="24" />
                     <Input name="AxisLeftStickLeft" height="34" width="34" />
@@ -168,7 +181,7 @@
                  other by being listed first, and the bare Container in each is the default that
                  draws when the pair does not agree. -->
             <Condition inputs="AxisLeftStick" atLeast="1" match="label">
-                <Overlay src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
+                <Overlay style="line" src="Line_AxisLeftStick_Multi.png" x="386" y="370" />
                 <Container x="312" y="358.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <OneOf>
                         <Condition inputs="AxisLeftStickX" match="agree">
@@ -209,7 +222,7 @@
                  AxisLeftStick above for why this needs both the outer and inner Condition. -->
             <Condition inputs="AxisRightStick" match="agree">
                 <Input name="AxisRightStick" style="show-if-label" x="1229" y="648" height="64" width="64">
-                    <Overlay src="Line_AxisRightStick.png" x="-278" y="-98" />
+                    <Overlay style="line" src="Line_AxisRightStick.png" x="-278" y="-98" />
                     <Label x="+80" y="+32" />
                 </Input>
             </Condition>
@@ -217,7 +230,7 @@
                  mechanism as AxisLeftStick above, but this Group has no vAlign (defaults to
                  "top"), and its y="+17" is its own manual nudge on top of the computed center. -->
             <Condition inputs="AxisRightStick" atLeast="2" match="agree">
-                <Overlay src="Line_AxisRightStick.png" x="951" y="550" />
+                <Overlay style="line" src="Line_AxisRightStick.png" x="951" y="550" />
                 <Container x="1254" y="663" gap="45" collapse="true" style="small-label-vacate">
                     <Label inputs="AxisRightStick" x="+52" y="+17" fontSize="24" />
                     <Input name="AxisRightStickLeft" useImage="AxisLeftStickLeft" height="34" width="34" />
@@ -233,7 +246,7 @@
                  other by being listed first, and the bare Container in each is the default that
                  draws when the pair does not agree. -->
             <Condition inputs="AxisRightStick" atLeast="1" match="label">
-                <Overlay src="Line_AxisRightStick.png" x="951" y="550" />
+                <Overlay style="line" src="Line_AxisRightStick.png" x="951" y="550" />
                 <Container x="1254" y="663" gap="45" collapse="true" style="small-label-vacate">
                     <OneOf>
                         <Condition inputs="AxisRightStickX" match="agree">
@@ -275,7 +288,7 @@
                  shared label rather than repeating it next to every agreeing icon. Covers a
                  full four-way agreement too, in the same shape as a partial one. -->
             <Condition inputs="ButtonDpad" atLeast="2" match="agree">
-                <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
+                <Overlay style="line" src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <Label inputs="ButtonDpad" x="-24" y="+17" align="right" fontSize="24" />
                     <Input name="ButtonDpadLeft" height="34" width="34" />
@@ -294,7 +307,7 @@
                  other by being listed first, and the bare Container in each is the default that
                  draws when the pair does not agree. -->
             <Condition inputs="ButtonDpad" atLeast="1" match="label">
-                <Overlay src="Line_ButtonDpad_Multi.png" x="384" y="507" />
+                <Overlay style="line" src="Line_ButtonDpad_Multi.png" x="384" y="507" />
                 <Container x="312" y="619.5" gap="45" collapse="true" vAlign="center" style="small-label-vacate">
                     <OneOf>
                         <Condition inputs="ButtonDpadX" match="agree">
