@@ -48,17 +48,18 @@
         <Input name="ButtonX" style="auto-blur" x="912" y="345" height="64" width="64" />
         <Input name="ButtonA" style="auto-blur" x="970" y="401" height="64" width="64" />
         <Input name="ButtonB" style="auto-blur" x="1026" y="350" height="64" width="64" />
-        <!-- Each button owns its leg of the line down to the labels, so the leg is as bright as
-             its button; the join below them is shared and always bright. The legs are drawn only
-             when the cluster is, hence the same Condition as below. -->
+        <!-- Each button owns its leg of the line, so the leg is as bright as its button and
+             vanishes when that button is dimmed; the join below them is shared, always bright,
+             and runs straight down to the labels. The legs are drawn only when the cluster is,
+             hence the same Condition as below. -->
         <Input name="ButtonStart" style="auto-blur" x="832" y="356" height="44" width="44">
             <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-                <Overlay style="line" src="Line_ButtonStart.png" x="-129" y="+50" />
+                <Overlay style="line" minOpacity="0" src="Line_ButtonStart.png" x="-129" y="+50" />
             </Condition>
         </Input>
         <Input name="ButtonBack" style="auto-blur" x="714" y="356" height="44" width="44">
             <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-                <Overlay style="line" src="Line_ButtonBack.png" x="-11" y="+50" />
+                <Overlay style="line" minOpacity="0" src="Line_ButtonBack.png" x="-11" y="+50" />
             </Condition>
         </Input>
         <!-- A Container never decides its own inclusion, so this explicit Condition is what
@@ -67,12 +68,12 @@
              neither button has a label. -->
         <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
             <Overlay style="line" src="Line_MetaButtons.png" x="703" y="406" />
-            <Container x="666" y="661" gap="45" collapse="true" style="small-label-vacate">
+            <Container x="776" y="676" gap="45" collapse="true" style="small-label-vacate">
                 <Input name="ButtonStart" height="34" width="34">
-                    <Label x="+51" y="+17" />
+                    <Label x="-12" y="+17" align="right" />
                 </Input>
                 <Input name="ButtonBack" height="34" width="34">
-                    <Label x="+51" y="+17" />
+                    <Label x="-12" y="+17" align="right" />
                 </Input>
             </Container>
         </Condition>
