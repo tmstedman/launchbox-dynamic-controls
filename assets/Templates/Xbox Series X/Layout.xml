@@ -68,7 +68,7 @@
              neither button has a label. -->
         <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
             <Overlay style="line" src="Line_MetaButtons.png" x="703" y="406" />
-            <Container x="776" y="676" gap="45" collapse="true" style="small-label-vacate">
+            <Container x="776" y="696" gap="45" collapse="true" style="small-label-vacate">
                 <Input name="ButtonStart" height="34" width="34">
                     <Label x="-12" y="+17" align="right" />
                 </Input>
