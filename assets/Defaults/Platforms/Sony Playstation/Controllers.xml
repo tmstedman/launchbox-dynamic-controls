@@ -18,19 +18,6 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="Analog" inheritFrom="Standard">
-        <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
-        <Mapping name="L-Up" input="AxisLeftStickUp" />
-        <Mapping name="L-Down" input="AxisLeftStickDown" />
-        <Mapping name="L-Left" input="AxisLeftStickLeft" />
-        <Mapping name="L-Right" input="AxisLeftStickRight" />
-        <Control name="R-Any" mappings="R-Up R-Down R-Left R-Right" />
-        <Mapping name="R-Up" input="AxisRightStickUp" />
-        <Mapping name="R-Down" input="AxisRightStickDown" />
-        <Mapping name="R-Left" input="AxisRightStickLeft" />
-        <Mapping name="R-Right" input="AxisRightStickRight" />
-    </Controller>
-
     <Controller name="DualShock" inheritFrom="Standard" default="true">
         <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
