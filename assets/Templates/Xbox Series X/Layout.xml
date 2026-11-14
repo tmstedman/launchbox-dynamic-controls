@@ -27,7 +27,7 @@
         <Whole name="AxisRightStickY" parts="AxisRightStickUp AxisRightStickDown" />
     </Head>
     <Body>
-        <Input name="ButtonGuide" style="auto-blur" x="771" y="262" height="68" width="68" />
+        <Input name="ButtonGuide" style="auto-blur" x="765" y="262" height="68" width="68" />
         <Input name="AxisTriggerLeft" style="auto-blur" x="307" y="116" height="65" width="65">
             <Overlay style="line" src="Line_AxisTriggerLeft.png" x="+81" y="+30" />
             <Label x="-19" y="+32" align="right" />
@@ -52,14 +52,14 @@
              vanishes when that button is dimmed; the join below them is shared, always bright,
              and runs straight down to the labels. The legs are drawn only when the cluster is,
              hence the same Condition as below. -->
-        <Input name="ButtonStart" style="auto-blur" x="832" y="356" height="44" width="44">
+        <Input name="ButtonStart" style="auto-blur" x="836" y="356" height="44" width="44">
             <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-                <Overlay style="line" minOpacity="0" src="Line_ButtonStart.png" x="-129" y="+50" />
+                <Overlay style="line" minOpacity="0" src="Line_ButtonStart.png" x="-127" y="+50" />
             </Condition>
         </Input>
-        <Input name="ButtonBack" style="auto-blur" x="714" y="356" height="44" width="44">
+        <Input name="ButtonBack" style="auto-blur" x="718" y="356" height="44" width="44">
             <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-                <Overlay style="line" minOpacity="0" src="Line_ButtonBack.png" x="-11" y="+50" />
+                <Overlay style="line" minOpacity="0" src="Line_ButtonBack.png" x="-9" y="+50" />
             </Condition>
         </Input>
         <!-- A Container never decides its own inclusion, so this explicit Condition is what
@@ -67,8 +67,8 @@
              cluster would fade to the template default instead of disappearing entirely when
              neither button has a label. -->
         <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
-            <Overlay style="line" src="Line_MetaButtons.png" x="703" y="406" />
-            <Container x="776" y="696" gap="45" collapse="true" style="small-label-vacate">
+            <Overlay style="line" src="Line_MetaButtons.png" x="709" y="406" />
+            <Container x="782" y="696" gap="45" collapse="true" style="small-label-vacate">
                 <Input name="ButtonStart" height="34" width="34">
                     <Label x="-12" y="+17" align="right" />
                 </Input>
