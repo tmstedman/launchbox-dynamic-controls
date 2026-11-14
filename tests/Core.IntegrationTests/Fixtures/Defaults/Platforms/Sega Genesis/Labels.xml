@@ -56,6 +56,12 @@
     <Input name="Dpad-Up">High Rate</Input>
     <Input name="Dpad-Down">Single</Input>
   </Game>
+  <Game romName="MultiLineLabelTest">
+    <Input name="A">Punch&#10;Block</Input>
+    <Input name="B">Grab
+                    Throw</Input>
+    <Input name="C">Kick</Input>
+  </Game>
   <Game romName="Sonic the Hedgehog">
     <Input name="A">Jump</Input>
     <Input name="B">Jump</Input>

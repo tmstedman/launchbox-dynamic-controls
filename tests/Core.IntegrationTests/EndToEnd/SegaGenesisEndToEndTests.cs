@@ -1,4 +1,5 @@
 using DynamicControls.Composition;
+using DynamicControls.Rendering;
 using static DynamicControls.Core.IntegrationTests.TestHelpers.TestPaths;
 
 namespace DynamicControls.Core.IntegrationTests.EndToEnd;
@@ -195,6 +196,40 @@ public class SegaGenesisEndToEndTests
         overlay.InputLabels.Where(l => l.InputName == "AxisLeftStickDown").ShouldBeEmpty();
         overlay.ShouldHaveLabel("AxisLeftStickLeft", "Walk");
         overlay.ShouldHaveLabel("AxisLeftStickRight", "Run");
+    }
+
+    /// <summary>
+    /// A label written on several lines reaches the overlay as one label per line, centred on
+    /// where the one-line label sits, and still reads as the whole label. A's break is written
+    /// <c>&amp;#10;</c>; B's is typed into the file and indented to match it, and reads the same.
+    /// The fixture labels the same three buttons as Aladdin, so the slots line up with its.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_LabelOnSeveralLines_DrawsEachLineCentredAndReadsWhole()
+    {
+        static GameInfo Genesis(string rom) => new(
+            Platform: "Sega Genesis",
+            RomName: rom,
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(Genesis("MultiLineLabelTest"));
+
+        // then each label reads whole, the typed break the same as the escaped one
+        overlay.ShouldHaveLabel("ButtonX", "Punch\nBlock");
+        overlay.ShouldHaveLabel("ButtonA", "Grab\nThrow");
+
+        // and draws as its lines, without the file's indent, one line apart...
+        List<RenderedLabel> lines = [.. overlay.InputLabels.Where(l => l.InputName == "ButtonA")];
+        lines.Select(l => l.Text).ShouldBe(["Grab", "Throw"]);
+        (lines[1].Top - lines[0].Top).ShouldBe(lines[0].FontSize * RenderingDefaults.LabelLineHeight, tolerance: 1e-9);
+
+        // ...centred on the Top Aladdin's one-line label for the same button is drawn at
+        RenderedLabel oneLine = _service.Resolve(Genesis("Aladdin")).InputLabels.Single(l => l.InputName == "ButtonA");
+        ((lines[0].Top + lines[1].Top) / 2).ShouldBe(oneLine.Top, tolerance: 1e-9);
     }
 
     /// <summary>

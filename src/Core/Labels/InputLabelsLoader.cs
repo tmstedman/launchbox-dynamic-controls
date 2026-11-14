@@ -34,6 +34,8 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
     private readonly LayeredFileSystem _lfs = lfs;
     private readonly Dictionary<string, PlatformLabels?> _cache = new(StringComparer.OrdinalIgnoreCase);
 
+    private static readonly string[] LineBreaks = ["\r\n", "\n"];
+
     public bool IsEnabled(GlobalConfig config) => true;
 
     public InputLabelsConfig? Load(GameInfo game)
@@ -140,7 +142,7 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
                 continue;
             }
 
-            string label = node.InnerText.Trim();
+            string label = LabelText(node);
             if (string.IsNullOrEmpty(label))
             {
                 _logger.Error($"Skipping <Input name=\"{name}\"> in {path}: element has no text value");
@@ -151,6 +153,15 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
         }
         return result;
     }
+
+    /// <summary>
+    /// An entry's text in one form however it was written: each line trimmed and the lines joined
+    /// by <c>\n</c>. A break written <c>&amp;#10;</c> and one typed into the file (which
+    /// <see cref="XmlDocument"/> keeps as CRLF, indent and all) then read the same, so two entries
+    /// saying the same thing compare equal wherever labels are compared.
+    /// </summary>
+    private static string LabelText(XmlElement node) =>
+        string.Join("\n", node.InnerText.Split(LineBreaks, StringSplitOptions.None).Select(l => l.Trim())).Trim();
 
     private static PlatformLabels Merge(PlatformFile? defaults, PlatformFile? user)
     {

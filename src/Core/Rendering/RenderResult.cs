@@ -19,7 +19,8 @@ public record RenderResult(
 /// </summary>
 /// <param name="Left">Left position in canvas coordinates.</param>
 /// <param name="Top">Top position in canvas coordinates.</param>
-/// <param name="Text">The label text to display.</param>
+/// <param name="Text">The label text to display: always a single line once rendering is done,
+/// since <see cref="LabelLineSplitter"/> gives each line of a multi-line label its own record.</param>
 /// <param name="Alignment">Text alignment ("left", "center", "right").</param>
 /// <param name="FontSize">Font size in points.</param>
 /// <param name="InputName">Generic input name this label was rendered for (e.g. "ButtonX").
@@ -32,7 +33,21 @@ public record RenderedLabel(
     string Text,
     string Alignment,
     double FontSize,
-    string? InputName = null);
+    string? InputName = null)
+{
+    /// <summary>
+    /// The whole label, line breaks and all, when this record draws one line of a label written
+    /// on several (set by <see cref="LabelLineSplitter"/>); null for a one-line label.
+    /// </summary>
+    public string? LineOf { get; init; }
+
+    /// <summary>
+    /// What the label says rather than how it is drawn: <see cref="LineOf"/> for one line of a
+    /// multi-line label, else <see cref="Text"/>. Computed rather than stored, so a copy made with
+    /// a different <see cref="Text"/> can't keep reporting the old one.
+    /// </summary>
+    public string FullText => LineOf ?? Text;
+}
 
 /// <summary>
 /// Pipeline output of InputImageRenderer. All image paths, positions, opacity, and blur are

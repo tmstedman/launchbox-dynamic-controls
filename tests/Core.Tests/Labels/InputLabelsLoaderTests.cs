@@ -490,4 +490,29 @@ public class InputLabelsLoaderTests
 
         result.Labels.Single().Label.ShouldBe("Brake");
     }
+
+    [Theory]
+    #pragma warning disable format
+    [InlineData("Punch&#10;Block")]             // the documented form
+    [InlineData("Punch &#10; Block")]           // spaced either side of the break
+    [InlineData("Punch\r\nBlock")]              // typed into the file on Windows
+    [InlineData("Punch\r\n            Block")]  // typed, and indented to match the file
+    #pragma warning restore format
+    public void Load_LineBreakInsideLabelText_IsKeptInOneForm(string written)
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Arcade", "Labels.xml");
+        StubXml(path, $"""
+            <Labels>
+              <Game romName="buriki">
+                <Input name="P1_JOYSTICK">{written}</Input>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Arcade", "buriki"))!;
+
+        // the break survives to be drawn as a second line, and every way of writing it reads the
+        // same: a plain \n, with each line trimmed, so equal labels compare equal
+        result.Labels.Single().Label.ShouldBe("Punch\nBlock");
+    }
 }

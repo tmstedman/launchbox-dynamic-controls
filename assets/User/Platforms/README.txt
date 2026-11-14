@@ -149,6 +149,10 @@ buttons on your Xbox or PlayStation controller. They must match the
 Mapping/@name values defined in that platform's Controllers.xml — unrecognised
 names are silently ignored.
 
+A label too long for one line can be split across several by writing &#10;
+where each new line starts: <Input name="A">Punch&#10;Block</Input>. The
+lines are centred on where a one-line label would sit.
+
 Merging with the shipped Labels.xml: your file is merged entry-by-entry with
 Defaults/Platforms/{Platform}/Labels.xml — a User <Game> entry overrides the
 matching Defaults entry entirely (matched first by id, then by name); User

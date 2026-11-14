@@ -78,6 +78,26 @@ public class InputRenderingSubsystemTests
     }
 
     [Fact]
+    public void Render_LabelWrittenOnTwoLines_DrawsEachLineAsItsOwnLabelCentredOnTheSlot()
+    {
+        // given an input with one label slot at (50,60), font size 20, and a label written on two
+        // lines
+        var input = Input("ButtonA", labels: [new LabelDefinition(X: 50, Y: 60, FontSize: 20)]);
+        ResolvedLabels labels = LabelsOf(isGameSpecific: true, ("ButtonA", "Punch\nBlock"));
+
+        // when the service renders
+        RenderResult result = _service.Render(TemplateOf([input]), MappingOf(("A", "ButtonA")), labels);
+
+        // then each line is its own label for the same input, and the pair is centred where the
+        // one-line label would sit (Top = 60 - 20*0.75 = 45), half a line above and below it
+        double halfLine = 20 * RenderingDefaults.LabelLineHeight / 2;
+        result.Labels.Select(l => (l.InputName, l.Text, l.FullText)).ShouldBe([
+            ("ButtonA", "Punch", "Punch\nBlock"),
+            ("ButtonA", "Block", "Punch\nBlock")]);
+        result.Labels.Select(l => l.Top).ShouldBe([45 - halfLine, 45 + halfLine], tolerance: 1e-9);
+    }
+
+    [Fact]
     public void Render_RemappedInput_ResolvesImageFromPhysicalButtonNotLogicalInput()
     {
         // given a 3-Button controller where the natural mapping is A→ButtonA, B→ButtonB, but the

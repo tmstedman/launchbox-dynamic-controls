@@ -160,6 +160,8 @@ Then the filter computes per-input Y-offset adjustments for collapsing Groups: m
 
 **Image and label rendering** (`InputImageRenderer`, `InputLabelRenderer`) then walks the filtered layout per input, resolves image paths through the mapping-aware `InputImageResolver`, and emits the final `RenderedImage` / `RenderedLabel` records carrying positions, sources, opacity, and the input name. The `InputName` metadata lets end-to-end tests assert that the right label landed on the right input slot.
 
+Last, **`LabelLineSplitter`** turns a label written on several lines (`&#10;` in `Labels.xml`) into one `RenderedLabel` per line, `RenderingDefaults.LabelLineHeight` apart and centred as a block on where the label would sit on one line. The pause theme and the preview tool therefore never lay out more than one line, so where each line goes doesn't depend on the font they draw it in. A line break at either end is dropped first, since not every label source trims one. Each line records the whole label in `LineOf`, and `FullText` reads it (falling back to `Text` for a one-line label) for readers that want what the label says rather than how it is drawn — the label dump tool, and the E2E `ShouldHaveLabel` assertion.
+
 `InputImageResolver` is where the styled/generic pair from step 4 gets decided, by classifying the input against the mapping:
 
 - **Unmapped** — no platform button drives this input. An identity render falls back to the generic image (platform-styled art for a button the controller doesn't have would mislead); a `useImage` render still honours the styled variant, because it's borrowing another input's asset rather than claiming one of its own.
