@@ -65,14 +65,15 @@ foreach (string rom in roms)
 {
     ControllerOverlayModel model = romResolver.Resolve(new SweepTarget(options.Platform, rom));
 
-    // One RenderedLabel per label slot the layout draws, so the same input legitimately
-    // repeats when a template gives it several positions. Group to one entry per control.
-    // A control whose slots somehow disagree on text is recorded rather than silently
-    // resolved -- one input carries one label value, so disagreement would mean a real bug.
+    // One RenderedLabel per label slot the layout draws, and per line of a label on several,
+    // so the same input legitimately repeats. Group to one entry per control, by the whole
+    // label each record is part of. A control whose slots somehow disagree on text is
+    // recorded rather than silently resolved -- one input carries one label value, so
+    // disagreement would mean a real bug.
     var byControl = model.InputLabels
         .Where(l => !string.IsNullOrEmpty(l.InputName) && !string.IsNullOrEmpty(l.Text))
         .GroupBy(l => l.InputName!)
-        .Select(g => (Control: g.Key, Texts: g.Select(l => l.Text).Distinct().ToList()))
+        .Select(g => (Control: g.Key, Texts: g.Select(l => l.FullText).Distinct().ToList()))
         .OrderBy(e => e.Control, StringComparer.Ordinal)
         .ToList();
 
@@ -274,11 +275,11 @@ return 0;
         Height: i.Height))];
 
     // Same grouping the rom sweep applies: a template may draw one input's label in several
-    // places, which is one label as far as this file is concerned.
+    // places, or on several lines, which is one label as far as this file is concerned.
     IReadOnlyList<(string, string)> labels = [.. m.InputLabels
         .Where(l => !string.IsNullOrEmpty(l.InputName) && !string.IsNullOrEmpty(l.Text))
         .GroupBy(l => l.InputName!)
-        .Select(g => (g.Key, g.First().Text))];
+        .Select(g => (g.Key, g.First().FullText))];
 
     return (images, labels);
 }

@@ -159,7 +159,13 @@ The database writes sentences: `Offensive Throw / Defensive Catch`, or Champion 
 label runs off the screen (issue #11). The artwork's own captions are almost always the fix —
 *Throw / Catch*, *Bat / Pitch / Throw*.
 
-Keep under about 24 characters. The shipped set's median is four.
+Keep each line under about 24 characters. The shipped set's median is four.
+
+Where a caption has several parts that can't move onto controls of their own — a joystick whose
+eight directions each do something different — and won't fit on one line, put each part on its own
+line: write `&#10;` between them instead of " / " (`Punch&#10;Block&#10;Combo&#10;Moves`). The
+lines are centred on where a one-line label would sit, so they reach above it as well as below —
+check a render for anything drawn nearby.
 
 ### A label that says nothing is dropped
 

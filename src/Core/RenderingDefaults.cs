@@ -18,6 +18,16 @@ public static class RenderingDefaults
     /// <summary>Maximum width allocated for label text elements.</summary>
     public const double LabelWidth = 300;
 
+    /// <summary>
+    /// Height of one line of label text, as a multiple of the font size: how far apart
+    /// <see cref="Rendering.LabelLineSplitter"/> sets the lines of a label written on several.
+    /// 1.33 is Segoe UI's own line spacing (2724/2048), the font the label <c>TextBlock</c> in
+    /// <c>pause-themes/Dynamic Controls/Default.xaml</c> asks for, so the lines sit as that font
+    /// would set them. A theme drawing another font still gets every line where this puts it,
+    /// just spaced for Segoe UI.
+    /// </summary>
+    public const double LabelLineHeight = 1.33;
+
     /// <summary>Blur radius applied to images rendered at less than full opacity (inactive state).</summary>
     public const double InactiveBlurRadius = 0.0;
 }

@@ -21,7 +21,8 @@ public interface IInputRenderingService
 /// Production implementation: delegates layout filtering to <see cref="ILayoutFilter"/>, label
 /// rendering to <see cref="IInputLabelRenderer"/>, and image rendering to
 /// <see cref="IInputImageRenderer"/>; applies the per-input collapse YOffset to labels
-/// post-render (image YOffset is baked in by the image renderer itself).
+/// post-render (image YOffset is baked in by the image renderer itself), then splits each
+/// multi-line label into its lines with <see cref="LabelLineSplitter"/>.
 /// </summary>
 public class InputRenderingService(
     ILayoutFilter layoutFilter,
@@ -79,7 +80,9 @@ public class InputRenderingService(
                 BlurRadius: visible ? 0.0 : g.Overlay.InactiveBlurRadius ?? template.Layout.DefaultInactiveBlurRadius));
         }
 
-        return new RenderResult(allLabels, allImages);
+        // Last, once every label sits where its slot and collapse put it: a label on several
+        // lines is centred on that position, so nothing downstream lays out more than one line.
+        return new RenderResult(LabelLineSplitter.Split(allLabels), allImages);
     }
 
     /// <summary>

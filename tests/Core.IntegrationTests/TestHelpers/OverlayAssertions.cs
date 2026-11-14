@@ -30,12 +30,13 @@ public static class OverlayAssertions
     /// <summary>
     /// Asserts that the overlay carries a label with the given text rendered for the given input.
     /// An input may have multiple labels (e.g. when the same input appears in multiple parts of
-    /// the template); the assertion passes if any of them match.
+    /// the template); the assertion passes if any of them match. A label on several lines is
+    /// matched whole, line breaks included, not line by line.
     /// </summary>
     public static void ShouldHaveLabel(this ControllerOverlayModel overlay, string inputName, string expectedText) =>
         overlay.InputLabels
             .Where(l => l.InputName == inputName)
-            .Select(l => l.Text)
+            .Select(l => l.FullText)
             .ShouldContain(expectedText, $"expected '{expectedText}' label on {inputName}");
 
     /// <summary>
@@ -100,6 +101,7 @@ public static class OverlayAssertions
     /// <summary>
     /// Asserts that the overlay's labels exactly match <paramref name="expected"/> (order-insensitive).
     /// Fails if any expected label is missing or if the overlay carries any label not in the list.
+    /// Compares what is drawn, so a label on several lines is expected as one entry per line.
     /// </summary>
     public static void ShouldHaveLabels(
         this ControllerOverlayModel overlay,

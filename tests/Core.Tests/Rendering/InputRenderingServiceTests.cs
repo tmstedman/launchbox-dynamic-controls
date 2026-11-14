@@ -137,6 +137,28 @@ public class InputRenderingServiceTests
     }
 
     [Fact]
+    public void Render_LabelOnTwoLines_IsSplitIntoLinesCentredOnItsShiftedTop()
+    {
+        // given a collapsed input (YOffset = -40) whose label renderer emits a two-line label at
+        // Top=100
+        var input = Input("ButtonA");
+        var li = Layout(input, yOffset: -40);
+        StubFilter(li);
+        var label = new RenderedLabel(Left: 0, Top: 100, Text: "Punch\nBlock", Alignment: "Left", FontSize: 20);
+        _labelRenderer.Render(li, Arg.Any<string?>()).Returns([label]);
+
+        // when the service renders
+        var result = _underTest.Render(TemplateOf(), EmptyMapping(), LabelsOf());
+
+        // then the label comes out as its two lines, one line apart, and the collapse shift moves
+        // them with it: centred on 100 + (-40), where the one-line label would have gone
+        double halfLine = 20 * RenderingDefaults.LabelLineHeight / 2;
+        result.Labels.Select(l => l.Text).ShouldBe(["Punch", "Block"]);
+        result.Labels[0].Top.ShouldBe(60 - halfLine, tolerance: 1e-9);
+        result.Labels[1].Top.ShouldBe(60 + halfLine, tolerance: 1e-9);
+    }
+
+    [Fact]
     public void Render_VisibleGroupOverlay_EmittedAtFullOpacityAndNoBlur()
     {
         // given a group overlay whose aggregated flags satisfy its ShowIf

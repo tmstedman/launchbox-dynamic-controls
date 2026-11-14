@@ -194,6 +194,9 @@ public static class ImageWriter
         File.WriteAllText(path, content);
     }
 
+    // A label on several lines stays on one line of the file, its breaks written as Labels.xml
+    // writes them, so each label is still one line to diff.
     private static string Escape(string v) => v
-        .Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;");
+        .Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace("\"", "&quot;")
+        .Replace("\n", "&#10;");
 }

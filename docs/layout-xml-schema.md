@@ -323,6 +323,8 @@ Where to draw the label text for this input. The text content itself comes from 
 
 A label with an unparseable coordinate logs the error and keeps the default (+0).
 
+A label whose text holds line breaks (`&#10;` in `Labels.xml`) is centred on `y` as a block, so its lines reach above `y` as well as below it — leave room on both sides for a label that might be written that way.
+
 ### `<Container>` — positioned cluster
 
 A vertical list of inputs, each spaced `gap` pixels below the last. Which slot sits at `y` itself depends on `vAlign`: by default (`vAlign="top"`) the first child sits at the Container's `(x, y)`, the second at `(x, y + gap)`, the third at `(x, y + 2×gap)`, and so on.
