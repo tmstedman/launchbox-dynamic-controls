@@ -77,29 +77,34 @@ Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` — a `*Resolv
 
 `InputMappingService.Load(GameInfo)` produces a `ResolvedMapping`. The job: take "platform button names" (e.g. `Cross`, `Square` for PlayStation) and produce a map to "generic input names" (e.g. `ButtonA`, `ButtonB`) that the rest of the codebase reasons about.
 
-The resolution chain (highest priority wins):
+The resolution chain, highest priority first. Each link is an `IInputMappingProvider`, and **the first to answer supplies the whole mapping** — the controller and any remap of it — so providers do not stack:
 
-1. **Per-game XML** mappings under `Platforms/{platform}/ControllerOverrides/`
-2. **Emulator-specific** — RetroArch core config + per-content overrides
-3. **Platform default** — the controller selected from `Platforms/{platform}/Controllers.xml`
+1. **Per-game XML** under `Platforms/{platform}/ControllerOverrides/`. The file's `controller="..."` picks the controller, or the platform default when it names none, and its `<Mapping>`/`<Unmap>` entries overlay that controller.
+2. **RetroArch** — the core config and per-content overrides pick the controller, and the game's cfg and remap file apply the player's button swaps to it.
+3. **MAME** — lays the JOYCODE assignments read from the emulator's `cfg/` files onto the platform's default controller.
+4. **Platform default** — the controller selected from `Platforms/{platform}/Controllers.xml`.
 
-On top of whichever source wins, the first applicable `IInputMappingTransform` runs — transforms are first-match-wins like sources, not a chain each layering onto the last. There are two: MAME's overlays the JOYCODE assignments read from the emulator's `cfg/` files onto the mapping already chosen, and RetroArch's applies the button swaps in the game's cfg and remap file. A transform amends the winning mapping rather than producing one from scratch, which is why it isn't a source.
+A provider returns a `ProvidedMapping`: the controller as `Controllers.xml` declares it (`Natural`) and the mapping the player has (`Current`). They differ when the provider knows of a remap, and the service resolves both so the renderer can tell a button that has moved from one in its usual place — whichever provider moved it.
+
+A per-game XML replaces an emulator's controller choice and swaps rather than layering onto them. The file stands in for what the RetroArch and MAME providers do for an emulator the plugin cannot read, and stacking the two would double-count a swap both describe. `PerGameXmlMappingProvider` logs at debug that the file supplies the whole mapping, so a cfg or rmp it hides isn't a silent mystery; it doesn't ask the emulator providers whether one exists, since running them would put back the dependency on their files that the replacement removes. A file that names no controller is read against the platform default, never the pad RetroArch selected, because its button names come from some controller's vocabulary and another pad may not have them. The shipped files include no overrides; they are for a user's own setup.
+
+On Arcade the replacement covers port naming too. The `TYPE:tag:mask` names a MAME cfg supplies — every port's alias (`ResolvedMapping.ButtonAliases`) and the qualified buttons of a repeated type's earlier ports — come from `MameMappingProvider`, which is not asked once the XML answers. A game with an override therefore has only the bare port types its `Controllers.xml` declares plus those the file maps itself, and a label written in the qualified form no longer matches it.
 
 (All paths resolve through the `Defaults/`+`User/` layering — see [Config layering](#config-layering).)
 
-After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once. When a transform has swapped buttons, the stick mirrors whichever Dpad the transform names (`InputMappingConfig.DpadMirrorSource`), else the transformed one. RetroArch's names the Dpad as it was before its swaps, because RetroArch works out the stick's Dpad presses from the stick itself, after any remap: swapping the Dpad's up and down swaps the Dpad's labels but not the stick's.
+After the base mapping is built, the service applies `AnalogToDigital` mirroring — if the configured controller has a Dpad and a left stick, the Dpad input drives both, so the rendered overlay shows labels on both at once. When a provider has swapped buttons, the stick mirrors whichever Dpad the provider names (`InputMappingConfig.DpadMirrorSource`), else the current one. RetroArch's names the Dpad as it was before its swaps, because RetroArch works out the stick's Dpad presses from the stick itself, after any remap: swapping the Dpad's up and down swaps the Dpad's labels but not the stick's.
 
-Last, after any transform, `ControlResolver` resolves the `<Control>` declarations in the platform's `Controllers.xml` — a platform button that stands for several others, like `Dpad-Any` for the four directions. It reaches whatever its members currently reach.
+Last, after whichever provider's remap, `ControlResolver` resolves the `<Control>` declarations in the platform's `Controllers.xml` — a platform button that stands for several others, like `Dpad-Any` for the four directions. It reaches whatever its members currently reach.
 
-Running last is the whole point of the indirection. An emulator config binds directions one at a time and has no way to name a control as a unit, so a button that *does* name one has to be re-read against wherever its members actually ended up. Writing the generic inputs into the control instead would fix them at the moment the file was written — measured over the ROM pack, that costs thousands of games a label, the stick losing its text wherever a cfg had moved the directions beneath it. Per-game `ControllerOverrides` are applied before the control resolves too, for the same reason: a control says something about the physical controller, so it should describe whatever that controller's buttons ended up driving.
+Running last is the whole point of the indirection. An emulator config binds directions one at a time and has no way to name a control as a unit, so a button that *does* name one has to be re-read against wherever its members actually ended up. Writing the generic inputs into the control instead would fix them at the moment the file was written — measured over the ROM pack, that costs thousands of games a label, the stick losing its text wherever a cfg had moved the directions beneath it. A per-game `ControllerOverrides` file is applied before the control resolves too, for the same reason: a control says something about the physical controller, so it should describe whatever that controller's buttons ended up driving.
 
 A control is **appended, never displacing**. A button that drives an input directly outranks one that merely stands for buttons reaching it, so the direct binding keeps the reverse lookup and decides which image the player is shown. The natural snapshot is resolved the same way against its own members, so `InputImageResolver` compares a control's natural reach with its current one as it does any other button's.
 
 This replaced `WholeInputDeriver`, which did the same job for a fixed set of names Core knew — `ButtonDpad`, `AxisLeftStick`, `AxisRightStick` — discovering the whole-and-parts pairing from the natural mapping. Saying it in the platform's own file makes the relationship data, and lets a platform declare whatever its hardware actually has (the N64's `C-Any`, the Gamecube's `L-Any`/`R-Any`).
 
-`ResolvedMapping` carries two reverse-direction snapshots (`NaturalButtonToInput`, `NaturalInputToButton`) of the pre-game-modifier state, so the renderer can later detect when a button has been remapped and choose the right artwork.
+`ResolvedMapping` carries two reverse-direction snapshots (`NaturalButtonToInput`, `NaturalInputToButton`) of the controller as declared, before any remap, so the renderer can later detect when a button has been remapped — by a per-game file or an emulator's swaps alike — and choose the right artwork.
 
-Namespace: `src/Core/InputMapping/`. Entry point: `InputMappingService`. Emulator-specific sources are pluggable — see [Plugin architecture](#plugin-architecture).
+Namespace: `src/Core/InputMapping/`. Entry point: `InputMappingService`. Emulator-specific providers are pluggable — see [Plugin architecture](#plugin-architecture).
 
 ### 3. Label resolution
 
@@ -166,7 +171,7 @@ Last, **`LabelLineSplitter`** turns a label written on several lines (`&#10;` in
 
 - **Unmapped** — no platform button drives this input. An identity render falls back to the generic image (platform-styled art for a button the controller doesn't have would mislead); a `useImage` render still honours the styled variant, because it's borrowing another input's asset rather than claiming one of its own.
 - **MappedDefault** — a platform button drives the input and it's that button's natural target. The platform button's own file wins (`B.png` before `ButtonA.png`), falling back to the generic.
-- **Remapped** — a platform button drives the input, but that button naturally targets something else. The image follows the *physical* button, so the player sees what they're actually pressing. A button with no platform picture of its own (a d-pad direction has none) shows the generic picture of what it normally drives instead — the left arrow, not the A glyph of the position it landed in — but only on a platform with a picture of at least one of its own buttons (a `{platform}` folder holding only a combined picture doesn't count). That art pictures the emulated controller, so a position shows what the game receives there, a trigger included. A platform with none (Arcade) pictures the player's own pad, where the position's own generic is the right picture, and a cfg's button numbering says nothing about what its buttons look like. A `fixedImage` render whose button (for a composite, a button driving one of its parts) usually drives another fixed input (`ResolvedLayout.FixedImageInputs`) is resolved against the natural snapshot instead, so it draws what it would with nothing moved — the direction lists' rows, whose icon is all that says which way to press, keep their arrows through a swap among themselves. A button from an unfixed position still shows its own picture. Only a transform's swap (RetroArch's or MAME's) is Remapped; a per-game override is part of the natural snapshot, so it classifies MappedDefault.
+- **Remapped** — a platform button drives the input, but that button naturally targets something else. The image follows the *physical* button, so the player sees what they're actually pressing. A button with no platform picture of its own (a d-pad direction has none) shows the generic picture of what it normally drives instead — the left arrow, not the A glyph of the position it landed in — but only on a platform with a picture of at least one of its own buttons (a `{platform}` folder holding only a combined picture doesn't count). That art pictures the emulated controller, so a position shows what the game receives there, a trigger included. A platform with none (Arcade) pictures the player's own pad, where the position's own generic is the right picture, and a cfg's button numbering says nothing about what its buttons look like. A `fixedImage` render whose button (for a composite, a button driving one of its parts) usually drives another fixed input (`ResolvedLayout.FixedImageInputs`) is resolved against the natural snapshot instead, so it draws what it would with nothing moved — the direction lists' rows, whose icon is all that says which way to press, keep their arrows through a swap among themselves. A button from an unfixed position still shows its own picture. Every remap is Remapped, whichever provider made it: an emulator's swap and a per-game `<Mapping>` both move a button away from where the declared controller puts it.
 
 Before any of these, a declared `<Whole>` that two or more platform buttons drive between them looks for the platform's picture of those buttons together (`CombinedImage`: `{platform}/{buttons, sorted by name and space-joined}.png`, so swapping two buttons between the parts names the same file). It exists because the covering button the classification would otherwise pick can be a wider control — `C-Any` reaches all four C directions, so it covers the left-right pair too — and its picture is of more than the row stands for. A file that isn't there falls through to the three cases unchanged. When the image finally chosen is the generic and the generic isn't on disk, `InputImageResolver` logs it (`ResolvedImagePaths.GenericExists`); the resolver itself can't, since a probe for a platform file that isn't there misses its generic too.
 
@@ -181,8 +186,7 @@ Namespace: `src/Core/Rendering/`. Entry point: `InputRenderingService`. The rend
 `Labels/` and `InputMapping/` both delegate part of their resolution to a pluggable, ordered list of contributors. Each emulator-specific source lives under `Plugins/{Emulator}/` and implements one or both of two interfaces:
 
 - `IInputLabelsLoader` — given `GameInfo`, returns labels for the ROM or null if it doesn't recognise it
-- `IInputMappingSource` — given `GameInfo`, returns a partial mapping or null
-- `IInputMappingTransform` — given the mapping a source already produced, returns an amended copy; this is how MAME's JOYCODE overrides apply without displacing the platform mapping underneath them
+- `IInputMappingProvider` — given `GameInfo` and the platform's controllers, returns the controller in play and any remap of it (a `ProvidedMapping`), or null
 
 The owning service tries contributors in priority order until one returns data. Every contributor also answers `IsEnabled(GlobalConfig)`, so a user can switch a whole emulator integration off (`EnableMame`, `EnableRetroArch`) without the service knowing what a config flag is. Adding a new emulator is a folder under `Plugins/`, an implementation of the relevant interface, and a registration line in the corresponding factory — no service code changes.
 
@@ -192,11 +196,11 @@ Reads the BYOAC `controls.xml` database to supply labels for thousands of arcade
 
 ### `Plugins/Mame/`
 
-Reads the per-game MAME `cfg/` files to detect JOYCODE remaps, contributed as an `IInputMappingTransform`. Only active when the configured emulator is MAME and `EnableMame` is set.
+Reads the per-game MAME `cfg/` files to detect JOYCODE remaps, contributed as an `IInputMappingProvider` that lays them onto the platform's default controller. Only active when the configured emulator is MAME and `EnableMame` is set.
 
 ### `Plugins/RetroArch/`
 
-Reads the RetroArch cfg cascade and per-game `.rmp` remaps to detect game-specific controller variant overrides and button swaps on top of the platform's base mapping. Only active when the configured emulator is RetroArch.
+Reads the RetroArch cfg cascade and per-game `.rmp` remaps to detect game-specific controller variant overrides and button swaps, contributed as one `IInputMappingProvider`: the controller it picks is the natural state and the swaps are applied to a copy of it. Only active when the configured emulator is RetroArch.
 
 A remap can send a button to another button or to one of the eight stick directions (RetroArch's ids 16–23, after the sixteen buttons). Either way the platform button at the target appears at the button too, so a Nintendo 64 remap sending L3 to the right stick's down shows C-Down at the left stick's click. A remap file can remap a stick's own directions too (`input_player1_stk_r_y+`), so an inverted stick swaps its directions' labels. Remapping either end takes that axis from the core whole, so an end the file leaves alone presses nothing. The stick a mirrored platform reads as its Dpad (`analogToDigital`) is the exception: RetroArch reads it as nothing to its remapper, so remaps of it are skipped. A cfg's stick-axis bindings aren't read.
 
@@ -232,7 +236,7 @@ The cache is process-scoped, not LRU — we're assuming a single LaunchBox sessi
 
 ### Plugin sources as composable loaders
 
-`IInputLabelsLoader` and `IInputMappingSource` are interfaces with an ordered list of implementations. The service tries each in priority order until one has data. Adding a new emulator's data source means adding a loader and registering it in the factory — no service code changes. This is how MAME, RetroArch, and per-game XML coexist.
+`IInputLabelsLoader` and `IInputMappingProvider` are interfaces with an ordered list of implementations. The service tries each in priority order until one has data. Adding a new emulator's data source means adding a loader and registering it in the factory — no service code changes. This is how MAME, RetroArch, and per-game XML coexist.
 
 ### Visibility as a pipeline, not a flag
 
@@ -290,7 +294,7 @@ If you want to contribute, these are the most likely entry points and the conven
 
 ### Add a new emulator's data source
 
-Add a folder under `src/Core/Plugins/{Emulator}/`. Implement `IInputLabelsLoader` (for labels) and/or `IInputMappingSource` (for mappings). Register in the relevant factory (`InputLabelsFactory`, `InputMappingFactory`). The loader receives `GameInfo`; it should return null for ROMs it doesn't recognise rather than throw.
+Add a folder under `src/Core/Plugins/{Emulator}/`. Implement `IInputLabelsLoader` (for labels) and/or `IInputMappingProvider` (for mappings). Register in the relevant factory (`InputLabelsFactory`, `InputMappingFactory`). The loader receives `GameInfo`; it should return null for ROMs it doesn't recognise rather than throw.
 
 ### Add a new platform
 

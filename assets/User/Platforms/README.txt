@@ -176,7 +176,21 @@ LaunchBox's ROM name exactly.
 
 A per-game file selects a controller variant and overlays button overrides on
 top of that variant's baseline. Buttons not mentioned in the file are
-preserved unchanged from the baseline.
+preserved unchanged from the baseline. A button the file remaps is drawn like
+one an emulator has swapped, with the picture of the physical button.
+
+A game with a file here is read from the file alone: RetroArch's and MAME's
+configuration is not consulted for it (with Debug on, Logs\debug.log says so).
+A file that names no controller is read against the platform's default
+controller, not the one RetroArch selected.
+
+On Arcade, use bare MAME port names (P1_BUTTON1, COIN1) in the file and in
+that game's labels. The longer TYPE:tag:mask form of a port name comes from
+the game's MAME cfg, which is not read once a file here exists, so a label
+written that way stops matching. The cfg is also what adds the ports Arcade's
+Controllers.xml doesn't declare (START2, COIN2, SERVICE, P1_BUTTON9 and up,
+another player's ports): for a game with a file here, those exist only if the
+file maps them itself.
 
   <GameMapping controller="3-Button">
 

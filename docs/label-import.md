@@ -141,16 +141,22 @@ Every port also answers to the name it would be displaced as, the last of a repe
 type the cfg has once included: its type, tag and mask, with its position added where it has no
 tag or mask (`P1_BUTTON1#1`) or that name was taken (`P1_BUTTON1:IN0#2`). `escounts`' Bonus is
 `OTHER:STROBE1:16` as well as `OTHER`. So name the ports of a repeated type by tag and mask
-throughout, all of them: the bare name belongs to whichever repeat is last among those bound to
-player 1 and moves with the cfg (rebind Bonus to player 2 and Continue's port becomes the bare
-`OTHER`), while the qualified names don't. Name one port by one form only; the same text under
-both is harmless, but different text keeps whichever entry comes first and logs the clash. A
-`<Defaults>` entry under the bare name gives way to a game entry under the qualified one, as it
-would to the bare name.
+throughout, all of them, unless the game has a `ControllerOverrides` file (see below): the bare
+name belongs to whichever repeat is last among those bound to player 1 and moves with the cfg
+(rebind Bonus to player 2 and Continue's port becomes the bare `OTHER`), while the qualified names
+don't. Name one port by one form only; the same text under both is harmless, but different text
+keeps whichever entry comes first and logs the clash. A `<Defaults>` entry under the bare name
+gives way to a game entry under the qualified one, as it would to the bare name.
 
-Only Labels.xml reads the second name. Controllers.xml (`<Mapping>`, `<Control mappings=>`) and
-`ControllerOverrides` files name a port by the button it ended up as: bare for the last of its
-type, qualified only for an earlier one.
+Only Labels.xml reads the second name. Controllers.xml (`<Mapping>`, `<Control mappings=>`) names
+a port by the button it ended up as: bare for the last of its type, qualified only for an earlier
+one.
+
+A game with a `ControllerOverrides` file is the exception to all of this. The file replaces the
+MAME cfg rather than layering on it, and the cfg is where both the qualified names and the second
+names come from, so that game has neither: its labels, like the file, name ports by their bare
+type, and the only ports it has are those Arcade's Controllers.xml declares plus those the file
+maps itself.
 
 ### Labels are captions, not prose
 
