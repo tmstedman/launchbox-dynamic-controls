@@ -42,6 +42,12 @@ public class PerGameXmlMappingProvider(ILogger logger, IInputMappingLoader loade
             config = _loader.LoadGameMapping(game with { RomName = game.CloneOf });
         if (config == null) return null;
 
+        // Nothing after this provider is asked, so say so: a user wondering why their RetroArch or
+        // MAME configuration has no effect finds the answer here.
+        _logger.Debug($"Per-game mapping for '{game.RomName}' supplies the whole mapping; RetroArch's and MAME's configuration is not read for this game");
+        if (config.Controller == null)
+            _logger.Debug($"Per-game mapping for '{game.RomName}' names no controller, reading it against the platform default");
+
         ControllerConfig? baseline = platform?.Resolve(config.Controller);
         if (config.Controller != null && baseline == null)
             _logger.Error($"Game selected unknown controller '{config.Controller}', falling back to platform default");
