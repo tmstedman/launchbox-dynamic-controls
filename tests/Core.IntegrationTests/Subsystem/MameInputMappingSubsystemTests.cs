@@ -7,8 +7,8 @@ using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
 namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
-/// Verifies the MAME input-mapping transform with its real internal wiring intact:
-/// <see cref="MameInputMappingSource"/> (emulator gate → cfg cascade → merge-onto-baseline) →
+/// Verifies the MAME input-mapping provider with its real internal wiring intact:
+/// <see cref="MameMappingProvider"/> (emulator gate → cfg cascade → merge-onto-baseline) →
 /// <see cref="MameCfgLoader"/> (real cfg XML parse + port-type normalization) →
 /// <see cref="JoycodeMappingLoader"/> (real <c>JoycodeMapping.xml</c> parse) →
 /// <see cref="JoycodeMapping"/> (OR-split translation), composed through the full
@@ -16,9 +16,9 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 ///
 /// The only faked seam is <see cref="IFileSystem"/>: the baseline <c>Controllers.xml</c>, the cfg
 /// files, and <c>JoycodeMapping.xml</c> all live inline and are parsed for real. The sibling
-/// <see cref="InputMappingSubsystemTests"/> deliberately injects a stub transform to keep MAME
+/// <see cref="InputMappingSubsystemTests"/> deliberately injects a stub provider to keep MAME
 /// internals out; this suite is the MAME half of that split. Unit tests
-/// (<c>MameInputMappingSourceTests</c>, <c>MameCfgLoaderTests</c>) mock the cfg loader, and the
+/// (<c>MameMappingProviderTests</c>, <c>MameCfgLoaderTests</c>) mock the cfg loader, and the
 /// only full-stack coverage is <c>ArcadeEndToEndTests</c> (one on-disk fixture set per game) — so
 /// the cfg cascade, real JOYCODE translation, merge, and natural-map composition are only
 /// verified together here.
@@ -33,18 +33,18 @@ public class MameInputMappingSubsystemTests
 
     private readonly MockDynamicControlsFilesystem _dc = new(RootDir);
 
-    /// <summary>Wires the production mapping subsystem with the real MAME transform: leaving
-    /// <c>transforms</c> defaulted lets the factory build
+    /// <summary>Wires the production mapping subsystem with the real MAME provider: leaving
+    /// <c>providers</c> defaulted lets the factory build
     /// <see cref="JoycodeMappingLoader"/> + <see cref="MameCfgLoader"/> +
-    /// <see cref="MameInputMappingSource"/>, while <c>sources: []</c> drops the RetroArch middle
-    /// source so the baseline comes purely from the platform <c>Controllers.xml</c>.</summary>
+    /// <see cref="MameMappingProvider"/>. RetroArch's provider is also in the chain but is off
+    /// (<c>EnableRetroArch</c> defaults to false), so the baseline comes purely from the platform
+    /// <c>Controllers.xml</c>.</summary>
     private InputMappingService Build(bool enableMame = true) =>
         InputMappingFactory.Create(
             _dc.Lfs,
             _dc.Fs,
             new NullLogger(),
-            config: new GlobalConfig { EnableMame = enableMame },
-            sources: []);
+            config: new GlobalConfig { EnableMame = enableMame });
 
     private GameInfo MameGame(string romName) =>
         Game(platform: Platform, romName: romName, emulatorPath: MamePath);
@@ -445,14 +445,14 @@ public class MameInputMappingSubsystemTests
     // ---- no overrides → baseline passes through unchanged ----
 
     [Fact]
-    public void Load_NoCfgFiles_TransformReturnsNull_BaselineUnchanged()
+    public void Load_NoCfgFiles_ProviderDeclines_BaselineUnchanged()
     {
         WriteBaseline();
         WriteJoycodeMapping();
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));
 
-        // No cfg → no transform → active map equals the natural baseline. Compared entry by
+        // No cfg → the provider declines → active map equals the natural baseline. Compared entry by
         // entry rather than whole: resolving a control rebuilds both maps, so their lists are
         // equal in content but no longer the same instances, and List<string> equality is by
         // reference.
@@ -466,7 +466,7 @@ public class MameInputMappingSubsystemTests
     // ---- gating ----
 
     [Fact]
-    public void Load_MameDisabled_TransformFilteredOut_CfgIgnored()
+    public void Load_MameDisabled_ProviderFilteredOut_CfgIgnored()
     {
         WriteBaseline();
         WriteJoycodeMapping();
@@ -480,14 +480,14 @@ public class MameInputMappingSubsystemTests
             </mameconfig>
             """);
 
-        // EnableMame=false removes the transform from the pipeline entirely.
+        // EnableMame=false removes the provider from the chain entirely.
         ResolvedMapping mapping = Build(enableMame: false).Load(MameGame("dkong"));
 
         mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
     }
 
     [Fact]
-    public void Load_NonMameEmulator_TransformSelfGates_CfgIgnored()
+    public void Load_NonMameEmulator_ProviderSelfGates_CfgIgnored()
     {
         WriteBaseline();
         WriteJoycodeMapping();
@@ -501,7 +501,7 @@ public class MameInputMappingSubsystemTests
             </mameconfig>
             """);
 
-        // Transform is enabled but gates itself off because the emulator isn't MAME.
+        // The provider is enabled but gates itself off because the emulator isn't MAME.
         ResolvedMapping mapping = Build().Load(
             Game(platform: Platform, romName: "dkong", emulatorPath: NonMamePath));
 
@@ -547,7 +547,7 @@ public class MameInputMappingSubsystemTests
     // ---- composition: natural-map re-splice survives a real JOYCODE swap ----
 
     [Fact]
-    public void Scenario_RealJoycodeSwap_ActiveMapTransformed_NaturalsRetainBaseline()
+    public void Scenario_RealJoycodeSwap_ActiveMapRemapped_NaturalsRetainBaseline()
     {
         WriteBaseline();
         WriteJoycodeMapping();
@@ -567,7 +567,7 @@ public class MameInputMappingSubsystemTests
         // Active view reflects the swap...
         mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonY"]);
         mapping.InputToButton["ButtonY"].ShouldBe("P1_BUTTON3");
-        // ...but the Naturals re-spliced from the pre-transform baseline still record ButtonX,
+        // ...but the Naturals re-spliced from the controller as declared still record ButtonX,
         // so IsMapped/remap detection can tell ButtonX's physical button is no longer in play.
         mapping.NaturalButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
         mapping.NaturalInputToButton["ButtonX"].ShouldBe("P1_BUTTON3");

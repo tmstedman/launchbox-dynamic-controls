@@ -10,7 +10,7 @@ public interface IRetroArchSwapApplier
 /// <summary>
 /// Applies RetroArch slot→coreId swaps to an <see cref="InputMappingConfig"/>. Both the cfg
 /// cascade and the .rmp file produce swaps in the same shape (slot name → libretro core ID), so
-/// the same applier handles both — see <c>RetroArchMappingSource</c> for the call order
+/// the same applier handles both — see <c>RetroArchMappingProvider</c> for the call order
 /// (cfg first, then rmp on top).
 /// </summary>
 public class RetroArchSwapApplier(ILogger logger) : IRetroArchSwapApplier

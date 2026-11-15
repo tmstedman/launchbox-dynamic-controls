@@ -6,22 +6,21 @@ namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
 /// Unit tests for <see cref="InputMappingService"/>. All collaborators are substituted —
-/// <see cref="IInputMappingPlugins"/> stands in for the source/transform iteration (covered by
-/// <see cref="InputMappingPluginsTests"/>) so each test states the chosen baseline and transformed
-/// config directly. Focus: the pipeline shape (loader → ResolveBaseline → resolver → ApplyTransform
-/// → re-splice naturals), with special attention to the natural-snapshot invariant when a
-/// transform applies.
+/// <see cref="IInputMappingProviders"/> stands in for the provider iteration (covered by
+/// <see cref="InputMappingProvidersTests"/>) so each test states the natural and current config
+/// directly. Focus: the pipeline shape (loader → Resolve → resolver → re-splice naturals), with
+/// special attention to the natural-snapshot invariant when a provider reports a remap.
 /// </summary>
 public class InputMappingServiceTests
 {
     private readonly IInputMappingLoader _loader = Substitute.For<IInputMappingLoader>();
     private readonly IInputMappingResolver _resolver = Substitute.For<IInputMappingResolver>();
-    private readonly IInputMappingPlugins _plugins = Substitute.For<IInputMappingPlugins>();
+    private readonly IInputMappingProviders _providers = Substitute.For<IInputMappingProviders>();
     private readonly InputMappingService _underTest;
 
     public InputMappingServiceTests()
     {
-        _underTest = new(_loader, _resolver, _plugins, new ControlResolver(Substitute.For<ILogger>()));
+        _underTest = new(_loader, _resolver, _providers, new ControlResolver(Substitute.For<ILogger>()));
     }
 
     // ---- fixture builders ----
@@ -39,13 +38,11 @@ public class InputMappingServiceTests
             NaturalInputToButton: inputToButton ?? [],
             AnalogToDigital: null);
 
-    private void StubSelection(InputMappingConfig baseline, InputMappingConfig? transformed = null)
-    {
-        _plugins.ResolveBaseline(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>())
-            .Returns(baseline);
-        _plugins.ApplyTransform(Arg.Any<GameInfo>(), Arg.Any<InputMappingConfig>())
-            .Returns(transformed);
-    }
+    /// <summary>The providers supply <paramref name="natural"/>, with <paramref name="current"/>
+    /// as the player's mapping when it differs (a remap), or nothing remapped when it is null.</summary>
+    private void StubSelection(InputMappingConfig natural, InputMappingConfig? current = null) =>
+        _providers.Resolve(Arg.Any<GameInfo>(), Arg.Any<PlatformControllersConfig?>())
+            .Returns(current == null ? ProvidedMapping.Unchanged(natural) : new ProvidedMapping(natural, current));
 
     private void ResolverReturns(ResolvedMapping mapping) =>
         _resolver.Resolve(Arg.Any<string>(), Arg.Any<InputMappingConfig>(), Arg.Any<string?>()).Returns(mapping);
@@ -53,10 +50,10 @@ public class InputMappingServiceTests
     // ---- tests ----
 
     [Fact]
-    public void Load_WithNoTransform_ReturnsBaselineMappingFromSingleResolverCall()
+    public void Load_WithNothingRemapped_ReturnsTheMappingFromSingleResolverCall()
     {
-        // given the plugins yield a baseline and no transform
-        StubSelection(baseline: MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        // given the providers yield one mapping, nothing remapped
+        StubSelection(natural: MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
         var canned = Resolved(controller: "Pad");
         ResolverReturns(canned);
 
@@ -64,26 +61,26 @@ public class InputMappingServiceTests
         var result = _underTest.Load(Game());
 
         // then the resolver's single result is returned unchanged — no second resolution because
-        // there is no transform
+        // there is no remap
         result.ShouldBeSameAs(canned);
         _resolver.Received(1).Resolve(Arg.Any<string>(), Arg.Any<InputMappingConfig>(), Arg.Any<string?>());
     }
 
     /// <summary>
-    /// Pins the natural-snapshot invariant: when a transform applies, the returned mapping must
-    /// carry the *baseline's* NaturalButtonToInput / NaturalInputToButton even though its active
-    /// ButtonToInput / InputToButton come from the transformed mapping. This is what lets the
+    /// Pins the natural-snapshot invariant: when a provider reports a remap, the returned mapping
+    /// must carry the *natural* state's NaturalButtonToInput / NaturalInputToButton even though its
+    /// active ButtonToInput / InputToButton come from the current mapping. This is what lets the
     /// renderer detect "this button has been remapped" — the natural state is the comparison
     /// point. Each role uses a distinct dictionary instance so reference identity proves which
     /// mapping sourced which field.
     /// </summary>
     [Fact]
-    public void Load_WithTransform_KeepsNaturalMapsFromBaseline()
+    public void Load_WithARemap_KeepsNaturalMapsFromTheNaturalState()
     {
-        // given the plugins yield a baseline and a transformed config that swaps A/B
+        // given the providers yield a natural config and a current one that swaps A/B
         var baseline = MappingConfig(controller: "Pad", mappings: [("A", "ButtonA"), ("B", "ButtonB")]);
-        var transformed = MappingConfig(controller: "Pad", mappings: [("A", "ButtonB"), ("B", "ButtonA")]);
-        StubSelection(baseline, transformed);
+        var remapped = MappingConfig(controller: "Pad", mappings: [("A", "ButtonB"), ("B", "ButtonA")]);
+        StubSelection(baseline, remapped);
 
         // each resolver call returns distinct dictionary instances so we can prove by reference
         // identity which mapping sourced each field on the final result
@@ -97,51 +94,35 @@ public class InputMappingServiceTests
             ["ButtonA"] = "A",
             ["ButtonB"] = "B",
         };
-        var transformedButtonToInput = new Dictionary<string, IReadOnlyList<string>>
+        var remappedButtonToInput = new Dictionary<string, IReadOnlyList<string>>
         {
             ["A"] = ["ButtonB"],
             ["B"] = ["ButtonA"],
         };
-        var transformedInputToButton = new Dictionary<string, string>
+        var remappedInputToButton = new Dictionary<string, string>
         {
             ["ButtonB"] = "A",
             ["ButtonA"] = "B",
         };
         _resolver.Resolve(Platform, baseline, "Pad")
             .Returns(Resolved("Pad", baselineButtonToInput, baselineInputToButton));
-        _resolver.Resolve(Platform, transformed, "Pad")
-            .Returns(Resolved("Pad", transformedButtonToInput, transformedInputToButton));
+        _resolver.Resolve(Platform, remapped, "Pad")
+            .Returns(Resolved("Pad", remappedButtonToInput, remappedInputToButton));
 
         // when the service loads
         var result = _underTest.Load(Game());
 
-        // then the active maps come from the transformed mapping
-        result.ButtonToInput.ShouldBeSameAs(transformedButtonToInput);
-        result.InputToButton.ShouldBeSameAs(transformedInputToButton);
+        // then the active maps come from the current mapping
+        result.ButtonToInput.ShouldBeSameAs(remappedButtonToInput);
+        result.InputToButton.ShouldBeSameAs(remappedInputToButton);
 
-        // and the natural snapshots come from the baseline — the invariant under test
+        // and the natural snapshots come from the natural state — the invariant under test
         result.NaturalButtonToInput.ShouldBeSameAs(baselineButtonToInput);
         result.NaturalInputToButton.ShouldBeSameAs(baselineInputToButton);
     }
 
     [Fact]
-    public void Load_TransformWithoutController_InheritsControllerFromBaseline()
-    {
-        // given the plugins yield a baseline with a controller and a transformed config without
-        var baseline = MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]);
-        var transformed = MappingConfig(controller: null, mappings: [("A", "ButtonB")]);
-        StubSelection(baseline, transformed);
-        ResolverReturns(Resolved("Pad"));
-
-        // when the service loads
-        _underTest.Load(Game());
-
-        // then the resolver is invoked for the transformed config using the baseline's controller
-        _resolver.Received(1).Resolve(Platform, transformed, "Pad");
-    }
-
-    [Fact]
-    public void Load_ForwardsLoaderPlatformControllersToResolveBaseline()
+    public void Load_ForwardsLoaderPlatformControllersToTheProviders()
     {
         // given the loader produces a platform controllers config
         var platform = new PlatformControllersConfig
@@ -149,13 +130,13 @@ public class InputMappingServiceTests
             Controllers = [new ControllerConfig { Name = "Pad", IsDefault = true }],
         };
         _loader.LoadPlatformMapping(Platform).Returns(platform);
-        StubSelection(baseline: MappingConfig(controller: "Pad"));
+        StubSelection(natural: MappingConfig(controller: "Pad"));
         ResolverReturns(Resolved("Pad"));
 
         // when the service loads
         _underTest.Load(Game());
 
-        // then the same platform instance is forwarded to plugins.ResolveBaseline
-        _plugins.Received(1).ResolveBaseline(Arg.Any<GameInfo>(), platform);
+        // then the same platform instance is forwarded to the providers
+        _providers.Received(1).Resolve(Arg.Any<GameInfo>(), platform);
     }
 }

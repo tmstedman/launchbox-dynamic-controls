@@ -58,11 +58,19 @@ internal sealed class FakeTemplateImageSource : ITemplateImageSource
         _entries.TryGetValue((src, platform, controller), out ResolvedImagePaths? r) ? r : new ResolvedImagePaths(src, null);
 }
 
-/// <summary>Wraps a delegate as an <see cref="IInputMappingTransform"/> so tests can describe
-/// their own per-game overlay without dragging in the MAME plugin internals.</summary>
-internal sealed class StubMappingTransform(Func<GameInfo, InputMappingConfig, InputMappingConfig?> fn)
-    : IInputMappingTransform
+/// <summary>Wraps a delegate as an <see cref="IInputMappingProvider"/> that remaps the platform's
+/// default controller, so tests can describe an emulator's swaps without dragging in the MAME
+/// plugin internals. The delegate receives the controller as Controllers.xml declares it (the
+/// natural state) and returns the mapping the player has, or null to decline.</summary>
+internal sealed class StubRemapProvider(Func<GameInfo, InputMappingConfig, InputMappingConfig?> fn)
+    : IInputMappingProvider
 {
     public bool IsEnabled(GlobalConfig config) => true;
-    public InputMappingConfig? Transform(GameInfo game, InputMappingConfig baseline) => fn(game, baseline);
+
+    public ProvidedMapping? Load(GameInfo game, PlatformControllersConfig? platform)
+    {
+        InputMappingConfig natural = ControllerBaseline.Default(platform);
+        InputMappingConfig? current = fn(game, natural);
+        return current == null ? null : new ProvidedMapping(natural, current);
+    }
 }

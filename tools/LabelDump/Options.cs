@@ -11,7 +11,7 @@ namespace DynamicControls.LabelDump;
 /// and <c>Templates/</c>. The repository's <c>assets/</c> has exactly that shape.</param>
 /// <param name="CfgPack">Directory containing <c>cfg/{rom}.cfg</c>. Also stands in as the
 /// emulator directory: the synthetic <c>mame.exe</c> path handed to the pipeline lives here,
-/// which is how <c>MameInputMappingSource</c> finds the cfg folder beside it.</param>
+/// which is how <c>MameMappingProvider</c> finds the cfg folder beside it.</param>
 /// <param name="Out">File to write. Overwritten wholesale.</param>
 /// <param name="Platform">Platform name passed to the pipeline, which selects
 /// <c>Platforms/{Platform}/</c>.</param>

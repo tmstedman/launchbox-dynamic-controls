@@ -7,18 +7,18 @@ using static DynamicControls.InputMapping.AnalogToDigitalMode;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="PlatformDefaultMappingSource"/>. The source is a thin wrapper around
+/// Unit tests for <see cref="PlatformDefaultMappingProvider"/>. The provider is a thin wrapper around
 /// <see cref="PlatformControllersConfig.Resolve"/> — it picks the platform default controller and
 /// copies its name, AnalogToDigital, and Mappings into a fresh <see cref="InputMappingConfig"/>.
 /// </summary>
-public class PlatformDefaultMappingSourceTests
+public class PlatformDefaultMappingProviderTests
 {
     private readonly ILogger _logger = Substitute.For<ILogger>();
-    private readonly PlatformDefaultMappingSource _underTest;
+    private readonly PlatformDefaultMappingProvider _underTest;
 
-    public PlatformDefaultMappingSourceTests()
+    public PlatformDefaultMappingProviderTests()
     {
-        _underTest = new PlatformDefaultMappingSource(_logger);
+        _underTest = new PlatformDefaultMappingProvider(_logger);
     }
 
     [Fact]
@@ -31,10 +31,10 @@ public class PlatformDefaultMappingSourceTests
     public void Load_NullPlatform_ReturnsNull()
     {
         // given no platform controllers file exists
-        // when the source loads
-        var result = _underTest.Load(Game(), platform: null);
+        // when the provider loads
+        var result = _underTest.Load(Game(), platform: null)?.Current;
 
-        // then the source contributes nothing
+        // then the provider contributes nothing
         result.ShouldBeNull();
     }
 
@@ -44,10 +44,10 @@ public class PlatformDefaultMappingSourceTests
         // given a platform config with an empty controllers list (Resolve returns null)
         var platform = PlatformConfig();
 
-        // when the source loads
-        var result = _underTest.Load(Game(), platform);
+        // when the provider loads
+        var result = _underTest.Load(Game(), platform)?.Current;
 
-        // then the source contributes nothing
+        // then the provider contributes nothing
         result.ShouldBeNull();
     }
 
@@ -61,8 +61,8 @@ public class PlatformDefaultMappingSourceTests
             ControllerDef("Pad-6btn", isDefault: true, analogToDigital: Left,
                 mappings: [("A", "ButtonA"), ("B", "ButtonB"), ("Start", "ButtonStart")]));
 
-        // when the source loads
-        var result = _underTest.Load(Game(), platform);
+        // when the provider loads
+        var result = _underTest.Load(Game(), platform)?.Current;
 
         // then the default-flagged controller is selected and its fields are copied
         result.ShouldNotBeNull();
@@ -84,8 +84,8 @@ public class PlatformDefaultMappingSourceTests
             ControllerDef("FirstDeclared", mappings: [("A", "ButtonA")]),
             ControllerDef("Second", mappings: [("B", "ButtonB")]));
 
-        // when the source loads
-        var result = _underTest.Load(Game(), platform);
+        // when the provider loads
+        var result = _underTest.Load(Game(), platform)?.Current;
 
         // then the first declared controller is used as the implicit default
         result.ShouldNotBeNull();

@@ -10,8 +10,8 @@ namespace DynamicControls.Labels;
 /// filtered chain plus the default loader, so it never needs to know about plugin gating or
 /// <see cref="GlobalConfig"/>.
 ///
-/// Unlike <see cref="InputMapping.IInputMappingPlugins"/> (which owns
-/// <c>Select*</c> iteration methods), this class is a passive holder — the service's loader loop
+/// Unlike <see cref="InputMapping.IInputMappingProviders"/> (whose <c>Resolve</c> walks
+/// the chain itself), this class is a passive holder — the service's loader loop
 /// is interleaved with per-loop default-labels fetching, mapping-driven translation, and a
 /// fall-through-on-empty-translation rule, so pulling iteration out would either lose behaviour
 /// or couple this class to <c>ResolvedMapping</c>/translation concerns that don't belong here.

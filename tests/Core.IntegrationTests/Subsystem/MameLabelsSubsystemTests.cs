@@ -13,10 +13,10 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// <c>AD_STICK_Y</c>, ...) follows wherever the game's own MAME cfg sends it, rather than sitting
 /// on that button's static <c>Controllers.xml</c> default. <see cref="MameInputMappingSubsystemTests"/>
 /// already proves the mapping layer does this; this suite is the one place the real MAME cfg
-/// pipeline (<see cref="Plugins.Mame.MameInputMappingSource"/> → <see cref="Plugins.Mame.MameCfgLoader"/>
+/// pipeline (<see cref="Plugins.Mame.MameMappingProvider"/> → <see cref="Plugins.Mame.MameCfgLoader"/>
 /// → <see cref="Plugins.Mame.JoycodeMappingLoader"/>) is wired into a real <see cref="InputLabelsService"/>
 /// — <see cref="WholeInputCollapseSubsystemTests"/> covers the same seam but with a
-/// <c>StubMappingTransform</c> standing in for MAME.
+/// <c>StubRemapProvider</c> standing in for MAME.
 ///
 /// This is the case that motivated dropping the redundant <c>JOYSTICKLEFT</c>/<c>JOYSTICKRIGHT</c>
 /// fallback entries from the Arcade label pack: that fallback is a static baseline claim on
@@ -35,7 +35,7 @@ public class MameLabelsSubsystemTests
 
     private ResolvedMapping LoadMapping(GameInfo game) =>
         InputMappingFactory.Create(_dc.Lfs, _dc.Fs, new NullLogger(),
-            config: new GlobalConfig { EnableMame = true }, sources: []).Load(game);
+            config: new GlobalConfig { EnableMame = true }).Load(game);
 
     private ResolvedLabels LoadLabels(GameInfo game, ResolvedMapping mapping) =>
         InputLabelsFactory.Create(_dc.Lfs, new NullLogger(), config: new GlobalConfig()).Load(game, mapping);

@@ -4,7 +4,7 @@ namespace DynamicControls.InputMapping;
 /// Resolves <see cref="ControlEntry"/> declarations against a mapping: a platform button standing
 /// for several others reaches whatever those others currently reach.
 ///
-/// <para>Run last, after any emulator transform, because that is the whole point of the
+/// <para>Run last, after any provider's remap, because that is the whole point of the
 /// indirection. A cfg binds directions one at a time and has no way to name a control as a unit,
 /// so a button that does name one has to be re-read against wherever its members actually ended
 /// up. Writing the generic inputs into the control instead would fix them when the file was

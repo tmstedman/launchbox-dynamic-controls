@@ -2,20 +2,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace DynamicControls.Plugins.RetroArch;
 
-/// <summary>The two plugins RetroArch contributes, built over one shared overrides resolver.</summary>
-public record RetroArchPlugins(
-    RetroArchMappingSource Source,
-    RetroArchSwapTransform Transform);
-
 [ExcludeFromCodeCoverage]
-internal static class RetroArchPluginsFactory
+internal static class RetroArchProviderFactory
 {
     /// <summary>
-    /// Builds RetroArch's source and transform. Both are returned together and share one
-    /// <see cref="IRetroArchGameOverridesResolver"/> instance, which is where a cache would go if
-    /// reading the cfg and remap cascades twice per launch ever proves costly.
+    /// Builds RetroArch's mapping provider over one <see cref="IRetroArchGameOverridesResolver"/>,
+    /// which is where a cache would go if reading the cfg and remap cascades ever proves costly.
     /// </summary>
-    public static RetroArchPlugins Create(
+    public static RetroArchMappingProvider Create(
         LayeredFileSystem lfs,
         IFileSystem fs,
         ILogger logger,
@@ -37,8 +31,6 @@ internal static class RetroArchPluginsFactory
         var overridesResolver = new RetroArchGameOverridesResolver(
             logger, coreInfo, coreLoader, cfgResolver, remapResolver);
 
-        return new RetroArchPlugins(
-            new RetroArchMappingSource(logger, overridesResolver),
-            new RetroArchSwapTransform(logger, overridesResolver, swapApplier));
+        return new RetroArchMappingProvider(logger, overridesResolver, swapApplier);
     }
 }

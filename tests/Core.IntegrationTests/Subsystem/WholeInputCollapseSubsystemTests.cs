@@ -32,8 +32,8 @@ public class WholeInputCollapseSubsystemTests
     private static readonly string RootDir = Path.DirectorySeparatorChar + "dc";
     private readonly MockDynamicControlsFilesystem _dc = new(RootDir);
 
-    private ResolvedMapping LoadMapping(IInputMappingTransform? transform, GameInfo game) =>
-        InputMappingFactory.Create(_dc.Lfs, _dc.Fs, new NullLogger(), transforms: transform == null ? [] : [transform])
+    private ResolvedMapping LoadMapping(IInputMappingProvider? provider, GameInfo game) =>
+        InputMappingFactory.Create(_dc.Lfs, _dc.Fs, new NullLogger(), providers: provider == null ? [] : [provider])
             .Load(game);
 
     private ResolvedLabels LoadLabels(GameInfo game, ResolvedMapping mapping) =>
@@ -73,7 +73,7 @@ public class WholeInputCollapseSubsystemTests
               <Input name="BUTTON2">Jump</Input>
             </InputLabels>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -92,7 +92,7 @@ public class WholeInputCollapseSubsystemTests
             ]));
         GameInfo game = Game(platform: "Arcade", romName: "3on3dunk");
 
-        ResolvedMapping mapping = LoadMapping(transform, game);
+        ResolvedMapping mapping = LoadMapping(emulator, game);
         ResolvedLabels labels = LoadLabels(game, mapping);
         IReadOnlyDictionary<string, string> collapsed = Collapse(labels);
 
@@ -134,7 +134,7 @@ public class WholeInputCollapseSubsystemTests
               <Input name="JOYSTICK">Move</Input>
             </InputLabels>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -147,7 +147,7 @@ public class WholeInputCollapseSubsystemTests
             ]));
         GameInfo game = Game(platform: "Arcade", romName: "3on3dunk");
 
-        ResolvedMapping mapping = LoadMapping(transform, game);
+        ResolvedMapping mapping = LoadMapping(emulator, game);
         ResolvedLabels labels = LoadLabels(game, mapping);
 
         Collapse(labels).ShouldBeDictionaryOf(

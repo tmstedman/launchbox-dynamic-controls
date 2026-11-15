@@ -13,12 +13,12 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// + <see cref="RetroArchVariantResolver"/>, <see cref="RetroArchCfgSwapResolver"/>
 /// / <see cref="RetroArchRemapSwapResolver"/> + <see cref="RetroArchOverridesResolver"/>
 /// + <see cref="RetroArchSwapApplier"/> all assembled exactly as
-/// <c>RetroArchMappingSourceFactory.Create</c> assembles them, driven through
-/// <see cref="RetroArchMappingSource.Load"/>. Each test stages a realistic RetroArch install in an
+/// <c>RetroArchProviderFactory.Create</c> assembles them, driven through
+/// <see cref="RetroArchMappingProvider.Load"/>. Each test stages a realistic RetroArch install in an
 /// in-memory <see cref="MockFileSystem"/> (retroarch.cfg + info + per-core xml + cfg/rmp cascade
 /// files) and asserts on the returned <see cref="InputMappingConfig"/>; where only the resolved
 /// mapping shows the answer (the natural snapshot, a control's reach, the Dpad mirror), the whole
-/// <see cref="InputMappingService"/> runs with the plugins in it and the test asserts on its
+/// <see cref="InputMappingService"/> runs with the provider in it and the test asserts on its
 /// <see cref="ResolvedMapping"/>. Focuses on emergent
 /// behaviours that unit tests for individual collaborators can't catch — display-name resolution
 /// driving the config subfolder, cfg/rmp variant override priority, the game-level swap-detection
@@ -50,32 +50,25 @@ public class RetroArchSubsystemTests
     /// the system uses. The factory's optional <see cref="IApplicationData"/> parameter lets the
     /// non-portable cascade resolve into <see cref="MockFileSystem"/> instead of the host's
     /// actual APPDATA.</summary>
-    private RetroArchPlugins Build() =>
-        RetroArchPluginsFactory.Create(_dc.Lfs, _dc.Fs, _logger, _appData);
+    private RetroArchMappingProvider Build() =>
+        RetroArchProviderFactory.Create(_dc.Lfs, _dc.Fs, _logger, _appData);
 
-    /// <summary>Runs RetroArch's two plugins the way <c>InputMappingService</c> does: the source
-    /// picks the controller, then the transform applies the player's swaps on top. They are
-    /// separate plugins precisely so the mapping can be snapshotted between them, but every
-    /// assertion here is about their combined result, which is what reaches the screen.</summary>
-    private InputMappingConfig? Resolve(GameInfo game, PlatformControllersConfig? platform)
-    {
-        RetroArchPlugins plugins = Build();
-        InputMappingConfig? baseline = plugins.Source.Load(game, platform);
-        if (baseline == null) return null;
-        return plugins.Transform.Transform(game, baseline) ?? baseline;
-    }
+    /// <summary>Runs RetroArch's provider and takes the mapping the player has: the controller
+    /// it picked with their swaps applied, which is what reaches the screen. The natural state
+    /// the provider also reports is asserted through <see cref="Service"/>, where it is spliced
+    /// into the resolved mapping.</summary>
+    private InputMappingConfig? Resolve(GameInfo game, PlatformControllersConfig? platform) =>
+        Build().Load(game, platform)?.Current;
 
-    /// <summary>The whole mapping service with RetroArch's plugins in it, for what only the
+    /// <summary>The whole mapping service with RetroArch's provider in it, for what only the
     /// resolved mapping shows: the natural snapshot, a control's reach, the Dpad mirror. It reads
     /// Controllers.xml itself, so the platform has to be staged on the filesystem.</summary>
     private InputMappingService Service()
     {
-        RetroArchPlugins plugins = Build();
         return InputMappingFactory.Create(
             _dc.Lfs, _dc.Fs, _logger,
             config: new GlobalConfig { EnableRetroArch = true },
-            sources: [plugins.Source],
-            transforms: [plugins.Transform]);
+            providers: [Build()]);
     }
 
     // ---- staging helpers ----
@@ -225,7 +218,7 @@ public class RetroArchSubsystemTests
     public void Load_NoPerCoreXml_ReturnsNull_SoChainFallsThrough()
     {
         // Without {rootDir}/RetroArch/{display}.xml, the plugin has no variant catalog and
-        // returns null — InputMappingService's source chain then falls through to the platform
+        // returns null — InputMappingService's provider chain then falls through to the platform
         // default.
         StageRetroArchCfg();
         StageCoreInfo(
@@ -269,9 +262,9 @@ public class RetroArchSubsystemTests
                 retroArchCore: CoreDll),
             GenesisPlatform());
 
-        // With no variant to select the source yields the platform default -- the same mapping
-        // PlatformDefaultMappingSource would have supplied had RetroArch declined -- and the
-        // transform applies the remap on top. The baseline has B driving ButtonA; the remap
+        // With no variant to select the provider takes the platform default -- the same mapping
+        // PlatformDefaultMappingProvider would have supplied had RetroArch declined -- and applies
+        // the remap to it. The baseline has B driving ButtonA; the remap
         // rebinds that slot to the core's button 1, which is Genesis A, so ButtonA now carries
         // A and B drives nothing. Before the fix none of this happened and B stayed put.
         result.ShouldNotBeNull();
@@ -308,7 +301,7 @@ public class RetroArchSubsystemTests
     public void Load_PerCoreXmlPresentButNoCfgOrRmp_ReturnsNull()
     {
         // No cfg files anywhere and no remaps directory: cfgResolver and remapResolver both
-        // return null, so the source has nothing to contribute.
+        // return null, so the provider has nothing to contribute.
         StageRetroArchCfg();
         StageCoreInfo(
             coreDll: CoreDll,
@@ -359,7 +352,7 @@ public class RetroArchSubsystemTests
     public void Load_CfgAndRmpBothPickVariants_RmpVariantWins()
     {
         // Per CLAUDE.md: rmp wins over cfg for variant selection. cfg picks 3-Button (257) but
-        // rmp picks 6-Button (513); the source resolves to 6-Button.
+        // rmp picks 6-Button (513); the provider resolves to 6-Button.
         StageRetroArchCfg();
         StageCoreInfo(
             coreDll: CoreDll,
@@ -506,15 +499,14 @@ public class RetroArchSubsystemTests
         result.Mappings.ShouldNotContainEntry("A", "ButtonX");
     }
 
-    // ---- the source/transform split ----
+    // ---- the natural state is the controller as declared ----
 
     [Fact]
     public void Scenario_RemapIsVisibleAsARemap_NotBakedIntoTheNaturalState()
     {
-        // The reason the swaps were lifted out of the source. InputMappingService snapshots the
-        // mapping between the source and the transform, so with the swaps applied inside the
-        // source they landed inside the snapshot: the "before" and "after" states were identical
-        // and nothing downstream could tell a remapped button from an untouched one.
+        // The provider hands back the controller as declared (Natural) apart from the swapped
+        // mapping (Current), so a swap stays visible as a remap rather than becoming the natural
+        // state, where nothing downstream could tell a remapped button from an untouched one.
         //
         // InputImageResolver reads exactly that difference to decide whether the artwork should
         // follow the action or the physical button being pressed.
@@ -538,14 +530,7 @@ public class RetroArchSubsystemTests
             </Controllers>
             """);
 
-        RetroArchPlugins plugins = Build();
-        InputMappingService service = InputMappingFactory.Create(
-            _dc.Lfs, _dc.Fs, _logger,
-            config: new GlobalConfig { EnableRetroArch = true },
-            sources: [plugins.Source],
-            transforms: [plugins.Transform]);
-
-        ResolvedMapping mapping = service.Load(Game(
+        ResolvedMapping mapping = Service().Load(Game(
             emulatorPath: RetroArchExe,
             romDirectory: RomDir,
             retroArchCore: CoreDll));
@@ -565,7 +550,7 @@ public class RetroArchSubsystemTests
 
     /// <summary>Stages a RetroArch Genesis game whose cfg selects the 3-Button pad, and the
     /// platform's Controllers.xml declaring both pads. A per-game override, if a test wants one,
-    /// is written before <see cref="LoadGenesisGame"/> runs the whole service, whose source order
+    /// is written before <see cref="LoadGenesisGame"/> runs the whole service, whose provider order
     /// is the production one (per-game XML first).</summary>
     private void StageGenesisGameOnThreeButtonPad()
     {
@@ -615,8 +600,8 @@ public class RetroArchSubsystemTests
     {
         // A per-game XML that names no controller is read against the platform default, never the
         // pad RetroArch selected: the file's button names come from some controller's vocabulary,
-        // and the selected pad may not have them. The per-game XML source is first in the chain
-        // and returns a complete mapping, so RetroArch's source is never asked, and a remap-only
+        // and the selected pad may not have them. The per-game XML provider is first in the chain
+        // and returns a complete mapping, so RetroArch's provider is never asked, and a remap-only
         // file reads against the 6-Button default even though the cfg selected the 3-Button pad.
         // A file that wants another pad says so with controller="...".
         StageGenesisGameOnThreeButtonPad();

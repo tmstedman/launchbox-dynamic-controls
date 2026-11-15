@@ -7,20 +7,20 @@ using static DynamicControls.InputMapping.AnalogToDigitalMode;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="PerGameXmlMappingSource"/>. The loader is a substitute so each test
+/// Unit tests for <see cref="PerGameXmlMappingProvider"/>. The loader is a substitute so each test
 /// supplies the exact per-game <see cref="InputMappingConfig"/> the source should see — no XML,
 /// no filesystem. Covers the controller-resolution chain (named → unknown-falls-back → null →
 /// platform-default), the per-game-over-baseline merge by Name, and AnalogToDigital inheritance.
 /// </summary>
-public class PerGameXmlMappingSourceTests
+public class PerGameXmlMappingProviderTests
 {
     private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly IInputMappingLoader _loader = Substitute.For<IInputMappingLoader>();
-    private readonly PerGameXmlMappingSource _underTest;
+    private readonly PerGameXmlMappingProvider _underTest;
 
-    public PerGameXmlMappingSourceTests()
+    public PerGameXmlMappingProviderTests()
     {
-        _underTest = new PerGameXmlMappingSource(_logger, _loader);
+        _underTest = new PerGameXmlMappingProvider(_logger, _loader);
     }
 
     [Fact]
@@ -35,10 +35,10 @@ public class PerGameXmlMappingSourceTests
         // given a game with no rom name
         var game = Game(romName: null!);
 
-        // when the source loads
-        var result = _underTest.Load(game, platform: null);
+        // when the provider loads
+        var result = _underTest.Load(game, platform: null)?.Current;
 
-        // then the source contributes nothing and the loader is never called
+        // then the provider contributes nothing and the loader is never called
         result.ShouldBeNull();
         _loader.DidNotReceive().LoadGameMapping(Arg.Any<GameInfo>());
     }
@@ -50,10 +50,10 @@ public class PerGameXmlMappingSourceTests
         var game = Game();
         _loader.LoadGameMapping(game).ReturnsNull();
 
-        // when the source loads
-        var result = _underTest.Load(game, PlatformConfig(ControllerDef("Pad", isDefault: true)));
+        // when the provider loads
+        var result = _underTest.Load(game, PlatformConfig(ControllerDef("Pad", isDefault: true)))?.Current;
 
-        // then the source contributes nothing
+        // then the provider contributes nothing
         result.ShouldBeNull();
     }
 
@@ -68,8 +68,8 @@ public class PerGameXmlMappingSourceTests
             ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]),
             ControllerDef(name: "Zapper", mappings: [("Trigger", "ButtonA")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the named controller is selected as the baseline
         result.ShouldNotBeNull();
@@ -86,8 +86,8 @@ public class PerGameXmlMappingSourceTests
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the result falls back to the platform default and an error was logged
         result.ShouldNotBeNull();
@@ -105,8 +105,8 @@ public class PerGameXmlMappingSourceTests
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the platform default fills in as baseline
         result.ShouldNotBeNull();
@@ -121,8 +121,8 @@ public class PerGameXmlMappingSourceTests
         _loader.LoadGameMapping(game).Returns(
             MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
 
-        // when the source loads with no platform
-        var result = _underTest.Load(game, platform: null);
+        // when the provider loads with no platform
+        var result = _underTest.Load(game, platform: null)?.Current;
 
         // then the result keeps the per-game mappings but has no controller resolution
         result.ShouldNotBeNull();
@@ -149,8 +149,8 @@ public class PerGameXmlMappingSourceTests
                 ("Start", "ButtonStart"),
             ]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then baseline-only entries (A, Start) remain, B is replaced by the game value, and the
         // new Select entry is appended
@@ -183,8 +183,8 @@ public class PerGameXmlMappingSourceTests
                 ("Start", "ButtonStart"),
             ]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then each button sits on the other's control, with no leftover baseline entry keeping
         // either control double-bound — naming both buttons is what makes a swap expressible
@@ -211,8 +211,8 @@ public class PerGameXmlMappingSourceTests
                 ("B", "ButtonB"),
             ]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then B keeps ButtonB and A joins it there: the overlay drops baseline entries by button
         // name, never by the control they occupy. Both now drive ButtonB, which InputLabelsService
@@ -240,8 +240,8 @@ public class PerGameXmlMappingSourceTests
                 ("Start", "ButtonStart"),
             ]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then B is gone entirely; A and Start survive from the baseline
         result.ShouldNotBeNull();
@@ -270,8 +270,8 @@ public class PerGameXmlMappingSourceTests
                 ("B", "ButtonB"),
             ]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then B is present at the remapped target, not dropped
         result.ShouldNotBeNull();
@@ -293,8 +293,8 @@ public class PerGameXmlMappingSourceTests
             ControllerDef(name: "Pad", isDefault: true, analogToDigital: Right,
                 mappings: [("A", "ButtonA")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the baseline's AnalogToDigital flows through
         result.ShouldNotBeNull();
@@ -302,7 +302,7 @@ public class PerGameXmlMappingSourceTests
     }
 
     /// <summary>
-    /// Failing test demonstrating the CloneOf inheritance gap: <see cref="PerGameXmlMappingSource"/>
+    /// Failing test demonstrating the CloneOf inheritance gap: <see cref="PerGameXmlMappingProvider"/>
     /// only looks up the rom by exact name and never retries with <see cref="GameInfo.CloneOf"/>,
     /// even though the labels pipeline does (<c>InputLabelsService.LoadGameLabels</c> retries on
     /// null). A clone ROM with no per-game XML of its own should inherit its parent's mappings.
@@ -320,8 +320,8 @@ public class PerGameXmlMappingSourceTests
             ControllerDef(name: "6-Button", isDefault: true, mappings: [("A", "ButtonX")]),
             ControllerDef(name: "3-Button", mappings: [("A", "ButtonX")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the parent's mapping is used (matches InputLabelsService.LoadGameLabels CloneOf behavior)
         result.ShouldNotBeNull();
@@ -341,8 +341,8 @@ public class PerGameXmlMappingSourceTests
             ControllerDef(name: "Pad", isDefault: true, analogToDigital: Right,
                 mappings: [("A", "ButtonA")]));
 
-        // when the source loads
-        var result = _underTest.Load(game, platform);
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
 
         // then the per-game value wins — `??=` only fills in nulls
         result.ShouldNotBeNull();

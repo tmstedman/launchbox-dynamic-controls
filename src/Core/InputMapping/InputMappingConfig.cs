@@ -1,9 +1,10 @@
 namespace DynamicControls.InputMapping;
 
 /// <summary>
-/// Raw DTO for per-game / per-source input mapping data — a single mapping list plus optional
+/// Raw DTO for per-game / per-provider input mapping data — a single mapping list plus optional
 /// selection of which platform-defined Controller to inherit from. Produced by InputMappingLoader
-/// (game XMLs) and per-game sources (MAME, RetroArch), consumed by InputMappingService.
+/// (game XMLs) and the emulator providers (MAME, RetroArch); a provider hands back two of them as a
+/// <see cref="ProvidedMapping"/>, and InputMappingResolver turns each into a ResolvedMapping.
 /// </summary>
 public record InputMappingConfig
 {
@@ -34,7 +35,7 @@ public record InputMappingConfig
 
     /// <summary>
     /// Other names a label may call a platform button by, each mapped to the button it means. Set
-    /// by a transform that knows them — MAME names a port by its type, tag and mask
+    /// by an emulator provider that knows them — MAME names a port by its type, tag and mask
     /// (<c>OTHER:STROBE1:16</c>) where the button goes by its bare type — never read from a
     /// file. Carried to <see cref="ResolvedMapping.ButtonAliases"/>.
     /// </summary>
@@ -42,7 +43,7 @@ public record InputMappingConfig
 
     /// <summary>
     /// The mappings whose Dpad the analogToDigital mirror copies onto the stick; null means this
-    /// config's own. Set by a transform whose emulator has the stick press the Dpad the
+    /// config's own. Set by an emulator provider whose emulator has the stick press the Dpad the
     /// controller started with whatever its own swaps did — RetroArch works out a stick's Dpad
     /// presses from the stick itself, after remapping — and never read from a file.
     /// </summary>
@@ -143,8 +144,8 @@ public record MappingEntry
 
     /// <summary>
     /// The button reaches <see cref="Input"/> only because something else does, rather than by a
-    /// binding of its own — set by a transform that derives it (a MAME nudge reaching its half of
-    /// the port's axis), never read from a file. Carried to
+    /// binding of its own — set by an emulator provider that derives it (a MAME nudge reaching
+    /// its half of the port's axis), never read from a file. Carried to
     /// <see cref="ResolvedMapping.DerivedButtonToInput"/>.
     /// </summary>
     public bool Derived { get; set; }

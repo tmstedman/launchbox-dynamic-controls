@@ -48,7 +48,7 @@ public class ControlResolverTests
     [Fact]
     public void ControlFollowsItsMembersWhereverTheyNowPoint()
     {
-        // The whole point of resolving after a transform: a cfg has moved the directions onto the
+        // The whole point of resolving after a provider's remap: a cfg has moved the directions onto the
         // stick, and the button that names the control as a unit has to follow them there.
         ResolvedMapping mapping = MappingOf(
             buttonToInput: Buttons(

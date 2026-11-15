@@ -1,75 +1,65 @@
 namespace DynamicControls.InputMapping;
 
 /// <summary>
-/// Resolves input mappings for a game by walking a chain of registered sources (per-game XML,
-/// RetroArch, ...) to pick a complete mapping, falling back to an empty mapping when no source
-/// applies. Transforms (MAME cfg) are then applied on top of whichever mapping was selected;
-/// when a transform applies, the resulting <see cref="ResolvedMapping"/>'s <c>Natural*</c> maps
-/// reflect the pre-transform baseline so callers can still detect remaps.
+/// Resolves input mappings for a game by walking a chain of providers (per-game XML, RetroArch,
+/// MAME, the platform default) and taking what the first one to answer supplies: the controller in
+/// play and any remap of it. The resulting <see cref="ResolvedMapping"/>'s <c>Natural*</c> maps
+/// reflect the controller before the remap, so callers can still detect one.
 /// </summary>
 public interface IInputMappingService
 {
     /// <summary>
-    /// Loads the resolved input mapping for <paramref name="game"/> by selecting the first
-    /// applicable source, then applying the first applicable transform on top.
+    /// Loads the resolved input mapping for <paramref name="game"/> from the first provider that
+    /// answers.
     /// </summary>
     ResolvedMapping Load(GameInfo game);
 }
 
 /// <summary>
-/// Production implementation: orchestrates the pipeline (load platform → select source → resolve
-/// → select transform → re-splice naturals). Plugin iteration lives on
-/// <see cref="IInputMappingPlugins"/>; raw → resolved conversion lives on
+/// Production implementation: orchestrates the pipeline (load platform → resolve providers →
+/// resolve natural and current → re-splice naturals). Provider iteration lives on
+/// <see cref="IInputMappingProviders"/>; raw → resolved conversion lives on
 /// <see cref="IInputMappingResolver"/>; the service just sequences them and re-splices the
-/// baseline's <c>Natural*</c> maps via <c>with</c> when a transform applies.
+/// natural state's <c>Natural*</c> maps via <c>with</c> when the provider reports a remap.
 /// </summary>
 public class InputMappingService(
     IInputMappingLoader loader,
     IInputMappingResolver resolver,
-    IInputMappingPlugins plugins,
+    IInputMappingProviders providers,
     ControlResolver controlResolver) : IInputMappingService
 {
     private readonly IInputMappingLoader _loader = loader;
     private readonly IInputMappingResolver _resolver = resolver;
-    private readonly IInputMappingPlugins _plugins = plugins;
+    private readonly IInputMappingProviders _providers = providers;
     private readonly ControlResolver _controlResolver = controlResolver;
 
     /// <inheritdoc />
     public ResolvedMapping Load(GameInfo game)
     {
         PlatformControllersConfig? platform = _loader.LoadPlatformMapping(game.Platform);
-        InputMappingConfig baseline = _plugins.ResolveBaseline(game, platform);
-        InputMappingConfig? transformed = _plugins.ApplyTransform(game, baseline);
+        ProvidedMapping provided = _providers.Resolve(game, platform);
+        // Both sides name the same controller (IInputMappingProvider.Load), so either will do.
+        string? controller = provided.Current.Controller;
 
-        if (transformed == null)
+        ResolvedMapping mapping = _resolver.Resolve(game.Platform, provided.Current, controller);
+        if (!ReferenceEquals(provided.Natural, provided.Current))
         {
-            return ResolveControls(_resolver.Resolve(game.Platform, baseline, baseline.Controller),
-                                  platform, baseline.Controller);
+            // A remap shuffles which action a physical button drives; the natural state is still
+            // the controller as declared, so overwrite the snapshot with its reverse. That is what
+            // InputImageResolver compares against to tell a button the remap moved from one in its
+            // usual place.
+            ResolvedMapping natural = _resolver.Resolve(game.Platform, provided.Natural, controller);
+            mapping = mapping with
+            {
+                NaturalInputToButton = natural.InputToButton,
+                NaturalButtonToInput = natural.ButtonToInput,
+            };
         }
 
-        // Transforms shuffle which action a physical button drives; the source baseline is still
-        // the natural state, so overwrite the snapshot with the baseline's reverse. That is what
-        // InputImageResolver compares against to tell a button the transform moved from one in
-        // its usual place.
-        ResolvedMapping baselineMapping = _resolver.Resolve(
-            game.Platform,
-            baseline,
-            baseline.Controller);
-        ResolvedMapping transformedMapping = _resolver.Resolve(
-            game.Platform,
-            transformed,
-            transformed.Controller ?? baseline.Controller);
-
-        ResolvedMapping spliced = transformedMapping with
-        {
-            NaturalInputToButton = baselineMapping.InputToButton,
-            NaturalButtonToInput = baselineMapping.ButtonToInput,
-        };
-
-        // A transform came from an emulator's config, which binds individual directions and has
-        // no way to name a control as a unit. So a control — a button that does name one — is read
-        // last, against wherever its members actually ended up.
-        return ResolveControls(spliced, platform, transformed.Controller ?? baseline.Controller);
+        // A remap comes from an emulator's config (or a file standing in for one), which binds
+        // individual directions and has no way to name a control as a unit. So a control — a
+        // button that does name one — is read last, against wherever its members actually ended up.
+        return ResolveControls(mapping, platform, controller);
     }
 
     /// <summary>Applies the selected controller's own controls, if it declares any.</summary>

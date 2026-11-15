@@ -5,7 +5,7 @@ namespace DynamicControls.Core.IntegrationTests.EndToEnd;
 
 /// <summary>
 /// Full-pipeline tests for the Arcade platform. MAME is the emulator, so both plugins are
-/// active: ControlsXml supplies labels from controls.xml, and MameInputMappingSource can apply
+/// active: ControlsXml supplies labels from controls.xml, and MameMappingProvider can apply
 /// cfg-based button remaps. No analogToDigital on the Cabinet controller — AxisLeftStick
 /// directions never inherit Joystick labels, in contrast to every Sega Genesis test.
 /// </summary>
