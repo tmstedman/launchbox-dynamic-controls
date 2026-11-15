@@ -93,7 +93,7 @@ internal sealed class MockDynamicControlsFilesystem(string root)
     // ---- Emulators (not layered) ----
 
     /// <summary>Writes a MAME cfg file under the <c>Emulators/mame/cfg/</c> directory that the
-    /// MAME transform derives from a <c>mame*.exe</c> emulator path in that folder. Pass
+    /// <c>MameMappingProvider</c> derives from a <c>mame*.exe</c> emulator path in that folder. Pass
     /// <c>"{rom}.cfg"</c> or <c>"default.cfg"</c>.</summary>
     public void WriteMameCfg(string fileName, string xml) =>
         WriteFile(Path.Combine("Emulators", "mame", "cfg", fileName), xml);

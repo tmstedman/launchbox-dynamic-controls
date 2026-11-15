@@ -15,9 +15,9 @@ public record RetroArchGameOverrides(
 /// <summary>
 /// Reads RetroArch's configuration for a game and hands back what it found.
 ///
-/// <para>Two plugins need this same answer — <see cref="RetroArchMappingSource"/> to learn which
-/// controller the player selected, and <see cref="RetroArchSwapTransform"/> to learn which
-/// buttons they swapped — so the reading lives here rather than in either of them.</para>
+/// <para><see cref="RetroArchMappingProvider"/> needs both halves of this answer — which
+/// controller the player selected, and which buttons they swapped — so the reading lives here
+/// rather than in the provider.</para>
 /// </summary>
 public interface IRetroArchGameOverridesResolver
 {
@@ -35,9 +35,8 @@ public interface IRetroArchGameOverridesResolver
 /// "genesis_plus_gx_libretro"), loads the plugin's per-core definition, then parses the cfg and
 /// remap cascades through the two resolvers.
 ///
-/// <para>This is read afresh per call. Both plugins that use it run once per game launch, so the
-/// files are read twice where they were previously read once — see the note on
-/// <see cref="RetroArchSwapTransform"/>.</para>
+/// <para>This is read afresh per call. The provider that uses it runs once per game launch, so the
+/// files are read once.</para>
 /// </summary>
 public class RetroArchGameOverridesResolver(
     ILogger logger,

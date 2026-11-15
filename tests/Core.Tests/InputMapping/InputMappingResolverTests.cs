@@ -171,7 +171,7 @@ public class InputMappingResolverTests
     {
         // given a config — the resolver is the raw → resolved transformation, so the natural
         // snapshot IS this mapping. Any divergence between active and natural maps only appears
-        // later in InputMappingService when a transform is layered on top
+        // later in InputMappingService when a provider reports a remap
         var config = MappingConfig(mappings: [("A", "ButtonA"), ("B", "ButtonB")]);
 
         // when resolving

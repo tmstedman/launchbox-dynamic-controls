@@ -4,8 +4,8 @@ namespace DynamicControls.InputMapping;
 /// Converts a raw <see cref="InputMappingConfig"/> into a <see cref="ResolvedMapping"/>: builds
 /// the platform-button → generic-input dictionary, applies AnalogToDigital mirroring, builds the
 /// reverse lookup, and snapshots the natural state for the renderer's remap detection. Pure
-/// transformation — no file I/O, no caching. Callers that need a transformed-vs-baseline
-/// distinction (e.g. MAME cfg overlays) resolve both configs separately and combine via
+/// transformation — no file I/O, no caching. Callers that need a current-vs-natural
+/// distinction (a provider's remap) resolve both configs separately and combine via
 /// <c>with</c>.
 /// </summary>
 public interface IInputMappingResolver

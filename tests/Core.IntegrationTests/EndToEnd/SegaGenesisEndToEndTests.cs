@@ -572,7 +572,7 @@ public class SegaGenesisEndToEndTests
     /// <summary>
     /// CloneOf fallback: a clone with no files of its own inherits the parent's 3-Button selection
     /// and labels via both pipelines' CloneOf retry (<see cref="Labels.InputLabelsService"/> and
-    /// <see cref="InputMapping.PerGameXmlMappingSource"/>). ButtonBack dim is the discriminator —
+    /// <see cref="InputMapping.PerGameXmlMappingProvider"/>). ButtonBack dim is the discriminator —
     /// 3-Button has no Mode mapping, where the 6-Button default would render it active.
     /// </summary>
     [Fact]
@@ -593,7 +593,7 @@ public class SegaGenesisEndToEndTests
         overlay.ShouldHaveLabel("ButtonX", "Brake");          // A → ButtonX (same in 3- and 6-Button)
         overlay.ShouldHaveLabel("ButtonA", "Accelerate");     // B → ButtonA
 
-        // Mapping inherits via PerGameXmlMappingSource's CloneOf retry: no XML for the Beta, so it
+        // Mapping inherits via PerGameXmlMappingProvider's CloneOf retry: no XML for the Beta, so it
         // retries the parent, which selects controller="3-Button". 3-Button has no Mode mapping,
         // so ButtonBack is dim (0.3, 6.0) — contrast the 6-Button default where Mode → ButtonBack
         // would be active at full opacity.

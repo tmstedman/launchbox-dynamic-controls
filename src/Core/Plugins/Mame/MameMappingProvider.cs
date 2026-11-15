@@ -4,21 +4,25 @@ using DynamicControls.InputMapping;
 namespace DynamicControls.Plugins.Mame;
 
 /// <summary>
-/// Input mapping transform backed by MAME configuration files. Reads per-game cfg first,
+/// Input mapping provider backed by MAME configuration files. Reads per-game cfg first,
 /// then falls back to default.cfg. Translates JOYCODE values into generic input names and
-/// produces a new InputMappingConfig by applying those overrides on top of the baseline
-/// supplied by the source pipeline (per-game XML, platform default, ...).
+/// lays those overrides onto the platform's default controller: the controller as Controllers.xml
+/// declares it is the natural state, and the cfg's bindings are the current one. MAME cfg
+/// shuffles which button drives which action, it does not change which controller is in play.
+///
+/// <para>Returns null when the game isn't a MAME launch or no cfg says anything, leaving the chain
+/// to fall through to the platform default.</para>
 /// </summary>
-public class MameInputMappingSource(
+public class MameMappingProvider(
     ILogger logger,
-    IMameCfgLoader cfgLoader) : IInputMappingTransform
+    IMameCfgLoader cfgLoader) : IInputMappingProvider
 {
     private readonly ILogger _logger = logger;
     private readonly IMameCfgLoader _cfgLoader = cfgLoader;
 
     public bool IsEnabled(GlobalConfig config) => config.EnableMame;
 
-    public InputMappingConfig? Transform(GameInfo game, InputMappingConfig baseline)
+    public ProvidedMapping? Load(GameInfo game, PlatformControllersConfig? platform)
     {
         if (game.EmulatorPath == null) return null;
         if (!MameEmulator.IsMameExecutable(game.EmulatorPath)) return null;
@@ -40,7 +44,8 @@ public class MameInputMappingSource(
         }
 
         _logger.Debug($"MAME config applied: {overrides.Count} overrides");
-        return Merge(baseline, overrides);
+        InputMappingConfig natural = ControllerBaseline.Default(platform);
+        return new ProvidedMapping(natural, Merge(natural, overrides));
     }
 
     /// <summary>

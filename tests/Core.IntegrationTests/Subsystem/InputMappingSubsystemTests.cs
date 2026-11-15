@@ -7,15 +7,15 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the input-mapping pipeline with its real internal wiring intact:
-/// <see cref="InputMappingLoader"/> (XML parsing) → <see cref="PerGameXmlMappingSource"/> /
-/// <see cref="PlatformDefaultMappingSource"/> (source chain) → <see cref="InputMappingPlugins"/>
+/// <see cref="InputMappingLoader"/> (XML parsing) → <see cref="PerGameXmlMappingProvider"/> /
+/// <see cref="PlatformDefaultMappingProvider"/> (provider chain) → <see cref="InputMappingProviders"/>
 /// (priority + filtering) → <see cref="InputMappingResolver"/> (forward/reverse build +
 /// <see cref="AnalogToDigitalMirror"/>) → <see cref="InputMappingService"/>
 /// (orchestration + natural-map splicing). Each test stages Controllers.xml and per-game XMLs in
 /// an in-memory <see cref="MockFileSystem"/> and asserts on the fully-resolved
-/// <see cref="ResolvedMapping"/>. Stub <see cref="IInputMappingSource"/> /
-/// <see cref="IInputMappingTransform"/> instances are injected when a test needs to exercise
-/// the middle-priority position or transform-on-baseline behaviour without dragging in the
+/// <see cref="ResolvedMapping"/>. Stub <see cref="IInputMappingProvider"/>
+/// instances are injected when a test needs to exercise the middle-priority position or a remap
+/// of the platform default without dragging in the
 /// RetroArch or MAME plugin internals (each of which warrants its own subsystem suite).
 /// </summary>
 public class InputMappingSubsystemTests
@@ -27,27 +27,24 @@ public class InputMappingSubsystemTests
 
     // ---- factory helpers ----
 
-    /// <summary>Uses the production factory so loader/resolver/plugins/service wiring under test
-    /// matches what the rest of the system uses. <see cref="PerGameXmlMappingSource"/> and
-    /// <see cref="PlatformDefaultMappingSource"/> are framework-fixed — the factory always wires
-    /// them — so the suite only controls the middle (where RetroArch lives in production) and
-    /// any transforms (where MAME lives in production).</summary>
-    private InputMappingService Build(
-        IInputMappingSource? source = null,
-        IInputMappingTransform? transform = null) =>
+    /// <summary>Uses the production factory so loader/resolver/providers/service wiring under test
+    /// matches what the rest of the system uses. <see cref="PerGameXmlMappingProvider"/> and
+    /// <see cref="PlatformDefaultMappingProvider"/> are framework-fixed — the factory always wires
+    /// them — so the suite only controls the middle (where RetroArch and MAME live in
+    /// production).</summary>
+    private InputMappingService Build(IInputMappingProvider? provider = null) =>
         InputMappingFactory.Create(
             _dc.Lfs,
             _dc.Fs,
             new NullLogger(),
-            sources: source == null ? [] : [source],
-            transforms: transform == null ? [] : [transform]);
+            providers: provider == null ? [] : [provider]);
 
-    // ---- source priority ----
+    // ---- provider priority ----
 
     [Fact]
     public void Load_NoPlatformAndNoGame_ReturnsEmptyMapping()
     {
-        // No Controllers.xml, no per-game XML, no middle source. Every source returns null;
+        // No Controllers.xml, no per-game XML, no middle provider. Every provider declines;
         // the service falls back to an empty config rather than throwing.
         ResolvedMapping mapping = Build().Load(Game(platform: Platform));
 
@@ -72,17 +69,17 @@ public class InputMappingSubsystemTests
               <Mapping name="A" input="ButtonStart" />
             </GameMapping>
             """);
-        var middle = new StubMappingSource(MappingConfig(mappings: [("A", "ButtonY")]));
+        var middle = new StubMappingProvider(MappingConfig(mappings: [("A", "ButtonY")]));
 
         ResolvedMapping mapping = Build(middle).Load(Game(romName: "OutRun"));
 
         // Per-game override wins — A drives ButtonStart, not the platform default's ButtonA
-        // nor the middle source's ButtonY.
+        // nor the middle provider's ButtonY.
         mapping.ButtonToInput["A"].ShouldBe(["ButtonStart"]);
     }
 
     [Fact]
-    public void Load_PerGameXmlMissing_MiddleSourcePresent_WinsOverPlatformDefault()
+    public void Load_PerGameXmlMissing_MiddleProviderPresent_WinsOverPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
             <Controllers>
@@ -91,7 +88,7 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var middle = new StubMappingSource(MappingConfig(mappings: [("A", "ButtonY")]));
+        var middle = new StubMappingProvider(MappingConfig(mappings: [("A", "ButtonY")]));
 
         ResolvedMapping mapping = Build(middle).Load(Game(romName: "OutRun"));
 
@@ -99,7 +96,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_PerGameXmlMissing_MiddleSourceNull_FallsThroughToPlatformDefault()
+    public void Load_PerGameXmlMissing_MiddleProviderDeclines_FallsThroughToPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
             <Controllers>
@@ -108,7 +105,7 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var middle = new StubMappingSource(returns: null);
+        var middle = new StubMappingProvider(returns: null);
 
         ResolvedMapping mapping = Build(middle).Load(Game(romName: "OutRun"));
 
@@ -312,7 +309,7 @@ public class InputMappingSubsystemTests
         // The platform's own Controllers file inherits a shared base whose "Pad" is the default,
         // but also declares its own new controller also marked default (e.g. a CD add-on platform
         // introducing a controller the base platform never had). No per-game mapping selects a
-        // controller explicitly, so PlatformDefaultMappingSource falls back to whichever controller
+        // controller explicitly, so PlatformDefaultMappingProvider falls back to whichever controller
         // resolves as the platform default — this must be the platform file's own, not the base's.
         _dc.WritePlatform("_SharedBase", """
             <Controllers>
@@ -361,8 +358,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameSelectsUnknownController_TheFallbackControllersControlsStillApply()
     {
         // The mappings and the controls are reached by different routes — mappings come from the
-        // baseline the source already resolved, controls from a second lookup by name. They agree
-        // only because PerGameXmlMappingSource overwrites the requested name with the resolved
+        // baseline the provider already resolved, controls from a second lookup by name. They agree
+        // only because PerGameXmlMappingProvider overwrites the requested name with the resolved
         // one. Without that, a game naming a controller that does not exist would get the default
         // variant's buttons and no controls at all.
         _dc.WritePlatform(Platform, """
@@ -407,14 +404,14 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["A"].ShouldBe(["ButtonY"]);
     }
 
-    // ---- transform application + natural-map splicing ----
+    // ---- a provider's remap + natural-map splicing ----
 
     [Fact]
-    public void Load_TransformApplies_NaturalMapsRetainSourceBaselineNotTransformedMapping()
+    public void Load_ProviderRemaps_NaturalMapsRetainTheControllerNotTheRemap()
     {
-        // Source baseline: A→ButtonA. Transform swaps A→ButtonStart. NaturalButtonToInput must
-        // reflect the pre-transform baseline ("A is naturally ButtonA"), even though the active
-        // ButtonToInput shows the transformed view ("A is now ButtonStart"). This lets
+        // Controller: A→ButtonA. The provider swaps A→ButtonStart. NaturalButtonToInput must
+        // reflect the controller as declared ("A is naturally ButtonA"), even though the active
+        // ButtonToInput shows the remapped view ("A is now ButtonStart"). This lets
         // VisibilityEvaluator detect that ButtonA's natural physical button is still present in
         // the mapping (via Naturals) after its action has been remapped away.
         _dc.WritePlatform(Platform, """
@@ -424,11 +421,11 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             mappings: [("A", "ButtonStart")]));
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(romName: "OutRun"));
 
         mapping.ButtonToInput["A"].ShouldBe(["ButtonStart"]);
         mapping.NaturalButtonToInput["A"].ShouldBe(["ButtonA"]);
@@ -437,7 +434,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_TransformReturnsNull_NoTransformApplied_NaturalsEqualActive()
+    public void Load_ProviderDeclines_NothingRemapped_NaturalsEqualActive()
     {
         _dc.WritePlatform(Platform, """
             <Controllers>
@@ -446,9 +443,9 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var transform = new StubMappingTransform((_, _) => null);
+        var emulator = new StubRemapProvider((_, _) => null);
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(romName: "OutRun"));
 
         mapping.ButtonToInput.ShouldBe(mapping.NaturalButtonToInput);
         mapping.InputToButton.ShouldBe(mapping.NaturalInputToButton);
@@ -464,13 +461,13 @@ public class InputMappingSubsystemTests
         """;
 
     [Fact]
-    public void Load_TransformNamesTheDpadToMirror_StickMirrorsThatDpad()
+    public void Load_ProviderNamesTheDpadToMirror_StickMirrorsThatDpad()
     {
-        // a transform can say which Dpad a mirrored stick presses -- RetroArch's names the one the
+        // a provider can say which Dpad a mirrored stick presses -- RetroArch's names the one the
         // controller started with -- so a swap putting B on the Dpad's up leaves the stick's up
         // with Dpad-Up
         _dc.WritePlatform(Platform, MirroredPad);
-        var transform = new StubMappingTransform((_, baseline) =>
+        var emulator = new StubRemapProvider((_, baseline) =>
         {
             InputMappingConfig swapped = MappingConfig(
                 controller: baseline.Controller,
@@ -480,7 +477,7 @@ public class InputMappingSubsystemTests
             return swapped;
         });
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(romName: "OutRun"));
 
         mapping.ButtonToInput["B"].ShouldBe(["ButtonA", "ButtonDpadUp"]);
         mapping.ButtonToInput["Dpad-Up"].ShouldBe(["AxisLeftStickUp"]);
@@ -488,16 +485,16 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_TransformNamingNoDpad_StickMirrorsTheTransformedDpad()
+    public void Load_ProviderNamingNoDpad_StickMirrorsTheRemappedDpad()
     {
         // one that names none -- MAME's -- has its own mapping mirrored, wherever it put the Dpad
         _dc.WritePlatform(Platform, MirroredPad);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings: [("B", "ButtonA"), ("B", "ButtonDpadUp")]));
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(romName: "OutRun"));
 
         mapping.ButtonToInput["B"].ShouldBe(["ButtonA", "ButtonDpadUp", "AxisLeftStickUp"]);
         mapping.ButtonToInput.ContainsKey("Dpad-Up").ShouldBeFalse();
@@ -507,14 +504,15 @@ public class InputMappingSubsystemTests
     // The cross-cutting cases — multiple features composing through the full pipeline at once.
 
     [Fact]
-    public void Scenario_PerGameSelectsAlternateController_WithA2D_AndTransformOnTop()
+    public void Scenario_PerGameSelectsAlternateController_WithA2D_ReplacesTheProviderBehindIt()
     {
-        // Per-game XML selects the non-default "6-Button" controller (which declares A2D=Right),
-        // adds an override mapping, and a transform overlays a swap on top. Verify:
+        // Per-game XML selects the non-default "6-Button" controller (which declares A2D=Right)
+        // and adds an override mapping, with an emulator-style remap provider behind it in the
+        // chain. Verify:
         //   (1) Controller selection threaded through to ResolvedMapping.Controller
         //   (2) A2D inherited from the chosen baseline controller, mirror applied to active map
-        //   (3) Transform replaces the active button-to-input for Y, but Naturals still record Y's
-        //       pre-transform identity
+        //   (3) The provider behind the XML is never consulted: the XML supplies the whole
+        //       mapping, so the swap that provider would have made on Y never lands
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Pad" default="true">
@@ -532,9 +530,11 @@ public class InputMappingSubsystemTests
               <Mapping name="A" input="ButtonStart" />
             </GameMapping>
             """);
-        // Transform: swap Y onto ButtonZ (e.g. simulating a MAME-style cfg overlay).
-        var transform = new StubMappingTransform((_, baseline) =>
+        // Behind the XML: swap Y onto ButtonZ (e.g. simulating a MAME-style cfg overlay).
+        bool consulted = false;
+        var emulator = new StubRemapProvider((_, baseline) =>
         {
+            consulted = true;
             var copy = MappingConfig(
                 controller: baseline.Controller,
                 analogToDigital: baseline.AnalogToDigital,
@@ -543,7 +543,7 @@ public class InputMappingSubsystemTests
             return copy;
         });
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game(romName: "OutRun"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(romName: "OutRun"));
 
         // (1) controller selection
         mapping.Controller.ShouldBe("6-Button");
@@ -552,17 +552,16 @@ public class InputMappingSubsystemTests
         mapping.AnalogToDigital.ShouldBe(AnalogToDigitalMode.Right);
         mapping.ButtonToInput["Up"].ShouldBe(["ButtonDpadUp", "AxisRightStickUp"]);
 
-        // Per-game override survived the transform layering for A
+        // The per-game override is the active mapping for A
         mapping.ButtonToInput["A"].ShouldBe(["ButtonStart"]);
 
-        // (3) transform's swap on Y is the active mapping; naturals retain pre-transform ButtonY
-        mapping.ButtonToInput["Y"].ShouldBe(["ButtonZ"]);
-        mapping.NaturalButtonToInput["Y"].ShouldBe(["ButtonY"]);
-        mapping.NaturalInputToButton["ButtonY"].ShouldBe("Y");
+        // (3) the provider behind the XML never ran, so Y is still where the controller puts it
+        consulted.ShouldBeFalse();
+        mapping.ButtonToInput["Y"].ShouldBe(["ButtonY"]);
     }
 
     [Fact]
-    public void Scenario_TransformMovesJoystickDirectionsOntoASecondControl_WholeJoystickFollows()
+    public void Scenario_RemapMovesJoystickDirectionsOntoASecondControl_WholeJoystickFollows()
     {
         // The MAME shape, through the real pipeline. A cfg binds each P1_JOYSTICK_* port to the
         // hat OR the matching axis, so every direction drives a Dpad control and a left-stick
@@ -582,7 +581,7 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         // Each direction gains its stick equivalent, exactly as an OR'd JOYCODE sequence does.
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -594,7 +593,7 @@ public class InputMappingSubsystemTests
                 ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
             ]));
 
-        ResolvedMapping mapping = Build(transform: transform)
+        ResolvedMapping mapping = Build(emulator)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         // The whole joystick now drives both controls, with the derived one appended -- and,
@@ -610,14 +609,14 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
         mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);
 
-        // Naturals still record the pre-transform state, so remap detection is unaffected.
+        // Naturals still record the controller as declared, so remap detection is unaffected.
         mapping.NaturalButtonToInput["JOYSTICK"].ShouldBe(
             ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"]);
         mapping.NaturalButtonToInput["JOYSTICK_UP"].ShouldBe(["ButtonDpadUp"]);
     }
 
     [Fact]
-    public void Scenario_TransformMovesOnlyOneJoystickDirection_WholeJoystickStaysPut()
+    public void Scenario_RemapMovesOnlyOneJoystickDirection_WholeJoystickStaysPut()
     {
         // Only UP reaches the stick. Pushing the stick up moves the player, but the stick as a
         // whole does not, so the whole-joystick binding stays on the Dpad alone.
@@ -632,12 +631,12 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings: [.. baseline.Mappings.Select(m => (m.Name, m.Input)), ("JOYSTICK_UP", "AxisLeftStickUp")]));
 
-        ResolvedMapping mapping = Build(transform: transform)
+        ResolvedMapping mapping = Build(emulator)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         // No new whole is added -- but the directions siblings currently reach still are, same
@@ -709,7 +708,7 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -721,7 +720,7 @@ public class InputMappingSubsystemTests
                 ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
             ]));
 
-        ResolvedMapping mapping = Build(transform: transform)
+        ResolvedMapping mapping = Build(emulator)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
@@ -753,7 +752,7 @@ public class InputMappingSubsystemTests
               </Controller>
             </Controllers>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -765,7 +764,7 @@ public class InputMappingSubsystemTests
                 ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
             ]));
 
-        ResolvedMapping mapping = Build(transform: transform)
+        ResolvedMapping mapping = Build(emulator)
             .Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
@@ -799,7 +798,7 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         // The config moves every direction onto the right stick as well.
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -811,12 +810,12 @@ public class InputMappingSubsystemTests
                 ("Dpad-Right", "AxisRightStickRight"),
             ]));
 
-        ResolvedMapping mapping = Build(transform: transform).Load(Game());
+        ResolvedMapping mapping = Build(emulator).Load(Game());
 
         // AxisLeftStick came from the mirror and is not restated; AxisRightStick is derived --
         // and, alongside all three wholes, every individual direction the siblings currently
         // reach (each direction now carries three targets: its own Dpad part, the mirror's left-
-        // stick part, and this transform's right-stick part).
+        // stick part, and this remap's right-stick part).
         mapping.ButtonToInput["Dpad-Any"].ShouldBe([
             "ButtonDpadUp", "AxisRightStickUp", "AxisLeftStickUp",
             "ButtonDpadDown", "AxisRightStickDown", "AxisLeftStickDown",
@@ -826,13 +825,13 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlRemapsButtons_ThenCfgMovesDirections_BothSurvive()
+    public void Scenario_PerGameXmlPresent_ReplacesTheEmulatorsRemapAndSupplyOfTheMapping()
     {
-        // The real 3on3dunk shape, which the end-to-end fixture deliberately simplifies away:
-        // the companion cfg pack rotates the face buttons *and* ORs the joystick onto the axes.
-        // Here the button rotation arrives from the authored per-game file and the direction
-        // move from the config, so the derivation reads a reference that already carries
-        // someone else's edits. The whole-input pairing must still be found in it.
+        // The 3on3dunk shape: an authored per-game file rotates the face buttons, and the
+        // emulator's cfg would also OR the joystick onto the axes. The file stands in for what an
+        // emulator provider does for an emulator the plugin cannot read, so where one exists it is
+        // the whole mapping: the emulator's remap does not stack on it. (Stacking would double-
+        // count a swap that both describe.) The provider behind it is never even consulted.
         _dc.WritePlatform("Arcade", """
             <Controllers>
               <Controller name="Cabinet" default="true">
@@ -852,29 +851,35 @@ public class InputMappingSubsystemTests
               <Mapping name="BUTTON2" input="ButtonY" />
             </GameMapping>
             """);
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
-            controller: baseline.Controller,
-            analogToDigital: baseline.AnalogToDigital,
-            mappings:
-            [
-                .. baseline.Mappings.Select(m => (m.Name, m.Input)),
-                ("JOYSTICK_UP", "AxisLeftStickUp"),
-                ("JOYSTICK_DOWN", "AxisLeftStickDown"),
-                ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
-                ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
-            ]));
+        bool consulted = false;
+        var emulator = new StubRemapProvider((_, baseline) =>
+        {
+            consulted = true;
+            return MappingConfig(
+                controller: baseline.Controller,
+                analogToDigital: baseline.AnalogToDigital,
+                mappings:
+                [
+                    .. baseline.Mappings.Select(m => (m.Name, m.Input)),
+                    ("JOYSTICK_UP", "AxisLeftStickUp"),
+                    ("JOYSTICK_DOWN", "AxisLeftStickDown"),
+                    ("JOYSTICK_LEFT", "AxisLeftStickLeft"),
+                    ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
+                ]);
+        });
 
-        ResolvedMapping mapping = Build(transform: transform)
-            .Load(Game(platform: "Arcade", romName: "3on3dunk"));
+        ResolvedMapping mapping = Build(emulator).Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        // The authored button rotation is intact and is the natural state, not a remap.
+        // The authored button rotation is the active mapping, and the natural state too: a
+        // per-game remap is read as the controller's own layout, not as a remap.
         mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["BUTTON2"].ShouldBe(["ButtonY"]);
         mapping.NaturalButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
 
-        // The derivation still found the joystick pairing in that edited reference.
+        // The emulator's direction move never landed: the joystick still reaches the D-pad alone.
+        consulted.ShouldBeFalse();
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
-            "ButtonDpadUp", "AxisLeftStickUp", "ButtonDpadDown", "AxisLeftStickDown",
-            "ButtonDpadLeft", "AxisLeftStickLeft", "ButtonDpadRight", "AxisLeftStickRight",
+            "ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight",
         ]);
     }
 
@@ -901,7 +906,7 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         // Each direction is *replaced*, not added to — the axis only, no hat.
-        var transform = new StubMappingTransform((_, baseline) => MappingConfig(
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
             analogToDigital: baseline.AnalogToDigital,
             mappings:
@@ -912,7 +917,7 @@ public class InputMappingSubsystemTests
                 ("JOYSTICK_RIGHT", "AxisLeftStickRight"),
             ]));
 
-        ResolvedMapping mapping = Build(transform: transform)
+        ResolvedMapping mapping = Build(emulator)
             .Load(Game(platform: "Arcade", romName: "mslug"));
 
         // Following onto the stick is right and already works.
@@ -980,12 +985,14 @@ public class InputMappingSubsystemTests
 
     // ---- stubs and helpers ----
 
-    /// <summary>Always returns the supplied config (or null) — used to occupy the middle source slot
-    /// without dragging in the RetroArch plugin internals.</summary>
-    private sealed class StubMappingSource(InputMappingConfig? returns) : IInputMappingSource
+    /// <summary>Always returns the supplied config (or null) with nothing remapped — used to occupy
+    /// the middle provider slot without dragging in the RetroArch plugin internals.</summary>
+    private sealed class StubMappingProvider(InputMappingConfig? returns) : IInputMappingProvider
     {
         public bool IsEnabled(GlobalConfig config) => true;
-        public InputMappingConfig? Load(GameInfo game, PlatformControllersConfig? platform) => returns;
+
+        public ProvidedMapping? Load(GameInfo game, PlatformControllersConfig? platform) =>
+            returns == null ? null : ProvidedMapping.Unchanged(returns);
     }
 
 }

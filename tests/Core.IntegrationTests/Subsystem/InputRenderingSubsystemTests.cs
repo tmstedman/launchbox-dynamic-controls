@@ -793,7 +793,7 @@ public class InputRenderingSubsystemTests
         result.Images.ShouldBeEmpty();
     }
 
-    // ---- remapped images: what a position draws once a transform moves its button ----
+    // ---- remapped images: what a position draws once a remap moves its button ----
 
     private const string Nintendo64 = "Nintendo 64";
 
@@ -1006,7 +1006,7 @@ public class InputRenderingSubsystemTests
     }
 
     /// <summary>A mapping whose buttons usually drive <paramref name="natural"/> and now drive
-    /// <paramref name="current"/>, as after a RetroArch or MAME transform's swap.</summary>
+    /// <paramref name="current"/>, as after a provider's remap.</summary>
     private static ResolvedMapping RemappedOf(
         string platform, (string Button, string Input)[] natural, (string Button, string Input)[] current) =>
         new(

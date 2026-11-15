@@ -6,7 +6,7 @@ namespace DynamicControls.Core.Tests.Plugins.RetroArch;
 
 /// <summary>
 /// Unit tests for <see cref="RetroArchGameOverridesResolver"/> — the reading of RetroArch's own
-/// configuration, shared by the source that picks a controller and the transform that applies
+/// configuration, read by <c>RetroArchMappingProvider</c> for both the controller choice and the
 /// swaps. Focus: (1) gating, so a game that isn't a RetroArch game costs nothing; (2) resolving
 /// the core's display name, with the DLL name as fallback when the .info file is missing;
 /// (3) returning null when neither the cfg cascade nor the remap file says anything.

@@ -23,7 +23,7 @@ public sealed class ToolResolver(string root, string toolName, string cfgPack = 
 
     /// <summary>
     /// A path nothing opens. <c>MameEmulator.IsMameExecutable</c> gates the whole MAME chain on
-    /// the filename starting with "mame", and <c>MameInputMappingSource</c> derives the cfg
+    /// the filename starting with "mame", and <c>MameMappingProvider</c> derives the cfg
     /// folder from its directory — so placing it in the pack root is what points the pipeline at
     /// <c>{pack}/cfg</c>, the same relationship a real install has between mame.exe and its cfg
     /// folder. Null when no pack was given, which is how a console platform resolves.
