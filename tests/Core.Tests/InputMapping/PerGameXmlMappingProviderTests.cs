@@ -8,7 +8,7 @@ namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
 /// Unit tests for <see cref="PerGameXmlMappingProvider"/>. The loader is a substitute so each test
-/// supplies the exact per-game <see cref="InputMappingConfig"/> the source should see — no XML,
+/// supplies the exact per-game <see cref="InputMappingConfig"/> the provider should see — no XML,
 /// no filesystem. Covers the controller-resolution chain (named → unknown-falls-back → null →
 /// platform-default), the per-game-over-baseline merge by Name, and AnalogToDigital inheritance.
 /// </summary>
@@ -347,5 +347,79 @@ public class PerGameXmlMappingProviderTests
         // then the per-game value wins — `??=` only fills in nulls
         result.ShouldNotBeNull();
         result.AnalogToDigital.ShouldBe(Left);
+    }
+
+    // ---- natural vs current ----
+
+    [Fact]
+    public void Load_MappingRemapsAButton_NaturalIsTheControllerAsDeclared()
+    {
+        // given a file moving A onto ButtonY, over a controller that declares A as ButtonA
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonY")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA"), ("B", "ButtonB")]));
+
+        // when the provider loads
+        ProvidedMapping? result = _underTest.Load(game, platform);
+
+        // then the mapping the player has carries the remap, and the natural state is the
+        // controller as declared, so the remap is told apart from a button in its usual place
+        result.ShouldNotBeNull();
+        result.Current.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("B", "ButtonB"), ("A", "ButtonY")]);
+        result.Natural.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA"), ("B", "ButtonB")]);
+        result.Natural.Controller.ShouldBe("Pad");
+    }
+
+    [Fact]
+    public void Load_FileNamesANonDefaultController_NaturalIsThatController()
+    {
+        // given a file naming "Zapper" and nothing else, where Zapper's button drives a different
+        // input from the default pad's
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Zapper"));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]),
+            ControllerDef(name: "Zapper", mappings: [("Trigger", "AxisTriggerRight")]));
+
+        // when the provider loads
+        ProvidedMapping? result = _underTest.Load(game, platform);
+
+        // then the natural state is the named controller, not the platform default, so choosing a
+        // controller reports nothing remapped
+        result.ShouldNotBeNull();
+        result.Natural.Controller.ShouldBe("Zapper");
+        result.Natural.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("Trigger", "AxisTriggerRight")]);
+        result.Current.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("Trigger", "AxisTriggerRight")]);
+    }
+
+    [Fact]
+    public void Load_FileSetsAnalogToDigital_NaturalTakesTheSameValue()
+    {
+        // the mirror is a statement about the hardware, so a stick mirror is never read as a remap
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(
+            MappingConfig(analogToDigital: Right, mappings: [("A", "ButtonY")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, analogToDigital: Left, mappings: [("A", "ButtonA")]));
+
+        ProvidedMapping? result = _underTest.Load(game, platform);
+
+        result.ShouldNotBeNull();
+        result.Current.AnalogToDigital.ShouldBe(Right);
+        result.Natural.AnalogToDigital.ShouldBe(Right);
+    }
+
+    [Fact]
+    public void Load_NoPlatform_ReportsNothingRemapped()
+    {
+        // with no controller to read against there is nothing for the file to remap
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonY")]));
+
+        ProvidedMapping? result = _underTest.Load(game, platform: null);
+
+        result.ShouldNotBeNull();
+        result.Natural.ShouldBeSameAs(result.Current);
     }
 }

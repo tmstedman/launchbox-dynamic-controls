@@ -618,6 +618,27 @@ public class RetroArchSubsystemTests
         mapping.ButtonToInput["A"].ShouldBe(["ButtonY"]);          // and the XML's remap applied to it
     }
 
+    [Fact]
+    public void Scenario_PerGameXmlPresent_TheRmpsSwapsNeverReachTheMapping()
+    {
+        // The other half of the XML standing in for RetroArch: its swaps are dropped along with
+        // its controller choice, rather than stacked on the file's own remap. The rmp moves B
+        // onto ButtonX, taking A off it; the file names a controller and remaps only C.
+        StageGenesisGameOnThreeButtonPad();
+        StageGameRmp(RmpSwap("y", "0"));
+        _dc.WriteGameMapping(Platform, Rom, """
+            <GameMapping controller="3-Button">
+              <Mapping name="C" input="ButtonY" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = LoadGenesisGame();
+
+        mapping.ButtonToInput["A"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["B"].ShouldBe(["ButtonA"]);
+        mapping.ButtonToInput["C"].ShouldBe(["ButtonY"]);
+    }
+
     // ---- the sticks ----
 
     [Fact]

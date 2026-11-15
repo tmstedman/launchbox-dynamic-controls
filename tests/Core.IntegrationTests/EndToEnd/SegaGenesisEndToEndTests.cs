@@ -570,6 +570,34 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
+    /// A per-game XML swapping B with Dpad-Left draws the swap the way an emulator's would: the
+    /// template's A position is pressed with Dpad-Left, which has no Genesis picture of its own, so
+    /// it shows the left arrow rather than the A glyph. The same file's <c>&lt;Unmap name="C"/&gt;</c>
+    /// leaves the B position with no button at all, so it draws its generic glyph, not C's picture.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_PerGameXmlSwapsAFaceButtonWithADirection_DrawsTheSwapAndLeavesTheUnmappedPositionGeneric()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "PerGameRemapTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.ShouldHaveImage("ButtonA", @"Templates\Xbox Series X\ButtonDpadLeft.png".AsFixturePath());
+        string aGlyph = @"Templates\Xbox Series X\ButtonA.png".AsFixturePath();
+        overlay.RenderedImages.ShouldNotContain(i => i.InputName == "ButtonA" && i.Source == aGlyph);
+
+        overlay.ShouldHaveImage("ButtonB", @"Templates\Xbox Series X\ButtonB.png".AsFixturePath());
+        overlay.RenderedImages.ShouldNotContain(i => i.InputName == "ButtonB" && i.Source.Contains("Sega Genesis"));
+    }
+
+    /// <summary>
     /// CloneOf fallback: a clone with no files of its own inherits the parent's 3-Button selection
     /// and labels via both pipelines' CloneOf retry (<see cref="Labels.InputLabelsService"/> and
     /// <see cref="InputMapping.PerGameXmlMappingProvider"/>). ButtonBack dim is the discriminator —

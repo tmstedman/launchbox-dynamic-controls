@@ -22,12 +22,12 @@ namespace DynamicControls.InputMapping;
 /// drive the same generic, the first one encountered wins (natural mappings precede mirror
 /// entries). e.g. <c>{ "ButtonA" -> "Cross" }</c></param>
 /// <param name="NaturalButtonToInput">Snapshot of ButtonToInput from the selected controller's
-/// natural mapping, taken before game-specific transforms run. Used by InputImageResolver to
-/// detect when a platform button has been remapped to drive a different input than it does by
-/// default on this controller.</param>
+/// natural mapping, taken before any remap (an emulator's swaps or a per-game
+/// <c>&lt;Mapping&gt;</c>). Used by InputImageResolver to detect when a platform button has been
+/// remapped to drive a different input than it does by default on this controller.</param>
 /// <param name="NaturalInputToButton">Snapshot of InputToButton from the selected controller's
-/// natural mapping (plus any AnalogToDigital mirror), taken before game-specific transforms
-/// run: which button drives each generic input by default on this controller.</param>
+/// natural mapping (plus any AnalogToDigital mirror), taken before any remap: which button
+/// drives each generic input by default on this controller.</param>
 /// <param name="AnalogToDigital">Which stick (if any) the Dpad is mirrored onto for this
 /// game/platform. Resolved with game-XML-overrides-platform inheritance; null when no mirroring
 /// applies.</param>
