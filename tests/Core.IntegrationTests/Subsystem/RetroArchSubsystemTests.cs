@@ -561,6 +561,78 @@ public class RetroArchSubsystemTests
         mapping.NaturalButtonToInput.ShouldNotBe(mapping.ButtonToInput);
     }
 
+    // ---- a per-game XML against RetroArch's controller choice ----
+
+    /// <summary>Stages a RetroArch Genesis game whose cfg selects the 3-Button pad, and the
+    /// platform's Controllers.xml declaring both pads. A per-game override, if a test wants one,
+    /// is written before <see cref="LoadGenesisGame"/> runs the whole service, whose source order
+    /// is the production one (per-game XML first).</summary>
+    private void StageGenesisGameOnThreeButtonPad()
+    {
+        StageRetroArchCfg();
+        StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
+        StageCoreXml(("6-Button", "513"), ("3-Button", "257"));
+        StageGameCfg(SelectDevice("257"));
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="6-Button" default="true" analogToDigital="left">
+                <Mapping name="X" input="ButtonLeftShoulder" />
+                <Mapping name="Y" input="ButtonY" />
+                <Mapping name="Z" input="ButtonRightShoulder" />
+                <Mapping name="A" input="ButtonX" />
+                <Mapping name="B" input="ButtonA" />
+                <Mapping name="C" input="ButtonB" />
+              </Controller>
+              <Controller name="3-Button" analogToDigital="left">
+                <Mapping name="A" input="ButtonX" />
+                <Mapping name="B" input="ButtonA" />
+                <Mapping name="C" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+    }
+
+    private ResolvedMapping LoadGenesisGame() => Service().Load(Game(
+        emulatorPath: RetroArchExe,
+        romDirectory: RomDir,
+        retroArchCore: CoreDll));
+
+    [Fact]
+    public void Scenario_NoPerGameXml_TheCfgsControllerChoiceReachesTheMapping()
+    {
+        // The control for the test below: with no override file the cfg's 3-Button choice is the
+        // controller, so a different answer there is the XML's doing and not a broken fixture.
+        StageGenesisGameOnThreeButtonPad();
+
+        ResolvedMapping mapping = LoadGenesisGame();
+
+        mapping.Controller.ShouldBe("3-Button");
+        mapping.ButtonToInput.ContainsKey("X").ShouldBeFalse();   // a 6-Button-only button
+    }
+
+    [Fact]
+    public void Scenario_PerGameXmlNamingNoController_ShadowsTheCfgsControllerChoice()
+    {
+        // A per-game XML that names no controller is read against the platform default, never the
+        // pad RetroArch selected: the file's button names come from some controller's vocabulary,
+        // and the selected pad may not have them. The per-game XML source is first in the chain
+        // and returns a complete mapping, so RetroArch's source is never asked, and a remap-only
+        // file reads against the 6-Button default even though the cfg selected the 3-Button pad.
+        // A file that wants another pad says so with controller="...".
+        StageGenesisGameOnThreeButtonPad();
+        _dc.WriteGameMapping(Platform, Rom, """
+            <GameMapping>
+              <Mapping name="A" input="ButtonY" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = LoadGenesisGame();
+
+        mapping.Controller.ShouldBe("6-Button");
+        mapping.ButtonToInput.ContainsKey("X").ShouldBeTrue();    // the default pad's buttons are back
+        mapping.ButtonToInput["A"].ShouldBe(["ButtonY"]);          // and the XML's remap applied to it
+    }
+
     // ---- the sticks ----
 
     [Fact]
