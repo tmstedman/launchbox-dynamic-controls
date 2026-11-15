@@ -114,6 +114,64 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
+    public void Load_NoControllerInXml_LogsThatItIsReadAgainstThePlatformDefault()
+    {
+        // given a per-game XML with no controller= attribute, over a platform with a default
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonA")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+
+        // when the provider loads
+        _underTest.Load(game, platform);
+
+        // then the log says which pad the file's button names were resolved against
+        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("names no controller") && s.Contains("platform default")));
+    }
+
+    [Fact]
+    public void Load_XmlPresent_LogsThatTheEmulatorsConfigurationIsNotRead()
+    {
+        // given a per-game XML for the game
+        var game = Game(romName: "sonic");
+        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+
+        // when the provider loads
+        _underTest.Load(game, platform);
+
+        // then the log says the file is the whole mapping, so an emulator's ignored config is explained
+        _logger.Received(1).Debug(Arg.Is<string>(s => s.Contains("'sonic' supplies the whole mapping") && s.Contains("not read")));
+    }
+
+    [Fact]
+    public void Load_NoXml_DoesNotLogThatItSuppliesTheMapping()
+    {
+        // given no per-game XML (and no clone parent)
+        _loader.LoadGameMapping(Arg.Any<GameInfo>()).ReturnsNull();
+
+        // when the provider loads
+        _underTest.Load(Game(), PlatformConfig(ControllerDef(name: "Pad", isDefault: true)));
+
+        // then the provider declines silently, leaving the emulator providers to answer
+        _logger.DidNotReceive().Debug(Arg.Is<string>(s => s.Contains("supplies the whole mapping")));
+    }
+
+    [Fact]
+    public void Load_ExplicitController_DoesNotLogTheDefaultNotice()
+    {
+        var game = Game();
+        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+
+        _underTest.Load(game, platform);
+
+        _logger.DidNotReceive().Debug(Arg.Is<string>(s => s.Contains("names no controller")));
+    }
+
+    [Fact]
     public void Load_NullPlatform_ReturnsConfigWithNullController()
     {
         // given a per-game XML and no platform controllers file
