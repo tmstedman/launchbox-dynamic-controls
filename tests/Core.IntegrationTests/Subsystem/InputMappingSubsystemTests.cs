@@ -199,6 +199,32 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["Up"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
     }
 
+    [Fact]
+    public void Load_PerGameSetsAnalogToDigitalItsControllerLacks_TheNaturalStateMirrorsToo()
+    {
+        // The mirror describes the hardware, not a remap, so the natural state takes the file's
+        // value of it. Were it left at the controller's (none), the stick directions the file's
+        // mirror reaches would have no natural button and read as moved there by a remap.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Mapping name="Up" input="ButtonDpadUp" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <GameMapping analogToDigital="left">
+              <Mapping name="A" input="ButtonA" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput["Up"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
+        mapping.NaturalButtonToInput["Up"].ShouldBe(["ButtonDpadUp", "AxisLeftStickUp"]);
+        mapping.NaturalInputToButton["AxisLeftStickUp"].ShouldBe("Up");
+    }
+
     // ---- controller selection ----
 
     [Fact]
@@ -687,6 +713,11 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["JOYSTICK_UP"].ShouldBe(["AxisLeftStickUp"]);
         mapping.ButtonToInput["JOYSTICK"].ShouldBe(
             ["AxisLeftStickUp", "AxisLeftStickDown", "AxisLeftStickLeft", "AxisLeftStickRight"]);
+        // The natural state is resolved against the members as declared, so the control is seen
+        // to have moved with them rather than read as reaching the stick all along.
+        mapping.NaturalButtonToInput["JOYSTICK"].ShouldBe(
+            ["ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight"]);
+        mapping.NaturalInputToButton["ButtonDpadUp"].ShouldBe("JOYSTICK_UP");
     }
 
     [Fact]
@@ -825,6 +856,35 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
+    public void Scenario_PerGameXmlRemapsAButton_ItIsVisibleAsARemapLikeAnEmulatorsSwap()
+    {
+        // The same move drew differently depending on which file it came from: an emulator's swap
+        // left the controller as declared in the natural snapshot, so the renderer could tell the
+        // button had moved, while a per-game <Mapping> was folded into the snapshot and read as the
+        // controller's own layout. Now the snapshot is the controller as Controllers.xml declares
+        // it whichever file moved the button, and InputImageResolver compares against that.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Mapping name="A" input="ButtonA" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <GameMapping>
+              <Mapping name="A" input="ButtonStart" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput["A"].ShouldBe(["ButtonStart"]);
+        mapping.NaturalButtonToInput["A"].ShouldBe(["ButtonA"]);
+        mapping.NaturalInputToButton["ButtonA"].ShouldBe("A");
+        mapping.InputToButton.ContainsKey("ButtonA").ShouldBeFalse();
+    }
+
+    [Fact]
     public void Scenario_PerGameXmlPresent_ReplacesTheEmulatorsRemapAndSupplyOfTheMapping()
     {
         // The 3on3dunk shape: an authored per-game file rotates the face buttons, and the
@@ -870,11 +930,11 @@ public class InputMappingSubsystemTests
 
         ResolvedMapping mapping = Build(emulator).Load(Game(platform: "Arcade", romName: "3on3dunk"));
 
-        // The authored button rotation is the active mapping, and the natural state too: a
-        // per-game remap is read as the controller's own layout, not as a remap.
+        // The authored button rotation is the active mapping, and a remap of it: the natural
+        // state is the controller as Controllers.xml declares it, as for an emulator's swap.
         mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
         mapping.ButtonToInput["BUTTON2"].ShouldBe(["ButtonY"]);
-        mapping.NaturalButtonToInput["BUTTON1"].ShouldBe(["ButtonX"]);
+        mapping.NaturalButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);
 
         // The emulator's direction move never landed: the joystick still reaches the D-pad alone.
         consulted.ShouldBeFalse();

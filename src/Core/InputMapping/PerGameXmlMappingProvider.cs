@@ -50,9 +50,15 @@ public class PerGameXmlMappingProvider(ILogger logger, IInputMappingLoader loade
         config.Controller = baseline?.Name;
         config.AnalogToDigital ??= baseline?.AnalogToDigital;
 
-        if (baseline != null)
-            config.Mappings = MappingOverlay.Apply(baseline.Mappings, config.Mappings, config.Unmaps);
+        // With no controller to read against there is nothing for the file to remap.
+        if (baseline == null) return ProvidedMapping.Unchanged(config);
 
-        return ProvidedMapping.Unchanged(config);
+        // The controller as Controllers.xml declares it is the natural state, so a button the file
+        // moves classifies as remapped, the same as one an emulator's config moves. The mirror is a
+        // statement about the hardware, so the natural state takes the file's value of it.
+        InputMappingConfig natural = ControllerBaseline.Of(baseline) with { AnalogToDigital = config.AnalogToDigital };
+        config.Mappings = MappingOverlay.Apply(baseline.Mappings, config.Mappings, config.Unmaps);
+
+        return new ProvidedMapping(natural, config);
     }
 }

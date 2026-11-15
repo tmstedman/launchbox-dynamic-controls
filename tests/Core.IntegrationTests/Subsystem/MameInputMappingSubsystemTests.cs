@@ -508,6 +508,39 @@ public class MameInputMappingSubsystemTests
         mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
     }
 
+    [Fact]
+    public void Load_PerGameXmlPresent_ReplacesTheCfgsBindingsAndPortNames()
+    {
+        // A per-game XML stands in for the cfg rather than layering on it, so nothing the cfg says
+        // reaches the mapping: not its swap of BUTTON3, not the BUTTON5 it adds, and not the
+        // tag-and-mask name BUTTON3 would otherwise also answer to.
+        WriteBaseline();
+        WriteJoycodeMapping();
+        _dc.WriteMameCfg("dkong.cfg", """
+            <mameconfig>
+              <system name="dkong">
+                <input>
+                  <port tag=":IN0" type="P1_BUTTON3" mask="4" defvalue="0"><newseq type="standard">JOYCODE_1_BUTTON4</newseq></port>
+                  <port type="P1_BUTTON5"><newseq type="standard">JOYCODE_1_BUTTON6</newseq></port>
+                </input>
+              </system>
+            </mameconfig>
+            """);
+        _dc.WriteGameMapping(Platform, "dkong", """
+            <GameMapping>
+              <Mapping name="P1_BUTTON1" input="ButtonB" />
+            </GameMapping>
+            """);
+
+        ResolvedMapping mapping = Build().Load(MameGame("dkong"));
+
+        mapping.ButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonB"]);
+        mapping.ButtonToInput["P1_BUTTON3"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput.ContainsKey("P1_BUTTON5").ShouldBeFalse();
+        mapping.ButtonAliases.ShouldBeEmpty();
+        mapping.NaturalButtonToInput["P1_BUTTON1"].ShouldBe(["ButtonA"]);
+    }
+
     // ---- user-layer override ----
 
     [Fact]

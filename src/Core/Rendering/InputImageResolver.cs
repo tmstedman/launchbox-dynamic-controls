@@ -77,10 +77,8 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
     ///
     /// <para>The name is a fact about the set of buttons, not about which one currently drives
     /// which part, so the buttons are sorted by name. Swapping C-Left and C-Right so each drives
-    /// the other's direction leaves the same two buttons and so the same picture. The platform's
-    /// own mapping can't supply an order that survives that: a per-game remap <em>is</em> the
-    /// mapping's natural state, so ordering by where each button naturally sits would follow the
-    /// swap.</para>
+    /// the other's direction leaves the same two buttons and so the same picture, and the name
+    /// needs no natural snapshot to work out.</para>
     ///
     /// <para>Tried before the covering button because that one accepts a wider control: C-Any
     /// reaches all four C directions, so it covers the two horizontal ones too and would draw its
@@ -265,7 +263,7 @@ public class InputImageResolver(ILogger logger) : IInputImageResolver
             && natural.Any(fixedInputs.Contains));
     }
 
-    /// <summary><paramref name="mapping"/> as it stood before any transform's swap: the natural
+    /// <summary><paramref name="mapping"/> as it stood before any remap: the natural
     /// snapshot standing in for the current mapping.</summary>
     private static ResolvedMapping Unremapped(ResolvedMapping mapping) => mapping with
     {
