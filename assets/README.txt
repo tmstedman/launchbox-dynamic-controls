@@ -28,7 +28,9 @@ User/ instead — see the section below.
   GlobalConfig.xml                          Global plugin settings.
   Platforms/{Platform}/Controllers.xml      Controller variants per platform.
   Platforms/{Platform}/Labels.xml           Per-platform labels (game entries + defaults block).
-  Platforms/{Platform}/ControllerOverrides/{Game}.xml  Per-game input mapping overrides.
+  Platforms/{Platform}/ControllerOverrides/{Game}.xml  Per-game input mapping overrides
+                                            (none ship: one would replace every user's
+                                            emulator configuration for that game).
   controls.xml                              BYOAC MAME controls database.
   Emulators/MAME/JoycodeMapping.xml            JOYCODE -> generic-input lookup for MAME cfg translation.
   Emulators/RetroArch/{CoreDisplayName}.xml Per-core controller variant declarations.

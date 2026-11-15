@@ -107,7 +107,11 @@ Some games remap buttons or use a different controller variant. The plugin resol
 </GameMapping>
 ```
 
-`<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button.
+`<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button. A button you remap is drawn like one an emulator has swapped: with the picture of the physical button the player presses.
+
+A game with an XML file is read from that file alone: RetroArch's and MAME's configuration is not consulted for it, so the file stands in for what they would have said. With `Debug` on, `Logs\debug.log` notes this each time such a game is loaded. Name the controller with `controller="..."`; a file that doesn't is read against the platform's default controller, never the one RetroArch selected, since its button names may not exist on another pad.
+
+On Arcade this also means the file, and any label for that game, must use bare MAME port names (`P1_BUTTON1`, `COIN1`). The longer `TYPE:tag:mask` form of a port name (`COIN1:mainpcb:IN0:128`, or `OTHER:STROBE1:2` for an earlier copy of a repeated port) is read from the game's MAME cfg, which is not consulted once an override file exists, so a label naming a port that way stops matching. The cfg is also what adds the ports Arcade's `Controllers.xml` doesn't declare (`START2`, `COIN2`, `SERVICE`, `P1_BUTTON9` and up, another player's ports), so for a game with an override those exist only if the file maps them itself.
 
 2. **RetroArch** (`EnableRetroArch=true`) - reads your RetroArch `.cfg` and remap files automatically to detect the active controller type and any per-game button swaps.
 3. **MAME** (`EnableMame=true`) - reads your MAME `.cfg` files to pick up per-game JOYCODE button assignments.

@@ -1,8 +1,7 @@
 Shipped per-platform configuration.
 
-Each subfolder is a platform and can hold `Controllers.xml` (controller
-variants), `Labels.xml` (game and default button labels), and
-`ControllerOverrides/{Game}.xml` (per-game input mapping overrides).
+Each subfolder is a platform and holds `Controllers.xml` (controller
+variants) and `Labels.xml` (game and default button labels).
 
 Editing these is encouraged, with one proviso: contribute the change back — a
 wrong button mapping, a missing platform, a game with no labels — fix it here,
@@ -12,18 +11,11 @@ in the next release, so the update that would have wiped your edit delivers
 it instead. For changes specific to your own setup, use `User\Platforms\`
 instead.
 
-`ControllerOverrides/{Game}.xml` follows the same structure as
-`User\Platforms\{Platform}\ControllerOverrides\`. Unlike Labels, most input
-mapping configuration is emulator-specific and belongs in
-`User\Platforms\{Platform}\ControllerOverrides\` rather than here. Controller
-variant selection (the `controller="..."` attribute) is the exception — it is
-emulator-independent and can be contributed here.
-
-Arcade platforms such as Sega NAOMI are a likely candidate for shipped
-per-game overrides: each game has its own unique button configuration, and
-specifying the correct controller variant per game is emulator-independent.
-MAME users additionally benefit from automatic JOYCODE translation, but the
-variant selection still needs to be correct, and other emulators (Flycast,
-Demul) rely on it entirely.
+No `ControllerOverrides/{Game}.xml` files ship, and none should be contributed
+here. A game with an override is read from that file alone: RetroArch's and
+MAME's configuration is not consulted for it, so a shipped file would switch
+off every user's own emulator setup for that game, controller choice
+included. A game whose controller variant RetroArch can't tell the plugin is
+better served by the platform's default in `Controllers.xml`.
 
 To add your own per-game overrides, use `User\Platforms\{Platform}\ControllerOverrides\` instead.
