@@ -172,7 +172,12 @@ When to use: if a specific game remaps buttons or uses a non-default
 controller variant and your emulator is not RetroArch or MAME.
 
 File naming: ControllerOverrides/{Game}.xml — the game name must match
-LaunchBox's ROM name exactly.
+LaunchBox's ROM name exactly. A clone doesn't use its parent's file (unlike its
+labels), so a clone's own RetroArch or MAME configuration is still read when
+only its parent has one; give the clone a file of its own to override it too.
+The clone does inherit its parent's labels, so a label for a button only the
+parent's file supplies may not be shown for the clone until it has its own
+file.
 
 A per-game file selects a controller variant and overlays button overrides on
 top of that variant's baseline. Buttons not mentioned in the file are

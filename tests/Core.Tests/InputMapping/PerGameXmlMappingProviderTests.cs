@@ -359,14 +359,8 @@ public class PerGameXmlMappingProviderTests
         result.AnalogToDigital.ShouldBe(Right);
     }
 
-    /// <summary>
-    /// Failing test demonstrating the CloneOf inheritance gap: <see cref="PerGameXmlMappingProvider"/>
-    /// only looks up the rom by exact name and never retries with <see cref="GameInfo.CloneOf"/>,
-    /// even though the labels pipeline does (<c>InputLabelsService.LoadGameLabels</c> retries on
-    /// null). A clone ROM with no per-game XML of its own should inherit its parent's mappings.
-    /// </summary>
     [Fact]
-    public void Load_NoGameXml_CloneOfHasGameXml_FallsBackToCloneOfMapping()
+    public void Load_NoGameXml_CloneOfHasGameXml_ReturnsNull_SoTheClonesOwnConfigurationIsRead()
     {
         // given a clone with no per-game XML; the parent ROM has one selecting "3-Button"
         var game = Game(romName: "OutRun (Beta)") with { CloneOf = "OutRun (USA, Europe)" };
@@ -379,11 +373,13 @@ public class PerGameXmlMappingProviderTests
             ControllerDef(name: "3-Button", mappings: [("A", "ButtonX")]));
 
         // when the provider loads
-        var result = _underTest.Load(game, platform)?.Current;
+        var result = _underTest.Load(game, platform);
 
-        // then the parent's mapping is used (matches InputLabelsService.LoadGameLabels CloneOf behavior)
-        result.ShouldNotBeNull();
-        result.Controller.ShouldBe("3-Button");
+        // then it has nothing for the clone, and the parent's file is never read: unlike labels, a
+        // mapping is per rom, and the parent's would switch off the clone's own MAME or RetroArch
+        // configuration
+        result.ShouldBeNull();
+        _loader.DidNotReceive().LoadGameMapping(Arg.Is<GameInfo>(g => g.RomName == "OutRun (USA, Europe)"));
     }
 
     [Fact]

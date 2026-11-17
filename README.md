@@ -159,7 +159,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 
 ## Known limitations
 
-- **Per-game input mappings match on exact ROM filename.** `Platforms\{Platform}\ControllerOverrides\{Game}.xml` is matched against the ROM filename without its extension; regional variants require their own file.
+- **Per-game input mappings match on exact ROM filename.** `Platforms\{Platform}\ControllerOverrides\{Game}.xml` is matched against the ROM filename without its extension; regional variants require their own file. So does a clone: unlike its labels, it doesn't inherit its parent's file, so a clone you reconfigure in RetroArch or MAME keeps that configuration even when its parent has an override. The clone still inherits its parent's labels, so a label for a button only the parent's file supplies (a port Arcade's `Controllers.xml` doesn't declare, or a button of a controller the file selects) may not be shown for the clone until it has a file of its own.
 - **DirectInput users in RetroArch do not get button swap detection.** XInput controllers get full game-level swap detection; DirectInput controllers get controller variant and remap file support but no swap detection through cfg files.
 - **DirectInput users in MAME do get button swap detection.** However, it is not reliable since DirectInput devices do not adhere to a standard layout.
 - **RetroArch button swap detection covers game-level remaps only.** Swaps configured in global, core, or core-remap files are not applied — only game-level remap files are checked. If you configure button swaps at those levels the overlay may not reflect them.

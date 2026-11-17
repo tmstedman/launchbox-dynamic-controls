@@ -598,13 +598,13 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
-    /// CloneOf fallback: a clone with no files of its own inherits the parent's 3-Button selection
-    /// and labels via both pipelines' CloneOf retry (<see cref="Labels.InputLabelsService"/> and
-    /// <see cref="InputMapping.PerGameXmlMappingProvider"/>). ButtonBack dim is the discriminator —
-    /// 3-Button has no Mode mapping, where the 6-Button default would render it active.
+    /// A clone inherits its parent's labels (<see cref="Labels.InputLabelsService"/> retries with
+    /// <see cref="GameInfo.CloneOf"/>) but not its parent's ControllerOverrides file, which selects
+    /// 3-Button: a mapping is the player's per-rom setup, and the parent's file would switch off the
+    /// clone's own emulator configuration. So the clone reads the platform default, 6-Button.
     /// </summary>
     [Fact]
-    public void SegaGenesis_OutRunBeta_CloneOfFallback_PerGameMapping()
+    public void SegaGenesis_OutRunBeta_Clone_InheritsTheParentsLabelsButNotItsControllerOverride()
     {
         var game = new GameInfo(
             Platform: "Sega Genesis",
@@ -621,14 +621,8 @@ public class SegaGenesisEndToEndTests
         overlay.ShouldHaveLabel("ButtonX", "Brake");          // A → ButtonX (same in 3- and 6-Button)
         overlay.ShouldHaveLabel("ButtonA", "Accelerate");     // B → ButtonA
 
-        // Mapping inherits via PerGameXmlMappingProvider's CloneOf retry: no XML for the Beta, so it
-        // retries the parent, which selects controller="3-Button". 3-Button has no Mode mapping,
-        // so ButtonBack is dim (0.3, 6.0) — contrast the 6-Button default where Mode → ButtonBack
-        // would be active at full opacity.
-        overlay.ShouldHaveImage(
-            "ButtonBack",
-            @"Templates\Xbox Series X\ButtonBack.png".AsFixturePath(),
-            expectedOpacity: 0.3,
-            expectedBlurRadius: 6.0);
+        // The controller doesn't: the 6-Button default's own art is drawn, where the parent's
+        // 3-Button would fall back to the platform folder's.
+        overlay.ShouldHaveImage("ButtonX", @"Templates\Xbox Series X\Sega Genesis\6-Button\A.png".AsFixturePath());
     }
 }
