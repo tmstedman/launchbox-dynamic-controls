@@ -50,15 +50,16 @@
         <Input name="ButtonB" style="auto-blur" x="1026" y="350" height="64" width="64" />
         <!-- Each button owns its leg of the line, so the leg is as bright as its button and
              vanishes when that button is dimmed; the join below them is shared, always bright,
-             and runs straight down to the labels. The legs are drawn only when the cluster is,
-             hence the same Condition as below. -->
+             and runs straight down to the labels. A leg is drawn only when its own button has a
+             label: a platform default maps both buttons, so lighting a leg on the mapping alone
+             would run a line from an unlabelled button to labels that never name it. -->
         <Input name="ButtonStart" style="auto-blur" x="836" y="356" height="44" width="44">
-            <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
+            <Condition inputs="ButtonStart" match="label">
                 <Overlay style="line" minOpacity="0" src="Line_ButtonStart.png" x="-127" y="+50" />
             </Condition>
         </Input>
         <Input name="ButtonBack" style="auto-blur" x="718" y="356" height="44" width="44">
-            <Condition inputs="ButtonStart ButtonBack" atLeast="1" match="label">
+            <Condition inputs="ButtonBack" match="label">
                 <Overlay style="line" minOpacity="0" src="Line_ButtonBack.png" x="-9" y="+50" />
             </Condition>
         </Input>
