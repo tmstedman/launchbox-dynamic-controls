@@ -22,9 +22,9 @@ namespace DynamicControls.InputMapping;
 /// per-game XML that contains only `controller="..."` (no &lt;Mapping&gt; entries) effectively
 /// means "use this controller as-is, no overrides."
 ///
-/// When no per-game XML exists for the rom and <see cref="GameInfo.CloneOf"/> is set, the
-/// lookup retries with the parent rom — matching the same CloneOf retry that
-/// <c>InputLabelsService.LoadGameLabels</c> performs.
+/// <para>Unlike labels, a clone does not inherit its parent's file. Labels describe the game, which
+/// a clone shares; a mapping describes the player's setup, which MAME and RetroArch keep per rom, so
+/// a file written for the parent would otherwise switch off a configuration written for the clone.</para>
 /// </summary>
 public class PerGameXmlMappingProvider(ILogger logger, IInputMappingLoader loader) : IInputMappingProvider
 {
@@ -38,8 +38,6 @@ public class PerGameXmlMappingProvider(ILogger logger, IInputMappingLoader loade
         if (game.RomName == null) return null;
 
         InputMappingConfig? config = _loader.LoadGameMapping(game);
-        if (config == null && !string.IsNullOrEmpty(game.CloneOf))
-            config = _loader.LoadGameMapping(game with { RomName = game.CloneOf });
         if (config == null) return null;
 
         // Nothing after this provider is asked, so say so: a user wondering why their RetroArch or

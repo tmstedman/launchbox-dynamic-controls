@@ -407,29 +407,6 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
     }
 
-    // ---- CloneOf fallback ----
-
-    [Fact]
-    public void Load_PerGameMissingButCloneOfPresent_LoadsFromCloneOf()
-    {
-        _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
-                <Mapping name="A" input="ButtonA" />
-              </Controller>
-            </Controllers>
-            """);
-        _dc.WriteGameMapping(Platform, "Parent", """
-            <GameMapping>
-              <Mapping name="A" input="ButtonY" />
-            </GameMapping>
-            """);
-
-        ResolvedMapping mapping = Build().Load(Game(romName: "Clone", cloneOf: "Parent"));
-
-        mapping.ButtonToInput["A"].ShouldBe(["ButtonY"]);
-    }
-
     // ---- a provider's remap + natural-map splicing ----
 
     [Fact]
@@ -941,6 +918,38 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["JOYSTICK"].ShouldBe([
             "ButtonDpadUp", "ButtonDpadDown", "ButtonDpadLeft", "ButtonDpadRight",
         ]);
+    }
+
+    [Fact]
+    public void Scenario_CloneWithoutAFileOfItsOwn_ParentsFileDoesNotReplaceItsEmulatorsRemap()
+    {
+        // A player reconfigures a clone in the emulator and leaves its parent alone, whose file
+        // they wrote for the parent. Labels describe the game and a clone inherits them, but a
+        // mapping describes the player's setup, which MAME and RetroArch keep per rom: were the
+        // parent's file inherited, it would switch the clone's own configuration off.
+        _dc.WritePlatform("Arcade", """
+            <Controllers>
+              <Controller name="Cabinet" default="true">
+                <Mapping name="BUTTON1" input="ButtonA" />
+                <Mapping name="BUTTON2" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping("Arcade", "sf2", """
+            <GameMapping>
+              <Mapping name="BUTTON1" input="ButtonX" />
+            </GameMapping>
+            """);
+        var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
+            controller: baseline.Controller,
+            analogToDigital: baseline.AnalogToDigital,
+            mappings: [("BUTTON1", "ButtonA"), ("BUTTON2", "ButtonY")]));
+
+        ResolvedMapping mapping = Build(emulator)
+            .Load(Game(platform: "Arcade", romName: "sf2ce", cloneOf: "sf2"));
+
+        mapping.ButtonToInput["BUTTON2"].ShouldBe(["ButtonY"]);
+        mapping.ButtonToInput["BUTTON1"].ShouldBe(["ButtonA"]);
     }
 
     [Fact]
