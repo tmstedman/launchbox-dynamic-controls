@@ -68,6 +68,23 @@ public static class OverlayAssertions
     }
 
     /// <summary>
+    /// Asserts that the overlay draws the given source for the given input at least once and
+    /// that every such image has the given opacity. <see cref="ShouldHaveImage"/> passes on any
+    /// one match, which leaves a button that draws both a lit and a dim image (a face button's
+    /// top-level glyph and its stacked one) looking right whichever it is.
+    /// </summary>
+    public static void ShouldOnlyHaveImageAtOpacity(
+        this ControllerOverlayModel overlay,
+        string inputName,
+        string expectedSource,
+        double expectedOpacity)
+    {
+        List<RenderedImage> drawn = [.. overlay.RenderedImages.Where(i => i.InputName == inputName && i.Source == expectedSource)];
+        drawn.ShouldNotBeEmpty($"expected image on {inputName} with source='{expectedSource}'");
+        drawn.Select(i => i.Opacity).Distinct().ShouldBe([expectedOpacity], $"opacities of {inputName}'s '{expectedSource}' images");
+    }
+
+    /// <summary>
     /// Asserts that the named inputs' rendered images sit in this order, top to bottom. A
     /// slot-stacking <c>&lt;Container&gt;</c> lays its members out in source order, so this is
     /// what pins a cluster's arrangement — a D-pad's or a stick's four directions — against an

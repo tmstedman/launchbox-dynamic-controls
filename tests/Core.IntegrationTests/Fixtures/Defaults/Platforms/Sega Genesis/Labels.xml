@@ -18,6 +18,10 @@
     <Input name="Dpad-Down">Crouch</Input>
     <Input name="Dpad-Left">Back</Input>
     <Input name="Dpad-Right">Forward</Input>
+    <ControlSet name="Boss Fight">
+      <Input name="A">Low Punch</Input>
+      <Input name="B">Block</Input>
+    </ControlSet>
   </Game>
   <Game launchBoxId="1" romName="OutRun">
     <Input name="Dpad-Left">Steer</Input>
@@ -75,9 +79,18 @@
     <Input name="Y">Special Attack</Input>
   </Game>
   <!-- Paired with a RetroArch remap swapping the Dpad's up and down: the Dpad rows swap their
-       labels, the left stick's keep theirs. -->
+       labels, the left stick's keep theirs. Its one control set takes the same swap. -->
   <Game romName="DpadSwapTest">
     <Input name="Dpad-Up">Jump</Input>
     <Input name="Dpad-Down">Crouch</Input>
+    <ControlSet name="Swimming">
+      <Input name="Dpad-Up">Dive</Input>
+      <Input name="Dpad-Down">Surface</Input>
+    </ControlSet>
+  </Game>
+  <!-- Control sets and no default of its own: the default falls back to the platform's. -->
+  <Game romName="SetsOnlyTest">
+    <ControlSet name="Driving"><Input name="A">Brake</Input><Input name="B">Accelerate</Input></ControlSet>
+    <ControlSet name="Walking"><Input name="A">Jump</Input></ControlSet>
   </Game>
 </Labels>
