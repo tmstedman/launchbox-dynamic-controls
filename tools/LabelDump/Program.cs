@@ -201,19 +201,24 @@ if (options.PlatformsOut.Length > 0)
     foreach (string name in platforms)
     {
         (IReadOnlyList<GameImage> defImages, IReadOnlyList<(string, string)> defLabels) =
-            RenderOf(new SweepTarget(name, ""));
+            RecordOf(platformResolver.Resolve(new SweepTarget(name, "")));
 
         // Every game the platform's own Labels.xml names -- the only game-specific coverage a
         // console platform can have, none of them having a rom pack. Skipped for the platform
         // the rom sweep above already covered, whose thousands of games are in its own file.
-        List<(string, IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>)> namedGames = [];
+        // A game with control sets records each after its own block, so a set's labels show in
+        // the diff like any game's.
+        List<(string, string?, IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>)> namedGames = [];
         if (!name.Equals(options.Platform, StringComparison.OrdinalIgnoreCase))
         {
             foreach (string namedRom in SweepTargets.NamedGames(options.Root, name, Console.Error.WriteLine))
             {
-                (IReadOnlyList<GameImage> images, IReadOnlyList<(string, string)> labels) =
-                    RenderOf(new SweepTarget(name, namedRom));
-                namedGames.Add((namedRom, images, labels));
+                ControllerOverlayModel game = platformResolver.Resolve(new SweepTarget(name, namedRom));
+                foreach (ControllerOverlayModel drawn in (ControllerOverlayModel[])[game, .. game.ControlSets])
+                {
+                    (IReadOnlyList<GameImage> images, IReadOnlyList<(string, string)> labels) = RecordOf(drawn);
+                    namedGames.Add((namedRom, drawn.SetName, images, labels));
+                }
             }
         }
 
@@ -225,7 +230,8 @@ if (options.PlatformsOut.Length > 0)
 
         What the template draws for each platform: first its default - a game with no config, no
         remap and no per-game override, so what is left is the platform's own Controllers.xml and
-        Labels.xml defaults - then one block per game that Labels.xml names.
+        Labels.xml defaults - then one block per game that Labels.xml names, followed by one
+        per control set it declares (set="...").
 
         This is the axis bespoke artwork varies along. A control resolves to its platform's own
         image when a platform button drives it (Nintendo 64's C-Any drives AxisRightStick, so
@@ -247,8 +253,10 @@ if (options.PlatformsOut.Length > 0)
         platform's named games render in the game-specific mode instead, where it resolves to
         HasLabel, so an unlabelled control dims there even when the platform has it.
         """, command);
+    int sets = platformRenders.Sum(p => p.Games.Count(g => g.SetName != null));
     Console.Error.WriteLine(
-        $"{platformRenders.Count} platforms + {platformRenders.Sum(p => p.Games.Count)} named games "
+        $"{platformRenders.Count} platforms + {platformRenders.Sum(p => p.Games.Count) - sets} named games "
+      + $"(and {sets} control sets) "
       + $"rendered {platformRenders.Sum(p => p.Images.Count + p.Games.Sum(g => g.Images.Count))} images, "
       + $"{platformRenders.Sum(p => p.Labels.Count + p.Games.Sum(g => g.Labels.Count))} labels "
       + $"-> {options.PlatformsOut}");
@@ -256,16 +264,13 @@ if (options.PlatformsOut.Length > 0)
 
 return 0;
 
-// Resolves one render and reduces it to what the file records. Shared by the platform default
-// and its named games so the two can never diverge in what they capture.
-//
-// Resolved through a ToolResolver with no cfg pack, unlike the rom sweep above: a platform
-// render is what the data alone produces, and pointing it at an emulator pack would make the
-// file describe one machine's configuration rather than the plugin's defaults.
-(IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>) RenderOf(SweepTarget target)
+// Reduces one render to what the file records. Shared by the platform default, its named games
+// and their control sets, so none of them can diverge in what they capture. The caller resolves
+// it, through a ToolResolver with no cfg pack unlike the rom sweep above: a platform render is
+// what the data alone produces, and pointing it at an emulator pack would make the file describe
+// one machine's configuration rather than the plugin's defaults.
+static (IReadOnlyList<GameImage>, IReadOnlyList<(string, string)>) RecordOf(ControllerOverlayModel m)
 {
-    ControllerOverlayModel m = platformResolver.Resolve(target);
-
     IReadOnlyList<GameImage> images = [.. m.RenderedImages.Select(i => new GameImage(
         Control: i.InputName is { Length: > 0 } n ? n : "(none)",
         Source: ImageWriter.Relative(i.Source),

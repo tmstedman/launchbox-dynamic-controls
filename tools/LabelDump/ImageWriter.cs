@@ -84,13 +84,14 @@ public static class ImageWriter
     /// platform they are one render and there is no transcription to keep either diffable
     /// against separately, which is the only reason the ROM sweep splits them.
     /// </summary>
-    /// <param name="Games">Named renders beyond the default, keyed by ROM name. Empty for most
-    /// platforms; the only game-specific coverage any of them has, none having a ROM pack.</param>
+    /// <param name="Games">Named renders beyond the default, keyed by ROM name, and for a game
+    /// with control sets one more per set after its own, keyed by the set's name too. Empty for
+    /// most platforms; the only game-specific coverage any of them has, none having a ROM pack.</param>
     public record PlatformRender(
         string Platform,
         IReadOnlyList<GameImage> Images,
         IReadOnlyList<(string Control, string Text)> Labels,
-        IReadOnlyList<(string RomName, IReadOnlyList<GameImage> Images,
+        IReadOnlyList<(string RomName, string? SetName, IReadOnlyList<GameImage> Images,
                        IReadOnlyList<(string Control, string Text)> Labels)> Games);
 
     /// <summary>
@@ -113,11 +114,13 @@ public static class ImageWriter
             AppendImages(sb, p.Images, "        ");
             AppendLabels(sb, p.Labels, "        ");
 
-            foreach ((string romName, IReadOnlyList<GameImage> images,
+            // Stable, so a game's sets stay after it in the order its Labels.xml declares them.
+            foreach ((string romName, string? setName, IReadOnlyList<GameImage> images,
                       IReadOnlyList<(string Control, string Text)> labels) in
                      p.Games.OrderBy(g => g.RomName, StringComparer.Ordinal))
             {
-                sb.Append($"        <Game romName=\"{Escape(romName)}\">\n");
+                string set = setName == null ? "" : $" set=\"{Escape(setName)}\"";
+                sb.Append($"        <Game romName=\"{Escape(romName)}\"{set}>\n");
                 AppendImages(sb, images, "            ");
                 AppendLabels(sb, labels, "            ");
                 sb.Append("        </Game>\n");
