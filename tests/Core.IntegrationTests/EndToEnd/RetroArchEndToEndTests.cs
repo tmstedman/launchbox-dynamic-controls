@@ -706,6 +706,62 @@ public class RetroArchEndToEndTests
     }
 
     /// <summary>
+    /// A control set's labels follow the game's mapping, so the rmp swap of the Dpad's up and down
+    /// moves them as it moves the default's, and the left stick keeps the Dpad it started with
+    /// here too.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_RetroArchRmpDpadSwap_ControlSetFollowsTheSwapToo()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "DpadSwapTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "genesis_plus_gx_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        ControllerOverlayModel swimming = overlay.ControlSets.Single();
+        swimming.SetName.ShouldBe("Swimming");
+        swimming.ShouldHaveLabel("ButtonDpadUp", "Surface");
+        swimming.ShouldHaveLabel("ButtonDpadDown", "Dive");
+        swimming.ShouldHaveLabel("AxisLeftStickUp", "Dive");
+        swimming.ShouldHaveLabel("AxisLeftStickDown", "Surface");
+    }
+
+    /// <summary>
+    /// A control set is drawn with the game's mapping, not the controller's natural one: under
+    /// the rmp's Sega A↔B swap, ButtonX takes Sega B's picture in the set as it does in the
+    /// default.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_MortalKombatII_RetroArchRmpButtonSwap_ControlSetIsDrawnWithTheSwap()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "Mortal Kombat II (USA)",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: RetroArchEmulatorPath,
+            RomDirectory: null,
+            RetroArchCore: "genesis_plus_gx_libretro");
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        ControllerOverlayModel bossFight = overlay.ControlSets.Single();
+        bossFight.SetName.ShouldBe("Boss Fight");
+        string segaA = @"Templates\Xbox Series X\Sega Genesis\6-Button\A.png".AsFixturePath();
+        string segaB = @"Templates\Xbox Series X\Sega Genesis\6-Button\B.png".AsFixturePath();
+        bossFight.ShouldHaveLabel("ButtonX", "Block");
+        bossFight.ShouldOnlyHaveImageAtOpacity("ButtonX", segaB, 1.0);
+        bossFight.ShouldHaveLabel("ButtonA", "Low Punch");
+        bossFight.ShouldOnlyHaveImageAtOpacity("ButtonA", segaA, 1.0);
+    }
+
+    /// <summary>
     /// The same Dpad-Left landing on LT, where the Genesis pad has no button at all. Genesis has
     /// art of its own, so its overlay pictures the emulated controller and LT shows the left
     /// arrow too, rather than an LT glyph for a trigger the game never receives.

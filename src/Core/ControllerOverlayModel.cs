@@ -24,4 +24,13 @@ public record ControllerOverlayModel
 
     /// <summary>All positioned images (button and overlay) to display.</summary>
     public List<RenderedImage> RenderedImages { get; set; } = [];
+
+    /// <summary>The control set this overlay draws, or null for the game's default — the one
+    /// picture of all its controls, which is what the pause screen shows.</summary>
+    public string? SetName { get; set; }
+
+    /// <summary>On the default, one overlay per control set the game's labels declare, in their
+    /// order, each drawn on the same base image and canvas. Empty for a game without sets, and on
+    /// a set itself.</summary>
+    public List<ControllerOverlayModel> ControlSets { get; set; } = [];
 }

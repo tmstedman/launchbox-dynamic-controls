@@ -9,4 +9,52 @@
         <Input name="A">Speed Up</Input>
         <Input name="X">Weapon Select</Input>
     </Game>
+    <!-- Read off the manual's five controller diagrams, one per vehicle (manual pages 7-15). The
+         default keeps only what holds in all five; each set labels its vehicle in full. -->
+    <Game launchBoxId="2418" romName="Pilotwings">
+        <Input name="Dpad-Left">Turn Left</Input>
+        <Input name="Dpad-Right">Turn Right</Input>
+        <ControlSet name="Light Plane">
+            <Input name="Dpad-Up">Lower Nose</Input>
+            <Input name="Dpad-Down">Raise Nose</Input>
+            <Input name="Dpad-Left">Turn Left</Input>
+            <Input name="Dpad-Right">Turn Right</Input>
+            <Input name="A">Increase Throttle</Input>
+            <Input name="B">Decrease Throttle</Input>
+        </ControlSet>
+        <ControlSet name="Sky Diving">
+            <Input name="Dpad-Up">Lean Forward</Input>
+            <Input name="Dpad-Down">Lean Backward</Input>
+            <Input name="Dpad-Left">Left Turn</Input>
+            <Input name="Dpad-Right">Right Turn</Input>
+            <Input name="A">Open Parachute</Input>
+        </ControlSet>
+        <ControlSet name="Rocket Belt">
+            <Input name="Dpad-Up">Point Jets Forward</Input>
+            <Input name="Dpad-Down">Point Jets Backward</Input>
+            <Input name="Dpad-Left">Turn Left</Input>
+            <Input name="Dpad-Right">Turn Right</Input>
+            <Input name="A">Fast Jets Throttle</Input>
+            <Input name="B">Slow Jets Throttle</Input>
+            <Input name="L">Change View Point</Input>
+            <Input name="R">Change View Point</Input>
+        </ControlSet>
+        <ControlSet name="Hang Glider">
+            <Input name="Dpad-Up">Point Nose Down</Input>
+            <Input name="Dpad-Down">Raise Nose</Input>
+            <Input name="Dpad-Left">Turn Left</Input>
+            <Input name="Dpad-Right">Turn Right</Input>
+            <Input name="A">Flare</Input>
+        </ControlSet>
+        <ControlSet name="Helicopter">
+            <Input name="Dpad-Up">Advance Forward</Input>
+            <Input name="Dpad-Down">Advance in Reverse</Input>
+            <Input name="Dpad-Left">Turn Left</Input>
+            <Input name="Dpad-Right">Turn Right</Input>
+            <Input name="A">Increase Throttle</Input>
+            <Input name="B">Decrease Throttle</Input>
+            <Input name="L">Fire Missiles</Input>
+            <Input name="R">Fire Missiles</Input>
+        </ControlSet>
+    </Game>
 </Labels>

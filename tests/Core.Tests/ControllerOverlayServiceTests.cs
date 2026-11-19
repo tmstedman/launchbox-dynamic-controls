@@ -195,4 +195,70 @@ public class ControllerOverlayServiceTests
         // record so structural equality determines the dedup
         result.RenderedImages.ShouldBe([duplicate, distinct]);
     }
+
+    [Fact]
+    public void Resolve_ControlSets_EachRenderedIntoItsOwnModel_BesideTheDefault()
+    {
+        // given labels whose default carries two control sets, each rendering its own labels
+        ResolvedLabels plane = EmptyLabels() with { SetName = "Light Plane" };
+        ResolvedLabels belt = EmptyLabels() with { SetName = "Rocket Belt" };
+        ResolvedLabels labels = EmptyLabels() with { ControlSets = [plane, belt] };
+        StubPipeline(
+            baseImage: new BaseImage(@"C:\template\BaseImage.png", Width: 800, Height: 500),
+            rendered: new RenderResult(Labels: [Label("Turn Left")], Images: []));
+        _inputLabelsService.Load(Arg.Any<GameInfo>(), Arg.Any<ResolvedMapping>()).Returns(labels);
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), plane)
+            .Returns(new RenderResult(Labels: [Label("Increase Throttle")], Images: []));
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), belt)
+            .Returns(new RenderResult(Labels: [Label("Fast Jets Throttle")], Images: []));
+
+        // when the service resolves
+        var result = BuildTestFixture().Resolve(Game());
+
+        // then the model is the default, and each set is a model of its own, in order, drawn on
+        // the same base image and canvas, with the mapping resolved once for all of them
+        result.SetName.ShouldBeNull();
+        result.InputLabels.Select(l => l.Text).ShouldBe(["Turn Left"]);
+        result.ControlSets.Select(s => (s.SetName, s.InputLabels.Single().Text, s.ImagePath, s.CanvasWidth)).ShouldBe(
+        [
+            ("Light Plane", "Increase Throttle", @"C:\template\BaseImage.png", 800),
+            ("Rocket Belt", "Fast Jets Throttle", @"C:\template\BaseImage.png", 800),
+        ]);
+        result.ControlSets.ShouldAllBe(s => s.ControlSets.Count == 0);
+        _inputMappingService.Received(1).Load(Arg.Any<GameInfo>());
+    }
+
+    [Fact]
+    public void Resolve_ControlSetThrows_IsLoggedAndLeftEmptyUnderItsName_TheRestStillDrawn()
+    {
+        // given two control sets, the first of which fails to render
+        ResolvedLabels plane = EmptyLabels() with { SetName = "Light Plane" };
+        ResolvedLabels belt = EmptyLabels() with { SetName = "Rocket Belt" };
+        ResolvedLabels labels = EmptyLabels() with { ControlSets = [plane, belt] };
+        StubPipeline(
+            baseImage: new BaseImage(@"C:\template\BaseImage.png", Width: 800, Height: 500),
+            rendered: new RenderResult(Labels: [Label("Turn Left")], Images: []));
+        _inputLabelsService.Load(Arg.Any<GameInfo>(), Arg.Any<ResolvedMapping>()).Returns(labels);
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), plane)
+            .Throws(new InvalidOperationException("boom"));
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), belt)
+            .Returns(new RenderResult(Labels: [Label("Fast Jets Throttle")], Images: []));
+
+        // when the service resolves
+        var result = BuildTestFixture().Resolve(Game());
+
+        // then the default and the other set are drawn as ever, and the failed set stays in its
+        // place under its name with nothing on it, so the sets keep their order and count
+        result.InputLabels.Select(l => l.Text).ShouldBe(["Turn Left"]);
+        result.ControlSets.Select(s => (s.SetName, s.InputLabels.Count, s.RenderedImages.Count, s.ImagePath)).ShouldBe(
+        [
+            ("Light Plane", 0, 0, @"C:\template\BaseImage.png"),
+            ("Rocket Belt", 1, 0, @"C:\template\BaseImage.png"),
+        ]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Light Plane")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("boom")));
+    }
+
+    private static RenderedLabel Label(string text) =>
+        new(Left: 0, Top: 0, Text: text, Alignment: "Left", FontSize: 14);
 }

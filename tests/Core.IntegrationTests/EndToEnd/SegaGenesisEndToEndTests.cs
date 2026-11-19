@@ -625,4 +625,46 @@ public class SegaGenesisEndToEndTests
         // 3-Button would fall back to the platform folder's.
         overlay.ShouldHaveImage("ButtonX", @"Templates\Xbox Series X\Sega Genesis\6-Button\A.png".AsFixturePath());
     }
+
+    /// <summary>
+    /// A game with control sets and no default of its own: its default is the platform's, drawn
+    /// as a game without labels is (every mapped button lit), while each set is the game's own
+    /// labels, where only a button the set labels is lit.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_ControlSetsWithoutADefault_DefaultLightsTheMappedButtons_EachSetOnlyItsLabelled()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "SetsOnlyTest",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        string a = @"Templates\Xbox Series X\Sega Genesis\6-Button\A.png".AsFixturePath();
+        string b = @"Templates\Xbox Series X\Sega Genesis\6-Button\B.png".AsFixturePath();
+
+        // the default: only the platform's Start label, but every mapped button is lit
+        overlay.ShouldHaveLabels(new ExpectedLabel("ButtonStart", "Pause"));
+        overlay.ShouldOnlyHaveImageAtOpacity("ButtonX", a, 1.0);
+        overlay.ShouldOnlyHaveImageAtOpacity("ButtonA", b, 1.0);
+
+        // a set: the platform's Start label under its own, and only a labelled button lit
+        overlay.ControlSets.Select(s => s.SetName).ShouldBe(["Driving", "Walking"]);
+        ControllerOverlayModel driving = overlay.ControlSets[0];
+        driving.ShouldHaveLabel("ButtonX", "Brake");
+        driving.ShouldHaveLabel("ButtonA", "Accelerate");
+        driving.ShouldHaveLabel("ButtonStart", "Pause");
+        driving.ShouldOnlyHaveImageAtOpacity("ButtonX", a, 1.0);
+        driving.ShouldOnlyHaveImageAtOpacity("ButtonA", b, 1.0);
+
+        ControllerOverlayModel walking = overlay.ControlSets[1];
+        walking.ShouldHaveLabel("ButtonX", "Jump");
+        walking.ShouldOnlyHaveImageAtOpacity("ButtonX", a, 1.0);
+        walking.ShouldOnlyHaveImageAtOpacity("ButtonA", b, 0.3);
+    }
 }

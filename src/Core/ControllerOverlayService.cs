@@ -16,7 +16,9 @@ public interface IControllerOverlayService
 {
     /// <summary>
     /// Resolves the overlay model for <paramref name="game"/>. Tries a static image first;
-    /// otherwise runs the mapping → labels → template → render pipeline.
+    /// otherwise runs the mapping → labels → template → render pipeline. The model is the
+    /// game's default overlay, carrying one more in <see cref="ControllerOverlayModel.ControlSets"/>
+    /// for each control set its labels declare.
     /// </summary>
     ControllerOverlayModel Resolve(GameInfo game);
 }
@@ -24,7 +26,8 @@ public interface IControllerOverlayService
 /// <summary>
 /// Production implementation: orchestrates the five collaborator services. Exceptions raised by
 /// any collaborator are caught, logged, and converted to an empty model so the pause screen
-/// doesn't show stale data after a misconfigured template.
+/// doesn't show stale data after a misconfigured template. One raised while drawing a control
+/// set empties only that set.
 /// </summary>
 public class ControllerOverlayService(
     ILogger logger,
@@ -67,27 +70,60 @@ public class ControllerOverlayService(
             ResolvedLabels labels = _inputLabelsService.Load(game, mapping);
             Template template = _templateService.Load(_defaultTemplate);
 
-            RenderResult rendered = _inputRenderingService.Render(template, mapping, labels);
-
-            return new ControllerOverlayModel
+            // A control set changes only what the labels say, so it is drawn with the default's
+            // mapping and template rather than resolving either again.
+            ControllerOverlayModel Frame(string? setName) => new()
             {
                 ImagePath = template.BaseImage?.Path,
                 CanvasWidth = template.BaseImage?.Width ?? RenderingDefaults.CanvasWidth,
                 CanvasHeight = template.BaseImage?.Height ?? RenderingDefaults.CanvasHeight,
-                InputLabels = [.. rendered.Labels],
-                RenderedImages = [.. rendered.Images.Distinct()]
+                SetName = setName,
             };
+
+            ControllerOverlayModel Draw(ResolvedLabels drawn)
+            {
+                RenderResult rendered = _inputRenderingService.Render(template, mapping, drawn);
+                ControllerOverlayModel model = Frame(drawn.SetName);
+                model.InputLabels = [.. rendered.Labels];
+                model.RenderedImages = [.. rendered.Images.Distinct()];
+                return model;
+            }
+
+            // A set that fails is logged and left empty under its name rather than costing the
+            // default, which is what the pause screen shows, and the sets keep their order.
+            ControllerOverlayModel DrawSet(ResolvedLabels set)
+            {
+                try
+                {
+                    return Draw(set);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"Control set \"{set.SetName}\" of {game.RomName} could not be drawn; it is left empty");
+                    LogException(ex);
+                    return Frame(set.SetName);
+                }
+            }
+
+            ControllerOverlayModel overlay = Draw(labels);
+            overlay.ControlSets = [.. labels.ControlSets.Select(DrawSet)];
+            return overlay;
         }
         catch (Exception ex)
         {
-            _logger.Error($"EXCEPTION: {ex.Message}");
-            _logger.Error($"STACK TRACE: {ex.StackTrace}");
-            if (ex.InnerException != null)
-            {
-                _logger.Error($"INNER EXCEPTION: {ex.InnerException.Message}");
-                _logger.Error($"INNER STACK TRACE: {ex.InnerException.StackTrace}");
-            }
+            LogException(ex);
             return new ControllerOverlayModel();
+        }
+    }
+
+    private void LogException(Exception ex)
+    {
+        _logger.Error($"EXCEPTION: {ex.Message}");
+        _logger.Error($"STACK TRACE: {ex.StackTrace}");
+        if (ex.InnerException != null)
+        {
+            _logger.Error($"INNER EXCEPTION: {ex.InnerException.Message}");
+            _logger.Error($"INNER STACK TRACE: {ex.InnerException.StackTrace}");
         }
     }
 }
