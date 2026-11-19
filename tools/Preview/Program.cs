@@ -22,8 +22,11 @@ const string Usage = """
                          anyway, so it changes nothing on a sweep.
       --out <file>       PNG to write. Default: tools/Preview/output/games/{platform}/{rom}.png,
                          or .../output/platforms/{platform}.png when --rom is omitted. A game
-                         with control sets also writes {rom}.set{n}.png for each set and
-                         {rom}.sheet.png beside it, all of them next to this file.
+                         with control sets also writes {rom}.set{n}.png for each set that drew
+                         and {rom}.sheet.png beside it, all of them next to this file, the sets
+                         numbered as the pause screen numbers them. The pause screen steps
+                         through the sets and shows this file, the game's default, only when
+                         the game has no set that drew.
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
       --bg <hex>         canvas colour behind the controller. Default: 101014
@@ -173,34 +176,39 @@ bool Draw(SweepTarget target, string explicitPath = "")
     // names are matched, whole: "{name}.set{n}" and "{name}.sheet", never a looser pattern, which
     // would take another game's file ("Foo.2" among Foo's) for a stale page.
     string name = Path.GetFileNameWithoutExtension(path);
+    IReadOnlyList<ControllerOverlayModel> pages = model.DrawnControlSets;
     foreach (string file in Directory.EnumerateFiles(string.IsNullOrEmpty(dir) ? "." : dir, $"{name}.*.png"))
     {
         string page = Path.GetFileNameWithoutExtension(file)[(name.Length + 1)..];
         bool stale = page == "sheet"
-            ? model.ControlSets.Count == 0
+            ? pages.Count == 0
             : page.StartsWith("set", StringComparison.Ordinal)
               && int.TryParse(page.AsSpan(3), NumberStyles.None, CultureInfo.InvariantCulture, out int number)
-              && number > model.ControlSets.Count;
+              && number > pages.Count;
         if (stale) File.Delete(file);
     }
-    if (model.ControlSets.Count == 0) return true;
+    foreach (ControllerOverlayModel blank in model.ControlSets.Where(set => set.IsBlank))
+    {
+        Console.Error.WriteLine($"{target} [{blank.SetName}]: nothing drawn, so no page");
+    }
+    if (pages.Count == 0) return true;
 
-    // A game whose controls change with the vehicle, view or mode: each control set as a PNG of
-    // its own, numbered in declared order, then a sheet of the default beside them all. Named
-    // off the default's file with a dot and "set", so another game's own file can't share the
-    // name -- a space would make Pilotwings' first set "Pilotwings 1.png", and a bare number
-    // would make Foo's second "Foo.2.png", a game of that name's file -- and nothing falls
-    // between them however a listing sorts. The set's name is stamped on the render and
-    // captions it on the sheet, not in the file name.
+    // A game whose controls change with the vehicle, view or mode: each control set that drew as
+    // a PNG of its own, numbered as the pause screen numbers them, then a sheet of the default
+    // beside them all. Named off the default's file with a dot and "set", so another game's own
+    // file can't share the name -- a space would make Pilotwings' first set "Pilotwings 1.png",
+    // and a bare number would make Foo's second "Foo.2.png", a game of that name's file -- and
+    // nothing falls between them however a listing sorts. The set's name is stamped on the
+    // render and captions it on the sheet, not in the file name.
     string stem = Path.Combine(dir ?? "", name);
     List<(string Caption, SKBitmap Render)> sheet = [("Default", bitmap)];
     try
     {
-        for (int n = 0; n < model.ControlSets.Count; n++)
+        for (int n = 0; n < pages.Count; n++)
         {
-            ControllerOverlayModel set = model.ControlSets[n];
+            ControllerOverlayModel set = pages[n];
             SKBitmap drawn = Render(set);
-            PageIndicator.Stamp(drawn, $"{n + 1} / {model.ControlSets.Count}", set.SetName ?? "", typeface);
+            PageIndicator.Stamp(drawn, $"{n + 1} / {pages.Count}", set.SetName ?? "", typeface);
             sheet.Add((set.SetName ?? "", drawn));
 
             string setPath = $"{stem}.set{n + 1}.png";
@@ -211,7 +219,7 @@ bool Draw(SweepTarget target, string explicitPath = "")
 
         using SKBitmap composed = ContactSheet.Compose(sheet, typeface, background);
         Save(composed, $"{stem}.sheet.png");
-        Console.Error.WriteLine($"{target}: default and {model.ControlSets.Count} control sets -> {stem}.sheet.png");
+        Console.Error.WriteLine($"{target}: default and {pages.Count} control sets -> {stem}.sheet.png");
     }
     finally
     {

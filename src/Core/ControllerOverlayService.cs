@@ -90,23 +90,26 @@ public class ControllerOverlayService(
             }
 
             // A set that fails is logged and left empty under its name rather than costing the
-            // default, which is what the pause screen shows, and the sets keep their order.
-            ControllerOverlayModel DrawSet(ResolvedLabels set)
+            // default or the other sets, and the sets keep their order. So is the default of a
+            // game with sets, which the pause screen shows only when no set drew; without sets, a
+            // default that fails empties the overlay as any other failure does.
+            ControllerOverlayModel DrawOrLeaveEmpty(ResolvedLabels drawn)
             {
                 try
                 {
-                    return Draw(set);
+                    return Draw(drawn);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error($"Control set \"{set.SetName}\" of {game.RomName} could not be drawn; it is left empty");
+                    string what = drawn.SetName is { } name ? $"Control set \"{name}\"" : "The default";
+                    _logger.Error($"{what} of {game.RomName} could not be drawn; it is left empty");
                     LogException(ex);
-                    return Frame(set.SetName);
+                    return Frame(drawn.SetName);
                 }
             }
 
-            ControllerOverlayModel overlay = Draw(labels);
-            overlay.ControlSets = [.. labels.ControlSets.Select(DrawSet)];
+            ControllerOverlayModel overlay = labels.ControlSets.Count == 0 ? Draw(labels) : DrawOrLeaveEmpty(labels);
+            overlay.ControlSets = [.. labels.ControlSets.Select(DrawOrLeaveEmpty)];
             return overlay;
         }
         catch (Exception ex)

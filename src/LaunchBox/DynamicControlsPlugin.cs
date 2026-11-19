@@ -33,6 +33,7 @@ public class DynamicControlsPlugin : IGameLaunchingPlugin
                 new RetroArchCoreResolver(),
                 DynamicControlsViewModel.Instance,
                 logger);
+            ControlSetInput.Current = new ControlSetInput(DynamicControlsViewModel.Instance, logger);
 
             logger.Info($"Plugin loaded. Plugin dir: {pluginDir}");
         }

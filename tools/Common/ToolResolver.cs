@@ -45,6 +45,5 @@ public sealed class ToolResolver(string root, string toolName, string cfgPack = 
     /// every exception into an empty model, so "this game draws nothing" and "the pipeline
     /// threw" are indistinguishable from out here — callers should say both.
     /// </summary>
-    public static bool IsEmpty(ControllerOverlayModel model) =>
-        model.RenderedImages.Count == 0 && model.InputLabels.Count == 0;
+    public static bool IsEmpty(ControllerOverlayModel model) => model.IsBlank;
 }

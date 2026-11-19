@@ -259,6 +259,33 @@ public class ControllerOverlayServiceTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("boom")));
     }
 
+    [Fact]
+    public void Resolve_DefaultThrowsOnAGameWithSets_IsLoggedAndLeftEmpty_TheSetsStillDrawn()
+    {
+        // given a default that fails to render, and a control set that renders
+        ResolvedLabels belt = EmptyLabels() with { SetName = "Rocket Belt" };
+        ResolvedLabels labels = EmptyLabels() with { ControlSets = [belt] };
+        StubPipeline(
+            baseImage: new BaseImage(@"C:\template\BaseImage.png", Width: 800, Height: 500),
+            rendered: new RenderResult(Labels: [], Images: []));
+        _inputLabelsService.Load(Arg.Any<GameInfo>(), Arg.Any<ResolvedMapping>()).Returns(labels);
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), labels)
+            .Throws(new InvalidOperationException("boom"));
+        _inputRenderingService.Render(Arg.Any<Template>(), Arg.Any<ResolvedMapping>(), belt)
+            .Returns(new RenderResult(Labels: [Label("Fast Jets Throttle")], Images: []));
+
+        // when the service resolves
+        var result = BuildTestFixture().Resolve(Game());
+
+        // then the default is left empty on the base image, and the set, which is what the pause
+        // screen shows, is drawn as ever
+        result.ImagePath.ShouldBe(@"C:\template\BaseImage.png");
+        result.InputLabels.ShouldBeEmpty();
+        result.ControlSets.Select(s => (s.SetName, s.InputLabels.Single().Text)).ShouldBe([("Rocket Belt", "Fast Jets Throttle")]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("The default")));
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("boom")));
+    }
+
     private static RenderedLabel Label(string text) =>
         new(Left: 0, Top: 0, Text: text, Alignment: "Left", FontSize: 14);
 }
