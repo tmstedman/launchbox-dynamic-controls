@@ -142,6 +142,28 @@ A `name` that means a whole control — MAME's `JOYSTICK`, or a platform's `Dpad
 
 The two halves need different amounts of evidence. A control is only labelled once *all four* directions reach it — binding just up to the stick doesn't make the stick move you. A control stops being labelled only when *every* direction has left it, so a two-way joystick, which never drove more than left and right, keeps its label.
 
+### Control sets
+
+Some games change their controls with the vehicle, view or mode. A `<Game>` can hold a `<ControlSet>` for each, labelling every button as it works in that context:
+
+```xml
+<!-- User\Platforms\Super Nintendo Entertainment System\Labels.xml -->
+<Game launchBoxId="2418" romName="Pilotwings">
+    <Input name="Dpad-Left">Turn Left</Input>
+    <Input name="Dpad-Right">Turn Right</Input>
+    <ControlSet name="Rocket Belt">
+        <Input name="Dpad-Left">Turn Left</Input>
+        <Input name="Dpad-Right">Turn Right</Input>
+        <Input name="A">Fast Jets Throttle</Input>
+        <Input name="B">Slow Jets Throttle</Input>
+    </ControlSet>
+</Game>
+```
+
+The `<Input>`s directly under `<Game>` are the game's default: one picture of its controls, which is what the pause screen shows. A set takes nothing from the default, so a set repeats the labels it shares with it, but the platform's `<Defaults>` still apply beneath every set. A set needs a `name`, unique within the game. In `User\`, an entry replaces the shipped one whole, its sets included, so copy every set you want to keep: one you leave out is removed.
+
+The pause screen does not step through a game's sets yet and shows its default only.
+
 ### MAME controls.xml support
 
 The plugin automatically reads a `controls.xml` database to display what each button does in each game. `controls.xml` is not distributed with the plugin: download the BYOAC MAME controls database and place it at `Data\Dynamic Controls\controls.xml`.

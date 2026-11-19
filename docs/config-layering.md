@@ -87,6 +87,8 @@ One file holds every game on a platform, so replacing it wholesale would mean th
 
 **The merge is per entry, not per label.** A user `<Game>` entry replaces the shipped entry for that game outright rather than combining button-by-button — so "show *these* labels for this game" stays expressible, instead of leaving the user unable to remove a shipped label.
 
+**A game with control sets is replaced whole as well.** A user entry's `<ControlSet>`s and its own `<Input>`s are the whole entry, so a set the shipped entry has and the user's leaves out is gone, and an empty user entry clears the game's labels. Correcting one context means copying the entry; in exchange, removing a set needs no syntax of its own.
+
 ## What ships in a release zip
 
 - The **assets** and **ALL** zips contain `Defaults\` and `Templates\`, and no user-authored file.

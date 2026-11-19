@@ -153,11 +153,31 @@ A label too long for one line can be split across several by writing &#10;
 where each new line starts: <Input name="A">Punch&#10;Block</Input>. The
 lines are centred on where a one-line label would sit.
 
+Control sets: a game whose controls change with the vehicle, view or mode
+can hold a <ControlSet name="..."> for each, labelling every button as it
+works there:
+
+      <Game launchBoxId="2418" romName="Pilotwings">
+          <Input name="Dpad-Left">Turn Left</Input>
+          <ControlSet name="Rocket Belt">
+              <Input name="Dpad-Left">Turn Left</Input>
+              <Input name="A">Fast Jets Throttle</Input>
+          </ControlSet>
+      </Game>
+
+The <Input>s directly under <Game> are the game's default, which is what the
+pause screen shows; it does not step through the sets yet. A set takes
+nothing from the default, so it repeats what it shares; the <Defaults> block
+still applies beneath every set. Each set needs a name, unique within the
+game.
+
 Merging with the shipped Labels.xml: your file is merged entry-by-entry with
 Defaults/Platforms/{Platform}/Labels.xml — a User <Game> entry overrides the
 matching Defaults entry entirely (matched first by id, then by name); User
 <Defaults> buttons override Defaults entries naming the same buttons (a
-combination in any order), and unmentioned Defaults buttons are kept.
+combination in any order), and unmentioned Defaults buttons are kept. A game
+with control sets is replaced whole too: copy every set you want to keep into
+your entry, since one you leave out is removed.
 
 Contributing: if you create labels for a game, please consider submitting
 them so they ship as defaults for everyone. Open a pull request or issue at:

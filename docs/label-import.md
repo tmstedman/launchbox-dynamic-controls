@@ -173,6 +173,19 @@ line: write `&#10;` between them instead of " / " (`Punch&#10;Block&#10;Combo&#1
 lines are centred on where a one-line label would sit, so they reach above it as well as below —
 check a render for anything drawn nearby.
 
+### Controls that change with the context get a set each
+
+When a game's controls change with the vehicle, view or mode — Pilotwings' five vehicles each
+print their own controller diagram — give each context a `<ControlSet name="...">`, named as the
+source names it, and label it in full from that context's own diagram. The `<Game>`'s direct
+`<Input>`s stay what the pause screen shows: only what holds in every context, since a label true
+for one vehicle is wrong for the next. A set takes nothing from them, so the controls they share
+are written in each set as well.
+
+Configurable buttons are not contexts. A manual tabulating several arrangements with no default
+still labels only what is constant across them, as before; a set is for controls the game itself
+changes, not ones the player chooses once.
+
 ### A label that says nothing is dropped
 
 The database marks unused controls several ways — `N/A`, `??`, `Unknown`, `(Not Used)`, `-`.
