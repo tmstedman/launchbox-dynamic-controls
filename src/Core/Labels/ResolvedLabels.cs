@@ -25,4 +25,13 @@ public record ResolvedLabels(
     IReadOnlySet<string>? GameLabelled = null)
 {
     public IReadOnlySet<string> GameLabelled { get; init; } = GameLabelled ?? new HashSet<string>();
+
+    /// <summary>The name of the control set these labels are, or null for a game's default —
+    /// the one picture of all its controls, which is what the pause screen shows.</summary>
+    public string? SetName { get; init; }
+
+    /// <summary>On a game's default, each of its control sets resolved the same way, in the order
+    /// Labels.xml declares them: one per context (vehicle, view, mode) whose controls differ.
+    /// Empty for a game without sets, and on a set itself.</summary>
+    public IReadOnlyList<ResolvedLabels> ControlSets { get; init; } = [];
 }
