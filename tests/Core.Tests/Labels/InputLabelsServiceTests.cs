@@ -1020,4 +1020,125 @@ public class InputLabelsServiceTests
         labels.LabelText["ButtonStart"].ShouldBe("Pause");
         _logger.Received().Error(Arg.Is<string>(s => s.StartsWith("Sega Genesis <Defaults>:")));
     }
+
+    // --- Control sets ---
+
+    private static ControlSetConfig Set(string name, params (string Name, string Label)[] entries) => new()
+    {
+        Name = name,
+        Labels = [.. entries.Select(e => new LabelEntry { Name = e.Name, Label = e.Label })],
+    };
+
+    [Fact]
+    public void Load_ControlSets_ResolveBesideTheDefault_EachTakingNothingFromIt()
+    {
+        // given a game with a default and two sets, on a platform with defaults of its own
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
+        InputLabelsConfig config = Labels(("A", "Brake"), ("B", "Accelerate"));
+        config.ControlSets = [Set("Turbo", ("B", "Boost")), Set("Pit Stop", ("C", "Refuel"))];
+        _loader.Load(game).Returns(config);
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the default is what it would be without sets
+        labels.SetName.ShouldBeNull();
+        labels.LabelText.ShouldBe(new Dictionary<string, string>
+        {
+            ["ButtonX"] = "Brake",
+            ["ButtonA"] = "Accelerate",
+            ["ButtonStart"] = "Pause",
+        }, ignoreOrder: true);
+
+        // and each set, in order, has its own labels and the platform's defaults, but none of the
+        // game's default: a set labels its context in full, so a default label it leaves out is
+        // one that doesn't apply there
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Turbo", "Pit Stop"]);
+        ResolvedLabels turbo = labels.ControlSets[0];
+        turbo.LabelText.ShouldBe(new Dictionary<string, string>
+        {
+            ["ButtonA"] = "Boost",
+            ["ButtonStart"] = "Pause",
+        }, ignoreOrder: true);
+        turbo.IsGameSpecific.ShouldBeTrue();
+        turbo.GameLabelled.ShouldBe(["ButtonA"]);
+        turbo.ControlSets.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_ControlSetsWithoutADefault_TheDefaultIsThePlatforms_AndTheSearchStopsHere()
+    {
+        // given a game whose entry has sets but no default, and a later loader with labels for it
+        var second = AddLoader();
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([Labels(("Start", "Pause"))]);
+        _loader.Load(game).Returns(new InputLabelsConfig { ControlSets = [Set("Turbo", ("B", "Boost"))] });
+        second.Load(game).Returns(Labels(("A", "FromSecond")));
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the default is the platform's own, drawn as a game without labels is
+        labels.LabelText.ShouldBe(new Dictionary<string, string> { ["ButtonStart"] = "Pause" });
+        labels.IsGameSpecific.ShouldBeFalse();
+
+        // and the sets are kept, with no other source asked: one game's default and sets never
+        // come from two places
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Turbo"]);
+        second.DidNotReceive().Load(Arg.Any<GameInfo>());
+
+        // a set is the game's own labels though the default isn't, so `auto` resolves one way on
+        // the default and the other on the sets
+        labels.ControlSets.Single().IsGameSpecific.ShouldBeTrue();
+        _logger.Received().Debug(Arg.Is<string>(m => m.Contains("OutRun") && m.Contains("no default labels")));
+    }
+
+    [Fact]
+    public void Load_ControlSetsWithADefaultThatMapsToNothing_TheDefaultIsEmpty_AndSaysSo()
+    {
+        // given a game whose default names a button this mapping hasn't got, on a platform with
+        // no defaults to inherit, and one set
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([]);
+        InputLabelsConfig config = Labels(("Z", "Nowhere"));
+        config.ControlSets = [Set("Turbo", ("B", "Boost"))];
+        _loader.Load(game).Returns(config);
+
+        // when the service resolves labels
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        // then the default has nothing, the set is kept, and the log says why
+        labels.LabelText.ShouldBeEmpty();
+        labels.ControlSets.Single().SetName.ShouldBe("Turbo");
+        _logger.Received().Debug(Arg.Is<string>(m => m.Contains("OutRun") && m.Contains("map to nothing")));
+    }
+
+    [Fact]
+    public void Load_ControlSetsWithoutAnyDefault_TheDefaultIsEmpty_AndTheSetsStay()
+    {
+        GameInfo game = Game("OutRun");
+        _loader.LoadDefaultLabels("Sega Genesis").Returns([]);
+        _loader.Load(game).Returns(new InputLabelsConfig { ControlSets = [Set("Turbo", ("B", "Boost"))] });
+
+        ResolvedLabels labels = BuildTestFixture.Load(game, ThreeButtonMapping());
+
+        labels.LabelText.ShouldBeEmpty();
+        labels.IsGameSpecific.ShouldBeFalse();
+        labels.ControlSets.Single().LabelText.ShouldBe(new Dictionary<string, string> { ["ButtonA"] = "Boost" });
+    }
+
+    [Fact]
+    public void Load_CloneGame_InheritsItsParentsControlSets()
+    {
+        GameInfo clone = Game("OutRun (Prototype)") with { CloneOf = "OutRun" };
+        _loader.Load(clone).ReturnsNull();
+        InputLabelsConfig parent = Labels(("A", "Brake"));
+        parent.ControlSets = [Set("Turbo", ("B", "Boost"))];
+        _loader.Load(clone with { RomName = "OutRun" }).Returns(parent);
+
+        ResolvedLabels labels = BuildTestFixture.Load(clone, ThreeButtonMapping());
+
+        labels.ControlSets.Single().LabelText["ButtonA"].ShouldBe("Boost");
+    }
 }

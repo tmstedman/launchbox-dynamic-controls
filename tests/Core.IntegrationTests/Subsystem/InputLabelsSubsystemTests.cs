@@ -427,6 +427,178 @@ public class InputLabelsSubsystemTests
         labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Boost"));
     }
 
+    // ---- control sets ----
+
+    [Fact]
+    public void Load_ControlSets_EachResolvedBesideTheDefault_OverThePlatformDefaults()
+    {
+        // The platform's <Defaults> sit beneath the default and each set alike; a set takes
+        // nothing from the default.
+        _dc.WriteDefaultLabels(Platform, """<Defaults><Input name="Start">Pause</Input></Defaults>""");
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <Input name="A">Accelerate</Input>
+              <ControlSet name="Low Gear"><Input name="B">Brake</Input></ControlSet>
+              <ControlSet name="High Gear"><Input name="A">Cruise</Input></ControlSet>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"]), ("Start", ["ButtonStart"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Accelerate"), ("ButtonStart", "Pause"));
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Low Gear", "High Gear"]);
+        labels.ControlSets[0].LabelText.ShouldBeDictionaryOf(("ButtonB", "Brake"), ("ButtonStart", "Pause"));
+        labels.ControlSets[1].LabelText.ShouldBeDictionaryOf(("ButtonA", "Cruise"), ("ButtonStart", "Pause"));
+    }
+
+    [Fact]
+    public void Load_ControlSet_NamingAButtonThePlatformDefaultsLabel_OverridesItForThatSetOnly()
+    {
+        // A set speaks for a button the same way a game does: naming it beats the platform's
+        // <Defaults>, and only in that set. The default and the other sets keep the platform's.
+        _dc.WriteDefaultLabels(Platform, """<Defaults><Input name="Start">Pause</Input></Defaults>""");
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <Input name="A">Accelerate</Input>
+              <ControlSet name="Menu"><Input name="Start">Select</Input></ControlSet>
+              <ControlSet name="Race"><Input name="A">Cruise</Input></ControlSet>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("Start", ["ButtonStart"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.LabelText["ButtonStart"].ShouldBe("Pause");
+        labels.ControlSets[0].LabelText.ShouldBeDictionaryOf(("ButtonStart", "Select"));
+        labels.ControlSets[1].LabelText.ShouldBeDictionaryOf(("ButtonA", "Cruise"), ("ButtonStart", "Pause"));
+    }
+
+    [Fact]
+    public void Load_EmptyUserEntry_OverAGameWithSets_FallsThroughToThePlatformDefaults()
+    {
+        // A User entry replaces the shipped one whole, sets and all, so an empty one clears the
+        // game's labels and it falls through to the platform's <Defaults>, as it did before sets.
+        _dc.WriteDefaultLabels(Platform, """<Defaults><Input name="Start">Pause</Input></Defaults>""");
+        _dc.WriteGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <Input name="A">Accelerate</Input>
+              <ControlSet name="High Gear"><Input name="A">Cruise</Input></ControlSet>
+            </InputLabels>
+            """);
+        _dc.WriteUserGameLabels(Platform, "OutRun", "<InputLabels />");
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("Start", ["ButtonStart"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.IsGameSpecific.ShouldBeFalse();
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonStart", "Pause"));
+        labels.ControlSets.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_UserEntryWithSomeOfTheSets_ReplacesTheShippedEntryWhole()
+    {
+        // The User entry is the whole entry: its default and the one set it keeps, with the set
+        // it leaves out gone, and nothing of the shipped default or sets showing through.
+        WriteOutRunWithSets("OutRun");
+        _dc.WriteUserGameLabels(Platform, "OutRun", """
+            <InputLabels>
+              <Input name="A">Mine</Input>
+              <ControlSet name="High Gear"><Input name="A">Mine Cruise</Input></ControlSet>
+            </InputLabels>
+            """);
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Mine"));
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["High Gear"]);
+        labels.ControlSets[0].LabelText.ShouldBeDictionaryOf(("ButtonA", "Mine Cruise"));
+    }
+
+    [Fact]
+    public void Load_UserEntryWithoutSets_DropsTheShippedSets()
+    {
+        WriteOutRunWithSets("OutRun");
+        _dc.WriteUserGameLabels(Platform, "OutRun", """<InputLabels><Input name="A">Mine</Input></InputLabels>""");
+        ResolvedMapping mapping = Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"]));
+
+        ResolvedLabels labels = Build().Load(Game(platform: Platform, romName: "OutRun"), mapping);
+
+        labels.LabelText.ShouldBeDictionaryOf(("ButtonA", "Mine"));
+        labels.ControlSets.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_ControlSets_FoundByLaunchBoxId_WhenRomNameDoesNotMatch()
+    {
+        WriteOutRunWithSets("OutRun (USA, Europe)", launchBoxId: 42);
+
+        ResolvedLabels labels = Build().Load(
+            Game(platform: Platform, romName: "a-renamed-rom", launchBoxId: 42), Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"])));
+
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Low Gear", "High Gear"]);
+    }
+
+    [Fact]
+    public void Load_ControlSets_FoundByAFuzzyRomNameMatch()
+    {
+        WriteOutRunWithSets("OutRun");
+
+        ResolvedLabels labels = Build().Load(
+            Game(platform: Platform, romName: "OutRun (USA, Europe)"), Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"])));
+
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Low Gear", "High Gear"]);
+    }
+
+    [Fact]
+    public void Load_ControlSets_InheritedByACloneFromItsParent()
+    {
+        WriteOutRunWithSets("OutRun");
+
+        ResolvedLabels labels = Build().Load(
+            Game(platform: Platform, romName: "outrunp", cloneOf: "OutRun"), Mapping(("A", ["ButtonA"]), ("B", ["ButtonB"])));
+
+        labels.ControlSets.Select(s => s.SetName).ShouldBe(["Low Gear", "High Gear"]);
+        labels.ControlSets[0].LabelText.ShouldBeDictionaryOf(("ButtonB", "Brake"));
+    }
+
+    [Fact]
+    public void Load_ControlSetNamingAPortByItsTagAndMask_OverridesTheDefaultWrittenBare()
+    {
+        // As for a game's own default: a set naming escounts' Bonus port by tag and mask is the
+        // same label as the platform default naming it bare, so it overrides it without a clash
+        _dc.WriteDefaultLabels(Arcade, """
+            <InputLabels>
+              <Input name="OTHER">Bonus</Input>
+            </InputLabels>
+            """);
+        _dc.WriteGameLabels(Arcade, "escounts", """
+            <InputLabels>
+              <ControlSet name="Round 2"><Input name="OTHER:STROBE1:16">Mine</Input></ControlSet>
+            </InputLabels>
+            """);
+        var aliases = new Dictionary<string, string> { ["OTHER:STROBE1:16"] = "OTHER" };
+        ResolvedMapping mapping = Mapping(("OTHER", ["AxisTriggerRight"])) with { ButtonAliases = aliases };
+        var logger = new ErrorRecordingLogger();
+
+        ResolvedLabels labels = Build(logger: logger).Load(Game(platform: Arcade, romName: "escounts"), mapping);
+
+        labels.ControlSets.Single().LabelText.ShouldBeDictionaryOf(("AxisTriggerRight", "Mine"));
+        logger.Errors.ShouldBeEmpty();
+    }
+
+    /// <summary>A game with a default and two sets, as the shipped file would hold it.</summary>
+    private void WriteOutRunWithSets(string romName, int? launchBoxId = null) =>
+        _dc.WriteGameLabels(Platform, romName, """
+            <InputLabels>
+              <Input name="A">Accelerate</Input>
+              <ControlSet name="Low Gear"><Input name="B">Brake</Input></ControlSet>
+              <ControlSet name="High Gear"><Input name="A">Cruise</Input></ControlSet>
+            </InputLabels>
+            """, launchBoxId);
+
     // ---- LaunchBoxId-based lookup ----
 
     [Fact]

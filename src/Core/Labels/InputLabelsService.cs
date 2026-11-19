@@ -60,6 +60,10 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
     /// returned null — an empty game labels XML doesn't count as "the game has its own labels,"
     /// so we fall through to the next loader (and ultimately to LoadDefaultLabels at the
     /// caller). Returns null if no loader has labels for this game.
+    ///
+    /// <para>An entry with control sets is the game's answer even when its default is empty: the
+    /// default then falls back to the platform's own labels rather than to the next loader, so a
+    /// game's default and its sets never come from two different sources.</para>
     /// </summary>
     private ResolvedLabels? LoadGameLabels(GameInfo game, ResolvedMapping mapping)
     {
@@ -68,20 +72,57 @@ public class InputLabelsService(ILogger logger, InputLabelsPlugins plugins) : II
             InputLabelsConfig? data = loader.Load(game);
             if (data == null && !string.IsNullOrEmpty(game.CloneOf))
                 data = loader.Load(game with { RomName = game.CloneOf });
-            if (data == null || data.Labels.Count == 0) continue;
+            if (data == null || data.Labels.Count + data.ControlSets.Count == 0) continue;
 
-            _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}");
+            _logger.Debug($"Game labels from {loader.GetType().Name}: {data.Labels.Count}, and {data.ControlSets.Count} control sets");
             IReadOnlyList<InputLabelsConfig> defaultLayers = _defaultLabelsLoader.LoadDefaultLabels(game.Platform);
-            (Dictionary<string, string> merged, HashSet<string> gameKeys) = MergeLayers(
-                [(data, $"{game.RomName}'s labels"), .. DefaultLayers(defaultLayers, game.Platform)],
-                mapping.ButtonAliases,
-                firstLayerIsGame: true);
-            ResolvedLabels resolved = TranslateToGeneric(merged, gameKeys, mapping) with { IsGameSpecific = true };
-            if (resolved.LabelText.Count == 0) continue;
-            return resolved;
+            ResolvedLabels? resolved = data.Labels.Count > 0
+                ? ResolveGameLabels(data, $"{game.RomName}'s labels", defaultLayers, game.Platform, mapping)
+                : null;
+            if (resolved?.LabelText.Count == 0) resolved = null;
+
+            if (data.ControlSets.Count == 0)
+            {
+                if (resolved == null) continue;
+                return resolved;
+            }
+
+            // A default with nothing to show -- the game wrote none, or what it wrote and the
+            // platform's <Defaults> alike map to nothing here -- falls back to the platform's own,
+            // drawn as any game without labels is (not game-specific), while each set is the
+            // game's own labels (game-specific), so `auto` lights the mapped buttons on the one
+            // and the labelled ones on the other.
+            if (resolved == null)
+            {
+                _logger.Debug($"{game.RomName}: {(data.Labels.Count == 0 ? "no default labels" : "its default labels map to nothing")}; "
+                            + $"the default falls back to the platform's labels and its {data.ControlSets.Count} control sets are kept");
+            }
+
+            resolved ??= LoadDefaultLabels(game.Platform, mapping) ?? new ResolvedLabels(LabelText: new Dictionary<string, string>());
+            return resolved with
+            {
+                ControlSets = [.. data.ControlSets.Select(set => ResolveGameLabels(
+                    new InputLabelsConfig { Labels = set.Labels },
+                    $"{game.RomName}'s \"{set.Name}\" labels",
+                    defaultLayers, game.Platform, mapping) with { SetName = set.Name })],
+            };
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Resolves one block of a game's own labels — its default or one of its control sets — over
+    /// the platform's <paramref name="defaultLayers"/>, as labels the game spoke for.
+    /// </summary>
+    private ResolvedLabels ResolveGameLabels(
+        InputLabelsConfig labels, string source, IReadOnlyList<InputLabelsConfig> defaultLayers, string platform, ResolvedMapping mapping)
+    {
+        (Dictionary<string, string> merged, HashSet<string> gameKeys) = MergeLayers(
+            [(labels, source), .. DefaultLayers(defaultLayers, platform)],
+            mapping.ButtonAliases,
+            firstLayerIsGame: true);
+        return TranslateToGeneric(merged, gameKeys, mapping) with { IsGameSpecific = true };
     }
 
     /// <summary>
