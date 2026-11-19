@@ -29,6 +29,8 @@ A controller button overlay plugin for LaunchBox and Big Box. Instead of a stati
 
 Individual component zips (plugin, assets, pause theme) are also on the Releases page if you need to update one piece at a time.
 
+> **Update the plugin and the pause theme together.** The theme uses code in the plugin to step through a game's control sets, so a theme newer than the plugin fails to load and the pause screen doesn't show. A plugin newer than the theme still works, but shows only the first control set of a game that has them, with no way to step to the others.
+
 ## Configuration
 
 All data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two layers:
@@ -160,9 +162,9 @@ Some games change their controls with the vehicle, view or mode. A `<Game>` can 
 </Game>
 ```
 
-The `<Input>`s directly under `<Game>` are the game's default: one picture of its controls, which is what the pause screen shows. A set takes nothing from the default, so a set repeats the labels it shares with it, but the platform's `<Defaults>` still apply beneath every set. A set needs a `name`, unique within the game. In `User\`, an entry replaces the shipped one whole, its sets included, so copy every set you want to keep: one you leave out is removed.
+The `<Input>`s directly under `<Game>` are the game's default: one picture of its controls, which the pause screen shows only for a game without sets, so a game with sets can leave them out. A set takes nothing from the default, so a set repeats the labels it shares with it, but the platform's `<Defaults>` still apply beneath every set. A set needs a `name`, unique within the game. In `User\`, an entry replaces the shipped one whole, its sets included, so copy every set you want to keep: one you leave out is removed.
 
-The pause screen does not step through a game's sets yet and shows its default only.
+A game with sets shows its sets and not its default. A game launch starts on the first set, and the pause screen opens on whichever one you last left it on. Step to the next set with Right, Page Down, the D-pad's Right or the right bumper, and back with Left, Page Up, the D-pad's Left or the left bumper; it wraps round at either end, and the bottom-left corner shows which set is on screen and its name ("3 / 5 Rocket Belt"). The plugin reads the keyboard and any Xbox (XInput) controller itself while the pause screen is up, since Big Box passes the theme no input: a PlayStation or other DirectInput pad isn't read unless something like Steam Input presents it as an Xbox one. A game with one set shows its name alone, with nothing to step to, and a game without sets shows nothing there; neither reads any input.
 
 ### MAME controls.xml support
 

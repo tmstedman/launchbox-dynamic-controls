@@ -25,7 +25,9 @@ public class OnGameLaunchHandler(
     private readonly ILogger _logger = logger;
 
     /// <summary>
-    /// Resolves the controller overlay for the given game and updates the bound view model.
+    /// Resolves the controller overlay for the given game and shows it on the bound view model,
+    /// starting on the game's first control set (or its overlay, with none) regardless of which
+    /// set the last pause was left on.
     /// Skips silently if game or its path is missing. Resolution errors are handled and
     /// logged inside <see cref="ControllerOverlayService.Resolve"/>, which returns an empty
     /// model so the pause screen doesn't show stale overlay data.
@@ -55,11 +57,6 @@ public class OnGameLaunchHandler(
             RomDirectory: Path.GetDirectoryName(game.ApplicationPath),
             RetroArchCore: _retroArchCoreResolver.Resolve(emulator, platform));
 
-        ControllerOverlayModel overlay = _overlayService.Resolve(gameInfo);
-        _viewModel.ControlsImagePath = overlay.ImagePath;
-        _viewModel.CanvasWidth = overlay.CanvasWidth;
-        _viewModel.CanvasHeight = overlay.CanvasHeight;
-        _viewModel.InputLabels = overlay.InputLabels;
-        _viewModel.RenderedImages = overlay.RenderedImages;
+        _viewModel.Show(_overlayService.Resolve(gameInfo));
     }
 }

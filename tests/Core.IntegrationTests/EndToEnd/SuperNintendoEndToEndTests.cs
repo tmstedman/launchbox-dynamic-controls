@@ -27,7 +27,7 @@ public class SuperNintendoEndToEndTests
         // when the service resolves the overlay for Pilotwings
         ControllerOverlayModel overlay = _service.Resolve(Pilotwings);
 
-        // then the overlay the pause screen shows is the default: the turns every vehicle shares,
+        // then the overlay itself is the default (the pause screen shows the sets instead): the turns every vehicle shares,
         // and none of any one vehicle's controls
         overlay.SetName.ShouldBeNull();
         overlay.ShouldHaveLabel("ButtonDpadLeft", "Turn Left");

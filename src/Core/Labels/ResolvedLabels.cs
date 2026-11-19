@@ -27,7 +27,7 @@ public record ResolvedLabels(
     public IReadOnlySet<string> GameLabelled { get; init; } = GameLabelled ?? new HashSet<string>();
 
     /// <summary>The name of the control set these labels are, or null for a game's default —
-    /// the one picture of all its controls, which is what the pause screen shows.</summary>
+    /// the one picture of all its controls, which the pause screen shows only without sets.</summary>
     public string? SetName { get; init; }
 
     /// <summary>On a game's default, each of its control sets resolved the same way, in the order

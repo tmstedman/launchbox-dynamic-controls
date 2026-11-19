@@ -15,6 +15,7 @@ Adapted from the "PauseShift" pause theme (v1.0) by Faeran, with thanks.
              HorizontalAlignment="Stretch"
              VerticalAlignment="Stretch"
              FocusVisualStyle="{x:Null}"
+             dc:ControlSetInput.Enabled="True"
              BorderThickness="0"
              Margin="0"
              Padding="0"
@@ -22,6 +23,8 @@ Adapted from the "PauseShift" pause theme (v1.0) by Faeran, with thanks.
 
     <!-- STYLING OF TEXT LIST -->
     <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="VisibleWhenTrue" />
+
         <Style x:Key="ListBoxItemStyle" TargetType="ListBoxItem">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Padding" Value="0" />
@@ -211,6 +214,37 @@ Adapted from the "PauseShift" pause theme (v1.0) by Faeran, with thanks.
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+
+                    <!-- CONTROL SET: which page is on screen and the set's name, for a game with sets to step
+                         through, between arrows (half-width) for the Left/Right (or bumper) presses that turn it.
+                         Bottom-left, since the platform logo sits over the bottom-right. -->
+                    <TextBlock Canvas.Left="64" Canvas.Bottom="64" Foreground="White" FontFamily="Segoe UI" FontSize="27"
+                               Visibility="{Binding CanStep, Source={x:Static dc:DynamicControlsViewModel.Instance}, Converter={StaticResource VisibleWhenTrue}}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="10" Direction="-90" RenderingBias="Quality" ShadowDepth="1" />
+                        </TextBlock.Effect>
+                        <InlineUIContainer BaselineAlignment="Center"><TextBlock Text="◄"><TextBlock.LayoutTransform><ScaleTransform ScaleX="0.5" /></TextBlock.LayoutTransform></TextBlock></InlineUIContainer><Run Text="   " /><Run Text="{Binding SetPosition, Mode=OneWay, Source={x:Static dc:DynamicControlsViewModel.Instance}}" /><Run Text="   " /><Run FontWeight="SemiBold" Text="{Binding SetName, Mode=OneWay, Source={x:Static dc:DynamicControlsViewModel.Instance}}" /><Run Text="   " /><InlineUIContainer BaselineAlignment="Center"><TextBlock Text="►"><TextBlock.LayoutTransform><ScaleTransform ScaleX="0.5" /></TextBlock.LayoutTransform></TextBlock></InlineUIContainer>
+                    </TextBlock>
+                    <!-- A game with one set that drew has nothing to step to: its name alone, where the indicator sits. -->
+                    <TextBlock Canvas.Left="64" Canvas.Bottom="64" Foreground="White" FontFamily="Segoe UI" FontSize="27" FontWeight="SemiBold"
+                               Text="{Binding SetName, Mode=OneWay, Source={x:Static dc:DynamicControlsViewModel.Instance}}">
+                        <TextBlock.Effect>
+                            <DropShadowEffect BlurRadius="10" Direction="-90" RenderingBias="Quality" ShadowDepth="1" />
+                        </TextBlock.Effect>
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasControlSets, Source={x:Static dc:DynamicControlsViewModel.Instance}}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding CanStep, Source={x:Static dc:DynamicControlsViewModel.Instance}}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
                 </Canvas>
                 </Viewbox>
 

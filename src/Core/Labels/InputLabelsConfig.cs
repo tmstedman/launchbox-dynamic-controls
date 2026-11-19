@@ -9,7 +9,7 @@ namespace DynamicControls.Labels;
 public record InputLabelsConfig
 {
     /// <summary>All label entries in this config — for a game with control sets, its default:
-    /// the one picture of every control that the pause screen shows.</summary>
+    /// the one picture of every control, which the pause screen shows only without sets.</summary>
     public List<LabelEntry> Labels { get; set; } = [];
 
     /// <summary>The game's control sets, in the order the file declares them: one per context

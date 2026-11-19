@@ -99,12 +99,8 @@ public class OnGameLaunchHandlerTests
         info.RomDirectory.ShouldBe(@"C:\Roms\SNES");
         info.RetroArchCore.ShouldBe("snes9x_libretro");
 
-        // and the resolved overlay is copied onto the view model
-        _viewModel.Received().ControlsImagePath = overlay.ImagePath;
-        _viewModel.Received().CanvasWidth = overlay.CanvasWidth;
-        _viewModel.Received().CanvasHeight = overlay.CanvasHeight;
-        _viewModel.Received().InputLabels = overlay.InputLabels;
-        _viewModel.Received().RenderedImages = overlay.RenderedImages;
+        // and the whole resolved overlay, its control sets with it, is shown on the view model
+        _viewModel.Received(1).Show(overlay);
     }
 
     [Fact]
