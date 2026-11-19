@@ -8,9 +8,9 @@ namespace DynamicControls.Core.Tests.Labels;
 /// Unit tests for <see cref="InputLabelsLoader"/>. The loader parses a per-platform
 /// <c>Platforms/{platform}/Labels.xml</c> file that combines all game entries and a <c>&lt;Defaults&gt;</c>
 /// block. Both the <c>Defaults\</c> and <c>User\</c> tiers are loaded and merged: User game
-/// entries override Defaults entries (by id, then by name); User <c>&lt;Defaults&gt;</c> entries
-/// override Defaults entries per button. Filesystem is a substitute; each test stubs only the
-/// exact paths it exercises.
+/// entries replace Defaults entries whole (by id, then by name), <c>&lt;ControlSet&gt;</c>s
+/// included; User <c>&lt;Defaults&gt;</c> entries override Defaults entries per button. Filesystem
+/// is a substitute; each test stubs only the exact paths it exercises.
 /// </summary>
 public class InputLabelsLoaderTests
 {
@@ -40,6 +40,10 @@ public class InputLabelsLoaderTests
         _fs.FileExists(path).Returns(true);
         _fs.OpenRead(path).Returns(_ => new MemoryStream(Encoding.UTF8.GetBytes(xml)));
     }
+
+    /// <summary>A set as one comparable line, "Name: button=label, …", in file order.</summary>
+    private static string Describe(ControlSetConfig set) =>
+        $"{set.Name}: {string.Join(", ", set.Labels.Select(e => $"{e.Name}={e.Label}"))}";
 
     // --- IsEnabled ---
 
@@ -432,6 +436,27 @@ public class InputLabelsLoaderTests
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("name=\"B\"") && s.Contains("no text value")));
     }
 
+    [Theory]
+    [InlineData("<Input>Brake</Input>")]
+    [InlineData("<Input name=\" \">Brake</Input>")]
+    public void Load_InputWithoutAName_IsSkippedAndLogged(string input)
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Sega Genesis", "Labels.xml");
+        StubXml(path, $"""
+            <Labels>
+              <Game romName="OutRun">
+                <Input name="A">Accelerate</Input>
+                {input}
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Sega Genesis", "OutRun"))!;
+
+        result.Labels.Select(e => e.Name).ShouldBe(["A"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("missing 'name' attribute")));
+    }
+
     [Fact]
     public void Load_CombinationName_IsCarriedThroughVerbatim()
     {
@@ -514,5 +539,281 @@ public class InputLabelsLoaderTests
         // the break survives to be drawn as a second line, and every way of writing it reads the
         // same: a plain \n, with each line trimmed, so equal labels compare equal
         result.Labels.Single().Label.ShouldBe("Punch\nBlock");
+    }
+
+    // --- Control sets ---
+
+    [Fact]
+    public void Load_ControlSets_AreReadInOrder_BesideTheDefault()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <Input name="Dpad-Left">Turn Left</Input>
+                <ControlSet name="Light Plane">
+                  <Input name="Dpad-Left">Turn Left</Input>
+                  <Input name="B">Throttle</Input>
+                </ControlSet>
+                <ControlSet name="Rocket Belt">
+                  <Input name="A">Thrust</Input>
+                </ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // the direct inputs are the default, and each set is held whole beside it, not merged in
+        result.Labels.Select(e => (e.Name, e.Label)).ShouldBe([("Dpad-Left", "Turn Left")]);
+        result.ControlSets.Select(Describe).ShouldBe(
+        [
+            "Light Plane: Dpad-Left=Turn Left, B=Throttle",
+            "Rocket Belt: A=Thrust",
+        ]);
+    }
+
+    [Fact]
+    public void Load_ControlSetsWithoutADefault_LeaveTheDefaultEmpty()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet name="Rocket Belt"><Input name="A">Thrust</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        result.Labels.ShouldBeEmpty();
+        result.ControlSets.Select(s => s.Name).ShouldBe(["Rocket Belt"]);
+    }
+
+    [Fact]
+    public void Load_ControlSetWithoutAName_IsSkippedAndLogged()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet><Input name="A">Thrust</Input></ControlSet>
+                <ControlSet name=" "><Input name="A">Thrust</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // a set is shown under its name, so one without a name has nothing to be shown as
+        result.ControlSets.ShouldBeEmpty();
+        _logger.Received(2).Error(Arg.Is<string>(s => s.Contains("<ControlSet>") && s.Contains("'name'")));
+    }
+
+    [Fact]
+    public void Load_ControlSetNameRepeated_KeepsTheFirstAndLogs()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet name="Rocket Belt"><Input name="A">Thrust</Input></ControlSet>
+                <ControlSet name="rocket belt"><Input name="A">Lift</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // names match case-insensitively, since two that differ only in case read as one
+        result.ControlSets.Single().Labels.Single().Label.ShouldBe("Thrust");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("rocket belt") && s.Contains("already")));
+    }
+
+    [Fact]
+    public void Load_ControlSetName_IsTrimmed_SoStraySpacesNeitherShowNorHideADuplicate()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet name=" Rocket Belt "><Input name="A">Thrust</Input></ControlSet>
+                <ControlSet name="Rocket Belt"><Input name="A">Lift</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // the name is shown to the player, so it is kept as written less the stray spaces, and
+        // the second set is the first's duplicate
+        result.ControlSets.Select(s => s.Name).ShouldBe(["Rocket Belt"]);
+        result.ControlSets.Single().Labels.Single().Label.ShouldBe("Thrust");
+    }
+
+    [Fact]
+    public void Load_ControlSetWithNoInputs_IsSkippedAndLogged()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <Input name="Dpad-Left">Turn Left</Input>
+                <ControlSet name="Rocket Belt" />
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        result.ControlSets.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Rocket Belt") && s.Contains("no <Input>")));
+    }
+
+    [Fact]
+    public void Load_ControlSetInDefaults_IsSkippedAndLogged()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """<Labels><Defaults><ControlSet name="X"><Input name="A">Jump</Input></ControlSet></Defaults></Labels>""");
+
+        _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"));
+        IReadOnlyList<InputLabelsConfig> defaults = _underTest.LoadDefaultLabels("Super Nintendo Entertainment System");
+
+        // in <Defaults> a set would belong to every game
+        defaults.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<ControlSet>") && s.Contains("directly inside <Game>")));
+    }
+
+    [Fact]
+    public void Load_ControlSetOutsideAnyGame_IsSkippedAndLogged()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <ControlSet name="Light Plane"><Input name="A">Throttle</Input></ControlSet>
+              <Game romName="Pilotwings"><Input name="B">Turn Left</Input></Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // directly under <Labels> a set belongs to no game: dropped, and the game beside it stays
+        result.Labels.Select(e => e.Name).ShouldBe(["B"]);
+        result.ControlSets.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<ControlSet>") && s.Contains("directly inside <Game>")));
+    }
+
+    [Fact]
+    public void Load_UnknownRootElement_IsSkippedAndLogged()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """<Labels><game romName="Pilotwings"><Input name="B">Turn Left</Input></game></Labels>""");
+
+        InputLabelsConfig? result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"));
+
+        // a misspelt <Game> says why the game has no labels rather than leaving it silently unlabelled
+        result.ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<game>") && s.Contains("expected <Defaults> or <Game>")));
+    }
+
+    [Fact]
+    public void Load_ControlSetInsideAControlSet_IsSkippedAndLogged_TheOuterSetKept()
+    {
+        string path = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(path, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet name="X">
+                  <Input name="B">Run</Input>
+                  <ControlSet name="Y"><Input name="A">Jump</Input></ControlSet>
+                </ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // inside another set it would be a set of a set: dropped, and the set around it stays
+        result.ControlSets.Select(Describe).ShouldBe(["X: B=Run"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<ControlSet>") && s.Contains("directly inside <Game>")));
+    }
+
+    [Fact]
+    public void Load_UserEntryWithSets_ReplacesTheShippedEntryWhole()
+    {
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(defaultsPath, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <Input name="Dpad-Left">Turn Left</Input>
+                <ControlSet name="Light Plane"><Input name="B">Throttle</Input></ControlSet>
+                <ControlSet name="Rocket Belt"><Input name="A">Thrust</Input><Input name="B">Hover</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+        StubXml(userPath, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <ControlSet name="Rocket Belt"><Input name="A">Lift</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // the User entry is the whole entry, as one without sets always was: the shipped default
+        // and every shipped set it leaves out are gone, so writing an entry is how a set is removed
+        result.Labels.ShouldBeEmpty();
+        result.ControlSets.Select(Describe).ShouldBe(["Rocket Belt: A=Lift"]);
+    }
+
+    [Fact]
+    public void Load_UserEntryWithoutSets_DropsTheShippedSets()
+    {
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(defaultsPath, """
+            <Labels>
+              <Game launchBoxId="2418" romName="Pilotwings">
+                <Input name="Dpad-Left">Turn Left</Input>
+                <Input name="Dpad-Right">Turn Right</Input>
+                <ControlSet name="Rocket Belt"><Input name="A">Thrust</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+        StubXml(userPath, """
+            <Labels>
+              <Game launchBoxId="2418"><Input name="Dpad-Left">Bank Left</Input></Game>
+            </Labels>
+            """);
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings", launchBoxId: 2418))!;
+
+        result.Labels.Select(e => (e.Name, e.Label)).ShouldBe([("Dpad-Left", "Bank Left")]);
+        result.ControlSets.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void Load_EmptyUserEntry_LeavesNothingOfTheShippedEntry()
+    {
+        string defaultsPath = Path.Combine(DefaultsPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        string userPath = Path.Combine(UserPlatforms, "Super Nintendo Entertainment System", "Labels.xml");
+        StubXml(defaultsPath, """
+            <Labels>
+              <Game romName="Pilotwings">
+                <Input name="Dpad-Left">Turn Left</Input>
+                <ControlSet name="Rocket Belt"><Input name="A">Thrust</Input></ControlSet>
+              </Game>
+            </Labels>
+            """);
+        StubXml(userPath, """<Labels><Game romName="Pilotwings" /></Labels>""");
+
+        InputLabelsConfig result = _underTest.Load(Game("Super Nintendo Entertainment System", "Pilotwings"))!;
+
+        // nothing left, so the game falls through to the next source as it would with no entry
+        result.Labels.ShouldBeEmpty();
+        result.ControlSets.ShouldBeEmpty();
     }
 }

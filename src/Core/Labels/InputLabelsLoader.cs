@@ -27,6 +27,12 @@ namespace DynamicControls.Labels;
 /// <para>A space-separated <c>name</c> denotes a button combination — an action performed by
 /// pressing those buttons together. It is carried through unchanged; <see cref="InputLabelsService"/>
 /// resolves it against the mapping.</para>
+///
+/// <para>A game whose controls change with the vehicle, view or mode can also declare
+/// <c>&lt;ControlSet name="..."&gt;</c>s, each labelling every control as it stands in that
+/// context. The <c>&lt;Input&gt;</c>s directly under <c>&lt;Game&gt;</c> stay its default — one
+/// picture of all of it — and a set takes nothing from them. A User entry still replaces the
+/// shipped entry whole, sets and all, so leaving a set out of it is how a set is removed.</para>
 /// </summary>
 public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLabelsLoader
 {
@@ -116,43 +122,104 @@ public class InputLabelsLoader(ILogger logger, LayeredFileSystem lfs) : IInputLa
                 string? idStr = node.Attributes["launchBoxId"]?.Value;
                 int? id = idStr != null && int.TryParse(idStr, out int parsed) ? parsed : null;
                 string? name = node.Attributes["romName"]?.Value;
-                InputLabelsConfig labels = ParseLabels(node, path);
+                InputLabelsConfig labels = ParseLabels(node, path, controlSetsAllowed: true);
                 file.Games.Add(new GameEntry(id, name, labels));
+            }
+            else if (node.Name == "ControlSet")
+            {
+                _logger.Error($"Skipping <ControlSet> in {path}: a control set belongs directly inside <Game>");
+            }
+            else
+            {
+                _logger.Error($"Skipping <{node.Name}> in {path}: expected <Defaults> or <Game>");
             }
         }
 
         return file;
     }
 
-    private InputLabelsConfig ParseLabels(XmlElement parent, string path)
+    /// <summary>
+    /// Reads the <c>&lt;Input&gt;</c> children of <paramref name="parent"/>, and when
+    /// <paramref name="controlSetsAllowed"/> (directly inside a <c>&lt;Game&gt;</c>) its
+    /// <c>&lt;ControlSet&gt;</c>s too. A set anywhere else is refused: in <c>&lt;Defaults&gt;</c>
+    /// it would belong to every game, and inside another set it would be a set of a set.
+    /// </summary>
+    private InputLabelsConfig ParseLabels(XmlElement parent, string path, bool controlSetsAllowed = false)
     {
         var result = new InputLabelsConfig();
         foreach (XmlElement node in parent.ChildNodes.OfType<XmlElement>())
         {
-            if (node.Name != "Input")
+            if (node.Name == "Input")
+            {
+                if (ParseInput(node, path) is LabelEntry entry) result.Labels.Add(entry);
+            }
+            else if (node.Name == "ControlSet" && controlSetsAllowed)
+            {
+                if (ParseControlSet(node, path, result.ControlSets) is ControlSetConfig set) result.ControlSets.Add(set);
+            }
+            else if (node.Name == "ControlSet")
+            {
+                _logger.Error($"Skipping <ControlSet> in {path}: a control set belongs directly inside <Game>");
+            }
+            else
             {
                 _logger.Error($"Skipping <{node.Name}> in {path}: expected <Input name=\"...\">label</Input>");
-                continue;
             }
-
-            string? name = node.Attributes["name"]?.Value;
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                _logger.Error($"Skipping <Input> in {path}: missing 'name' attribute");
-                continue;
-            }
-
-            string label = LabelText(node);
-            if (string.IsNullOrEmpty(label))
-            {
-                _logger.Error($"Skipping <Input name=\"{name}\"> in {path}: element has no text value");
-                continue;
-            }
-
-            result.Labels.Add(new LabelEntry { Name = name, Label = label });
         }
         return result;
     }
+
+    private LabelEntry? ParseInput(XmlElement node, string path)
+    {
+        string? name = node.Attributes["name"]?.Value;
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            _logger.Error($"Skipping <Input> in {path}: missing 'name' attribute");
+            return null;
+        }
+
+        string label = LabelText(node);
+        if (string.IsNullOrEmpty(label))
+        {
+            _logger.Error($"Skipping <Input name=\"{name}\"> in {path}: element has no text value");
+            return null;
+        }
+
+        return new LabelEntry { Name = name, Label = label };
+    }
+
+    /// <summary>
+    /// Reads one <c>&lt;ControlSet&gt;</c>, or null when it can't be one: a set is shown under
+    /// its name, so it needs one, distinct from every <paramref name="earlier"/> set's (compared
+    /// case-insensitively, since two that differ only in case read as one), and a set with no
+    /// labels says nothing.
+    /// </summary>
+    private ControlSetConfig? ParseControlSet(XmlElement node, string path, List<ControlSetConfig> earlier)
+    {
+        string? name = node.Attributes["name"]?.Value.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            _logger.Error($"Skipping <ControlSet> in {path}: missing 'name' attribute");
+            return null;
+        }
+
+        if (earlier.Any(set => SameSetName(set.Name, name)))
+        {
+            _logger.Error($"Skipping <ControlSet name=\"{name}\"> in {path}: a set of that name is already declared for this game");
+            return null;
+        }
+
+        InputLabelsConfig labels = ParseLabels(node, path);
+        if (labels.Labels.Count == 0)
+        {
+            _logger.Error($"Skipping <ControlSet name=\"{name}\"> in {path}: it has no <Input> labels");
+            return null;
+        }
+
+        return new ControlSetConfig { Name = name, Labels = labels.Labels };
+    }
+
+    private static bool SameSetName(string a, string b) => string.Equals(a, b, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// An entry's text in one form however it was written: each line trimmed and the lines joined
