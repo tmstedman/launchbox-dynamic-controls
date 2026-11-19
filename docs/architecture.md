@@ -119,6 +119,8 @@ If no loader has game labels, the `<Defaults>` block of `Platforms/{platform}/La
 
 Every entry in that `<Defaults>` block is inheritable. When a game *does* have its own labels, defaults are merged in for any set of platform buttons the game didn't name, so Start = "Pause" applies to every Genesis game even if the game only specifies racing labels. The game's entries, the User `<Defaults>` and the shipped `<Defaults>` are layered in that order; whether two entries name the same buttons is decided by the set they name — in any order, and with a MAME port's `TYPE:tag:mask` read as the port it names — so a later layer is overridden however an earlier one spells the buttons. Clone-of ROMs inherit their parent's labels. The final dictionary is keyed by generic input name (`ButtonA`, `AxisLeftStickUp`).
 
+A game whose controls change with the vehicle, view or mode can declare `<ControlSet name>`s inside its `<Game>`. Each is resolved the same way, over the platform's `<Defaults>` but not over the game's own direct `<Input>`s, which stay its default — one picture of all its controls — and the sets ride on that default's `ResolvedLabels.ControlSets`. An entry with sets is the game's answer even with no default of its own: the default then falls back to the platform's `<Defaults>` rather than to the next loader, so one game's default and sets never come from two sources.
+
 The `IsGameSpecific` flag tells the renderer "the game contributed at least one of its own label entries." This flips the meaning of `showIf="auto"` on a template — see below. `GameLabelled` says which inputs those entries spoke for, since a game's labels always have the platform's defaults merged beneath them; `<Condition match="game-label">` reads it.
 
 A composite control's own label is reconciled against its parts' by `WholeLabelCollapser`, during rendering rather than here — see [Rendering](#5-rendering). It works in both directions: a direct whole-only mapping with no per-direction breakdown copies the whole's text onto all four directions; 2, 3, or 4 directions that already agree on identical text (with the rest genuinely blank) copy that shared text back onto the whole's own key. Individual entries are never removed. This is what lets `Layout.xml` express "some directions are labelled, merge them" via `<Condition match="agree">` without the template needing to special-case "whole-only" versus "all-four-agree" — both leave the same signal on the whole's key.
@@ -180,6 +182,8 @@ Namespace: `src/Core/Rendering/`. Entry point: `InputRenderingService`. The rend
 ### 6. Assembling the model
 
 `ControllerOverlayService` packages the `RenderResult` into a `ControllerOverlayModel` along with the canvas dimensions (from the template's base image, defaulting to constants in `RenderingDefaults` when none exists). The WPF view-model in `LaunchBox/` consumes this model and the WPF view renders the image and labels at the positions the model specifies.
+
+Each control set is rendered the same way, with the same mapping and template, into a model of its own on the default's `ControlSets`. The pause screen shows the default alone for now; stepping through the sets on it is [issue #46](https://github.com/tmstedman/launchbox-dynamic-controls/issues/46). The Preview tool draws every set, and a contact sheet of them all.
 
 ## Plugin architecture
 
