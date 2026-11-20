@@ -648,13 +648,16 @@ public class SegaGenesisEndToEndTests
         string a = @"Templates\Xbox Series X\Sega Genesis\6-Button\A.png".AsFixturePath();
         string b = @"Templates\Xbox Series X\Sega Genesis\6-Button\B.png".AsFixturePath();
 
-        // the default: only the platform's Start label, but every mapped button is lit
+        // the default: only the platform's Start label, but every mapped button is lit, and nothing
+        // of it is the game's, so a client can tell it from a summary the game wrote
+        overlay.HasGameLabels.ShouldBeFalse();
         overlay.ShouldHaveLabels(new ExpectedLabel("ButtonStart", "Pause"));
         overlay.ShouldOnlyHaveImageAtOpacity("ButtonX", a, 1.0);
         overlay.ShouldOnlyHaveImageAtOpacity("ButtonA", b, 1.0);
 
         // a set: the platform's Start label under its own, and only a labelled button lit
         overlay.ControlSets.Select(s => s.SetName).ShouldBe(["Driving", "Walking"]);
+        overlay.ControlSets.ShouldAllBe(s => s.HasGameLabels);
         ControllerOverlayModel driving = overlay.ControlSets[0];
         driving.ShouldHaveLabel("ButtonX", "Brake");
         driving.ShouldHaveLabel("ButtonA", "Accelerate");
@@ -666,5 +669,45 @@ public class SegaGenesisEndToEndTests
         walking.ShouldHaveLabel("ButtonX", "Jump");
         walking.ShouldOnlyHaveImageAtOpacity("ButtonX", a, 1.0);
         walking.ShouldOnlyHaveImageAtOpacity("ButtonA", b, 0.3);
+    }
+
+    /// <summary>
+    /// A game that writes a default beside its sets has a default of its own, the summary a client
+    /// may offer instead of paging, and says so; one that writes none does not (above). The flag
+    /// is what tells the two apart, since both defaults draw labels once the platform's merge in.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_ControlSetsBesideAWrittenDefault_DefaultHasGameLabels()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "Mortal Kombat II",                // a written default and a "Boss Fight" set
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        overlay.HasGameLabels.ShouldBeTrue();
+        overlay.ControlSets.Select(s => s.SetName).ShouldBe(["Boss Fight"]);
+        overlay.ControlSets.Single().HasGameLabels.ShouldBeTrue();
+    }
+
+    /// <summary>A game with no entry at all draws the platform's defaults, none of them its own.</summary>
+    [Fact]
+    public void SegaGenesis_GameWithoutAnEntry_HasNoGameLabels()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "No Such Game",
+            CloneOf: null,
+            LaunchBoxId: null,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        _service.Resolve(game).HasGameLabels.ShouldBeFalse();
     }
 }

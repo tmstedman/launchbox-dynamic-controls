@@ -229,6 +229,37 @@ public class ControllerOverlayServiceTests
     }
 
     [Fact]
+    public void Resolve_HasGameLabels_IsTrueOnlyWhereTheGameSpokeForAnInput()
+    {
+        // given a default that is the platform's alone (no input is the game's own), and a set
+        // that names one
+        ResolvedLabels belt = EmptyLabels() with { SetName = "Rocket Belt", GameLabelled = new HashSet<string> { "ButtonA" } };
+        ResolvedLabels labels = EmptyLabels() with { ControlSets = [belt] };
+        StubPipeline(baseImage: null, rendered: new RenderResult(Labels: [Label("Pause")], Images: []));
+        _inputLabelsService.Load(Arg.Any<GameInfo>(), Arg.Any<ResolvedMapping>()).Returns(labels);
+
+        // when the service resolves
+        var result = BuildTestFixture().Resolve(Game());
+
+        // then the default says it has none of the game's own, and the set that does says so
+        result.HasGameLabels.ShouldBeFalse();
+        result.ControlSets.Single().HasGameLabels.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Resolve_HasGameLabels_IsTrueForADefaultTheGameWrote()
+    {
+        // given a default with an input of the game's own
+        ResolvedLabels labels = EmptyLabels() with { GameLabelled = new HashSet<string> { "ButtonA" } };
+        StubPipeline(baseImage: null, rendered: new RenderResult(Labels: [Label("Jump")], Images: []));
+        _inputLabelsService.Load(Arg.Any<GameInfo>(), Arg.Any<ResolvedMapping>()).Returns(labels);
+
+        // when the service resolves
+        // then the overlay says so
+        BuildTestFixture().Resolve(Game()).HasGameLabels.ShouldBeTrue();
+    }
+
+    [Fact]
     public void Resolve_ControlSetThrows_IsLoggedAndLeftEmptyUnderItsName_TheRestStillDrawn()
     {
         // given two control sets, the first of which fails to render
