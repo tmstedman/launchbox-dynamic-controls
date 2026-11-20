@@ -34,6 +34,13 @@ public record ControllerOverlayModel
     /// a set itself.</summary>
     public List<ControllerOverlayModel> ControlSets { get; set; } = [];
 
+    /// <summary>Whether any label on this overlay is the game's own, as opposed to the platform's
+    /// <c>&lt;Defaults&gt;</c> drawn for want of one. A game whose entry leaves its default empty
+    /// (its manual names no summary of the variants, so its sets carry them all) has a default that
+    /// is the platform's alone, which this tells apart from a written summary the client may offer
+    /// beside the sets. False for a game with no entry, and for a static image, which has no labels.</summary>
+    public bool HasGameLabels { get; set; }
+
     /// <summary>Whether this overlay draws nothing: no label and no image. A control set that failed
     /// to draw is left blank under its name.</summary>
     public bool IsBlank => InputLabels.Count == 0 && RenderedImages.Count == 0;

@@ -22,11 +22,10 @@ const string Usage = """
                          anyway, so it changes nothing on a sweep.
       --out <file>       PNG to write. Default: tools/Preview/output/games/{platform}/{rom}.png,
                          or .../output/platforms/{platform}.png when --rom is omitted. A game
-                         with control sets also writes {rom}.set{n}.png for each set that drew
-                         and {rom}.sheet.png beside it, all of them next to this file, the sets
-                         numbered as the pause screen numbers them. The pause screen steps
-                         through the sets and shows this file, the game's default, only when
-                         the game has no set that drew.
+                         with control sets writes {rom}.set{n}.png for each set that drew,
+                         numbered as the pause screen numbers them, and this file is a sheet of
+                         them alone; its default, which the pause screen shows only when no set
+                         drew, goes beside them as {rom}.default.png.
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
       --bg <hex>         canvas colour behind the controller. Default: 101014
@@ -254,24 +253,33 @@ bool Draw(SweepTarget target, string explicitPath = "")
     string? dir = Path.GetDirectoryName(path);
     if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
-    using SKBitmap bitmap = Render(model, target);
-    Save(bitmap, path);
-    Console.Error.WriteLine($"{target}: {model.RenderedImages.Count} images, "
-                          + $"{model.InputLabels.Count} labels -> {path}");
-    // An earlier run's files for sets this game no longer has are cleared, so that a game which
-    // has since lost sets doesn't leave pages behind that read as current. Only this game's own
-    // names are matched, whole: "{name}.set{n}" and "{name}.sheet", never a looser pattern, which
-    // would take another game's file ("Foo.2" among Foo's) for a stale page.
     string name = Path.GetFileNameWithoutExtension(path);
+    string stem = Path.Combine(dir ?? "", name);
     IReadOnlyList<ControllerOverlayModel> pages = model.DrawnControlSets;
+
+    // A game with sets is shown by its sheet, which takes the game's own file name; the default
+    // the pause screen would show only for a game without them moves aside to ".default".
+    string defaultPath = pages.Count > 0 ? $"{stem}.default.png" : path;
+    using SKBitmap bitmap = Render(model, target);
+    Save(bitmap, defaultPath);
+    Console.Error.WriteLine($"{target}: {model.RenderedImages.Count} images, "
+                          + $"{model.InputLabels.Count} labels -> {defaultPath}");
+    // An earlier run's files that this game no longer has are cleared, so that a game which has
+    // since lost sets doesn't leave pages behind that read as current. Only this game's own
+    // names are matched, whole: "{name}.set{n}", "{name}.default" and the retired
+    // "{name}.sheet", never a looser pattern, which would take another game's file ("Foo.2"
+    // among Foo's) for a stale page.
     foreach (string file in Directory.EnumerateFiles(string.IsNullOrEmpty(dir) ? "." : dir, $"{name}.*.png"))
     {
         string page = Path.GetFileNameWithoutExtension(file)[(name.Length + 1)..];
-        bool stale = page == "sheet"
-            ? pages.Count == 0
-            : page.StartsWith("set", StringComparison.Ordinal)
-              && int.TryParse(page.AsSpan(3), NumberStyles.None, CultureInfo.InvariantCulture, out int number)
-              && number > pages.Count;
+        bool stale = page switch
+        {
+            "sheet" => true,
+            "default" => pages.Count == 0,
+            _ => page.StartsWith("set", StringComparison.Ordinal)
+                 && int.TryParse(page.AsSpan(3), NumberStyles.None, CultureInfo.InvariantCulture, out int number)
+                 && number > pages.Count,
+        };
         if (stale) File.Delete(file);
     }
     foreach (ControllerOverlayModel blank in model.ControlSets.Where(set => set.IsBlank))
@@ -281,14 +289,15 @@ bool Draw(SweepTarget target, string explicitPath = "")
     if (pages.Count == 0) return true;
 
     // A game whose controls change with the vehicle, view or mode: each control set that drew as
-    // a PNG of its own, numbered as the pause screen numbers them, then a sheet of the default
-    // beside them all. Named off the default's file with a dot and "set", so another game's own
+    // a PNG of its own, numbered as the pause screen numbers them, then a sheet of them all as
+    // the game's own file. Named off the game's file with a dot and "set", so another game's own
     // file can't share the name -- a space would make Pilotwings' first set "Pilotwings 1.png",
     // and a bare number would make Foo's second "Foo.2.png", a game of that name's file -- and
     // nothing falls between them however a listing sorts. The set's name is stamped on the
     // render and captions it on the sheet, not in the file name.
-    string stem = Path.Combine(dir ?? "", name);
-    List<(string Caption, SKBitmap Render)> sheet = [("Default", bitmap)];
+    // The sheet is the sets alone, as the pause screen steps through them: the default is never
+    // one of its pages, and whether it says anything of the game's own is for a client to ask.
+    List<(string Caption, SKBitmap Render)> sheet = [];
     try
     {
         for (int n = 0; n < pages.Count; n++)
@@ -305,12 +314,12 @@ bool Draw(SweepTarget target, string explicitPath = "")
         }
 
         using SKBitmap composed = ContactSheet.Compose(sheet, typeface, background);
-        Save(composed, $"{stem}.sheet.png");
-        Console.Error.WriteLine($"{target}: default and {pages.Count} control sets -> {stem}.sheet.png");
+        Save(composed, path);
+        Console.Error.WriteLine($"{target}: {pages.Count} control sets -> {path}");
     }
     finally
     {
-        foreach ((_, SKBitmap drawn) in sheet.Skip(1)) drawn.Dispose();
+        foreach ((_, SKBitmap drawn) in sheet) drawn.Dispose();
     }
     return true;
 }
