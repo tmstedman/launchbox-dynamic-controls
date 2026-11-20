@@ -30,11 +30,27 @@ const string Usage = """
       --cfg <dir>        emulator pack holding cfg/{rom}.cfg, for MAME games. Optional.
       --font <file>      TTF/TTC to draw labels with. Default: the closest match installed.
       --bg <hex>         canvas colour behind the controller. Default: 101014
+      --backdrop <file>  artwork to blur behind the controller, as the pause screen does with
+                         the game's background image. Omitted, the canvas stays flat --bg.
+      --backdrops <dir>  a screenshot library: each game takes {dir}/{platform}/{rom}.png
+                         (or .jpg) as its own backdrop, falling back to --backdrop where
+                         there is none. Platform defaults always use --backdrop.
+      --backdrop-blur <r>  blur radius over the backdrop. Default: 60, the theme's own.
+      --backdrop-stretch stretch the backdrop to the canvas, distorting its aspect, instead of
+                         the theme's UniformToFill crop.
+      --scrim <hex>      colour laid over the blurred backdrop. Default: 90000000 (ARGB),
+                         the theme's own. 0 to see the artwork undimmed.
+      --no-title         draw the pause-screen frame alone, without the band above it that
+                         carries the game title.
+      --titles <file>    transcription to take game titles from, by romName; a game it does
+                         not name, or every game without it, is titled by its rom name.
 
     e.g. dotnet run --project tools/Preview -- --platform "Nintendo 64" --rom "GoldenEye 007"
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols
          dotnet run --project tools/Preview -- --all
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --no-labels
+         dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --backdrop art/fanart.jpg
+         dotnet run --project tools/Preview -- --all --backdrops romcontrols/Screenshots
     """;
 
 /// <summary>How many of a platform's named games <c>--all</c> will render before giving up on
@@ -43,7 +59,9 @@ const string Usage = """
 const int MaxGamesPerPlatform = 50;
 
 string root = "assets", platform = "", rom = "", output = "", cfgPack = "", fontPath = "", bg = "101014";
-bool noLabels = false, all = false;
+string backdrop = "", backdropDir = "", scrim = "90000000", backdropBlur = "60";
+string titlesPath = "";
+bool noLabels = false, all = false, noTitle = false, backdropStretch = false;
 for (int i = 0; i < args.Length; i++)
 {
     string? Next() => i + 1 < args.Length ? args[++i] : null;
@@ -60,6 +78,13 @@ for (int i = 0; i < args.Length; i++)
         "--cfg" => cfgPack = Next() ?? "",
         "--font" => fontPath = Next() ?? "",
         "--bg" => bg = Next() ?? "",
+        "--backdrop" => backdrop = Next() ?? "",
+        "--backdrops" => backdropDir = Next() ?? "",
+        "--backdrop-blur" => backdropBlur = Next() ?? "",
+        "--backdrop-stretch" => Set(ref backdropStretch),
+        "--scrim" => scrim = Next() ?? "",
+        "--no-title" => Set(ref noTitle),
+        "--titles" => titlesPath = Next() ?? "",
         _ => null
     };
     if (value is not { Length: > 0 })
@@ -82,6 +107,53 @@ if (!Directory.Exists(root))
 
 SKTypeface typeface = LoadTypeface(fontPath);
 SKColor background = ParseColour(bg);
+
+if (backdrop.Length > 0 && !File.Exists(backdrop))
+{
+    Console.Error.WriteLine($"Backdrop image not found: {backdrop}");
+    return 1;
+}
+if (backdropDir.Length > 0 && !Directory.Exists(backdropDir))
+{
+    Console.Error.WriteLine($"Backdrop library not found: {backdropDir}");
+    return 1;
+}
+if (!double.TryParse(backdropBlur, out double backdropRadius) || backdropRadius < 0)
+{
+    Console.Error.WriteLine($"--backdrop-blur wants a number of 0 or more, not: {backdropBlur}");
+    return 1;
+}
+SKColor scrimColour = ParseColour(scrim, SKColors.Transparent);
+
+// A --titles that is missing is a typo worth stopping for; without it every game is titled by its
+// rom name.
+if (titlesPath.Length > 0 && !File.Exists(titlesPath))
+{
+    Console.Error.WriteLine($"Titles file not found: {titlesPath}");
+    return 1;
+}
+IReadOnlyDictionary<string, string> titles = noTitle || titlesPath.Length == 0
+    ? new Dictionary<string, string>()
+    : LoadTitles(titlesPath);
+
+// Preferred first: a png in this library is the lossless original, a jpg the same shot
+// re-encoded, and several games carry both.
+string[] backdropExtensions = [".png", ".jpg", ".jpeg"];
+
+// The library is searched by rom name, so a platform default -- which has none -- always
+// falls through to --backdrop, as does a game the library has no shot of.
+string? BackdropFor(SweepTarget target)
+{
+    if (backdropDir.Length == 0 || target.IsPlatformDefault)
+        return backdrop.Length > 0 ? backdrop : null;
+
+    foreach (string ext in backdropExtensions)
+    {
+        string candidate = Path.Combine(backdropDir, target.Platform, target.RomName + ext);
+        if (File.Exists(candidate)) return candidate;
+    }
+    return backdrop.Length > 0 ? backdrop : null;
+}
 
 // Say so when the labels are not in the font the theme asks for. Metrics drive wrapping inside
 // the fixed-width label box, so a preview in a substitute can break a line where Windows would
@@ -167,7 +239,7 @@ bool Draw(SweepTarget target, string explicitPath = "")
     string? dir = Path.GetDirectoryName(path);
     if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
 
-    using SKBitmap bitmap = Render(model);
+    using SKBitmap bitmap = Render(model, target);
     Save(bitmap, path);
     Console.Error.WriteLine($"{target}: {model.RenderedImages.Count} images, "
                           + $"{model.InputLabels.Count} labels -> {path}");
@@ -207,7 +279,7 @@ bool Draw(SweepTarget target, string explicitPath = "")
         for (int n = 0; n < pages.Count; n++)
         {
             ControllerOverlayModel set = pages[n];
-            SKBitmap drawn = Render(set);
+            SKBitmap drawn = Render(set, target);
             PageIndicator.Stamp(drawn, $"{n + 1} / {pages.Count}", set.SetName ?? "", typeface);
             sheet.Add((set.SetName ?? "", drawn));
 
@@ -228,13 +300,20 @@ bool Draw(SweepTarget target, string explicitPath = "")
     return true;
 }
 
-SKBitmap Render(ControllerOverlayModel model)
+SKBitmap Render(ControllerOverlayModel model, SweepTarget target)
 {
     // Dropped after resolving, not before: the labels still decide what is drawn. A control's
     // opacity comes from whether it has a label, so suppressing them earlier would dim the very
     // buttons the unlabelled render is meant to show.
     if (noLabels) model.InputLabels.Clear();
-    return OverlayRenderer.Render(model, typeface, background);
+
+    var backdropLayer = new OverlayRenderer.Backdrop(
+        BackdropFor(target), backdropRadius, scrimColour, backdropStretch);
+    // With a title the backdrop spans the whole taller image, so the frame is drawn bare on a
+    // transparent canvas and TitleFrame lays background and backdrop beneath it.
+    return noTitle
+        ? OverlayRenderer.Render(model, typeface, background, backdropLayer)
+        : Titled(OverlayRenderer.Render(model, typeface, SKColors.Transparent), target, backdropLayer);
 }
 
 static void Save(SKBitmap bitmap, string path)
@@ -242,6 +321,50 @@ static void Save(SKBitmap bitmap, string path)
     using SKData png = bitmap.Encode(SKEncodedImageFormat.Png, 100);
     using FileStream file = File.Create(path);
     png.SaveTo(file);
+}
+
+// A control set's name is not in the band: it is stamped beside the page number, as the pause
+// screen's indicator shows it.
+SKBitmap Titled(SKBitmap frame, SweepTarget target, OverlayRenderer.Backdrop backdropLayer)
+{
+    using (frame)
+        return TitleFrame.Wrap(frame, TitleFor(target), SubtitleFor(target), typeface, background, backdropLayer);
+}
+
+string TitleFor(SweepTarget target) =>
+    target.IsPlatformDefault ? target.Platform
+    : titles.TryGetValue(target.RomName, out string? title) ? title
+    : target.RomName;
+
+// The rom name is only worth printing where it is a short name nobody would guess (an Arcade
+// set's "sf2ce"); everywhere else the title above it is already the rom name or a better one.
+static string SubtitleFor(SweepTarget target) =>
+    target.IsPlatformDefault ? "platform default"
+    : target.Platform == "Arcade" ? $"{target.Platform} · {target.RomName}"
+    : target.Platform;
+
+// romName -> title from a transcription in arcade-artwork.xml's shape. Read leniently: a missing
+// or unreadable file costs only the titles, never the render.
+static IReadOnlyDictionary<string, string> LoadTitles(string path)
+{
+    var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+    if (!File.Exists(path)) return map;
+    try
+    {
+        foreach (System.Xml.Linq.XElement game in System.Xml.Linq.XDocument.Load(path).Root!.Elements("Game"))
+        {
+            if ((string?)game.Attribute("romName") is { Length: > 0 } romName
+                && (string?)game.Attribute("title") is { Length: > 0 } title)
+            {
+                map.TryAdd(romName, title);
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Could not read titles from {path}: {ex.Message}");
+    }
+    return map;
 }
 
 static string Set(ref bool flag)
@@ -290,7 +413,7 @@ static SKTypeface LoadTypeface(string path)
     }
 }
 
-static SKColor ParseColour(string hex) =>
+static SKColor ParseColour(string hex, SKColor? fallback = null) =>
     SKColor.TryParse(hex.StartsWith('#') ? hex : "#" + hex, out SKColor parsed)
         ? parsed
-        : new SKColor(0x10, 0x10, 0x14);
+        : fallback ?? new SKColor(0x10, 0x10, 0x14);
