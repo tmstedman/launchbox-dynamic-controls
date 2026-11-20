@@ -42,8 +42,13 @@ const string Usage = """
                          the theme's own. 0 to see the artwork undimmed.
       --no-title         draw the pause-screen frame alone, without the band above it that
                          carries the game title.
-      --titles <file>    transcription to take game titles from, by romName; a game it does
-                         not name, or every game without it, is titled by its rom name.
+      --launchbox <dir>  a LaunchBox Games Database export (Metadata.xml, and Mame.xml for
+                         Arcade), to take game titles from: by the launchBoxId a game's
+                         Labels.xml entry carries, or for an Arcade rom set with none by its
+                         file name. On a Windows install this is LaunchBox\Metadata. A game it
+                         does not name is titled by its rom name.
+      --titles <file>    a transcription to take game titles from instead, by romName, ahead
+                         of --launchbox.
 
     e.g. dotnet run --project tools/Preview -- --platform "Nintendo 64" --rom "GoldenEye 007"
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols
@@ -51,6 +56,7 @@ const string Usage = """
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --no-labels
          dotnet run --project tools/Preview -- --platform Arcade --rom 1942 --cfg romcontrols --backdrop art/fanart.jpg
          dotnet run --project tools/Preview -- --all --backdrops romcontrols/Screenshots
+         dotnet run --project tools/Preview -- --platform "Nintendo 64" --rom "GoldenEye 007" --launchbox romcontrols/Metadata
     """;
 
 /// <summary>How many of a platform's named games <c>--all</c> will render before giving up on
@@ -60,7 +66,7 @@ const int MaxGamesPerPlatform = 50;
 
 string root = "assets", platform = "", rom = "", output = "", cfgPack = "", fontPath = "", bg = "101014";
 string backdrop = "", backdropDir = "", scrim = "90000000", backdropBlur = "60";
-string titlesPath = "";
+string titlesPath = "", launchBoxDir = "";
 bool noLabels = false, all = false, noTitle = false, backdropStretch = false;
 for (int i = 0; i < args.Length; i++)
 {
@@ -85,6 +91,7 @@ for (int i = 0; i < args.Length; i++)
         "--scrim" => scrim = Next() ?? "",
         "--no-title" => Set(ref noTitle),
         "--titles" => titlesPath = Next() ?? "",
+        "--launchbox" => launchBoxDir = Next() ?? "",
         _ => null
     };
     if (value is not { Length: > 0 })
@@ -125,16 +132,24 @@ if (!double.TryParse(backdropBlur, out double backdropRadius) || backdropRadius 
 }
 SKColor scrimColour = ParseColour(scrim, SKColors.Transparent);
 
-// A --titles that is missing is a typo worth stopping for; without it every game is titled by its
-// rom name.
+// An explicit --titles or --launchbox that is missing is a typo worth stopping for; without
+// either, every game is titled by its rom name.
 if (titlesPath.Length > 0 && !File.Exists(titlesPath))
 {
     Console.Error.WriteLine($"Titles file not found: {titlesPath}");
     return 1;
 }
+if (launchBoxDir.Length > 0 && !File.Exists(Path.Combine(launchBoxDir, "Metadata.xml")))
+{
+    Console.Error.WriteLine($"No Metadata.xml in the LaunchBox export: {launchBoxDir}");
+    return 1;
+}
 IReadOnlyDictionary<string, string> titles = noTitle || titlesPath.Length == 0
     ? new Dictionary<string, string>()
     : LoadTitles(titlesPath);
+LaunchBoxTitles? launchBoxTitles = noTitle || launchBoxDir.Length == 0
+    ? null
+    : LaunchBoxTitles.Load(launchBoxDir, root, all ? SweepTargets.Platforms(root) : [platform], Console.Error.WriteLine);
 
 // Preferred first: a png in this library is the lossless original, a jpg the same shot
 // re-encoded, and several games carry both.
@@ -334,7 +349,7 @@ SKBitmap Titled(SKBitmap frame, SweepTarget target, OverlayRenderer.Backdrop bac
 string TitleFor(SweepTarget target) =>
     target.IsPlatformDefault ? target.Platform
     : titles.TryGetValue(target.RomName, out string? title) ? title
-    : target.RomName;
+    : launchBoxTitles?.TitleOf(target) ?? target.RomName;
 
 // The rom name is only worth printing where it is a short name nobody would guess (an Arcade
 // set's "sf2ce"); everywhere else the title above it is already the rom name or a better one.
