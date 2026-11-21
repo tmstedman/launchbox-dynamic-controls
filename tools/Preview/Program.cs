@@ -339,15 +339,19 @@ bool Draw(SweepTarget target, string explicitPath = "")
     // render and captions it on the sheet, not in the file name.
     // The sheet is the sets alone, as the pause screen steps through them: the default is never
     // one of its pages, and whether it says anything of the game's own is for a client to ask.
+    // The sheet's tiles are drawn bare, with no title or backdrop of their own: the sheet lays one
+    // backdrop across itself and carries the game's title once, above them.
     List<(string Caption, SKBitmap Render)> sheet = [];
     try
     {
         for (int n = 0; n < pages.Count; n++)
         {
             ControllerOverlayModel set = pages[n];
-            SKBitmap drawn = Render(set, target);
+            // Drawn once: the bare frame is the sheet's tile, and the page lays it on its own backdrop.
+            SKBitmap bare = Bare(set);
+            sheet.Add((set.SetName ?? "", bare));
+            using SKBitmap drawn = Framed(bare, target);
             PageIndicator.Stamp(drawn, $"{n + 1} / {pages.Count}", set.SetName ?? "", typeface);
-            sheet.Add((set.SetName ?? "", drawn));
 
             string setPath = $"{stem}.set{n + 1}.png";
             Save(drawn, setPath);
@@ -355,7 +359,9 @@ bool Draw(SweepTarget target, string explicitPath = "")
                                   + $"{set.InputLabels.Count} labels -> {setPath}");
         }
 
-        using SKBitmap composed = ContactSheet.Compose(sheet, typeface, background);
+        using SKBitmap composed = ContactSheet.Compose(
+            sheet, noTitle ? "" : TitleFor(target), noTitle ? "" : SubtitleFor(target), typeface, background,
+            new OverlayRenderer.Backdrop(BackdropFor(target), backdropRadius, scrimColour, backdropStretch));
         Save(composed, path);
         Console.Error.WriteLine($"{target}: {pages.Count} control sets -> {path}");
     }
@@ -368,18 +374,20 @@ bool Draw(SweepTarget target, string explicitPath = "")
 
 SKBitmap Render(ControllerOverlayModel model, SweepTarget target)
 {
+    using SKBitmap bare = Bare(model);
+    return Framed(bare, target);
+}
+
+// The frame alone on a transparent canvas: what a page lays on its background and backdrop, and a
+// sheet's tile, since the sheet supplies its own.
+SKBitmap Bare(ControllerOverlayModel model)
+{
     // Dropped after resolving, not before: the labels still decide what is drawn. A control's
     // opacity comes from whether it has a label, so suppressing them earlier would dim the very
     // buttons the unlabelled render is meant to show.
     if (noLabels) model.InputLabels.Clear();
 
-    var backdropLayer = new OverlayRenderer.Backdrop(
-        BackdropFor(target), backdropRadius, scrimColour, backdropStretch);
-    // With a title the backdrop spans the whole taller image, so the frame is drawn bare on a
-    // transparent canvas and TitleFrame lays background and backdrop beneath it.
-    return noTitle
-        ? OverlayRenderer.Render(model, typeface, background, backdropLayer)
-        : Titled(OverlayRenderer.Render(model, typeface, SKColors.Transparent), target, backdropLayer);
+    return OverlayRenderer.Render(model, typeface, SKColors.Transparent);
 }
 
 static void Save(SKBitmap bitmap, string path)
@@ -389,12 +397,23 @@ static void Save(SKBitmap bitmap, string path)
     png.SaveTo(file);
 }
 
-// A control set's name is not in the band: it is stamped beside the page number, as the pause
-// screen's indicator shows it.
-SKBitmap Titled(SKBitmap frame, SweepTarget target, OverlayRenderer.Backdrop backdropLayer)
+// A page: the bare frame on the background and backdrop, under the title band unless --no-title.
+// The frame stays its caller's, so a sheet can keep it as a tile. With a title the backdrop spans
+// the whole taller image, which is why the frame arrives bare. A control set's name is not in the
+// band: it is stamped beside the page number, as the pause screen's indicator shows it.
+SKBitmap Framed(SKBitmap bare, SweepTarget target)
 {
-    using (frame)
-        return TitleFrame.Wrap(frame, TitleFor(target), SubtitleFor(target), typeface, background, backdropLayer);
+    var backdropLayer = new OverlayRenderer.Backdrop(
+        BackdropFor(target), backdropRadius, scrimColour, backdropStretch);
+    if (!noTitle)
+        return TitleFrame.Wrap(bare, TitleFor(target), SubtitleFor(target), typeface, background, backdropLayer);
+
+    var page = new SKBitmap(bare.Width, bare.Height, SKColorType.Rgba8888, SKAlphaType.Premul);
+    using var canvas = new SKCanvas(page);
+    canvas.Clear(background);
+    OverlayRenderer.DrawBackdrop(canvas, backdropLayer, bare.Width, bare.Height);
+    canvas.DrawBitmap(bare, 0, 0);
+    return page;
 }
 
 string TitleFor(SweepTarget target) =>
