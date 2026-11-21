@@ -16,7 +16,7 @@ public readonly record struct SweepTarget(string Platform, string RomName)
 
 /// <summary>
 /// Enumerates what the tools sweep. Shared because <c>LabelDump</c> and <c>Preview</c> have to
-/// agree: a PNG and a row in <c>platform-renders.xml</c> are meant to describe the same render,
+/// agree: the PNGs and the rows in <c>platform-renders.xml</c> are meant to cover the same games,
 /// and that only holds while both ask the same question of the same data.
 /// </summary>
 public static class SweepTargets
