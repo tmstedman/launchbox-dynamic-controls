@@ -5,7 +5,7 @@ namespace DynamicControls.Preview;
 /// <summary>
 /// Writes a control set's name and page number ("Rocket Belt   2 / 5") in the bottom-right
 /// corner of its render, so a file opened on its own says that the game has other sets and which
-/// of them this is.
+/// of them this is. A game's only set has no number, as the pause screen shows it.
 /// </summary>
 public static class PageIndicator
 {
@@ -22,7 +22,7 @@ public static class PageIndicator
         using SKPaint number = Paint(typeface, bold: false);
         using SKPaint title = Paint(typeface, bold: true);
 
-        float gap = number.MeasureText(Gap);
+        float gap = position.Length > 0 ? number.MeasureText(Gap) : 0;
         float positionWidth = number.MeasureText(position);
         float y = bitmap.Height - Padding;
 

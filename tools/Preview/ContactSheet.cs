@@ -4,8 +4,9 @@ namespace DynamicControls.Preview;
 
 /// <summary>
 /// Lays a game's renders out in a grid, each captioned, so a game with control sets can be
-/// checked in one image: its default beside every set, where a label that should hold in all of
-/// them and doesn't stands out without paging through the files.
+/// checked in one image: every set side by side, where a label that should hold in all of them
+/// and doesn't stands out without paging through the files. A last row that can't be filled is
+/// centred rather than left against the edge.
 /// </summary>
 public static class ContactSheet
 {
@@ -47,7 +48,8 @@ public static class ContactSheet
         for (int i = 0; i < renders.Count; i++)
         {
             (string text, SKBitmap render) = renders[i];
-            float x = Gap + (i % columns * (tileWidth + Gap));
+            int inRow = Math.Min(columns, renders.Count - (i / columns * columns));
+            float x = Gap + ((columns - inRow) * (tileWidth + Gap) / 2f) + (i % columns * (tileWidth + Gap));
             float y = Gap + (i / columns * (captionHeight + tileHeight + Gap));
 
             canvas.DrawText(text, x, y - caption.FontMetrics.Ascent, caption);
