@@ -165,13 +165,14 @@ works there:
           </ControlSet>
       </Game>
 
-The <Input>s directly under <Game> are the game's default, which the pause
-screen shows only for a game without sets; with sets it starts on the first
-one each launch and keeps the page between pauses, and Left and Right (or
-Page Up and Page Down, or an Xbox controller's D-pad Left and Right or
-bumpers) step through them. A set takes nothing from the default, so it
-repeats what it shares; the <Defaults> block still applies beneath every
-set. Each set needs a name, unique within the game.
+The <Input>s directly under <Game> are the game's default, a summary of
+every set when it has them, which the pause screen shows only for a game
+without sets; with sets it starts on the first one each launch and keeps the
+page between pauses, and Left and Right (or Page Up and Page Down, or an
+Xbox controller's D-pad Left and Right or bumpers) step through them. A set
+takes nothing from the default, so it repeats what it shares; the <Defaults>
+block still applies beneath every set. Each set needs a name, unique within
+the game.
 
 Merging with the shipped Labels.xml: your file is merged entry-by-entry with
 Defaults/Platforms/{Platform}/Labels.xml — a User <Game> entry overrides the

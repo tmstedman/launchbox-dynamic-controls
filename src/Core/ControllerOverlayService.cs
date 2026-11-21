@@ -86,6 +86,7 @@ public class ControllerOverlayService(
                 ControllerOverlayModel model = Frame(drawn.SetName);
                 model.InputLabels = [.. rendered.Labels];
                 model.RenderedImages = [.. rendered.Images.Distinct()];
+                model.HasGameLabels = drawn.GameLabelled.Count > 0;
                 return model;
             }
 

@@ -93,4 +93,10 @@
     <ControlSet name="Driving"><Input name="A">Brake</Input><Input name="B">Accelerate</Input></ControlSet>
     <ControlSet name="Walking"><Input name="A">Jump</Input></ControlSet>
   </Game>
+  <!-- Control sets beside a written default that names no button this platform has: the entry
+       is the game's, but none of its default's labels are. -->
+  <Game romName="UnreachableDefaultTest">
+    <Input name="NoSuchButton">Fly</Input>
+    <ControlSet name="Flying"><Input name="A">Climb</Input></ControlSet>
+  </Game>
 </Labels>
