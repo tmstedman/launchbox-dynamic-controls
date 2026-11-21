@@ -178,14 +178,16 @@ check a render for anything drawn nearby.
 When a game's controls change with the vehicle, view or mode — Pilotwings' five vehicles each
 print their own controller diagram — give each context a `<ControlSet name="...">`, named as the
 source names it, and label it in full from that context's own diagram. The `<Game>`'s direct
-`<Input>`s are the game's default, which the pause screen doesn't show once a game has sets, so they
-can be left out; if kept, only what holds in every context, since a label true for one vehicle is
-wrong for the next. A set takes nothing from them, so the controls they share are written in each
-set as well.
+`<Input>`s are the game's default: one picture summarising every context, as the source's own
+overview gives it (a summary diagram or table beside the per-context ones). The pause screen
+doesn't show it once a game has sets, but a client may offer it beside them, so write it when the
+source has such a summary and leave it out when it doesn't, rather than assembling one from the
+sets. A set takes nothing from the default, so the controls they share are written in each set as
+well.
 
 Configurable buttons are not contexts. A manual tabulating several arrangements with no default
-still labels only what is constant across them, as before; a set is for controls the game itself
-changes, not ones the player chooses once.
+still labels only what is constant across them, as a game without sets does; a set is for
+controls the game itself changes, not ones the player chooses once.
 
 ### A label that says nothing is dropped
 
