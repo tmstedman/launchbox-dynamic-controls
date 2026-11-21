@@ -14,7 +14,7 @@ namespace DynamicControls.Preview;
 public static class TitleFrame
 {
     /// <summary>Height of the title band above the frame.</summary>
-    private const int Band = 100;
+    public const int Band = 100;
 
     private const float TitleSize = 46, SubtitleSize = 24, Gap = 10;
 
@@ -32,26 +32,43 @@ public static class TitleFrame
         OverlayRenderer.DrawBackdrop(canvas, backdrop, width, height);
         canvas.DrawBitmap(frame, 0, Band);
 
-        using SKPaint titlePaint = TextPaint(typeface, TitleSize, SKColors.White);
-        using SKPaint subtitlePaint = TextPaint(typeface, SubtitleSize, new SKColor(0xA0, 0xA0, 0xA8));
-        float room = width - (2 * SidePadding);
+        // Centre the two lines as one block in the free space above the drawing — the band plus
+        // however many of the frame's own top rows nothing was drawn in. Varies by game: one
+        // whose topmost control is unlabelled and faint leaves more room than one with a label
+        // up there.
+        DrawTitle(canvas, width, Band + FirstInkedRow(frame), title, subtitle, typeface);
+        return bitmap;
+    }
+
+    /// <summary>Writes the title and subtitle, centred as one block in the top <paramref name="free"/>
+    /// pixels of a canvas <paramref name="width"/> wide, measured cap-top to baseline, at
+    /// <paramref name="scale"/> times their usual size.</summary>
+    public static void DrawTitle(SKCanvas canvas, float width, float free, string title, string subtitle,
+                                 SKTypeface typeface, float scale = 1)
+    {
+        using SKPaint titlePaint = TextPaint(typeface, TitleSize * scale, SKColors.White);
+        using SKPaint subtitlePaint = TextPaint(typeface, SubtitleSize * scale, new SKColor(0xA0, 0xA0, 0xA8));
+        float room = width - (2 * SidePadding * scale);
         FitWidth(titlePaint, title, room);
         FitWidth(subtitlePaint, subtitle, room);
 
-        // Centre the two lines as one block in the free space above the drawing — the band plus
-        // however many of the frame's own top rows nothing was drawn in — measured cap-top to
-        // baseline. Varies by game: one whose topmost control is unlabelled and faint leaves
-        // more room than one with a label up there.
-        float free = Band + FirstInkedRow(frame);
         float titleHeight = -titlePaint.FontMetrics.Ascent;
         float subtitleHeight = -subtitlePaint.FontMetrics.Ascent;
-        float block = titleHeight + Gap + subtitleHeight;
+        float block = titleHeight + (Gap * scale) + subtitleHeight;
         float titleBaseline = ((free - block) / 2) + titleHeight;
         float centre = width / 2f;
 
         canvas.DrawText(title, centre, titleBaseline, titlePaint);
-        canvas.DrawText(subtitle, centre, titleBaseline + Gap + subtitleHeight, subtitlePaint);
-        return bitmap;
+        canvas.DrawText(subtitle, centre, titleBaseline + (Gap * scale) + subtitleHeight, subtitlePaint);
+    }
+
+    /// <summary>Height of the title and subtitle as <see cref="DrawTitle"/> draws them, before any
+    /// shrinking to fit a width, at <paramref name="scale"/> times their usual size.</summary>
+    public static float BlockHeight(SKTypeface typeface, float scale)
+    {
+        using SKPaint titlePaint = TextPaint(typeface, TitleSize * scale, SKColors.White);
+        using SKPaint subtitlePaint = TextPaint(typeface, SubtitleSize * scale, SKColors.White);
+        return -titlePaint.FontMetrics.Ascent + (Gap * scale) - subtitlePaint.FontMetrics.Ascent;
     }
 
     /// <summary>

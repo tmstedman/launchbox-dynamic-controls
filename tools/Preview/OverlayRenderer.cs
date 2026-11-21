@@ -86,8 +86,9 @@ public static class OverlayRenderer
     /// edges bleed outward and fill the canvas instead of fading to the clear colour — the same
     /// reason <see cref="DrawOverlay"/> filters at paint time.
     ///
-    /// <para>Internal so <see cref="TitleFrame"/> can lay the same backdrop across its taller
-    /// canvas, behind a frame rendered without one.</para>
+    /// <para>Internal so Preview's other canvases — <see cref="TitleFrame"/>'s taller one, a page
+    /// drawn without a title, and <see cref="ContactSheet"/> — can lay the same backdrop behind a
+    /// frame rendered without one.</para>
     /// </summary>
     internal static void DrawBackdrop(SKCanvas canvas, Backdrop backdrop, int width, int height)
     {
