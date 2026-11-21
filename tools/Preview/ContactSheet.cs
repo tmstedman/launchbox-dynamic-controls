@@ -9,10 +9,11 @@ namespace DynamicControls.Preview;
 ///
 /// <para>The sheet is one picture rather than a wall of finished ones: the renders arrive bare, on
 /// a transparent canvas, and the backdrop is laid once across the whole sheet with the game's
-/// title above the grid. The sheet takes the renders' own aspect ratio, so it reads like one of
-/// them at a larger size: the grid's shape is the one that makes the smallest sheet at that
-/// aspect, and what is left over is room around it, not a stretched tile. A last row that can't
-/// be filled is centred rather than left against the edge.</para>
+/// title above the grid. The sheet takes the aspect of the game's own image, title band
+/// included, so it reads like one of them at a larger size: the grid's shape is the one that
+/// makes the smallest sheet at that aspect, and what is left over is room around it, not a
+/// stretched tile. A last row that can't be filled is centred rather than left against the
+/// edge.</para>
 /// </summary>
 public static class ContactSheet
 {
@@ -23,12 +24,6 @@ public static class ContactSheet
 
     private const float CaptionSize = 40f;
     private const int Gap = 24;
-
-    /// <summary>The sheet's title at this multiple of its size on a single image, which the
-    /// larger canvas needs to read as the heading, and the room left clear above and below it
-    /// within its header.</summary>
-    private const float TitleScale = 1.5f;
-    private const int TitleMargin = 60;
 
     /// <param name="title">Written above the grid with <paramref name="subtitle"/>; both empty
     /// leaves the sheet without a header.</param>
@@ -42,22 +37,34 @@ public static class ContactSheet
         int tileHeight = (int)Math.Round(renderHeight * Scale);
         int captionHeight = (int)Math.Round(CaptionSize * 1.5f);
         bool titled = title.Length + subtitle.Length > 0;
-        double aspect = (double)renderWidth / renderHeight;
+        // The aspect of one of the game's own titled images, so the sheet reads as one of them at
+        // a larger size: the render under the title band, as Program draws a single image.
+        double aspect = (double)renderWidth / (renderHeight + (titled ? TitleFrame.Band : 0));
 
-        // The title gets a header of the room it needs, margin either side, and the grid is
-        // centred in what is left below it. Where the aspect leaves more room than that, the grid
-        // sits lower and the title has it all; where it leaves none (a grid that already fills the
-        // aspect, two by two say), the sheet grows to fit the header, and wider to keep the
-        // aspect. The column count is the one that makes the smallest sheet.
-        float titleBlock = titled ? TitleFrame.BlockHeight(typeface, TitleScale) : 0;
-        int header = titled ? (int)Math.Ceiling(titleBlock + (2 * TitleMargin)) : 0;
+        // The header is the same share of the sheet's height as the title's room is of a single
+        // image — the band and the blank rows above the drawing, taken from whichever set leaves
+        // the least — so the sheet is that image at a larger size and the title, drawn at the same
+        // scale, takes the same share of the width. The band alone would leave the title pressed
+        // against the edge and the captions, since a caption takes the place of those blank rows.
+        // The grid is centred in what is left below it, and the title in everything above the
+        // grid: where the header decides the sheet's height the title has the same space around
+        // it as on a single image, and where the grid's width does, the room left over is split
+        // above and below the grid, so the title sits somewhat lower. A grid that already fills
+        // the aspect leaves no room for the header, so the sheet grows to give it that share. The
+        // column count is the one that makes the smallest sheet.
+        int titleRoom = renders.Min(r => TitleFrame.TitleRoom(r.Render));
+        double headerShare = titled ? (double)titleRoom / (renderHeight + TitleFrame.Band) : 0;
         int columns = Enumerable.Range(1, renders.Count).MinBy(c => (double)SheetWidth(c) * SheetHeight(c));
         int width = SheetWidth(columns), height = SheetHeight(columns);
+        int header = (int)Math.Round(height * headerShare);
+        float scale = (float)width / renderWidth;
 
         var sheet = new SKBitmap(width, height, SKColorType.Rgba8888, SKAlphaType.Premul);
         using var canvas = new SKCanvas(sheet);
         canvas.Clear(background);
-        OverlayRenderer.DrawBackdrop(canvas, backdrop, width, height);
+        // The blur radius is in canvas pixels, so on a sheet wider than one render it would blur the
+        // artwork less than the single image does; scaled with the sheet, it blurs the same share of it.
+        OverlayRenderer.DrawBackdrop(canvas, backdrop with { Radius = backdrop.Radius * scale }, width, height);
 
         using var caption = new SKPaint
         {
@@ -70,7 +77,7 @@ public static class ContactSheet
 
         float left = (width - GridWidth(columns)) / 2f;
         float top = header + ((height - header - GridHeight(columns)) / 2f);
-        if (titled) TitleFrame.DrawTitle(canvas, width, top, title, subtitle, typeface, TitleScale);
+        if (titled) TitleFrame.DrawTitle(canvas, width, top, title, subtitle, typeface, scale);
         for (int i = 0; i < renders.Count; i++)
         {
             (string text, SKBitmap render) = renders[i];
@@ -87,7 +94,7 @@ public static class ContactSheet
         int RowsFor(int c) => (renders.Count + c - 1) / c;
         int GridWidth(int c) => (c * tileWidth) + ((c + 1) * Gap);
         int GridHeight(int c) => (RowsFor(c) * (captionHeight + tileHeight)) + ((RowsFor(c) + 1) * Gap);
-        int SheetHeight(int c) => (int)Math.Round(Math.Max(header + GridHeight(c), GridWidth(c) / aspect));
+        int SheetHeight(int c) => (int)Math.Round(Math.Max(GridHeight(c) / (1 - headerShare), GridWidth(c) / aspect));
         int SheetWidth(int c) => (int)Math.Round(SheetHeight(c) * aspect);
     }
 }
