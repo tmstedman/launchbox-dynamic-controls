@@ -25,6 +25,13 @@ public static class ContactSheet
     private const float CaptionSize = 40f;
     private const int Gap = 24;
 
+    /// <summary>The most of the sheet's height the header may take. The header takes the room of
+    /// the set that leaves the least, so only sets that all draw nothing near the top would
+    /// otherwise claim nearly all of it (and sets that all draw nothing, all of it, which no sheet
+    /// can be sized for). Real sets share the template's topmost glyphs and come nowhere near
+    /// it.</summary>
+    private const double MaxHeaderShare = 0.4;
+
     /// <param name="title">Written above the grid with <paramref name="subtitle"/>; both empty
     /// leaves the sheet without a header.</param>
     public static SKBitmap Compose(
@@ -52,8 +59,9 @@ public static class ContactSheet
         // above and below the grid, so the title sits somewhat lower. A grid that already fills
         // the aspect leaves no room for the header, so the sheet grows to give it that share. The
         // column count is the one that makes the smallest sheet.
-        int titleRoom = renders.Min(r => TitleFrame.TitleRoom(r.Render));
-        double headerShare = titled ? (double)titleRoom / (renderHeight + TitleFrame.Band) : 0;
+        double headerShare = titled
+            ? Math.Min(MaxHeaderShare, (double)renders.Min(r => TitleFrame.TitleRoom(r.Render)) / (renderHeight + TitleFrame.Band))
+            : 0;
         int columns = Enumerable.Range(1, renders.Count).MinBy(c => (double)SheetWidth(c) * SheetHeight(c));
         int width = SheetWidth(columns), height = SheetHeight(columns);
         int header = (int)Math.Round(height * headerShare);
