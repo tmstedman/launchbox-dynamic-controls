@@ -19,4 +19,18 @@
         <Mapping name="Mode" input="ButtonBack" />
     </Controller>
 
+    <Game romName="OutRun (USA, Europe)" inheritFrom="3-Button" />
+
+    <Game romName="Aladdin (USA)" inheritFrom="3-Button">
+        <Mapping name="A" input="ButtonRightShoulder" />
+    </Game>
+
+    <Game romName="PerGameRemapTest">
+        <Mapping name="B" input="ButtonDpadLeft" />
+        <Mapping name="Dpad-Left" input="ButtonA" />
+        <Unmap name="C" />
+    </Game>
+
+    <Game romName="UserMappingTest" inheritFrom="3-Button" />
+
 </Controllers>

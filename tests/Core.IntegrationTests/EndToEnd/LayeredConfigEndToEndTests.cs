@@ -14,8 +14,9 @@ public class LayeredConfigEndToEndTests
     private readonly ControllerOverlayService _service = ControllerOverlayFactory.Create(FixturesRoot);
 
     /// <summary>
-    /// User/Platforms/{Platform}/ControllerOverrides shadows the Defaults counterpart: the Defaults
-    /// file selects 3-Button but the User file selects 6-Button. The 6-Button-only Y button maps to
+    /// A game's entry in User/Platforms/{Platform}/Controllers.xml replaces the Defaults one: the
+    /// Defaults entry selects 3-Button but the User entry selects 6-Button, which the User file
+    /// doesn't define, so it also shows the shipped controllers surviving the merge. The 6-Button-only Y button maps to
     /// ButtonY, so the Defaults labels file's Y="Special Attack" lands on ButtonY only when the User
     /// mapping wins. If the Defaults mapping (3-Button) were used instead, Y has no mapping and the
     /// label drops.
@@ -53,7 +54,7 @@ public class LayeredConfigEndToEndTests
     [Fact]
     public void SegaGenesis_UserLabelsFileWinsOverDefaults()
     {
-        // given a game with no ControllerOverrides override (falls back to 6-Button default), a Defaults
+        // given a game with no Controllers.xml entry (falls back to 6-Button default), a Defaults
         // labels file, and a User labels file that overrides the same button with different text
         var game = new GameInfo(
             Platform: "Sega Genesis",

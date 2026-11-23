@@ -11,7 +11,6 @@ Dynamic Controls\
   Defaults\                              ← shipped; replaced wholesale on every update
     GlobalConfig.xml
     Platforms\{Platform}\Controllers.xml
-    Platforms\{Platform}\ControllerOverrides\{Rom}.xml
     Platforms\{Platform}\Labels.xml
     Emulators\MAME\JoycodeMapping.xml
     Emulators\RetroArch\{CoreDisplayName}.xml
@@ -53,15 +52,14 @@ Three loaders need a specific layer instead and address it directly through `Lay
 |---|---|---|---|
 | `GlobalConfig.xml` | yes | **Merged** | per setting |
 | `Platforms\{Platform}\Labels.xml` | yes | **Merged** | per entry — per game, and per default button |
-| `Platforms\{Platform}\Controllers.xml` | yes | **Merged** | per controller |
-| `Platforms\{Platform}\ControllerOverrides\{Rom}.xml` | yes | **Replaced** | whole file, per game |
+| `Platforms\{Platform}\Controllers.xml` | yes | **Merged** | per entry — per controller, and per game |
 | `Emulators\**` | yes | **Replaced** | whole file |
 | `Templates\` | no | not layered | — |
 | `Static\` | user-only | not layered | per image |
 
 **Three files merge; everything else is replaced wholesale.**
 
-A file is replaced when it describes exactly one thing — one game's mapping, one emulator core's controller ids — because replacing it is precisely the customization the user meant, and it needs no cross-file merge logic. A file is merged when it holds many independent settings, because replacing it would discard far more than the user intended to change.
+A file is replaced when it describes exactly one thing — one emulator core's controller ids, the MAME joycode table — because replacing it is precisely the customization the user meant, and it needs no cross-file merge logic. A file is merged when it holds many independent settings, because replacing it would discard far more than the user intended to change.
 
 ## `GlobalConfig.xml` — field-level merge
 
@@ -92,15 +90,17 @@ One file holds every game on a platform, so replacing it wholesale would mean th
 
 ## `Platforms\{Platform}\Controllers.xml` — entry-level merge
 
-**Read both copies and overlay the user's controllers onto the shipped ones by name.**
+**Read both copies and overlay the user's entries onto the shipped ones.**
 
-A platform's file holds several controllers, so replacing it wholesale would mean that changing one controller discards the others, and that a user's file has to restate every controller just to stay complete.
+A platform's file holds several controllers and every game's remap of them, so replacing it wholesale would mean that changing one controller discards the others, and that a user's file has to restate every controller just to remap one game.
 
 - A user `<Controller>` whose `name` matches a shipped one replaces it in place; a new name is added after the shipped ones.
+- A user `<Game>` replaces every shipped one it shares a `launchBoxId` or a `romName` with; an unmatched one is added. Matching on either key, rather than looking the keys up separately as `Labels.xml` does, is what lets a user entry giving only `romName` replace a shipped one that also has an ID.
 - A user controller marked `default="true"` takes the default from the shipped one.
 - The root `inheritFrom` is the user file's when it states one, otherwise the shipped file's, so a user file for a platform that points at its family's root keeps that pointer without restating it. The platform it points at is itself loaded merged, so a user change to the root platform reaches every platform inheriting from it.
+- A root `inheritFrom` brings in the base platform's controllers but not its games: a game's ID and ROM name belong to its own platform.
 
-**The merge is per controller, not per button.** A user controller replaces the shipped one outright, the same rule as a `<Game>` in `Labels.xml`, so what a controller's buttons do is stated in one place. To change one button and keep the rest, give the user controller another name and `inheritFrom` the shipped one.
+**The merge is per entry, not per button.** A user controller or game replaces the shipped one outright, the same rule as a `<Game>` in `Labels.xml`, so what an entry's buttons do is stated in one place. To change one button and keep the rest, give the user controller another name and `inheritFrom` the shipped one.
 
 ## What ships in a release zip
 

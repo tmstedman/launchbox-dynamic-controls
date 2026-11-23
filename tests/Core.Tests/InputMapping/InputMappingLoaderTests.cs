@@ -5,8 +5,8 @@ using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="InputMappingLoader"/>. The loader parses per-game ControllerOverrides XML
-/// and platform Controllers.xml into raw DTOs without applying any merging. Filesystem is a
+/// Unit tests for <see cref="InputMappingLoader"/>. The loader parses a platform's Controllers.xml —
+/// its controllers and its per-game entries — into raw DTOs. Filesystem is a
 /// substitute so each test supplies a literal XML string and a stubbed FileExists answer; path
 /// construction is verified by the precise path the loader probes.
 /// </summary>
@@ -34,71 +34,34 @@ public class InputMappingLoaderTests
         _fs.OpenRead(path).Returns(_ => new MemoryStream(bytes));
     }
 
-    // ---- LoadGameMapping: file presence + path construction ----
+    // ---- LoadPlatformMapping: <Game> entries ----
 
-    [Fact]
-    public void LoadGameMapping_FileMissing_ReturnsNullAndDoesNotParse()
+    private static readonly string GenesisControllers = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
+
+    private GameMappingConfig? LoadGame(string gameXml, GameInfo? game = null)
     {
-        // given no per-game mapping file exists
-        _fs.FileExists(Arg.Any<string>()).Returns(false);
-
-        // when the loader is asked for it
-        var result = _underTest.LoadGameMapping(Game());
-
-        // then null is returned and no XML is loaded
-        result.ShouldBeNull();
-        _fs.DidNotReceive().OpenRead(Arg.Any<string>());
+        StubXml(GenesisControllers, $"""
+            <Controllers>
+              <Controller name='Pad' default='true' />
+              {gameXml}
+            </Controllers>
+            """);
+        return _underTest.LoadPlatformMapping("Sega Genesis")!.FindGame(game ?? Game());
     }
 
     [Fact]
-    public void LoadGameMapping_BuildsPathFromPlatformAndRomName()
+    public void LoadPlatformMapping_Game_ParsesInheritFromAndMappingEntries()
     {
-        // given a per-game mapping at Platforms/{platform}/ControllerOverrides/{romName}.xml
-        string expected = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(expected, "<InputMapping />");
-
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game());
-
-        // then the loader probes the exact constructed path
-        result.ShouldNotBeNull();
-        _fs.Received().OpenRead(expected);
-    }
-
-    [Fact]
-    public void LoadGameMapping_PlatformWithInvalidChars_IsSanitized()
-    {
-        // given a platform name with chars not legal in file paths
-        string safePlatform = "Sega/Genesis".SafeFileName();
-        string expected = Path.Combine(DefaultsDir, "Platforms", safePlatform, "ControllerOverrides", "OutRun.xml");
-        StubXml(expected, "<InputMapping />");
-
-        // when the loader runs
-        _underTest.LoadGameMapping(Game() with { Platform = "Sega/Genesis" });
-
-        // then the platform folder uses the sanitized name
-        _fs.Received().OpenRead(expected);
-    }
-
-    // ---- LoadGameMapping: XML parsing ----
-
-    [Fact]
-    public void LoadGameMapping_ParsesControllerAttribute_AndMappingEntries()
-    {
-        // given a per-game XML with a controller selection and two mapping entries
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, """
-            <InputMapping controller='Zapper'>
+        // given an entry selecting a controller and remapping two buttons
+        var result = LoadGame("""
+            <Game romName='OutRun' inheritFrom='Zapper'>
               <Mapping name='Trigger' input='ButtonA' />
               <Mapping name='Start' input='ButtonStart' />
-            </InputMapping>
-            """);
+            </Game>
+            """)!;
 
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
-
-        // then the controller attribute and both entries are captured in document order
-        result.Controller.ShouldBe("Zapper");
+        // then the controller and both entries are captured in document order
+        result.InheritFrom.ShouldBe("Zapper");
         result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe(
         [
             ("Trigger", "ButtonA"),
@@ -111,28 +74,20 @@ public class InputMappingLoaderTests
     [InlineData("right", AnalogToDigitalMode.Right)]
     [InlineData("LEFT", AnalogToDigitalMode.Left)]
     [InlineData("Right", AnalogToDigitalMode.Right)]
-    public void LoadGameMapping_AnalogToDigital_IsCaseInsensitive(string attrValue, AnalogToDigitalMode expected)
+    public void LoadPlatformMapping_GameAnalogToDigital_IsCaseInsensitive(string attrValue, AnalogToDigitalMode expected)
     {
-        // given a per-game XML with analogToDigital in varying case
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, $"<InputMapping analogToDigital='{attrValue}' />");
-
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
+        // given an entry with analogToDigital in varying case
+        var result = LoadGame($"<Game romName='OutRun' analogToDigital='{attrValue}' />")!;
 
         // then the mode is parsed to the matching enumerator regardless of case
         result.AnalogToDigital.ShouldBe(expected);
     }
 
     [Fact]
-    public void LoadGameMapping_InvalidAnalogToDigital_LogsErrorAndLeavesUnset()
+    public void LoadPlatformMapping_GameInvalidAnalogToDigital_LogsErrorAndLeavesUnset()
     {
-        // given a per-game XML with an unrecognized analogToDigital value
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, "<InputMapping analogToDigital='diagonal' />");
-
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
+        // given an entry with an unrecognized analogToDigital value
+        var result = LoadGame("<Game romName='OutRun' analogToDigital='diagonal' />")!;
 
         // then AnalogToDigital is left null and the invalid value is logged
         result.AnalogToDigital.ShouldBeNull();
@@ -141,20 +96,16 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadGameMapping_MappingEntryMissingNameOrInput_SkippedWithError()
+    public void LoadPlatformMapping_GameMappingEntryMissingNameOrInput_SkippedWithError()
     {
-        // given a per-game XML with one valid entry, one missing name, and one missing input
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, """
-            <InputMapping>
+        // given an entry with one valid mapping, one missing name, and one missing input
+        var result = LoadGame("""
+            <Game romName='OutRun'>
               <Mapping name='A' input='ButtonA' />
               <Mapping input='ButtonB' />
               <Mapping name='C' />
-            </InputMapping>
-            """);
-
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
+            </Game>
+            """)!;
 
         // then only the complete entry is kept; each malformed entry produced an error log
         result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA")]);
@@ -162,20 +113,16 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadGameMapping_Unmap_ParsesNameIntoUnmapsList()
+    public void LoadPlatformMapping_GameUnmap_ParsesNameIntoUnmapsList()
     {
-        // given a per-game XML with a mix of <Mapping> and <Unmap> entries
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, """
-            <InputMapping>
+        // given an entry with a mix of <Mapping> and <Unmap> elements
+        var result = LoadGame("""
+            <Game romName='OutRun'>
               <Mapping name='A' input='ButtonA' />
               <Unmap name='B' />
               <Unmap name='Mode' />
-            </InputMapping>
-            """);
-
-        // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
+            </Game>
+            """)!;
 
         // then Unmaps collects the names; Mappings is unaffected
         result.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA")]);
@@ -183,23 +130,181 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadGameMapping_UnmapMissingName_SkippedWithError()
+    public void LoadPlatformMapping_GameUnmapMissingName_SkippedWithError()
     {
-        // given a per-game XML with an <Unmap> element that has no name attribute
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "ControllerOverrides", "OutRun.xml");
-        StubXml(path, """
-            <InputMapping>
+        // given an entry with an <Unmap> that has no name attribute
+        var result = LoadGame("""
+            <Game romName='OutRun'>
               <Unmap name='B' />
               <Unmap />
-            </InputMapping>
+            </Game>
+            """)!;
+
+        // then the malformed element is dropped and the rest survive
+        result.Unmaps.ShouldBe(["B"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<Unmap>") && s.Contains("missing 'name'")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_GameUnrecognisedElement_SkippedWithError()
+    {
+        // given an entry with a typo'd element
+        var result = LoadGame("""
+            <Game romName='OutRun'>
+              <Mappin name='A' input='ButtonA' />
+            </Game>
+            """)!;
+
+        // then it is logged rather than silently dropped
+        result.Mappings.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<Mappin>") && s.Contains("romName=\"OutRun\"")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_GameWithNeitherKey_SkippedWithError()
+    {
+        // given an entry with no launchBoxId and no romName
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game inheritFrom='Pad' />
+            </Controllers>
             """);
 
         // when the loader runs
-        var result = _underTest.LoadGameMapping(Game())!;
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
 
-        // then the malformed entry is dropped and the rest survive
-        result.Unmaps.ShouldBe(["B"]);
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<Unmap>") && s.Contains("missing 'name'")));
+        // then the entry, which nothing could find, is dropped and logged
+        result.Games.ShouldBeEmpty();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<Game>") && s.Contains("launchBoxId or a romName")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_Game_IsFoundByLaunchBoxIdBeforeRomName()
+    {
+        // given one entry keyed by the game's LaunchBox ID and another by its ROM name
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game romName='OutRun' inheritFrom='ByName' />
+              <Game launchBoxId='42' inheritFrom='ById' />
+            </Controllers>
+            """);
+
+        // when the game is looked up
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then its ID finds it first, and its ROM name only when no ID matches
+        platform.FindGame(Game(launchBoxId: 42))!.InheritFrom.ShouldBe("ById");
+        platform.FindGame(Game(launchBoxId: 7))!.InheritFrom.ShouldBe("ByName");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_Game_RomNameMatchesIgnoringCaseButNotTags()
+    {
+        // given an entry for one dump of a game
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game romName='OutRun (USA, Europe)' />
+            </Controllers>
+            """);
+
+        // when the game is looked up
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then a difference of case still finds it, but another region's dump does not: a mapping
+        // is one ROM's setup, unlike a label
+        platform.FindGame(Game(romName: "outrun (usa, europe)")).ShouldNotBeNull();
+        platform.FindGame(Game(romName: "OutRun (Japan)")).ShouldBeNull();
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_TwoGamesWithTheSameKey_KeepsTheFirstAndLogs()
+    {
+        // given two entries in one file naming the same ROM
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game romName='OutRun' inheritFrom='First' />
+              <Game romName='OUTRUN' inheritFrom='Second' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the first stands and the second is reported
+        platform.Games.Select(g => g.InheritFrom).ShouldBe(["First"]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("OUTRUN") && s.Contains("already names that game")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserGame_ReplacesTheShippedEntryItSharesEitherKeyWith()
+    {
+        // given shipped entries for two games, and a User entry naming one of them by ROM name only
+        // where the shipped entry also has an ID
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game launchBoxId='42' romName='OutRun' inheritFrom='Shipped'>
+                <Mapping name='A' input='ButtonA' />
+              </Game>
+              <Game romName='Aladdin' inheritFrom='Shipped' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Game romName='OutRun' inheritFrom='Mine' />
+              <Game romName='Sonic' inheritFrom='Mine' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's entry replaces the shipped one whole, so the game's ID no longer finds the
+        // shipped entry; the other shipped game is kept, and the user's new game is added
+        platform.FindGame(Game(launchBoxId: 42))!.InheritFrom.ShouldBe("Mine");
+        platform.FindGame(Game(launchBoxId: 42))!.Mappings.ShouldBeEmpty();
+        platform.Games.Select(g => (g.RomName, g.InheritFrom)).ShouldBe(
+        [
+            ("OutRun", "Mine"),
+            ("Aladdin", "Shipped"),
+            ("Sonic", "Mine"),
+        ]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_RootInheritFrom_DoesNotBringInTheBaseFilesGames()
+    {
+        // given a base platform with a game entry, and a platform pointing at it
+        StubXml(GenesisControllers, """<Controllers inheritFrom="_SharedBase" />""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad' default='true' />
+              <Game romName='OutRun' inheritFrom='Pad' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the controllers arrive but the game, which belongs to the base platform, doesn't
+        platform.Controllers.Select(c => c.Name).ShouldBe(["Pad"]);
+        platform.Games.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UnrecognisedRootElement_SkippedWithError()
+    {
+        // given a file with a typo'd root child
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Controler name='Pad' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        _underTest.LoadPlatformMapping("Sega Genesis");
+
+        // then it is logged rather than silently dropped
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("<Controler>") && s.Contains("expected <Controller> or <Game>")));
     }
 
     // ---- LoadPlatformMapping: file presence + path construction ----

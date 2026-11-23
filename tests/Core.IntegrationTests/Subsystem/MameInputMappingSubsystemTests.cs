@@ -511,7 +511,7 @@ public class MameInputMappingSubsystemTests
     [Fact]
     public void Load_PerGameXmlPresent_ReplacesTheCfgsBindingsAndPortNames()
     {
-        // A per-game XML stands in for the cfg rather than layering on it, so nothing the cfg says
+        // A game entry stands in for the cfg rather than layering on it, so nothing the cfg says
         // reaches the mapping: not its swap of BUTTON3, not the BUTTON5 it adds, and not the
         // tag-and-mask name BUTTON3 would otherwise also answer to.
         WriteBaseline();
@@ -527,9 +527,9 @@ public class MameInputMappingSubsystemTests
             </mameconfig>
             """);
         _dc.WriteGameMapping(Platform, "dkong", """
-            <GameMapping>
+            <Game>
               <Mapping name="P1_BUTTON1" input="ButtonB" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(MameGame("dkong"));

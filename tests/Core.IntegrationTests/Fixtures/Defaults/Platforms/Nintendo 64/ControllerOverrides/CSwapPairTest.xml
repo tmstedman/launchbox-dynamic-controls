@@ -1,4 +1,0 @@
-<GameMapping>
-    <Mapping name="C-Left" input="AxisRightStickRight" />
-    <Mapping name="C-Right" input="AxisRightStickLeft" />
-</GameMapping>

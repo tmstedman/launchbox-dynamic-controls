@@ -13,6 +13,8 @@ namespace DynamicControls.Core.IntegrationTests.TestHelpers;
 /// Label helpers accumulate entries in memory and re-write the combined per-platform
 /// <c>Platforms/{platform}/Labels.xml</c> file each time an entry is added, so tests can call
 /// <see cref="WriteGameLabels"/> and <see cref="WriteDefaultLabels"/> independently in any order.
+/// The controllers helpers do the same for <c>Platforms/{platform}/Controllers.xml</c>, so
+/// <see cref="WritePlatform"/> and <see cref="WriteGameMapping"/> combine in either order.
 /// </summary>
 internal sealed class MockDynamicControlsFilesystem(string root)
 {
@@ -20,6 +22,9 @@ internal sealed class MockDynamicControlsFilesystem(string root)
 
     // Accumulated label state keyed by (layer, platform).
     private readonly Dictionary<(string Layer, string Platform), PlatformLabelAccumulator> _labels = [];
+
+    // Accumulated controllers state keyed by (layer, platform).
+    private readonly Dictionary<(string Layer, string Platform), ControllersAccumulator> _controllers = [];
 
     /// <summary>The in-memory filesystem as the production <see cref="IFileSystem"/>.</summary>
     public IFileSystem Fs => new MockFsAdapter(_mock);
@@ -33,11 +38,16 @@ internal sealed class MockDynamicControlsFilesystem(string root)
 
     // ---- Defaults layer (shipped config) ----
 
+    /// <summary>Sets the platform's Controllers.xml; any <see cref="WriteGameMapping"/> entries are
+    /// appended to its root.</summary>
     public void WritePlatform(string platform, string xml) =>
-        WriteFile(Path.Combine("Defaults", "Platforms", platform, "Controllers.xml"), xml);
+        AddControllers("Defaults", platform, platformXml: xml);
 
+    /// <summary>Adds a <c>&lt;Game&gt;</c> entry to the platform's Controllers.xml.
+    /// <paramref name="xml"/> is the <c>&lt;Game&gt;</c> element itself, without its
+    /// <c>romName</c>, which is set from <paramref name="romName"/>.</summary>
     public void WriteGameMapping(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("Defaults", "Platforms", platform, "ControllerOverrides", romName + ".xml"), xml);
+        AddControllers("Defaults", platform, game: (romName, xml));
 
     /// <summary>Sets the <c>&lt;Defaults&gt;</c> block for the platform. <paramref name="xml"/>
     /// is the inner XML of a root element (e.g. <c>&lt;InputLabels&gt;...&lt;/InputLabels&gt;</c>);
@@ -66,10 +76,11 @@ internal sealed class MockDynamicControlsFilesystem(string root)
         WriteFile(Path.Combine("User", "GlobalConfig.xml"), xml);
 
     public void WriteUserPlatform(string platform, string xml) =>
-        WriteFile(Path.Combine("User", "Platforms", platform, "Controllers.xml"), xml);
+        AddControllers("User", platform, platformXml: xml);
 
+    /// <summary>Adds a <c>&lt;Game&gt;</c> entry to the User-layer Controllers.xml.</summary>
     public void WriteUserGameMapping(string platform, string romName, string xml) =>
-        WriteFile(Path.Combine("User", "Platforms", platform, "ControllerOverrides", romName + ".xml"), xml);
+        AddControllers("User", platform, game: (romName, xml));
 
     /// <summary>Sets the <c>&lt;Defaults&gt;</c> block in the User-layer platform labels file.</summary>
     public void WriteUserDefaultLabels(string platform, string xml) =>
@@ -117,6 +128,44 @@ internal sealed class MockDynamicControlsFilesystem(string root)
 
         string path = Path.Combine(layer, "Platforms", platform, "Labels.xml");
         WriteFile(path, acc.ToXml());
+    }
+
+    // ---- Controllers accumulation ----
+
+    private void AddControllers(string layer, string platform,
+        string? platformXml = null,
+        (string RomName, string Xml)? game = null)
+    {
+        var key = (layer, platform);
+        if (!_controllers.TryGetValue(key, out ControllersAccumulator? acc))
+            _controllers[key] = acc = new ControllersAccumulator();
+
+        if (platformXml != null)
+            acc.PlatformXml = platformXml;
+        if (game is (string romName, string gameXml))
+            acc.Games.Add((romName, gameXml));
+
+        WriteFile(Path.Combine(layer, "Platforms", platform, "Controllers.xml"), acc.ToXml());
+    }
+
+    private sealed class ControllersAccumulator
+    {
+        public string PlatformXml { get; set; } = "<Controllers />";
+        public List<(string RomName, string Xml)> Games { get; } = [];
+
+        public string ToXml()
+        {
+            var doc = new XmlDocument();
+            doc.LoadXml(PlatformXml);
+            foreach ((string romName, string xml) in Games)
+            {
+                var game = new XmlDocument();
+                game.LoadXml(xml);
+                game.DocumentElement!.SetAttribute("romName", romName);
+                doc.DocumentElement!.AppendChild(doc.ImportNode(game.DocumentElement, deep: true));
+            }
+            return doc.OuterXml;
+        }
     }
 
     private static string InnerXml(string xml)

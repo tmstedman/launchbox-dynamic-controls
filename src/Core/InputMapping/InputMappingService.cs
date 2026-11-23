@@ -1,7 +1,7 @@
 namespace DynamicControls.InputMapping;
 
 /// <summary>
-/// Resolves input mappings for a game by walking a chain of providers (per-game XML, RetroArch,
+/// Resolves input mappings for a game by walking a chain of providers (per-game entry, RetroArch,
 /// MAME, the platform default) and taking what the first one to answer supplies: the controller in
 /// play and any remap of it. The resulting <see cref="ResolvedMapping"/>'s <c>Natural*</c> maps
 /// reflect the controller before the remap, so callers can still detect one.

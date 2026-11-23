@@ -22,4 +22,6 @@
         <Mapping name="VI" input="AxisTriggerRight" />
     </Controller>
 
+    <Game romName="Street Fighter II Dash (Japan)" inheritFrom="6-Button" />
+
 </Controllers>

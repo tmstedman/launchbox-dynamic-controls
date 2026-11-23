@@ -1,5 +1,0 @@
-<GameMapping>
-    <Mapping name="B" input="ButtonDpadLeft" />
-    <Mapping name="Dpad-Left" input="ButtonA" />
-    <Unmap name="C" />
-</GameMapping>

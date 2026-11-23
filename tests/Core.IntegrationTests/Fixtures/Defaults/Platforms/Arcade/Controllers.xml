@@ -82,4 +82,10 @@
         <Mapping name="START1" input="ButtonStart" />
         <Mapping name="COIN1" input="ButtonBack" />
     </Controller>
+
+    <Game romName="1942" analogToDigital="left">
+        <Mapping name="P1_BUTTON1" input="ButtonX" />
+        <Mapping name="P1_BUTTON2" input="ButtonA" />
+    </Game>
+
 </Controllers>

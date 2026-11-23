@@ -546,12 +546,12 @@ public class RetroArchSubsystemTests
         mapping.NaturalButtonToInput.ShouldNotBe(mapping.ButtonToInput);
     }
 
-    // ---- a per-game XML against RetroArch's controller choice ----
+    // ---- a game entry against RetroArch's controller choice ----
 
     /// <summary>Stages a RetroArch Genesis game whose cfg selects the 3-Button pad, and the
     /// platform's Controllers.xml declaring both pads. A per-game override, if a test wants one,
     /// is written before <see cref="LoadGenesisGame"/> runs the whole service, whose provider order
-    /// is the production one (per-game XML first).</summary>
+    /// is the production one (game entry first).</summary>
     private void StageGenesisGameOnThreeButtonPad()
     {
         StageRetroArchCfg();
@@ -598,17 +598,17 @@ public class RetroArchSubsystemTests
     [Fact]
     public void Scenario_PerGameXmlNamingNoController_ShadowsTheCfgsControllerChoice()
     {
-        // A per-game XML that names no controller is read against the platform default, never the
-        // pad RetroArch selected: the file's button names come from some controller's vocabulary,
-        // and the selected pad may not have them. The per-game XML provider is first in the chain
+        // A game entry that names no controller is read against the platform default, never the
+        // pad RetroArch selected: the entry's button names come from some controller's vocabulary,
+        // and the selected pad may not have them. The per-game provider is first in the chain
         // and returns a complete mapping, so RetroArch's provider is never asked, and a remap-only
-        // file reads against the 6-Button default even though the cfg selected the 3-Button pad.
-        // A file that wants another pad says so with controller="...".
+        // entry reads against the 6-Button default even though the cfg selected the 3-Button pad.
+        // An entry that wants another pad says so with inheritFrom="...".
         StageGenesisGameOnThreeButtonPad();
         _dc.WriteGameMapping(Platform, Rom, """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = LoadGenesisGame();
@@ -627,9 +627,9 @@ public class RetroArchSubsystemTests
         StageGenesisGameOnThreeButtonPad();
         StageGameRmp(RmpSwap("y", "0"));
         _dc.WriteGameMapping(Platform, Rom, """
-            <GameMapping controller="3-Button">
+            <Game inheritFrom="3-Button">
               <Mapping name="C" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = LoadGenesisGame();

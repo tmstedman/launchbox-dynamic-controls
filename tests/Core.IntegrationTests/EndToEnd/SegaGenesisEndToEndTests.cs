@@ -21,7 +21,7 @@ public class SegaGenesisEndToEndTests
     [Fact]
     public void SegaGenesis_OutRun()
     {
-        // given the OutRun game on Sega Genesis (the fixture's ControllerOverrides file picks 3-Button)
+        // given the OutRun game on Sega Genesis (the fixture's Controllers.xml entry picks 3-Button)
         var game = new GameInfo(
             Platform: "Sega Genesis",
             RomName: "OutRun (USA, Europe)",
@@ -599,8 +599,8 @@ public class SegaGenesisEndToEndTests
 
     /// <summary>
     /// A clone inherits its parent's labels (<see cref="Labels.InputLabelsService"/> retries with
-    /// <see cref="GameInfo.CloneOf"/>) but not its parent's ControllerOverrides file, which selects
-    /// 3-Button: a mapping is the player's per-rom setup, and the parent's file would switch off the
+    /// <see cref="GameInfo.CloneOf"/>) but not its parent's Controllers.xml entry, which selects
+    /// 3-Button: a mapping is the player's per-rom setup, and the parent's entry would switch off the
     /// clone's own emulator configuration. So the clone reads the platform default, 6-Button.
     /// </summary>
     [Fact]
@@ -608,7 +608,7 @@ public class SegaGenesisEndToEndTests
     {
         var game = new GameInfo(
             Platform: "Sega Genesis",
-            RomName: "OutRun (Beta)",                  // no ControllerOverrides or Labels file
+            RomName: "OutRun (Beta)",                  // no Controllers.xml or Labels.xml entry
             CloneOf: "OutRun (USA, Europe)",           // parent has both
             LaunchBoxId: null,
             EmulatorPath: null,
