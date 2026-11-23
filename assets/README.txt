@@ -28,11 +28,11 @@ lose the next time you update. For changes specific to your own setup, use
 User/ instead — see the section below.
 
   GlobalConfig.xml                          Global plugin settings.
-  Platforms/{Platform}/Controllers.xml      Controller variants per platform.
+  Platforms/{Platform}/Controllers.xml      Controller variants per platform, and per-game
+                                            input mappings (<Game> entries; none ship: one
+                                            would replace every user's emulator
+                                            configuration for that game).
   Platforms/{Platform}/Labels.xml           Per-platform labels (game entries + defaults block).
-  Platforms/{Platform}/ControllerOverrides/{Game}.xml  Per-game input mapping overrides
-                                            (none ship: one would replace every user's
-                                            emulator configuration for that game).
   controls.xml                              BYOAC MAME controls database.
   Emulators/MAME/JoycodeMapping.xml            JOYCODE -> generic-input lookup for MAME cfg translation.
   Emulators/RetroArch/{CoreDisplayName}.xml Per-core controller variant declarations.
@@ -43,9 +43,9 @@ Place files here with the same relative path as their Defaults/ counterpart to
 shadow them. For example:
 
   GlobalConfig.xml                          Override global settings.
-  Platforms/{Platform}/Controllers.xml      Override or add a platform's controllers.
+  Platforms/{Platform}/Controllers.xml      Override or add a platform's controllers, or a
+                                            game's input mapping.
   Platforms/{Platform}/Labels.xml           Override or add game labels for a platform.
-  Platforms/{Platform}/ControllerOverrides/{Game}.xml  Override a game's input mapping.
   controls.xml                              Override the MAME controls database.
   Emulators/MAME/JoycodeMapping.xml            Override the JOYCODE mapping.
   Emulators/RetroArch/{CoreDisplayName}.xml Override a core's variant declarations.

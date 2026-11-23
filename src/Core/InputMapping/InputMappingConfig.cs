@@ -2,8 +2,9 @@ namespace DynamicControls.InputMapping;
 
 /// <summary>
 /// Raw DTO for per-game / per-provider input mapping data — a single mapping list plus optional
-/// selection of which platform-defined Controller to inherit from. Produced by InputMappingLoader
-/// (game XMLs) and the emulator providers (MAME, RetroArch); a provider hands back two of them as a
+/// selection of which platform-defined Controller to inherit from. Produced by the providers — the
+/// per-game one from a <see cref="GameMappingConfig"/>, and the emulator ones (MAME, RetroArch) from
+/// the emulator's own files; a provider hands back two of them as a
 /// <see cref="ProvidedMapping"/>, and InputMappingResolver turns each into a ResolvedMapping.
 /// </summary>
 public record InputMappingConfig
@@ -13,23 +14,22 @@ public record InputMappingConfig
     public List<MappingEntry> Mappings { get; set; } = [];
 
     /// <summary>Platform-button Names to drop from the selected controller's baseline without
-    /// substituting anything in their place. Parsed from per-game &lt;Unmap name="..."/&gt;
+    /// substituting anything in their place. From a game's &lt;Unmap name="..."/&gt;
     /// elements. Lets a game disable a baseline button the player isn't supposed to use, in
     /// parity with RetroArch's <c>-1</c> sentinel for the same purpose. Empty when no
     /// &lt;Unmap&gt; elements are present.</summary>
     public List<string> Unmaps { get; set; } = [];
 
     /// <summary>
-    /// Root-level `analogToDigital` attribute selecting which stick the Dpad mirrors onto.
-    /// Null when the attribute is absent, allowing game-specific configs to inherit the
-    /// controller value.
+    /// Which stick the Dpad mirrors onto. Null when the game's entry states none, allowing it to
+    /// inherit the controller value.
     /// </summary>
     public AnalogToDigitalMode? AnalogToDigital { get; set; }
 
     /// <summary>
-    /// Optional `controller="..."` attribute on the game's XML root — selects which Controller
-    /// inside the platform's Controllers.xml provides the baseline. Null means use the
-    /// platform's default controller.
+    /// Which Controller inside the platform's Controllers.xml provides the baseline — a game
+    /// entry's <c>inheritFrom</c>, or the controller an emulator provider picked. Null means use
+    /// the platform's default controller.
     /// </summary>
     public string? Controller { get; set; }
 
@@ -52,19 +52,23 @@ public record InputMappingConfig
 
 /// <summary>
 /// Raw DTO for a platform's Controllers.xml — one or more &lt;Controller&gt; entries,
-/// each declaring its own button vocabulary. A controller may carry an
+/// each declaring its own button vocabulary, and the &lt;Game&gt; entries remapping one of them for a
+/// single game. A controller may carry an
 /// <c>inheritFrom="OtherControllerName"</c> attribute; the loader applies the inheriting
 /// controller's own entries as an overlay onto the base: entries whose Name matches a base
 /// entry replace it, new Names are appended. Inheritance is transitive — the named base may
 /// itself inheritFrom another controller — with cycles detected and broken. Games either select
-/// one controller explicitly via <c>controller="..."</c> or fall back to whichever controller
-/// is marked default (or, if none is marked, the first one in document order).
+/// one controller explicitly via their entry's <c>inheritFrom</c> or fall back to whichever
+/// controller is marked default (or, if none is marked, the first one in document order).
 /// </summary>
 public record PlatformControllersConfig
 {
     /// <summary>The platform's controllers in document order. Always at least one element when
     /// the file parses successfully.</summary>
     public List<ControllerConfig> Controllers { get; set; } = [];
+
+    /// <summary>The platform's per-game entries, each keyed by LaunchBox ID, ROM name or both.</summary>
+    public List<GameMappingConfig> Games { get; set; } = [];
 
     /// <summary>
     /// Returns the controller named <paramref name="preferredName"/>, or null when no such
@@ -78,6 +82,44 @@ public record PlatformControllersConfig
         not null => Controllers.FirstOrDefault(c => c.Name == preferredName),
         null => Controllers.FirstOrDefault(c => c.IsDefault) ?? Controllers[0],
     };
+
+    /// <summary>
+    /// Returns the entry for <paramref name="game"/>: the one with its LaunchBox ID, else the one
+    /// with its ROM name, compared ignoring case; null when neither matches. A ROM name is not
+    /// matched with its region and revision tags stripped, as a label is, and a clone is not
+    /// matched by its parent's: a mapping is one ROM's setup, as an emulator keeps it, so a remap
+    /// written for one dump shouldn't reach another.
+    /// </summary>
+    public GameMappingConfig? FindGame(GameInfo game) =>
+        (game.LaunchBoxId is int id ? Games.FirstOrDefault(g => g.LaunchBoxId == id) : null)
+        ?? Games.FirstOrDefault(g => string.Equals(g.RomName, game.RomName, StringComparison.OrdinalIgnoreCase));
+}
+
+/// <summary>
+/// One &lt;Game&gt; in a platform's Controllers.xml: a remap of one of the platform's controllers for
+/// a single game, standing in for an emulator configuration the plugin can't read. It is written
+/// like a &lt;Controller&gt;, but its mappings are a remap of the controller it inherits from rather
+/// than buttons of its own, so a button it moves is drawn as the physical button the player presses.
+/// </summary>
+public record GameMappingConfig
+{
+    /// <summary>The game's LaunchBox ID, matched first.</summary>
+    public int? LaunchBoxId { get; set; }
+
+    /// <summary>The game's ROM file name without extension, matched when no ID does.</summary>
+    public string? RomName { get; set; }
+
+    /// <summary>The controller this game remaps; null means the platform default.</summary>
+    public string? InheritFrom { get; set; }
+
+    /// <summary>Which stick the Dpad mirrors onto; null inherits the controller's.</summary>
+    public AnalogToDigitalMode? AnalogToDigital { get; set; }
+
+    /// <summary>Buttons this game binds differently, overlaid on the controller's by name.</summary>
+    public List<MappingEntry> Mappings { get; set; } = [];
+
+    /// <summary>Buttons of the controller this game leaves unbound.</summary>
+    public List<string> Unmaps { get; set; } = [];
 }
 
 /// <summary>
@@ -93,7 +135,7 @@ public record ControllerConfig
     public string Name { get; set; } = null!;
 
     /// <summary>True when this controller is marked as the platform default via
-    /// `default="true"`. Games without a `controller="..."` selection inherit from the first
+    /// `default="true"`. Games whose entry names no controller inherit from the first
     /// controller with this flag set; if none has it, the first controller in document order
     /// is the implicit default.</summary>
     public bool IsDefault { get; set; }

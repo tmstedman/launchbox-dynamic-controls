@@ -4,21 +4,18 @@ Platforms — user overrides
 Each subfolder is a platform (the name must match LaunchBox's platform name
 exactly) and can hold any combination of:
 
-  Controllers.xml                    Override a platform's controller button definitions.
+  Controllers.xml                    Override a platform's controllers, or add a
+                                     per-game input mapping.
   Labels.xml                         Add or override game and platform-default labels.
-  ControllerOverrides/{Game}.xml     Override or add a per-game input mapping.
 
 Example layout:
 
   User/Platforms/Sega Genesis/Controllers.xml
   User/Platforms/Sega Genesis/Labels.xml
-  User/Platforms/Sega Genesis/ControllerOverrides/Aladdin (USA).xml
 
-ControllerOverrides/{Game}.xml is shadowed wholesale: copy it from the
-matching Defaults/Platforms/{Platform}/ path here and edit your copy, and it
-replaces the Defaults file entirely. Controllers.xml and Labels.xml are merged
-entry by entry instead (see below), because each holds many independent
-settings: write only the entries you want to change.
+Both files are merged with the shipped ones in Defaults/Platforms/{Platform}/
+entry by entry (see below), because each holds many independent settings:
+write only the entries you want to change.
 
 Controllers.xml
 ----------------
@@ -108,7 +105,7 @@ base is logged to Logs/debug.log rather than failing the load.
 Attributes:
   Mapping/@name     Platform button name (matches element names in Labels.xml).
   Mapping/@input    Generic input name (ButtonA, ButtonX, AxisLeftStick, …).
-  Controller/@name  Variant name — referenced by ControllerOverrides files.
+  Controller/@name  Variant name — referenced by a <Game>'s inheritFrom.
   Controller/@default="true"  Marks the variant used when no game-specific
                     selection is made.
   Controller/@inheritFrom     Name of another <Controller> whose mappings are
@@ -193,49 +190,58 @@ Contributing: if you create labels for a game, please consider submitting
 them so they ship as defaults for everyone. Open a pull request or issue at:
 https://github.com/tmstedman/launchbox-dynamic-controls
 
-ControllerOverrides/{Game}.xml
--------------------------------
-Files here override per-game input mappings for any emulator not handled
-automatically (RetroArch and MAME are read automatically when enabled).
+Per-game input mappings: <Game> in Controllers.xml
+--------------------------------------------------
+A <Game> entry in Controllers.xml overrides one game's input mapping, for any
+emulator not handled automatically (RetroArch and MAME are read automatically
+when enabled).
 
 When to use: if a specific game remaps buttons or uses a non-default
 controller variant and your emulator is not RetroArch or MAME.
 
-File naming: ControllerOverrides/{Game}.xml — the game name must match
-LaunchBox's ROM name exactly. A clone doesn't use its parent's file (unlike its
+Finding the game: an entry is matched by launchBoxId first (the LaunchBox
+Games Database ID), then by romName — LaunchBox's ROM name, compared ignoring
+case but otherwise exactly, so each region's dump needs its own entry. Either
+attribute alone is enough. A clone doesn't use its parent's entry (unlike its
 labels), so a clone's own RetroArch or MAME configuration is still read when
-only its parent has one; give the clone a file of its own to override it too.
-The clone does inherit its parent's labels, so a label for a button only the
-parent's file supplies may not be shown for the clone until it has its own
-file.
+only its parent has one; give the clone an entry of its own to override it
+too. The clone does inherit its parent's labels, so a label for a button only
+the parent's entry supplies may not be shown for the clone until it has its
+own entry.
 
-A per-game file selects a controller variant and overlays button overrides on
-top of that variant's baseline. Buttons not mentioned in the file are
-preserved unchanged from the baseline. A button the file remaps is drawn like
-one an emulator has swapped, with the picture of the physical button.
+An entry is written like a <Controller>: inheritFrom names the controller
+variant it starts from, and its <Mapping>s are laid over that variant's
+baseline. Buttons the entry doesn't mention are preserved unchanged. A button
+the entry remaps is drawn like one an emulator has swapped, with the picture
+of the physical button. A <Game> here replaces any shipped entry for the same
+game whole.
 
-A game with a file here is read from the file alone: RetroArch's and MAME's
+A game with an entry is read from the entry alone: RetroArch's and MAME's
 configuration is not consulted for it (with Debug on, Logs\debug.log says so).
-A file that names no controller is read against the platform's default
+An entry that names no controller is read against the platform's default
 controller, not the one RetroArch selected.
 
-On Arcade, use bare MAME port names (P1_BUTTON1, COIN1) in the file and in
+On Arcade, use bare MAME port names (P1_BUTTON1, COIN1) in the entry and in
 that game's labels. The longer TYPE:tag:mask form of a port name comes from
-the game's MAME cfg, which is not read once a file here exists, so a label
+the game's MAME cfg, which is not read once the game has an entry, so a label
 written that way stops matching. The cfg is also what adds the ports Arcade's
 Controllers.xml doesn't declare (START2, COIN2, SERVICE, P1_BUTTON9 and up,
-another player's ports): for a game with a file here, those exist only if the
-file maps them itself.
+another player's ports): for a game with an entry, those exist only if the
+entry maps them itself.
 
-  <GameMapping controller="3-Button">
+  <Controllers>
 
-      <!-- Override a specific button's generic input -->
-      <Mapping name="A" input="ButtonRightShoulder" />
+      <Game launchBoxId="1234" romName="Aladdin (USA)" inheritFrom="3-Button">
 
-      <!-- Remove a button from the mapping entirely -->
-      <Unmap name="C" />
+          <!-- Override a specific button's generic input -->
+          <Mapping name="A" input="ButtonRightShoulder" />
 
-  </GameMapping>
+          <!-- Remove a button from the mapping entirely -->
+          <Unmap name="C" />
+
+      </Game>
+
+  </Controllers>
 
 In the example above, <Mapping name="A" ...> replaces whatever generic input
 A had in the baseline — the original assignment is unassigned. <Unmap
@@ -245,13 +251,15 @@ generic input simultaneously (useful to drive two template slots from one
 platform button).
 
 Attributes:
-  GameMapping/@controller   Controller variant to use as the base (optional;
+  Game/@launchBoxId         LaunchBox Games Database ID, matched first.
+  Game/@romName             ROM name without extension, matched when no ID
+                            does.
+  Game/@inheritFrom         Controller variant to use as the base (optional;
                             defaults to the platform's default variant). Must
                             match a <Controller name="..."> in that platform's
                             Controllers.xml.
+  Game/@analogToDigital     As on <Controller>; inherited from the variant
+                            when absent.
   Mapping/@name             Platform button name to override.
   Mapping/@input            Generic input to assign to that button.
   Unmap/@name               Platform button name to remove from the mapping.
-
-Example:
-  User/Platforms/Sega Genesis/ControllerOverrides/Aladdin (USA).xml

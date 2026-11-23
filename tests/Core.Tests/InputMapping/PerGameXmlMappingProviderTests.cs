@@ -1,26 +1,24 @@
 using DynamicControls.InputMapping;
 using NSubstitute;
-using NSubstitute.ReturnsExtensions;
 using static DynamicControls.Core.TestHelpers.InputMapping.InputMappingFixtures;
 using static DynamicControls.InputMapping.AnalogToDigitalMode;
 
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="PerGameXmlMappingProvider"/>. The loader is a substitute so each test
-/// supplies the exact per-game <see cref="InputMappingConfig"/> the provider should see — no XML,
-/// no filesystem. Covers the controller-resolution chain (named → unknown-falls-back → null →
+/// Unit tests for <see cref="PerGameXmlMappingProvider"/>. Each test supplies the platform's
+/// controllers and the game's <see cref="GameMappingConfig"/> entry directly — no XML, no
+/// filesystem. Covers the controller-resolution chain (named → unknown-falls-back → null →
 /// platform-default), the per-game-over-baseline merge by Name, and AnalogToDigital inheritance.
 /// </summary>
 public class PerGameXmlMappingProviderTests
 {
     private readonly ILogger _logger = Substitute.For<ILogger>();
-    private readonly IInputMappingLoader _loader = Substitute.For<IInputMappingLoader>();
     private readonly PerGameXmlMappingProvider _underTest;
 
     public PerGameXmlMappingProviderTests()
     {
-        _underTest = new PerGameXmlMappingProvider(_logger, _loader);
+        _underTest = new PerGameXmlMappingProvider(_logger);
     }
 
     [Fact]
@@ -38,17 +36,15 @@ public class PerGameXmlMappingProviderTests
         // when the provider loads
         var result = _underTest.Load(game, platform: null)?.Current;
 
-        // then the provider contributes nothing and the loader is never called
+        // then the provider contributes nothing
         result.ShouldBeNull();
-        _loader.DidNotReceive().LoadGameMapping(Arg.Any<GameInfo>());
     }
 
     [Fact]
-    public void Load_NoPerGameXml_ReturnsNull()
+    public void Load_NoGameEntry_ReturnsNull()
     {
-        // given no per-game mapping file exists for this rom
+        // given no entry for this rom in the platform's file
         var game = Game();
-        _loader.LoadGameMapping(game).ReturnsNull();
 
         // when the provider loads
         var result = _underTest.Load(game, PlatformConfig(ControllerDef("Pad", isDefault: true)))?.Current;
@@ -60,13 +56,12 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_ExplicitController_ResolvesNamedControllerFromPlatform()
     {
-        // given a per-game XML selecting "Zapper" and a platform with that controller
+        // given a game entry selecting "Zapper" and a platform with that controller
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(controller: "Zapper", mappings: [("Trigger", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Zapper", mappings: [("Trigger", "ButtonA")]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]),
-            ControllerDef(name: "Zapper", mappings: [("Trigger", "ButtonA")]));
+            ControllerDef(name: "Zapper", mappings: [("Trigger", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -79,12 +74,11 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_UnknownController_LogsErrorAndFallsBackToPlatformDefault()
     {
-        // given a per-game XML selecting a controller the platform doesn't declare
+        // given a game entry selecting a controller the platform doesn't declare
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(controller: "Unknown", mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Unknown", mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -96,14 +90,13 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NoControllerInXml_UsesPlatformDefault()
+    public void Load_EntryNamesNoController_UsesPlatformDefault()
     {
-        // given a per-game XML with no controller= attribute
+        // given a game entry with no inheritFrom
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -114,43 +107,41 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NoControllerInXml_LogsThatItIsReadAgainstThePlatformDefault()
+    public void Load_EntryNamesNoController_LogsThatItIsReadAgainstThePlatformDefault()
     {
-        // given a per-game XML with no controller= attribute, over a platform with a default
+        // given a game entry with no inheritFrom, over a platform with a default
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         _underTest.Load(game, platform);
 
-        // then the log says which pad the file's button names were resolved against
+        // then the log says which pad the entry's button names were resolved against
         _logger.Received().Debug(Arg.Is<string>(s => s.Contains("names no controller") && s.Contains("platform default")));
     }
 
     [Fact]
-    public void Load_XmlPresent_LogsThatTheEmulatorsConfigurationIsNotRead()
+    public void Load_EntryPresent_LogsThatTheEmulatorsConfigurationIsNotRead()
     {
-        // given a per-game XML for the game
+        // given a game entry for the game
         var game = Game(romName: "sonic");
-        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(romName: "sonic", inheritFrom: "Pad", mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         _underTest.Load(game, platform);
 
-        // then the log says the file is the whole mapping, so an emulator's ignored config is explained
+        // then the log says the entry is the whole mapping, so an emulator's ignored config is explained
         _logger.Received(1).Debug(Arg.Is<string>(s => s.Contains("'sonic' supplies the whole mapping") && s.Contains("not read")));
     }
 
     [Fact]
-    public void Load_NoXml_DoesNotLogThatItSuppliesTheMapping()
+    public void Load_NoGameEntry_DoesNotLogThatItSuppliesTheMapping()
     {
-        // given no per-game XML (and no clone parent)
-        _loader.LoadGameMapping(Arg.Any<GameInfo>()).ReturnsNull();
-
+        // given no game entry (and no clone parent)
         // when the provider loads
         _underTest.Load(Game(), PlatformConfig(ControllerDef(name: "Pad", isDefault: true)));
 
@@ -162,9 +153,9 @@ public class PerGameXmlMappingProviderTests
     public void Load_ExplicitController_DoesNotLogTheDefaultNotice()
     {
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Pad", mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         _underTest.Load(game, platform);
 
@@ -172,15 +163,14 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NullPlatform_ReturnsConfigWithNullController()
+    public void Load_PlatformWithNoControllers_ReturnsConfigWithNullController()
     {
-        // given a per-game XML and no platform controllers file
+        // given a game entry in a file that declares no controllers
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Pad", mappings: [("A", "ButtonA")]);
 
-        // when the provider loads with no platform
-        var result = _underTest.Load(game, platform: null)?.Current;
+        // when the provider loads
+        var result = _underTest.Load(game, PlatformConfig().WithGames(entry))?.Current;
 
         // then the result keeps the per-game mappings but has no controller resolution
         result.ShouldNotBeNull();
@@ -191,21 +181,20 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_LayersGameOverBaseline_ReplacesByName_AndAppendsNew()
     {
-        // given a baseline with A, B, Start and a per-game XML that overrides B and adds Select
+        // given a baseline with A, B, Start and a game entry that overrides B and adds Select
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(mappings:
+        GameMappingConfig entry = GameEntry(mappings:
             [
                 ("B", "ButtonY"),     // override baseline's B
                 ("Select", "ButtonSelect"), // new — not in baseline
-            ]));
+            ]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings:
             [
                 ("A", "ButtonA"),
                 ("B", "ButtonB"),     // will be replaced
                 ("Start", "ButtonStart"),
-            ]));
+            ])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -225,21 +214,20 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_SwapsTwoButtons_BothOldBindingsCleared()
     {
-        // given a per-game XML that exchanges the controls A and B sit on
+        // given a game entry that exchanges the controls A and B sit on
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(mappings:
+        GameMappingConfig entry = GameEntry(mappings:
             [
                 ("A", "ButtonB"),
                 ("B", "ButtonA"),
-            ]));
+            ]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings:
             [
                 ("A", "ButtonA"),
                 ("B", "ButtonB"),
                 ("Start", "ButtonStart"),
-            ]));
+            ])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -258,16 +246,15 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_MovesOneButtonOntoAnOccupiedControl_LeavesTheOccupantInPlace()
     {
-        // given a per-game XML that moves A onto B's control without saying what becomes of B
+        // given a game entry that moves A onto B's control without saying what becomes of B
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(mappings: [("A", "ButtonB")]));
+        GameMappingConfig entry = GameEntry(mappings: [("A", "ButtonB")]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings:
             [
                 ("A", "ButtonA"),
                 ("B", "ButtonB"),
-            ]));
+            ])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -286,17 +273,16 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_Unmap_DropsBaselineEntryWithoutReplacement()
     {
-        // given a baseline with A, B, Start and a per-game XML that <Unmap>s B
+        // given a baseline with A, B, Start and a game entry that <Unmap>s B
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(unmaps: ["B"]));
+        GameMappingConfig entry = GameEntry(unmaps: ["B"]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings:
             [
                 ("A", "ButtonA"),
                 ("B", "ButtonB"),
                 ("Start", "ButtonStart"),
-            ]));
+            ])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -313,20 +299,19 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_UnmapAndMappingForSameName_MappingWins()
     {
-        // given a per-game XML that both unmaps and remaps B — the <Mapping> entry wins because
+        // given a game entry that both unmaps and remaps B — the <Mapping> entry wins because
         // the override-Names set is shared, but Mapping then appends the new value while Unmap
         // contributes nothing back
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(
+        GameMappingConfig entry = GameEntry(
                 mappings: [("B", "ButtonY")],
-                unmaps: ["B"]));
+                unmaps: ["B"]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings:
             [
                 ("A", "ButtonA"),
                 ("B", "ButtonB"),
-            ]));
+            ])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -341,15 +326,14 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_AnalogToDigitalNullInXml_InheritsFromBaseline()
+    public void Load_AnalogToDigitalNullInEntry_InheritsFromBaseline()
     {
-        // given a per-game XML without AnalogToDigital and a controller that has one
+        // given a game entry without AnalogToDigital and a controller that has one
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(controller: "Pad", mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Pad", mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, analogToDigital: Right,
-                mappings: [("A", "ButtonA")]));
+                mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -360,40 +344,34 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NoGameXml_CloneOfHasGameXml_ReturnsNull_SoTheClonesOwnConfigurationIsRead()
+    public void Load_NoGameEntry_CloneOfHasOne_ReturnsNull_SoTheClonesOwnConfigurationIsRead()
     {
-        // given a clone with no per-game XML; the parent ROM has one selecting "3-Button"
+        // given a clone with no entry of its own; the parent ROM has one selecting "3-Button"
         var game = Game(romName: "OutRun (Beta)") with { CloneOf = "OutRun (USA, Europe)" };
-        _loader.LoadGameMapping(Arg.Is<GameInfo>(g => g.RomName == "OutRun (Beta)"))
-            .ReturnsNull();
-        _loader.LoadGameMapping(Arg.Is<GameInfo>(g => g.RomName == "OutRun (USA, Europe)"))
-            .Returns(MappingConfig(controller: "3-Button", mappings: [("A", "ButtonX")]));
+        GameMappingConfig parents = GameEntry(romName: "OutRun (USA, Europe)", inheritFrom: "3-Button", mappings: [("A", "ButtonX")]);
         var platform = PlatformConfig(
             ControllerDef(name: "6-Button", isDefault: true, mappings: [("A", "ButtonX")]),
-            ControllerDef(name: "3-Button", mappings: [("A", "ButtonX")]));
+            ControllerDef(name: "3-Button", mappings: [("A", "ButtonX")])).WithGames(parents);
 
         // when the provider loads
         var result = _underTest.Load(game, platform);
 
-        // then it has nothing for the clone, and the parent's file is never read: unlike labels, a
-        // mapping is per rom, and the parent's would switch off the clone's own MAME or RetroArch
-        // configuration
+        // then it has nothing for the clone: unlike labels, a mapping is per rom, and the parent's
+        // would switch off the clone's own MAME or RetroArch configuration
         result.ShouldBeNull();
-        _loader.DidNotReceive().LoadGameMapping(Arg.Is<GameInfo>(g => g.RomName == "OutRun (USA, Europe)"));
     }
 
     [Fact]
-    public void Load_AnalogToDigitalExplicitlySetInXml_OverridesBaseline()
+    public void Load_AnalogToDigitalExplicitlySetInEntry_OverridesBaseline()
     {
-        // given a per-game XML that explicitly sets AnalogToDigital and a controller with a
+        // given a game entry that explicitly sets AnalogToDigital and a controller with a
         // different value
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(controller: "Pad", analogToDigital: Left,
-                mappings: [("A", "ButtonA")]));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Pad", analogToDigital: Left,
+                mappings: [("A", "ButtonA")]);
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, analogToDigital: Right,
-                mappings: [("A", "ButtonA")]));
+                mappings: [("A", "ButtonA")])).WithGames(entry);
 
         // when the provider loads
         var result = _underTest.Load(game, platform)?.Current;
@@ -408,11 +386,11 @@ public class PerGameXmlMappingProviderTests
     [Fact]
     public void Load_MappingRemapsAButton_NaturalIsTheControllerAsDeclared()
     {
-        // given a file moving A onto ButtonY, over a controller that declares A as ButtonA
+        // given an entry moving A onto ButtonY, over a controller that declares A as ButtonA
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonY")]));
+        GameMappingConfig entry = GameEntry(mappings: [("A", "ButtonY")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA"), ("B", "ButtonB")]));
+            ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA"), ("B", "ButtonB")])).WithGames(entry);
 
         // when the provider loads
         ProvidedMapping? result = _underTest.Load(game, platform);
@@ -426,15 +404,15 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_FileNamesANonDefaultController_NaturalIsThatController()
+    public void Load_EntryNamesANonDefaultController_NaturalIsThatController()
     {
-        // given a file naming "Zapper" and nothing else, where Zapper's button drives a different
+        // given an entry naming "Zapper" and nothing else, where Zapper's button drives a different
         // input from the default pad's
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(MappingConfig(controller: "Zapper"));
+        GameMappingConfig entry = GameEntry(inheritFrom: "Zapper");
         var platform = PlatformConfig(
             ControllerDef(name: "Pad", isDefault: true, mappings: [("A", "ButtonA")]),
-            ControllerDef(name: "Zapper", mappings: [("Trigger", "AxisTriggerRight")]));
+            ControllerDef(name: "Zapper", mappings: [("Trigger", "AxisTriggerRight")])).WithGames(entry);
 
         // when the provider loads
         ProvidedMapping? result = _underTest.Load(game, platform);
@@ -448,14 +426,13 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_FileSetsAnalogToDigital_NaturalTakesTheSameValue()
+    public void Load_EntrySetsAnalogToDigital_NaturalTakesTheSameValue()
     {
         // the mirror is a statement about the hardware, so a stick mirror is never read as a remap
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(
-            MappingConfig(analogToDigital: Right, mappings: [("A", "ButtonY")]));
+        GameMappingConfig entry = GameEntry(analogToDigital: Right, mappings: [("A", "ButtonY")]);
         var platform = PlatformConfig(
-            ControllerDef(name: "Pad", isDefault: true, analogToDigital: Left, mappings: [("A", "ButtonA")]));
+            ControllerDef(name: "Pad", isDefault: true, analogToDigital: Left, mappings: [("A", "ButtonA")])).WithGames(entry);
 
         ProvidedMapping? result = _underTest.Load(game, platform);
 
@@ -465,13 +442,13 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NoPlatform_ReportsNothingRemapped()
+    public void Load_NoControllers_ReportsNothingRemapped()
     {
-        // with no controller to read against there is nothing for the file to remap
+        // with no controller to read against there is nothing for the entry to remap
         var game = Game();
-        _loader.LoadGameMapping(game).Returns(MappingConfig(mappings: [("A", "ButtonY")]));
+        GameMappingConfig entry = GameEntry(mappings: [("A", "ButtonY")]);
 
-        ProvidedMapping? result = _underTest.Load(game, platform: null);
+        ProvidedMapping? result = _underTest.Load(game, PlatformConfig().WithGames(entry));
 
         result.ShouldNotBeNull();
         result.Natural.ShouldBeSameAs(result.Current);

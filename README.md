@@ -100,21 +100,25 @@ The overlay can only be accurate if this mapping matches what your emulator is a
 
 Some games remap buttons or use a different controller variant. The plugin resolves this from the following sources:
 
-1. **XML** (highest priority) - create `User\Platforms\{Platform}\ControllerOverrides\{Game}.xml` for any emulator not covered below, or to explicitly override automatic detection:
+1. **XML** (highest priority) - add a `<Game>` entry to `User\Platforms\{Platform}\Controllers.xml` for any emulator not covered below, or to explicitly override automatic detection:
 
 ```xml
-<!-- User\Platforms\Sega Genesis\ControllerOverrides\Aladdin (USA).xml -->
-<GameMapping controller="3-Button">
-    <Mapping name="A" input="ButtonRightShoulder" />
-    <Unmap name="C" />
-</GameMapping>
+<!-- User\Platforms\Sega Genesis\Controllers.xml -->
+<Controllers>
+    <Game launchBoxId="1234" romName="Aladdin (USA)" inheritFrom="3-Button">
+        <Mapping name="A" input="ButtonRightShoulder" />
+        <Unmap name="C" />
+    </Game>
+</Controllers>
 ```
+
+An entry is found by `launchBoxId` first, then by `romName` (the ROM file name without its extension, ignoring case); either attribute alone is enough. It is written like a `<Controller>`, and your file is merged over the shipped one, so the entry is all it needs to hold.
 
 `<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button. A button you remap is drawn like one an emulator has swapped: with the picture of the physical button the player presses.
 
-A game with an XML file is read from that file alone: RetroArch's and MAME's configuration is not consulted for it, so the file stands in for what they would have said. With `Debug` on, `Logs\debug.log` notes this each time such a game is loaded. Name the controller with `controller="..."`; a file that doesn't is read against the platform's default controller, never the one RetroArch selected, since its button names may not exist on another pad.
+A game with an entry is read from that entry alone: RetroArch's and MAME's configuration is not consulted for it, so the entry stands in for what they would have said. With `Debug` on, `Logs\debug.log` notes this each time such a game is loaded. Name the controller with `inheritFrom="..."`; an entry that doesn't is read against the platform's default controller, never the one RetroArch selected, since its button names may not exist on another pad.
 
-On Arcade this also means the file, and any label for that game, must use bare MAME port names (`P1_BUTTON1`, `COIN1`). The longer `TYPE:tag:mask` form of a port name (`COIN1:mainpcb:IN0:128`, or `OTHER:STROBE1:2` for an earlier copy of a repeated port) is read from the game's MAME cfg, which is not consulted once an override file exists, so a label naming a port that way stops matching. The cfg is also what adds the ports Arcade's `Controllers.xml` doesn't declare (`START2`, `COIN2`, `SERVICE`, `P1_BUTTON9` and up, another player's ports), so for a game with an override those exist only if the file maps them itself.
+On Arcade this also means the entry, and any label for that game, must use bare MAME port names (`P1_BUTTON1`, `COIN1`). The longer `TYPE:tag:mask` form of a port name (`COIN1:mainpcb:IN0:128`, or `OTHER:STROBE1:2` for an earlier copy of a repeated port) is read from the game's MAME cfg, which is not consulted once the game has an entry, so a label naming a port that way stops matching. The cfg is also what adds the ports Arcade's `Controllers.xml` doesn't declare (`START2`, `COIN2`, `SERVICE`, `P1_BUTTON9` and up, another player's ports), so for a game with an entry those exist only if the entry maps them itself.
 
 2. **RetroArch** (`EnableRetroArch=true`) - reads your RetroArch `.cfg` and remap files automatically to detect the active controller type and any per-game button swaps.
 3. **MAME** (`EnableMame=true`) - reads your MAME `.cfg` files to pick up per-game JOYCODE button assignments.
@@ -137,7 +141,7 @@ Labels tell the plugin what each button does in a specific game. All labels for 
 </Labels>
 ```
 
-The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers.xml and ControllerOverrides — and the element's text is what the button does. A label too long for one line can be split across several with `&#10;`, as in `<Input name="P1_JOYSTICK">Punch&#10;Block</Input>`; the lines are centred on where a one-line label would sit.
+The `launchBoxId` attribute is the LaunchBox Games Database ID for the title and is the primary lookup key — using it means the entry is found regardless of your ROM's filename. The `romName` attribute is a fallback for games without a database ID: it's matched case-insensitively against your ROM's filename, and if that misses, both sides are retried with `(...)` and `[...]` groups stripped — so a `romName` of `Sonic the Hedgehog (USA, Europe)` still matches a ROM file named `Sonic the Hedgehog (World)`. The `name` attribute is the button as printed on the original hardware — the same names used in Controllers.xml — and the element's text is what the button does. A label too long for one line can be split across several with `&#10;`, as in `<Input name="P1_JOYSTICK">Punch&#10;Block</Input>`; the lines are centred on where a one-line label would sit.
 
 A space-separated `name` describes an action performed by pressing several buttons together, for example `<Input name="BUTTON1 BUTTON2">Power Move</Input>`. It labels whichever control your configuration binds to all of those buttons at once, and takes precedence over their individual labels there. If nothing on your controller fires them together, it simply doesn't appear.
 
@@ -184,7 +188,7 @@ Templates support platform-specific hardware button art: when a platform subfold
 
 ## Known limitations
 
-- **Per-game input mappings match on exact ROM filename.** `Platforms\{Platform}\ControllerOverrides\{Game}.xml` is matched against the ROM filename without its extension; regional variants require their own file. So does a clone: unlike its labels, it doesn't inherit its parent's file, so a clone you reconfigure in RetroArch or MAME keeps that configuration even when its parent has an override. The clone still inherits its parent's labels, so a label for a button only the parent's file supplies (a port Arcade's `Controllers.xml` doesn't declare, or a button of a controller the file selects) may not be shown for the clone until it has a file of its own.
+- **Per-game input mappings match on LaunchBox ID or exact ROM filename.** A `<Game>` entry in `Controllers.xml` with no `launchBoxId` is matched against the ROM filename without its extension (ignoring case only), so regional variants require their own entry. So does a clone: unlike its labels, it doesn't inherit its parent's entry, so a clone you reconfigure in RetroArch or MAME keeps that configuration even when its parent has one. The clone still inherits its parent's labels, so a label for a button only the parent's entry supplies (a port Arcade's `Controllers.xml` doesn't declare, or a button of a controller the entry selects) may not be shown for the clone until it has an entry of its own.
 - **DirectInput users in RetroArch do not get button swap detection.** XInput controllers get full game-level swap detection; DirectInput controllers get controller variant and remap file support but no swap detection through cfg files.
 - **DirectInput users in MAME do get button swap detection.** However, it is not reliable since DirectInput devices do not adhere to a standard layout.
 - **RetroArch button swap detection covers game-level remaps only.** Swaps configured in global, core, or core-remap files are not applied — only game-level remap files are checked. If you configure button swaps at those levels the overlay may not reflect them.

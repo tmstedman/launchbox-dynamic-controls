@@ -22,4 +22,10 @@
         <Mapping name="C-Left" input="AxisRightStickLeft" />
         <Mapping name="C-Right" input="AxisRightStickRight" />
     </Controller>
+
+    <Game romName="CSwapPairTest">
+        <Mapping name="C-Left" input="AxisRightStickRight" />
+        <Mapping name="C-Right" input="AxisRightStickLeft" />
+    </Game>
+
 </Controllers>

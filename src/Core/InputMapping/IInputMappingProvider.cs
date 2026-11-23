@@ -19,8 +19,8 @@ public record ProvidedMapping(InputMappingConfig Natural, InputMappingConfig Cur
 /// A standalone source of one game's input mapping: the controller in play and any remap of it.
 /// Providers are tried in priority order and the first to return a mapping supplies all of it —
 /// the controller choice and the remap alike — so a provider that applies is the whole answer and
-/// no other provider is consulted. A per-game XML override therefore replaces an emulator's
-/// swaps and controller choice rather than stacking on them: the XML stands in for what the
+/// no other provider is consulted. A game's Controllers.xml entry therefore replaces an emulator's
+/// swaps and controller choice rather than stacking on them: the entry stands in for what the
 /// emulator providers do for an emulator the plugin cannot read.
 ///
 /// <para>Controls (<c>&lt;Control&gt;</c> entries) are not a provider's job: the cfg has to have
@@ -30,7 +30,7 @@ public interface IInputMappingProvider
 {
     /// <summary>
     /// Returns true when this provider should participate in the chain for the current
-    /// configuration. Always-on providers (per-game XML, platform default) return true
+    /// configuration. Always-on providers (per-game entry, platform default) return true
     /// unconditionally; emulator providers gate on their <c>EnableX</c> flag. Evaluated once at
     /// composition time — disabled providers are filtered out before the service ever sees them.
     /// </summary>

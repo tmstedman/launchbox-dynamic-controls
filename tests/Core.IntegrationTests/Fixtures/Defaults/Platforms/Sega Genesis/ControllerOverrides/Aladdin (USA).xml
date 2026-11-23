@@ -1,3 +1,0 @@
-<GameMapping controller="3-Button">
-    <Mapping name="A" input="ButtonRightShoulder" />
-</GameMapping>

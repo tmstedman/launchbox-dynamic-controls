@@ -48,7 +48,7 @@ internal static class InputMappingFactory
 
         IInputMappingProvider[] assembled =
         [
-            new PerGameXmlMappingProvider(logger, loader),
+            new PerGameXmlMappingProvider(logger),
             .. providers,
             new PlatformDefaultMappingProvider(logger),
         ];

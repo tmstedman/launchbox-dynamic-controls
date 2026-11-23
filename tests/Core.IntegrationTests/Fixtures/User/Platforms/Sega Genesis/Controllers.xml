@@ -1,0 +1,3 @@
+<Controllers>
+    <Game romName="UserMappingTest" inheritFrom="6-Button" />
+</Controllers>

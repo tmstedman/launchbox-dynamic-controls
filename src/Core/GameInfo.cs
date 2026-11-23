@@ -7,11 +7,11 @@ namespace DynamicControls;
 /// </summary>
 /// <param name="Platform">LaunchBox platform name (e.g. "Sega Genesis").</param>
 /// <param name="RomName">ROM filename without extension, derived from
-/// <c>ApplicationPath</c>. Used as the primary filename stem when looking up per-game label
-/// and input-mapping XML files (e.g. <c>Platforms/{platform}/ControllerOverrides/{RomName}.xml</c>).</param>
+/// <c>ApplicationPath</c>. Matched against the <c>romName</c> of a game's entry in the
+/// platform's Labels.xml and Controllers.xml when its <see cref="LaunchBoxId"/> finds none.</param>
 /// <param name="CloneOf">Parent ROM name for MAME clones and similar sets. When a game's own
-/// labels lookup by <see cref="RomName"/> finds nothing, it retries with this value. A per-game
-/// ControllerOverrides file is not inherited: a mapping is the player's per-rom setup.</param>
+/// labels lookup by <see cref="RomName"/> finds nothing, it retries with this value. A parent's
+/// Controllers.xml entry is not inherited: a mapping is the player's per-rom setup.</param>
 /// <param name="LaunchBoxId">LaunchBox Games Database ID for this game, if matched. Used as
 /// the primary key when looking up per-game label XML entries; more stable than
 /// <see cref="RomName"/> across ROM renames or No-Intro set updates. Null when the game has

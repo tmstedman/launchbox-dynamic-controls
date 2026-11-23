@@ -3,20 +3,12 @@ using System.Xml;
 namespace DynamicControls.InputMapping;
 
 /// <summary>
-/// Locates and parses platform-level Controllers.xml (multi-controller vocabulary) and per-game
-/// ControllerOverrides/{Rom}.xml (single mapping list with optional controller selection) into
-/// thin DTOs. No merging is performed at this layer — callers receive the raw XML structure.
+/// Locates and parses a platform's Controllers.xml — its controller vocabulary and its per-game
+/// remaps — into thin DTOs. A game's remap is left unresolved against its controller: the provider
+/// that answers for it does that.
 /// </summary>
 public interface IInputMappingLoader
 {
-    /// <summary>
-    /// Loads a per-game mapping override. Returns null if no game-specific mapping exists.
-    /// The root element may carry a <c>controller="..."</c> attribute selecting which controller
-    /// in the platform's Controllers.xml to inherit from; nested <c>&lt;Mapping&gt;</c> entries
-    /// overlay onto that controller's baseline.
-    /// </summary>
-    InputMappingConfig? LoadGameMapping(GameInfo game);
-
     /// <summary>
     /// Loads the platform-level controllers file (<c>Controllers.xml</c>) — one or more
     /// <c>&lt;Controller&gt;</c> blocks, each with its own button vocabulary. A controller may
@@ -25,9 +17,12 @@ public interface IInputMappingLoader
     /// on) with cycles detected and broken. The root <c>&lt;Controllers&gt;</c> element may also
     /// carry <c>inheritFrom="OtherFile"</c> to pull in a shared base file's controllers and merge
     /// this file's own on top (override by name, append new) — letting platforms that share a
-    /// layout reduce to a one-line pointer. A <c>User\</c> file is merged over the shipped one the
-    /// same way, controller by controller, rather than replacing it. Returns null when no
-    /// controllers file exists for the given platform in either layer.
+    /// layout reduce to a one-line pointer. <c>&lt;Game launchBoxId="..." romName="..."&gt;</c>
+    /// entries alongside the controllers remap one of them for a single game; a root inheritFrom
+    /// brings in the base file's controllers but not its games. A <c>User\</c> file is merged over
+    /// the shipped one the same way, controller by controller and game by game, rather than
+    /// replacing it. Returns null when no controllers file exists for the given platform in either
+    /// layer.
     /// </summary>
     PlatformControllersConfig? LoadPlatformMapping(string platform);
 }
@@ -42,51 +37,6 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     private readonly LayeredFileSystem _lfs = lfs;
 
     /// <inheritdoc />
-    public InputMappingConfig? LoadGameMapping(GameInfo game)
-    {
-        string safePlatform = game.Platform.SafeFileName();
-        string? gamePath = _lfs.Resolve("Platforms", safePlatform, "ControllerOverrides", game.RomName + ".xml");
-        _logger.Debug($"Game input mapping path: {gamePath}");
-
-        return gamePath != null ? ParseGameMapping(gamePath) : null;
-    }
-
-    private InputMappingConfig ParseGameMapping(string path)
-    {
-        var result = new InputMappingConfig();
-        using Stream stream = _lfs.OpenRead(path);
-        var doc = new XmlDocument();
-        doc.Load(stream);
-        XmlElement root = doc.DocumentElement!;
-
-        result.Controller = root.Attributes["controller"]?.Value;
-        if (result.Controller != null) _logger.Debug($"Game controller selection: {result.Controller}");
-
-        if (TryParseAnalogToDigital(root, path, out AnalogToDigitalMode? a2d))
-            result.AnalogToDigital = a2d;
-
-        foreach (XmlElement node in root.ChildNodes.OfType<XmlElement>())
-        {
-            if (node.Name == "Mapping")
-            {
-                MappingEntry? entry = ParseMappingEntry(node, path);
-                if (entry != null) result.Mappings.Add(entry);
-            }
-            else if (node.Name == "Unmap")
-            {
-                string? name = node.Attributes["name"]?.Value;
-                if (string.IsNullOrEmpty(name))
-                    _logger.Error($"Skipping <Unmap> in {path}: missing 'name' attribute");
-                else
-                    result.Unmaps.Add(name);
-            }
-        }
-
-        _logger.Debug($"Game mapping entries: {result.Mappings.Count}, unmaps: {result.Unmaps.Count}");
-        return result;
-    }
-
-    /// <inheritdoc />
     public PlatformControllersConfig? LoadPlatformMapping(string platform)
     {
         var result = new PlatformControllersConfig();
@@ -97,9 +47,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         // its own on top (override by name, append new names). This lets many platforms that share
         // a controller layout reduce to a one-line pointer at a shared base file. No
         // controller-level inheritance is resolved yet.
-        List<ParsedController>? parsed = LoadControllersRaw(platform, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { platform });
-        if (parsed == null) return null;
+        ParsedPlatform? raw = LoadControllersRaw(platform, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { platform });
+        if (raw == null) return null;
+        List<ParsedController> parsed = raw.Controllers;
         string path = ControllersPath(platform);
+        result.Games.AddRange(raw.Games);
 
         // Pass 2: build the final ControllerConfig list. For each controller, walk its inheritFrom
         // chain to the root and prepend every ancestor's own mappings in order (root ancestor first,
@@ -124,7 +76,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             _logger.Debug($"Controller '{controller.Name}': {controller.Mappings.Count} mappings (inheritFrom={pc.InheritFrom ?? "none"}), default={controller.IsDefault}, analogToDigital={controller.AnalogToDigital}");
         }
 
-        _logger.Debug($"Platform controllers: {result.Controllers.Count}");
+        _logger.Debug($"Platform controllers: {result.Controllers.Count}, games: {result.Games.Count}");
         return result;
     }
 
@@ -136,10 +88,12 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// file states one, else the shipped one — by loading that platform the same way and merging
     /// this one's controllers on top. Root-level inheritance is transitive (a base may itself
     /// inheritFrom another) with cycles detected via <paramref name="visited"/> and a missing base
-    /// logged; either case falls back to this platform's own controllers. Returns null when neither
-    /// layer has a file.
+    /// logged; either case falls back to this platform's own controllers. The games are this
+    /// platform's own, the user's laid over the shipped ones (see <see cref="MergeGames"/>): a
+    /// game's ID and ROM name belong to its platform, so a base file's are not brought in. Returns
+    /// null when neither layer has a file.
     /// </summary>
-    private List<ParsedController>? LoadControllersRaw(string platform, HashSet<string> visited)
+    private ParsedPlatform? LoadControllersRaw(string platform, HashSet<string> visited)
     {
         string relative = ControllersPath(platform);
         bool defaultsExists = _lfs.Defaults.FileExists(relative);
@@ -151,25 +105,27 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         ParsedFile? user = userExists ? ParseFile(_lfs.User.OpenRead(relative), Path.Combine("User", relative)) : null;
 
         List<ParsedController> own = MergeControllers(shipped?.Controllers ?? [], user?.Controllers ?? [], user?.Path ?? relative);
+        List<GameMappingConfig> games = MergeGames(shipped?.Games ?? [], user?.Games ?? []);
         string? baseName = user?.InheritFrom ?? shipped?.InheritFrom;
-        if (string.IsNullOrEmpty(baseName)) return own;
+        if (string.IsNullOrEmpty(baseName)) return new ParsedPlatform(own, games);
 
         if (!visited.Add(baseName))
         {
             _logger.Error($"Controllers file {relative}: root inheritFrom chain forms a cycle at '{baseName}'; stopping resolution");
-            return own;
+            return new ParsedPlatform(own, games);
         }
-        List<ParsedController>? baseControllers = LoadControllersRaw(baseName, visited);
-        if (baseControllers == null)
+        ParsedPlatform? basePlatform = LoadControllersRaw(baseName, visited);
+        if (basePlatform == null)
         {
             _logger.Error($"Controllers file {relative}: inheritFrom='{baseName}' names '{ControllersPath(baseName)}', found in neither User\\Platforms nor Defaults\\Platforms; using own controllers only");
-            return own;
+            return new ParsedPlatform(own, games);
         }
 
-        return MergeControllers(baseControllers, own, relative);
+        return new ParsedPlatform(MergeControllers(basePlatform.Controllers, own, relative), games);
     }
 
-    /// <summary>One layer's Controllers file as written: its controllers and its root inheritFrom.</summary>
+    /// <summary>One layer's Controllers file as written: its controllers, its games and its root
+    /// inheritFrom.</summary>
     private ParsedFile ParseFile(Stream openedStream, string path)
     {
         using Stream stream = openedStream;
@@ -178,11 +134,21 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         XmlElement root = doc.DocumentElement!;
 
         var controllers = new List<ParsedController>();
+        var games = new List<GameMappingConfig>();
         foreach (XmlElement node in root.ChildNodes.OfType<XmlElement>())
         {
-            if (node.Name != "Controller") continue;
-            ParsedController? pc = ParseControllerRaw(node, path);
-            if (pc != null) controllers.Add(pc);
+            switch (node.Name)
+            {
+                case "Controller":
+                    if (ParseControllerRaw(node, path) is ParsedController pc) controllers.Add(pc);
+                    break;
+                case "Game":
+                    if (ParseGame(node, path) is GameMappingConfig game) AddGame(games, game, path);
+                    break;
+                default:
+                    _logger.Error($"Skipping <{node.Name}> in {path}: expected <Controller> or <Game>");
+                    break;
+            }
         }
 
         var defaults = controllers.Where(c => c.IsDefault).Select(c => c.Name).ToList();
@@ -190,7 +156,106 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             _logger.Error($"Controllers file {path}: multiple controllers marked default ({string.Join(", ", defaults)}); one will be picked arbitrarily by document order");
 
         string? inheritFrom = root.Attributes["inheritFrom"]?.Value;
-        return new ParsedFile(path, controllers, string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom);
+        return new ParsedFile(path, controllers, games, string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom);
+    }
+
+    /// <summary>
+    /// Adds <paramref name="game"/> to one file's games unless an earlier entry already has its ID
+    /// or ROM name: the two would be one game stated twice, and which one applied would come down
+    /// to document order, so the first is kept and the second logged.
+    /// </summary>
+    private void AddGame(List<GameMappingConfig> games, GameMappingConfig game, string path)
+    {
+        if (games.FirstOrDefault(g => SameGame(g, game)) is GameMappingConfig earlier)
+        {
+            _logger.Error($"Skipping <Game {Describe(game)}> in {path}: <Game {Describe(earlier)}> already names that game");
+            return;
+        }
+        games.Add(game);
+    }
+
+    /// <summary>
+    /// Lays the user's games over the shipped ones: a user entry replaces, whole, every shipped
+    /// entry it shares an ID or a ROM name with, taking the first one's place, and is appended when
+    /// it shares neither. Whole entries rather than keys, so a user entry naming a game by its ROM
+    /// alone still replaces a shipped one that also has an ID — which an ID lookup would otherwise
+    /// find first.
+    /// </summary>
+    private static List<GameMappingConfig> MergeGames(List<GameMappingConfig> shipped, List<GameMappingConfig> user)
+    {
+        var merged = new List<GameMappingConfig>(shipped);
+        foreach (GameMappingConfig game in user)
+        {
+            int at = merged.FindIndex(g => SameGame(g, game));
+            if (at < 0)
+            {
+                merged.Add(game);
+                continue;
+            }
+            merged[at] = game;
+            merged.RemoveAll(g => !ReferenceEquals(g, game) && SameGame(g, game));
+        }
+        return merged;
+    }
+
+    private static bool SameGame(GameMappingConfig a, GameMappingConfig b) =>
+        (a.LaunchBoxId != null && a.LaunchBoxId == b.LaunchBoxId)
+        || (a.RomName != null && string.Equals(a.RomName, b.RomName, StringComparison.OrdinalIgnoreCase));
+
+    private static string Describe(GameMappingConfig game) =>
+        string.Join(" ", new[]
+        {
+            game.LaunchBoxId is int id ? $"launchBoxId=\"{id}\"" : null,
+            game.RomName is string rom ? $"romName=\"{rom}\"" : null,
+        }.Where(k => k != null));
+
+    /// <summary>
+    /// Parses a &lt;Game&gt;: the keys it is found by, the controller it remaps, and the remap
+    /// itself. An entry with neither key could never be found, so it is logged and skipped.
+    /// </summary>
+    private GameMappingConfig? ParseGame(XmlElement node, string path)
+    {
+        string? idText = node.Attributes["launchBoxId"]?.Value;
+        int? id = null;
+        if (idText != null)
+        {
+            if (int.TryParse(idText, out int parsed)) id = parsed;
+            else _logger.Error($"Ignoring launchBoxId=\"{idText}\" on a <Game> in {path}: not a number");
+        }
+        string? romName = node.Attributes["romName"]?.Value;
+        if (string.IsNullOrEmpty(romName)) romName = null;
+        if (id == null && romName == null)
+        {
+            _logger.Error($"Skipping <Game> in {path}: it needs a launchBoxId or a romName to be found by");
+            return null;
+        }
+
+        var game = new GameMappingConfig { LaunchBoxId = id, RomName = romName, InheritFrom = node.Attributes["inheritFrom"]?.Value };
+        if (TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d))
+            game.AnalogToDigital = a2d;
+
+        foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
+        {
+            switch (child.Name)
+            {
+                case "Mapping":
+                    if (ParseMappingEntry(child, path) is MappingEntry entry) game.Mappings.Add(entry);
+                    break;
+                case "Unmap":
+                    string? name = child.Attributes["name"]?.Value;
+                    if (string.IsNullOrEmpty(name))
+                        _logger.Error($"Skipping <Unmap> in {path}: missing 'name' attribute");
+                    else
+                        game.Unmaps.Add(name);
+                    break;
+                default:
+                    _logger.Error($"Invalid element <{child.Name}> in <Game {Describe(game)}> in {path}");
+                    break;
+            }
+        }
+
+        _logger.Debug($"Game {Describe(game)}: inheritFrom={game.InheritFrom ?? "none"}, {game.Mappings.Count} mappings, {game.Unmaps.Count} unmaps");
+        return game;
     }
 
     private static string ControllersPath(string platform) =>
@@ -351,7 +416,9 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         return new ControlEntry { Name = name, Mappings = [.. members] };
     }
 
-    private sealed record ParsedFile(string Path, List<ParsedController> Controllers, string? InheritFrom);
+    private sealed record ParsedFile(string Path, List<ParsedController> Controllers, List<GameMappingConfig> Games, string? InheritFrom);
+
+    private sealed record ParsedPlatform(List<ParsedController> Controllers, List<GameMappingConfig> Games);
 
     private sealed record ParsedController(
         string Name,

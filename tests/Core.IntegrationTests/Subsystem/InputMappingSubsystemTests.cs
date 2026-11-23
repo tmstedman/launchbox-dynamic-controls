@@ -11,7 +11,7 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 /// <see cref="PlatformDefaultMappingProvider"/> (provider chain) → <see cref="InputMappingProviders"/>
 /// (priority + filtering) → <see cref="InputMappingResolver"/> (forward/reverse build +
 /// <see cref="AnalogToDigitalMirror"/>) → <see cref="InputMappingService"/>
-/// (orchestration + natural-map splicing). Each test stages Controllers.xml and per-game XMLs in
+/// (orchestration + natural-map splicing). Each test stages Controllers.xml and game entries in
 /// an in-memory <see cref="MockFileSystem"/> and asserts on the fully-resolved
 /// <see cref="ResolvedMapping"/>. Stub <see cref="IInputMappingProvider"/>
 /// instances are injected when a test needs to exercise the middle-priority position or a remap
@@ -44,7 +44,7 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Load_NoPlatformAndNoGame_ReturnsEmptyMapping()
     {
-        // No Controllers.xml, no per-game XML, no middle provider. Every provider declines;
+        // No Controllers.xml, no game entry, no middle provider. Every provider declines;
         // the service falls back to an empty config rather than throwing.
         ResolvedMapping mapping = Build().Load(Game(platform: Platform));
 
@@ -65,9 +65,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonStart" />
-            </GameMapping>
+            </Game>
             """);
         var middle = new StubMappingProvider(MappingConfig(mappings: [("A", "ButtonY")]));
 
@@ -129,9 +129,9 @@ public class InputMappingSubsystemTests
             """);
         // Per-game overrides A; B and Start should survive from the baseline.
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -145,7 +145,7 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Load_PerGameUnmap_DropsBaselineEntryWithoutReplacement()
     {
-        // <Unmap name="A" /> in the per-game XML removes A from the baseline mapping entirely —
+        // <Unmap name="A" /> in the game entry removes A from the baseline mapping entirely —
         // parity with RetroArch's -1 sentinel. Other Names survive.
         _dc.WritePlatform(Platform, """
             <Controllers>
@@ -157,9 +157,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Unmap name="A" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -177,7 +177,7 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Load_PerGameOmitsAnalogToDigital_InheritsFromBaselineController_AndMirrorApplied()
     {
-        // Baseline controller declares analogToDigital="left"; per-game XML inherits it,
+        // Baseline controller declares analogToDigital="left"; game entry inherits it,
         // and the resolver's AnalogToDigitalMirror appends AxisLeftStickUp to the same
         // platform button that drives ButtonDpadUp.
         _dc.WritePlatform(Platform, """
@@ -188,9 +188,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonA" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -213,9 +213,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping analogToDigital="left">
+            <Game analogToDigital="left">
               <Mapping name="A" input="ButtonA" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -243,9 +243,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping controller="6-Button">
+            <Game inheritFrom="6-Button">
               <Mapping name="A" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -280,7 +280,7 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "Fatal Fury", """
-            <GameMapping controller="6-Button" />
+            <Game inheritFrom="6-Button" />
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "Fatal Fury"));
@@ -316,7 +316,7 @@ public class InputMappingSubsystemTests
             """);
         _dc.WritePlatform(Platform, """<Controllers inheritFrom="_NEC Pad" />""");
         _dc.WriteGameMapping(Platform, "Fatal Fury", """
-            <GameMapping controller="6-Button" />
+            <Game inheritFrom="6-Button" />
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "Fatal Fury"));
@@ -369,9 +369,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping controller="DoesNotExist">
+            <Game inheritFrom="DoesNotExist">
               <Mapping name="A" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -398,7 +398,7 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping controller="DoesNotExist" />
+            <Game inheritFrom="DoesNotExist" />
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -509,7 +509,7 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Scenario_PerGameSelectsAlternateController_WithA2D_ReplacesTheProviderBehindIt()
     {
-        // Per-game XML selects the non-default "6-Button" controller (which declares A2D=Right)
+        // Game entry selects the non-default "6-Button" controller (which declares A2D=Right)
         // and adds an override mapping, with an emulator-style remap provider behind it in the
         // chain. Verify:
         //   (1) Controller selection threaded through to ResolvedMapping.Controller
@@ -529,9 +529,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping controller="6-Button">
+            <Game inheritFrom="6-Button">
               <Mapping name="A" input="ButtonStart" />
-            </GameMapping>
+            </Game>
             """);
         // Behind the XML: swap Y onto ButtonZ (e.g. simulating a MAME-style cfg overlay).
         bool consulted = false;
@@ -652,11 +652,11 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Scenario_PerGameXmlMovesJoystickDirections_TheControlFollowsThem()
     {
-        // A per-game file moves every direction onto the stick and says nothing about JOYSTICK.
+        // A game entry moves every direction onto the stick and says nothing about JOYSTICK.
         // JOYSTICK follows them, exactly as it would follow an emulator cfg.
         //
         // The control describes the hardware: this button IS those buttons, a fact about the
-        // cabinet rather than a mapping choice. A per-game file remaps where a button goes; it
+        // cabinet rather than a mapping choice. A game entry remaps where a button goes; it
         // cannot change what the stick is made of. So there is nothing here for an override to
         // override, and the control simply re-resolves against wherever its members now point.
         //
@@ -677,12 +677,12 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping("Arcade", "handmade", """
-            <GameMapping>
+            <Game>
               <Mapping name="JOYSTICK_UP" input="AxisLeftStickUp" />
               <Mapping name="JOYSTICK_DOWN" input="AxisLeftStickDown" />
               <Mapping name="JOYSTICK_LEFT" input="AxisLeftStickLeft" />
               <Mapping name="JOYSTICK_RIGHT" input="AxisLeftStickRight" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(platform: "Arcade", romName: "handmade"));
@@ -848,9 +848,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonStart" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
@@ -864,7 +864,7 @@ public class InputMappingSubsystemTests
     [Fact]
     public void Scenario_PerGameXmlPresent_ReplacesTheEmulatorsRemapAndSupplyOfTheMapping()
     {
-        // The 3on3dunk shape: an authored per-game file rotates the face buttons, and the
+        // The 3on3dunk shape: an authored game entry rotates the face buttons, and the
         // emulator's cfg would also OR the joystick onto the axes. The file stands in for what an
         // emulator provider does for an emulator the plugin cannot read, so where one exists it is
         // the whole mapping: the emulator's remap does not stack on it. (Stacking would double-
@@ -883,10 +883,10 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping("Arcade", "3on3dunk", """
-            <GameMapping>
+            <Game>
               <Mapping name="BUTTON1" input="ButtonX" />
               <Mapping name="BUTTON2" input="ButtonY" />
-            </GameMapping>
+            </Game>
             """);
         bool consulted = false;
         var emulator = new StubRemapProvider((_, baseline) =>
@@ -936,9 +936,9 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping("Arcade", "sf2", """
-            <GameMapping>
+            <Game>
               <Mapping name="BUTTON1" input="ButtonX" />
-            </GameMapping>
+            </Game>
             """);
         var emulator = new StubRemapProvider((_, baseline) => MappingConfig(
             controller: baseline.Controller,
@@ -1051,9 +1051,9 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_UserGameMappingFilePresent_WinsOverDefaultsFile()
+    public void Load_UserGameEntry_ReplacesTheShippedEntry()
     {
-        // Defaults per-game mapping has A→ButtonA; User per-game mapping remaps A→ButtonB.
+        // Defaults game entry has A→ButtonA; User game entry remaps A→ButtonB.
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Pad" default="true">
@@ -1062,19 +1062,19 @@ public class InputMappingSubsystemTests
             </Controllers>
             """);
         _dc.WriteGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonA" />
-            </GameMapping>
+            </Game>
             """);
         _dc.WriteUserGameMapping(Platform, "OutRun", """
-            <GameMapping>
+            <Game>
               <Mapping name="A" input="ButtonB" />
-            </GameMapping>
+            </Game>
             """);
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
 
-        // The User per-game mapping wins — ButtonB, not the Defaults per-game ButtonA
+        // The User entry wins — ButtonB, not the Defaults entry's ButtonA
         mapping.ButtonToInput["A"].ShouldBe(["ButtonB"]);
     }
 

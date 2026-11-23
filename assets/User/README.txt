@@ -16,9 +16,9 @@ holds many independent settings:
                                   one game doesn't discard the shipped labels
                                   for every other game.
   Platforms/{Platform}/Controllers.xml
-                                  Merged controller by controller — a
-                                  <Controller> here replaces the shipped one
-                                  of the same name, and the rest are kept.
+                                  Merged entry by entry — a <Controller> or
+                                  <Game> here replaces the shipped one of the
+                                  same name or game, and the rest are kept.
 
 An update refreshes these README.txt files, so don't keep notes of your own in
 them. Nothing else under User/ is ever touched.
@@ -30,8 +30,8 @@ Files
 
 Subdirectories
 --------------
-  Platforms/         Per-platform Controllers.xml, Labels.xml and
-                     ControllerOverrides/{Game}.xml — see Platforms/README.txt.
+  Platforms/         Per-platform Controllers.xml and Labels.xml — see
+                     Platforms/README.txt.
   Static/            Static overlay images that bypass the rendering pipeline entirely.
   Emulators/         Override MAME JOYCODE lookup or RetroArch core variant declarations.
 

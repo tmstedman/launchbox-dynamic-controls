@@ -23,7 +23,7 @@ public static class SweepTargets
 {
     /// <summary>
     /// ROM name standing in for "no game at all". Nothing can match it — no
-    /// <c>ControllerOverrides</c> file, no <c>Labels.xml</c> entry — so what resolves is the
+    /// <c>Controllers.xml</c> or <c>Labels.xml</c> entry — so what resolves is the
     /// platform's own default. A constant rather than a literal in each tool because the two
     /// outputs only line up while both spell it identically.
     /// </summary>

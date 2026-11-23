@@ -28,7 +28,7 @@
     <Input name="C-Left">Strafe Left</Input>
     <Input name="C-Right">Strafe Right</Input>
   </Game>
-  <!-- CDirectionPairTest with C-Left and C-Right swapped in ControllerOverrides: each now drives
+  <!-- CDirectionPairTest with C-Left and C-Right swapped by its Controllers.xml entry: each drives
        the other's direction, so the same two buttons stand behind the horizontal pair. -->
   <Game romName="CSwapPairTest">
     <Input name="C-Up">Look Up</Input>
