@@ -23,11 +23,16 @@ internal static class MappingOverlay
     /// <summary>
     /// Controls overlay by their own name too, but a later declaration replaces an earlier one
     /// outright rather than adding members to it, so what a name stands for is always stated in
-    /// one place.
+    /// one place. A control is a platform button like any other, so an &lt;Unmap&gt; naming one
+    /// drops it as it would a mapping.
     /// </summary>
-    internal static List<ControlEntry> ApplyControls(List<ControlEntry> baseline, List<ControlEntry> overlay)
+    internal static List<ControlEntry> ApplyControls(
+        List<ControlEntry> baseline,
+        List<ControlEntry> overlay,
+        List<string>? removes = null)
     {
-        var result = new List<ControlEntry>(baseline);
+        var removed = new HashSet<string>(removes ?? []);
+        var result = baseline.Where(c => !removed.Contains(c.Name)).ToList();
         foreach (ControlEntry control in overlay)
         {
             int at = result.FindIndex(c => string.Equals(c.Name, control.Name, StringComparison.Ordinal));

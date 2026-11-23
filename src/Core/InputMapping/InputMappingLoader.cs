@@ -348,7 +348,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         // Controls inherit by the same rule, keyed on their own name.
         List<ControlEntry> controls = [];
         for (int i = chain.Count - 1; i >= 0; i--)
-            controls = MappingOverlay.ApplyControls(controls, chain[i].OwnControls);
+            controls = MappingOverlay.ApplyControls(controls, chain[i].OwnControls, chain[i].OwnUnmaps);
 
         AnalogToDigitalMode? a2d = chain.FirstOrDefault(c => c.StatesAnalogToDigital)?.AnalogToDigital;
         return (mappings, controls, a2d);

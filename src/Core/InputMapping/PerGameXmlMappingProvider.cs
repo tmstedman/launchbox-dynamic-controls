@@ -59,7 +59,8 @@ public class PerGameXmlMappingProvider(ILogger logger) : IInputMappingProvider
 
         config.Controller = baseline?.Name;
         if (!entry.StatesAnalogToDigital) config.AnalogToDigital = baseline?.AnalogToDigital;
-        if (entry.Controls.Count > 0) config.Controls = MappingOverlay.ApplyControls(baseline?.Controls ?? [], entry.Controls);
+        if (entry.Controls.Count > 0 || entry.Unmaps.Count > 0)
+            config.Controls = MappingOverlay.ApplyControls(baseline?.Controls ?? [], entry.Controls, entry.Unmaps);
 
         // With no controller to read against there is nothing for the entry to remap.
         if (baseline == null) return ProvidedMapping.Unchanged(config);

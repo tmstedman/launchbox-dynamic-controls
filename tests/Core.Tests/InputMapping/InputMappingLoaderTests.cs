@@ -750,6 +750,31 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_InheritFrom_UnmapDropsABaseControl()
+    {
+        // given a base with a control, and a descendant that doesn't have it
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Base'>
+                <Control name='Dpad-Any' mappings='Dpad-Up Dpad-Down' />
+                <Mapping name='Dpad-Up' input='ButtonDpadUp' />
+                <Mapping name='Dpad-Down' input='ButtonDpadDown' />
+              </Controller>
+              <Controller name='Child' inheritFrom='Base'>
+                <Unmap name='Dpad-Any' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the control is gone from the descendant, as an unmapped button would be
+        result.Controllers[1].Controls.ShouldBeEmpty();
+        result.Controllers[1].Mappings.Select(m => m.Name).ShouldBe(["Dpad-Up", "Dpad-Down"]);
+    }
+
+    [Fact]
     public void LoadPlatformMapping_InheritFrom_IsTransitive()
     {
         // given A inherits from B which inherits from C — A merges the whole chain root-first,
