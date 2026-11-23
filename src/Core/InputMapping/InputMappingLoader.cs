@@ -246,6 +246,9 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
                 case "Unmap":
                     if (ParseUnmapName(child, path) is string unmapped) game.Unmaps.Add(unmapped);
                     break;
+                case "Control":
+                    if (ParseControlEntry(child, path) is ControlEntry control) game.Controls.Add(control);
+                    break;
                 default:
                     _logger.Error($"Invalid element <{child.Name}> in <Game {Describe(game)}> in {path}");
                     break;
@@ -331,18 +334,10 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         for (int i = chain.Count - 1; i >= 0; i--)
             mappings = MappingOverlay.Apply(mappings, chain[i].OwnMappings, chain[i].OwnUnmaps);
 
-        // Controls inherit by the same rule, keyed on their own name: a descendant redeclaring
-        // one replaces it outright rather than adding members to it, so what a name stands for
-        // is always stated in one place.
-        var controls = new List<ControlEntry>();
+        // Controls inherit by the same rule, keyed on their own name.
+        List<ControlEntry> controls = [];
         for (int i = chain.Count - 1; i >= 0; i--)
-        {
-            foreach (ControlEntry a in chain[i].OwnControls)
-            {
-                int at = controls.FindIndex(x => string.Equals(x.Name, a.Name, StringComparison.Ordinal));
-                if (at >= 0) controls[at] = a; else controls.Add(a);
-            }
-        }
+            controls = MappingOverlay.ApplyControls(controls, chain[i].OwnControls);
 
         AnalogToDigitalMode? a2d = chain.FirstOrDefault(c => c.StatesAnalogToDigital)?.AnalogToDigital;
         return (mappings, controls, a2d);

@@ -217,8 +217,9 @@ An entry is written like a <Controller>: inheritFrom names the controller
 variant it starts from, and its <Mapping>s are laid over that variant's
 baseline. Buttons the entry doesn't mention are preserved unchanged. A button
 the entry remaps is drawn like one an emulator has swapped, with the picture
-of the physical button. A <Game> here replaces any shipped entry for the same
-game whole.
+of the physical button. An entry can declare <Control>s too, which replace
+its variant's controls of the same name and add new ones. A <Game> here
+replaces any shipped entry for the same game whole.
 
 A game with an entry is read from the entry alone: RetroArch's and MAME's
 configuration is not consulted for it (with Debug on, Logs\debug.log says so).
