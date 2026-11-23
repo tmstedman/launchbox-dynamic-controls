@@ -21,8 +21,8 @@ public record InputMappingConfig
     public List<string> Unmaps { get; set; } = [];
 
     /// <summary>
-    /// Which stick the Dpad mirrors onto. Null when the game's entry states none, allowing it to
-    /// inherit the controller value.
+    /// Which stick the Dpad mirrors onto; null means no mirroring. A provider fills it from the
+    /// controller when the game's entry doesn't state one.
     /// </summary>
     public AnalogToDigitalMode? AnalogToDigital { get; set; }
 

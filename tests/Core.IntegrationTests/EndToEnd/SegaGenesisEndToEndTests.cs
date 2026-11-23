@@ -15,7 +15,7 @@ public class SegaGenesisEndToEndTests
     private readonly ControllerOverlayService _service = ControllerOverlayFactory.Create(FixturesRoot);
 
     /// <summary>
-    /// 3-Button controller (per-game XML) with game-specific labels — the game-specific rendering
+    /// 3-Button controller (the game's Controllers.xml entry) with game-specific labels — the game-specific rendering
     /// mode where showIf="auto" resolves to HasLabel, so unlabeled and unmapped inputs render dim.
     /// </summary>
     [Fact]
@@ -570,7 +570,7 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
-    /// A per-game XML swapping B with Dpad-Left draws the swap the way an emulator's would: the
+    /// A game entry swapping B with Dpad-Left draws the swap the way an emulator's would: the
     /// template's A position is pressed with Dpad-Left, which has no Genesis picture of its own, so
     /// it shows the left arrow rather than the A glyph. The same file's <c>&lt;Unmap name="C"/&gt;</c>
     /// leaves the B position with no button at all, so it draws its generic glyph, not C's picture.
