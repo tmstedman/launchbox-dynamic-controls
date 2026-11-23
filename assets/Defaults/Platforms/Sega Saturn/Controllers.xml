@@ -17,7 +17,7 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="3D Control Pad" inheritFrom="Control Pad">
+    <Controller name="3D Control Pad" inheritFrom="Control Pad" analogToDigital="none">
         <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
         <Mapping name="L-Down" input="AxisLeftStickDown" />

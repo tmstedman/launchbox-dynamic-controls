@@ -84,6 +84,17 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_GameAnalogToDigitalNone_IsStatedWithNoMode()
+    {
+        // given an entry switching the mirror off
+        var result = LoadGame("<Game romName='OutRun' analogToDigital='none' />")!;
+
+        // then it states a value, which is no mirroring, rather than inheriting the controller's
+        result.StatesAnalogToDigital.ShouldBeTrue();
+        result.AnalogToDigital.ShouldBeNull();
+    }
+
+    [Fact]
     public void LoadPlatformMapping_GameInvalidAnalogToDigital_LogsErrorAndLeavesUnset()
     {
         // given an entry with an unrecognized analogToDigital value
@@ -644,6 +655,82 @@ public class InputMappingLoaderTests
         // then the controller's mappings are unchanged — no base prepended
         result.Controllers[0].Mappings.Select(m => (m.Name, m.Input))
             .ShouldBe([("A", "ButtonA"), ("B", "ButtonB")]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_InheritFrom_InheritsAnalogToDigitalThroughTheChain()
+    {
+        // given A inherits from B which inherits from C, and only C sets analogToDigital
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='C' analogToDigital='left' />
+              <Controller name='B' inheritFrom='C' />
+              <Controller name='A' inheritFrom='B' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then every level mirrors as C does, since none of them says otherwise
+        result.Controllers.Select(c => (c.Name, c.AnalogToDigital)).ShouldBe(
+        [
+            ("C", AnalogToDigitalMode.Left),
+            ("B", AnalogToDigitalMode.Left),
+            ("A", AnalogToDigitalMode.Left),
+        ]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_InheritFrom_OwnAnalogToDigitalWins_AndNoneSwitchesItOff()
+    {
+        // given a base mirroring left, one descendant mirroring right, and one with a stick of
+        // its own saying none
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Saturn", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Control Pad' analogToDigital='left' />
+              <Controller name='Right' inheritFrom='Control Pad' analogToDigital='right' />
+              <Controller name='3D Control Pad' inheritFrom='Control Pad' analogToDigital='None' />
+              <Controller name='Below 3D' inheritFrom='3D Control Pad' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Saturn")!;
+
+        // then each descendant's own statement wins, and none is inherited like any other value
+        result.Controllers.Select(c => (c.Name, c.AnalogToDigital)).ShouldBe(
+        [
+            ("Control Pad", AnalogToDigitalMode.Left),
+            ("Right", AnalogToDigitalMode.Right),
+            ("3D Control Pad", null),
+            ("Below 3D", null),
+        ]);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_InheritFrom_UnmapDropsABaseButton()
+    {
+        // given a base with A, B and C, and a descendant without B
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Base'>
+                <Mapping name='A' input='ButtonA' />
+                <Mapping name='B' input='ButtonB' />
+                <Mapping name='C' input='ButtonX' />
+              </Controller>
+              <Controller name='Fewer' inheritFrom='Base'>
+                <Unmap name='B' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the descendant has the base's buttons but B
+        result.Controllers[1].Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA"), ("C", "ButtonX")]);
     }
 
     [Fact]

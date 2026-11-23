@@ -51,12 +51,14 @@ public static class InputMappingFixtures
         string? inheritFrom = null,
         AnalogToDigitalMode? analogToDigital = null,
         (string Name, string Input)[]? mappings = null,
-        string[]? unmaps = null) => new()
+        string[]? unmaps = null,
+        bool statesAnalogToDigital = false) => new()
         {
             RomName = romName,
             LaunchBoxId = launchBoxId,
             InheritFrom = inheritFrom,
             AnalogToDigital = analogToDigital,
+            StatesAnalogToDigital = statesAnalogToDigital || analogToDigital != null,
             Mappings = [.. (mappings ?? []).Select(m => new MappingEntry { Name = m.Name, Input = m.Input })],
             Unmaps = [.. unmaps ?? []],
         };

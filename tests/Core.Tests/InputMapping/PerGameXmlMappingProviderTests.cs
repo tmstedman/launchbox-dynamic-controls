@@ -381,6 +381,24 @@ public class PerGameXmlMappingProviderTests
         result.AnalogToDigital.ShouldBe(Left);
     }
 
+    [Fact]
+    public void Load_AnalogToDigitalNoneInEntry_SwitchesOffTheControllersMirror()
+    {
+        // given an entry saying analogToDigital="none" over a controller that mirrors right
+        var game = Game();
+        GameMappingConfig entry = GameEntry(inheritFrom: "Pad", statesAnalogToDigital: true);
+        var platform = PlatformConfig(
+            ControllerDef(name: "Pad", isDefault: true, analogToDigital: Right)).WithGames(entry);
+
+        // when the provider loads
+        ProvidedMapping? result = _underTest.Load(game, platform);
+
+        // then neither the mapping nor its natural state mirrors
+        result.ShouldNotBeNull();
+        result.Current.AnalogToDigital.ShouldBeNull();
+        result.Natural.AnalogToDigital.ShouldBeNull();
+    }
+
     // ---- natural vs current ----
 
     [Fact]
