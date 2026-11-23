@@ -12,11 +12,11 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="3-Button" inheritFrom="2-Button" analogToDigital="left">
+    <Controller name="3-Button" inheritFrom="2-Button">
         <Mapping name="III" input="ButtonX" />
     </Controller>
 
-    <Controller name="6-Button" inheritFrom="3-Button" analogToDigital="left" default="true">
+    <Controller name="6-Button" inheritFrom="3-Button" default="true">
         <Mapping name="IV" input="ButtonY" />
         <Mapping name="V" input="ButtonRightShoulder" />
         <Mapping name="VI" input="AxisTriggerRight" />

@@ -94,7 +94,9 @@ When a platform has several controllers that share a common button set, a varian
 repeating them. Inheritance is transitive — the base may itself `inheritFrom` a third controller —
 so you can build up a chain (e.g. NEC PC Engine's `6-Button` inherits from `3-Button`, which
 inherits from `2-Button`). A variant's own mappings override any inherited entry with the same
-`name`. Only mappings are inherited; `analogToDigital` is read from each controller's own attribute.
+`name`, and an `<Unmap name="…"/>` drops one it doesn't have. `analogToDigital` is inherited
+too, from the nearest controller in the chain that sets it; a variant with a stick of its own
+switches off its base's mirror with `analogToDigital="none"`, as Saturn's `3D Control Pad` does.
 
 ```xml
 <!-- User\Platforms\NEC PC Engine\Controllers.xml -->

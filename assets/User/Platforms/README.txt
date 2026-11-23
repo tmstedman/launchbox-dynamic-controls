@@ -49,9 +49,11 @@ becomes the platform's default. The shipped file's inheritFrom on the root
 
       <!-- inheritFrom prepends another variant's mappings before this one's, so
            a variant that only adds buttons doesn't restate the shared ones. A
-           mapping here overrides an inherited one with the same name. -->
+           mapping here overrides an inherited one with the same name, and
+           <Unmap name="..."/> drops one. analogToDigital is inherited too;
+           analogToDigital="none" switches an inherited mirror off. -->
 
-      <Controller name="6-Button" analogToDigital="left" inheritFrom="3-Button">
+      <Controller name="6-Button" inheritFrom="3-Button">
           <Mapping name="X" input="ButtonLeftShoulder" />
           <Mapping name="Y" input="ButtonY" />
           <Mapping name="Z" input="ButtonRightShoulder" />
@@ -113,9 +115,11 @@ Attributes:
   Control/@name       Platform button name being declared — usable in Labels.xml
                     like any other.
   Control/@mappings   Space-separated platform button names it stands for.
-  Controller/@analogToDigital="left"|"right"  Mirrors Dpad direction buttons
-                    onto the named stick's directions. Not inherited — read
-                    from each variant's own attribute.
+  Controller/@analogToDigital="left"|"right"|"none"  Mirrors Dpad direction
+                    buttons onto the named stick's directions. Inherited from
+                    the variant's inheritFrom chain when absent; "none"
+                    switches an inherited mirror off.
+  Unmap/@name       Inherited platform button this variant doesn't have.
   Controllers/@inheritFrom    Platform name of another platform folder whose
                     variants are pulled in and merged under this file's own.
 
@@ -258,8 +262,8 @@ Attributes:
                             defaults to the platform's default variant). Must
                             match a <Controller name="..."> in that platform's
                             Controllers.xml.
-  Game/@analogToDigital     As on <Controller>; inherited from the variant
-                            when absent.
+  Game/@analogToDigital     As on <Controller>: inherited from the variant
+                            when absent, "none" for no mirroring.
   Mapping/@name             Platform button name to override.
   Mapping/@input            Generic input to assign to that button.
   Unmap/@name               Platform button name to remove from the mapping.

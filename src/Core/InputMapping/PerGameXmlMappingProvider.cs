@@ -17,7 +17,8 @@ namespace DynamicControls.InputMapping;
 /// controller choice and swaps are not consulted for a game that has an entry — the entry stands
 /// in for what the emulator providers do, for an emulator the plugin cannot read.</para>
 ///
-/// AnalogToDigital is inherited from the controller if the entry doesn't set it. An entry that
+/// AnalogToDigital is inherited from the controller if the entry doesn't set it; <c>none</c> sets
+/// it to no mirroring. An entry that
 /// only names a controller (no &lt;Mapping&gt; entries) effectively means "use this controller
 /// as-is, no overrides."
 ///
@@ -57,7 +58,7 @@ public class PerGameXmlMappingProvider(ILogger logger) : IInputMappingProvider
         baseline ??= platform?.Resolve(null);
 
         config.Controller = baseline?.Name;
-        config.AnalogToDigital ??= baseline?.AnalogToDigital;
+        if (!entry.StatesAnalogToDigital) config.AnalogToDigital = baseline?.AnalogToDigital;
 
         // With no controller to read against there is nothing for the entry to remap.
         if (baseline == null) return ProvidedMapping.Unchanged(config);

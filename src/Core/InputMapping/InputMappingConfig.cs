@@ -112,8 +112,13 @@ public record GameMappingConfig
     /// <summary>The controller this game remaps; null means the platform default.</summary>
     public string? InheritFrom { get; set; }
 
-    /// <summary>Which stick the Dpad mirrors onto; null inherits the controller's.</summary>
+    /// <summary>Which stick the Dpad mirrors onto, when <see cref="StatesAnalogToDigital"/>;
+    /// null there is <c>analogToDigital="none"</c>.</summary>
     public AnalogToDigitalMode? AnalogToDigital { get; set; }
+
+    /// <summary>The entry sets analogToDigital itself, <c>none</c> included; false inherits the
+    /// controller's.</summary>
+    public bool StatesAnalogToDigital { get; set; }
 
     /// <summary>Buttons this game binds differently, overlaid on the controller's by name.</summary>
     public List<MappingEntry> Mappings { get; set; } = [];
@@ -140,7 +145,8 @@ public record ControllerConfig
     /// is the implicit default.</summary>
     public bool IsDefault { get; set; }
 
-    /// <summary>Controller-level `analogToDigital` value. Null means no mirroring.</summary>
+    /// <summary>`analogToDigital` as resolved along inheritFrom: the nearest controller's that
+    /// states one. Null means no mirroring.</summary>
     public AnalogToDigitalMode? AnalogToDigital { get; set; }
 
     /// <summary>Platform-button-to-generic-input mappings for this controller, fully resolved

@@ -60,15 +60,14 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         var byName = parsed.ToDictionary(pc => pc.Name);
         foreach (ParsedController pc in parsed)
         {
+            (List<MappingEntry> inheritedMappings, List<ControlEntry> inheritedControls, AnalogToDigitalMode? a2d) =
+                ResolveInheritedMappings(pc, byName, path);
             var controller = new ControllerConfig
             {
                 Name = pc.Name,
                 IsDefault = pc.IsDefault,
-                AnalogToDigital = pc.AnalogToDigital,
+                AnalogToDigital = a2d,
             };
-
-            (List<MappingEntry> inheritedMappings, List<ControlEntry> inheritedControls) =
-                ResolveInheritedMappings(pc, byName, path);
             controller.Mappings.AddRange(inheritedMappings);
             controller.Controls.AddRange(inheritedControls);
             result.Controllers.Add(controller);
@@ -232,7 +231,10 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
 
         var game = new GameMappingConfig { LaunchBoxId = id, RomName = romName, InheritFrom = node.Attributes["inheritFrom"]?.Value };
         if (TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d))
+        {
             game.AnalogToDigital = a2d;
+            game.StatesAnalogToDigital = true;
+        }
 
         foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
         {
@@ -242,11 +244,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
                     if (ParseMappingEntry(child, path) is MappingEntry entry) game.Mappings.Add(entry);
                     break;
                 case "Unmap":
-                    string? name = child.Attributes["name"]?.Value;
-                    if (string.IsNullOrEmpty(name))
-                        _logger.Error($"Skipping <Unmap> in {path}: missing 'name' attribute");
-                    else
-                        game.Unmaps.Add(name);
+                    if (ParseUnmapName(child, path) is string unmapped) game.Unmaps.Add(unmapped);
                     break;
                 default:
                     _logger.Error($"Invalid element <{child.Name}> in <Game {Describe(game)}> in {path}");
@@ -297,11 +295,13 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// <summary>
     /// Resolves a controller's transitive inheritFrom chain into a single mapping list. Each level
     /// is applied as an overlay onto the accumulated result from the root down: a child entry
-    /// whose Name matches a parent entry replaces it; names not mentioned in the child are
-    /// inherited unchanged. A missing base controller or an inheritFrom cycle is logged and stops
-    /// the walk, so resolution never loops or throws.
+    /// whose Name matches a parent entry replaces it, a child's &lt;Unmap&gt; drops it, and names
+    /// the child doesn't mention are inherited unchanged. analogToDigital is the nearest level's
+    /// that states one, <c>none</c> included, so a controller with a stick of its own can switch
+    /// off the mirror its base has. A missing base controller or an inheritFrom cycle is logged
+    /// and stops the walk, so resolution never loops or throws.
     /// </summary>
-    private (List<MappingEntry> Mappings, List<ControlEntry> Controls) ResolveInheritedMappings(
+    private (List<MappingEntry> Mappings, List<ControlEntry> Controls, AnalogToDigitalMode? AnalogToDigital) ResolveInheritedMappings(
         ParsedController pc, Dictionary<string, ParsedController> byName, string path)
     {
         // Walk from pc up towards the root, collecting the chain leaf-first.
@@ -327,9 +327,9 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         }
 
         // chain is leaf-first; fold root-first so each level's entries override the previous.
-        List<MappingEntry> mappings = chain[^1].OwnMappings;
-        for (int i = chain.Count - 2; i >= 0; i--)
-            mappings = MappingOverlay.Apply(mappings, chain[i].OwnMappings);
+        List<MappingEntry> mappings = [];
+        for (int i = chain.Count - 1; i >= 0; i--)
+            mappings = MappingOverlay.Apply(mappings, chain[i].OwnMappings, chain[i].OwnUnmaps);
 
         // Controls inherit by the same rule, keyed on their own name: a descendant redeclaring
         // one replaces it outright rather than adding members to it, so what a name stands for
@@ -344,7 +344,8 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             }
         }
 
-        return (mappings, controls);
+        AnalogToDigitalMode? a2d = chain.FirstOrDefault(c => c.StatesAnalogToDigital)?.AnalogToDigital;
+        return (mappings, controls, a2d);
     }
 
     private ParsedController? ParseControllerRaw(XmlElement node, string path)
@@ -361,11 +362,12 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         if (defaultAttr != null && bool.TryParse(defaultAttr, out bool parsed))
             isDefault = parsed;
 
-        TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
+        bool statesA2d = TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
 
         string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
 
         var ownMappings = new List<MappingEntry>();
+        var ownUnmaps = new List<string>();
         var ownControls = new List<ControlEntry>();
         foreach (XmlElement child in node.ChildNodes.OfType<XmlElement>())
         {
@@ -374,6 +376,9 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
                 case "Mapping":
                     MappingEntry? entry = ParseMappingEntry(child, path);
                     if (entry != null) ownMappings.Add(entry);
+                    break;
+                case "Unmap":
+                    if (ParseUnmapName(child, path) is string unmapped) ownUnmaps.Add(unmapped);
                     break;
                 case "Control":
                     ControlEntry? control = ParseControlEntry(child, path);
@@ -387,7 +392,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             }
         }
 
-        return new ParsedController(name, isDefault, a2d, inheritFrom, ownMappings, ownControls);
+        return new ParsedController(name, isDefault, statesA2d, a2d, inheritFrom, ownMappings, ownUnmaps, ownControls);
     }
 
     /// <summary>
@@ -420,12 +425,16 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
 
     private sealed record ParsedPlatform(List<ParsedController> Controllers, List<GameMappingConfig> Games);
 
+    /// <param name="StatesAnalogToDigital">The controller sets analogToDigital itself, <c>none</c>
+    /// included, rather than inheriting its base's.</param>
     private sealed record ParsedController(
         string Name,
         bool IsDefault,
+        bool StatesAnalogToDigital,
         AnalogToDigitalMode? AnalogToDigital,
         string? InheritFrom,
         List<MappingEntry> OwnMappings,
+        List<string> OwnUnmaps,
         List<ControlEntry> OwnControls);
 
     private MappingEntry? ParseMappingEntry(XmlElement node, string path)
@@ -440,6 +449,19 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         return new MappingEntry { Name = name, Input = input };
     }
 
+    private string? ParseUnmapName(XmlElement node, string path)
+    {
+        string? name = node.Attributes["name"]?.Value;
+        if (!string.IsNullOrEmpty(name)) return name;
+        _logger.Error($"Skipping <Unmap> in {path}: missing 'name' attribute");
+        return null;
+    }
+
+    /// <summary>
+    /// Reads an <c>analogToDigital</c> attribute. Returns true when the element states one —
+    /// <c>none</c> included, with a null <paramref name="result"/> — and false when it is absent
+    /// or invalid, so the value is inherited.
+    /// </summary>
     private bool TryParseAnalogToDigital(XmlElement node, string path, out AnalogToDigitalMode? result)
     {
         result = null;
@@ -449,10 +471,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         {
             case "left": result = AnalogToDigitalMode.Left; return true;
             case "right": result = AnalogToDigitalMode.Right; return true;
+            case "none": return true;
             default:
                 break;
         }
-        _logger.Error($"Invalid analogToDigital value '{attr}' in {path} (expected 'left' or 'right')");
+        _logger.Error($"Invalid analogToDigital value '{attr}' in {path} (expected 'left', 'right' or 'none')");
         return false;
     }
 }
