@@ -56,8 +56,8 @@ public class WholeInputCollapseSubsystemTests
         // leave," never "does the direction that stayed still agree with the others' text." That
         // question belongs to the labels layer's own rank comparison and final collapse.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -119,8 +119,8 @@ public class WholeInputCollapseSubsystemTests
         // The ordinary case, through the same two real services, as a baseline against the swap
         // scenario above -- confirms the collapse fires when nothing has disturbed any direction.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />

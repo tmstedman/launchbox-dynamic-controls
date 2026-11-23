@@ -41,8 +41,8 @@ public class InputMappingLoaderTests
     private GameMappingConfig? LoadGame(string gameXml, GameInfo? game = null)
     {
         StubXml(GenesisControllers, $"""
-            <Controllers>
-              <Controller name='Pad' default='true' />
+            <Controllers default='Pad'>
+              <Controller name='Pad' />
               {gameXml}
             </Controllers>
             """);
@@ -303,8 +303,8 @@ public class InputMappingLoaderTests
         // given a base platform with a game entry, and a platform pointing at it
         StubXml(GenesisControllers, """<Controllers inheritFrom="_SharedBase" />""");
         StubXml(Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml"), """
-            <Controllers>
-              <Controller name='Pad' default='true' />
+            <Controllers default='Pad'>
+              <Controller name='Pad' />
               <Game romName='OutRun' inheritFrom='Pad' />
             </Controllers>
             """);
@@ -372,11 +372,11 @@ public class InputMappingLoaderTests
         // given a Controllers.xml with two controllers — one default with analogToDigital, one not
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='Pad-6btn'>
               <Controller name='Pad-3btn'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
-              <Controller name='Pad-6btn' default='true' analogToDigital='left'>
+              <Controller name='Pad-6btn' analogToDigital='left'>
                 <Mapping name='A' input='ButtonA' />
                 <Mapping name='B' input='ButtonB' />
               </Controller>
@@ -407,12 +407,12 @@ public class InputMappingLoaderTests
         // given a Controllers.xml where 6-Button inherits from 3-Button (which appears before it)
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Mapping name='A' input='ButtonX' />
                 <Mapping name='Start' input='ButtonStart' />
               </Controller>
-              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Mapping name='Y' input='ButtonY' />
               </Controller>
             </Controllers>
@@ -438,8 +438,8 @@ public class InputMappingLoaderTests
     {
         string path = Path.Combine(DefaultsDir, "Platforms", "Nintendo 64", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='C-Up' input='AxisRightStickUp' />
                 <Mapping name='C-Down' input='AxisRightStickDown' />
                 <Control name='C-Any' mappings='C-Up C-Down' />
@@ -461,8 +461,8 @@ public class InputMappingLoaderTests
         // missing with nothing to read afterwards.
         string path = Path.Combine(DefaultsDir, "Platforms", "Nintendo 64", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='C-Up' input='AxisRightStickUp' />
                 <Mappping name='C-Down' input='AxisRightStickDown' />
               </Controller>
@@ -482,12 +482,12 @@ public class InputMappingLoaderTests
         // what a name stands for is always stated in one place.
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Control name='Dpad-Any' mappings='Dpad-Up Dpad-Down' />
                 <Control name='Stick-Any' mappings='L-Up L-Down' />
               </Controller>
-              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Control name='Dpad-Any' mappings='Dpad-Up Dpad-Down Dpad-Left Dpad-Right' />
               </Controller>
             </Controllers>
@@ -508,8 +508,8 @@ public class InputMappingLoaderTests
         // A single member is that button under another name, which the mappings already express.
         string path = Path.Combine(DefaultsDir, "Platforms", "Arcade", "Controllers.xml");
         StubXml(path, $"""
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
                 {control}
               </Controller>
@@ -529,12 +529,12 @@ public class InputMappingLoaderTests
         // given a controller that inherits a mapping and redeclares the same button Name
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Mapping name='A' input='ButtonX' />
                 <Mapping name='Start' input='ButtonStart' />
               </Controller>
-              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Mapping name='A' input='ButtonRightShoulder' />
               </Controller>
             </Controllers>
@@ -555,13 +555,13 @@ public class InputMappingLoaderTests
         // redeclares that Name once
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Mapping name='A' input='ButtonX' />
                 <Mapping name='A' input='ButtonRightShoulder' />
                 <Mapping name='Start' input='ButtonStart' />
               </Controller>
-              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Mapping name='A' input='ButtonY' />
               </Controller>
             </Controllers>
@@ -581,12 +581,12 @@ public class InputMappingLoaderTests
         // given a controller that declares the same button Name twice in its own mappings
         string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         StubXml(path, """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Mapping name='A' input='ButtonX' />
                 <Mapping name='Start' input='ButtonStart' />
               </Controller>
-              <Controller name='6-Button' default='true' inheritFrom='3-Button'>
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Mapping name='A' input='ButtonRightShoulder' />
                 <Mapping name='A' input='ButtonY' />
               </Controller>
@@ -820,8 +820,8 @@ public class InputMappingLoaderTests
         string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(platformPath, """<Controllers inheritFrom="_SharedBase" />""");
         StubXml(basePath, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
@@ -843,8 +843,8 @@ public class InputMappingLoaderTests
         string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
               <Controller name='Extra'>
@@ -853,8 +853,8 @@ public class InputMappingLoaderTests
             </Controllers>
             """);
         StubXml(platformPath, """
-            <Controllers inheritFrom="_SharedBase">
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad' inheritFrom="_SharedBase">
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonB' />
               </Controller>
               <Controller name='Special'>
@@ -882,15 +882,15 @@ public class InputMappingLoaderTests
         string platformPath = Path.Combine(DefaultsDir, "Platforms", "NEC PC Engine-CD", "Controllers.xml");
         string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
             """);
         StubXml(platformPath, """
-            <Controllers inheritFrom="_SharedBase">
-              <Controller name='CD-Pad' default='true'>
+            <Controllers default='CD-Pad' inheritFrom="_SharedBase">
+              <Controller name='CD-Pad'>
                 <Mapping name='A' input='ButtonB' />
               </Controller>
             </Controllers>
@@ -909,56 +909,85 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadPlatformMapping_RootInheritFrom_NewControllerMarkedDefault_LogsOverride()
+    public void LoadPlatformMapping_DefaultOnAController_IsLoggedAndIgnored()
     {
-        // given the same override scenario as above
-        string platformPath = Path.Combine(DefaultsDir, "Platforms", "NEC PC Engine-CD", "Controllers.xml");
-        string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
-        StubXml(basePath, """
+        // given a file in the old form, marking its default on a controller
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
             <Controllers>
-              <Controller name='Pad' default='true'>
-                <Mapping name='A' input='ButtonA' />
-              </Controller>
-            </Controllers>
-            """);
-        StubXml(platformPath, """
-            <Controllers inheritFrom="_SharedBase">
-              <Controller name='CD-Pad' default='true'>
-                <Mapping name='A' input='ButtonB' />
-              </Controller>
-            </Controllers>
-            """);
-
-        // when the loader runs
-        _underTest.LoadPlatformMapping("NEC PC Engine-CD");
-
-        // then the override is visible in the debug log
-        _logger.Received().Debug(Arg.Is<string>(s => s.Contains("CD-Pad") && s.Contains("overrides") && s.Contains("Pad")));
-    }
-
-    [Fact]
-    public void LoadPlatformMapping_MultipleControllersMarkedDefaultInSameFile_LogsError()
-    {
-        // given a single file (no inheritance) with two controllers both marked default
-        string path = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
-        StubXml(path, """
-            <Controllers>
-              <Controller name='3-Button' default='true'>
-                <Mapping name='A' input='ButtonA' />
-              </Controller>
-              <Controller name='6-Button' default='true'>
-                <Mapping name='A' input='ButtonB' />
-              </Controller>
+              <Controller name='3-Button' />
+              <Controller name='6-Button' default='true' />
             </Controllers>
             """);
 
         // when the loader runs
         var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
 
-        // then the mistake is logged, and resolution still falls back deterministically to the
-        // first-in-document-order default rather than throwing or picking randomly
-        _logger.Received().Error(Arg.Is<string>(s => s.Contains("3-Button") && s.Contains("6-Button") && s.Contains("multiple controllers marked default")));
+        // then the attribute is reported with where the default belongs, and nothing is default
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("6-Button") && s.Contains("<Controllers default=")));
+        result.Controllers.ShouldAllBe(c => !c.IsDefault);
         result.Resolve(null)!.Name.ShouldBe("3-Button");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_RootDefaultNamingNoController_IsLoggedAndTheNextOneApplies()
+    {
+        // given a user file whose default is misspelt, over a shipped one with a default of its own
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers default='6-Button'>
+              <Controller name='3-Button' />
+              <Controller name='6-Button' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"),
+            """<Controllers default='6-Buton' />""");
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the typo is reported and costs nothing but its own line: the shipped default stands
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("6-Buton") && s.Contains("names no controller")));
+        result.Resolve(null)!.Name.ShouldBe("6-Button");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_RootDefaultNamingNoController_FallsThroughToTheBasePlatforms()
+    {
+        // given a platform pointing at a base, with a default naming a controller neither has
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml"), """
+            <Controllers default='Pad'>
+              <Controller name='Stick' />
+              <Controller name='Pad' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"),
+            """<Controllers default='Missing' inheritFrom='_SharedBase' />""");
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the base's default applies, not the first controller the merge happens to list
+        result.Resolve(null)!.Name.ShouldBe("Pad");
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("Missing")));
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_NoRootDefault_TheFirstControllerIsUsed()
+    {
+        // given a file naming no default
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button' />
+              <Controller name='6-Button' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then none is marked, and resolution takes the first in document order
+        result.Controllers.ShouldAllBe(c => !c.IsDefault);
+        result.Resolve(null)!.Name.ShouldBe("3-Button");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
     [Fact]
@@ -969,8 +998,8 @@ public class InputMappingLoaderTests
         string platformPath = Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml");
         string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
@@ -1006,8 +1035,8 @@ public class InputMappingLoaderTests
             </Controllers>
             """);
         StubXml(platformPath, """
-            <Controllers inheritFrom="_SharedBase">
-              <Controller name='6-Button' inheritFrom='3-Button' default='true'>
+            <Controllers default='6-Button' inheritFrom="_SharedBase">
+              <Controller name='6-Button' inheritFrom='3-Button'>
                 <Mapping name='Y' input='ButtonY' />
               </Controller>
             </Controllers>
@@ -1032,8 +1061,8 @@ public class InputMappingLoaderTests
         StubXml(platformPath, """<Controllers inheritFrom="_Mid" />""");
         StubXml(midPath, """<Controllers inheritFrom="_Root" />""");
         StubXml(rootPath, """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
@@ -1126,11 +1155,11 @@ public class InputMappingLoaderTests
         // given a shipped file with two controllers, and a User file redefining one of them and
         // adding a third
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button'>
                 <Mapping name='A' input='ButtonX' />
               </Controller>
-              <Controller name='6-Button' default='true'>
+              <Controller name='6-Button'>
                 <Mapping name='A' input='ButtonX' />
                 <Mapping name='X' input='ButtonLeftShoulder' />
               </Controller>
@@ -1158,18 +1187,18 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadPlatformMapping_UserDefault_DemotesTheShippedDefault()
+    public void LoadPlatformMapping_UserRootDefault_WinsOverTheShippedOne()
     {
-        // given a shipped default and a User file marking another controller default
+        // given a shipped default and a User file naming another controller default
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
-            <Controllers>
+            <Controllers default='6-Button'>
               <Controller name='3-Button' />
-              <Controller name='6-Button' default='true' />
+              <Controller name='6-Button' />
             </Controllers>
             """);
         StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
-            <Controllers>
-              <Controller name='3-Button' default='true' />
+            <Controllers default='3-Button'>
+              <Controller name='3-Button' />
             </Controllers>
             """);
 
@@ -1181,6 +1210,35 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_UserCopyOfTheDefaultController_KeepsItTheDefault()
+    {
+        // given the shipped default, and a User copy of it changing a button
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers default='6-Button'>
+              <Controller name='3-Button' />
+              <Controller name='6-Button' inheritFrom='3-Button'>
+                <Mapping name='X' input='ButtonLeftShoulder' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='6-Button' inheritFrom='3-Button'>
+                <Mapping name='X' input='ButtonY' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the copy is still the default: which one is the default is the root's to say, and
+        // the user's file doesn't say otherwise
+        result.Resolve(null)!.Name.ShouldBe("6-Button");
+        result.Resolve(null)!.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("X", "ButtonY")]);
+    }
+
+    [Fact]
     public void LoadPlatformMapping_UserFileStatingNoRootInheritFrom_KeepsTheShippedOne()
     {
         // given a shipped one-line pointer at a base platform, and a User file for the same
@@ -1188,8 +1246,8 @@ public class InputMappingLoaderTests
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Famicom", "Controllers.xml"),
             """<Controllers inheritFrom="Nintendo Entertainment System" />""");
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
@@ -1236,15 +1294,15 @@ public class InputMappingLoaderTests
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Famicom", "Controllers.xml"),
             """<Controllers inheritFrom="Nintendo Entertainment System" />""");
         StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonA' />
               </Controller>
             </Controllers>
             """);
         StubXml(Path.Combine(UserDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
-            <Controllers>
-              <Controller name='Pad' default='true'>
+            <Controllers default='Pad'>
+              <Controller name='Pad'>
                 <Mapping name='A' input='ButtonB' />
               </Controller>
             </Controllers>
@@ -1265,7 +1323,7 @@ public class InputMappingLoaderTests
         StubXml(path, """
             <Controllers>
               <Controller name='Pad' />
-              <Controller default='true' />
+              <Controller />
             </Controllers>
             """);
 

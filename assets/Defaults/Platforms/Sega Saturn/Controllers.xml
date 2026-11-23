@@ -1,6 +1,6 @@
-<Controllers>
+<Controllers default="Control Pad">
 
-    <Controller name="Control Pad" analogToDigital="left" default="true">
+    <Controller name="Control Pad" analogToDigital="left">
         <Mapping name="A" input="ButtonX" />
         <Mapping name="B" input="ButtonA" />
         <Mapping name="C" input="ButtonB" />

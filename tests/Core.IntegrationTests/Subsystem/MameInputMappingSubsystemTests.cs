@@ -54,8 +54,8 @@ public class MameInputMappingSubsystemTests
     /// Mapping names carry the "P1_" prefix, matching the raw cfg port types verbatim (#16); only
     /// START1 keeps its cfg name, like every other port -- nothing is rewritten on the way in.</summary>
     private void WriteBaseline() => _dc.WritePlatform(Platform, """
-        <Controllers>
-          <Controller name="Cabinet" default="true">
+        <Controllers default="Cabinet">
+          <Controller name="Cabinet">
             <Mapping name="P1_BUTTON1" input="ButtonA" />
             <Mapping name="P1_BUTTON2" input="ButtonB" />
             <Mapping name="P1_BUTTON3" input="ButtonX" />
@@ -199,8 +199,8 @@ public class MameInputMappingSubsystemTests
         // lookup that picks the image as much as in the labels -- and the nudges reach their half
         // only derivedly, ahead of the port in Controllers.xml though they are
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_PADDLE" mappings="P1_PADDLE.dec P1_PADDLE.inc" />
                 <Mapping name="P1_PADDLE.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_PADDLE.inc" input="AxisLeftStickRight" />
@@ -250,8 +250,8 @@ public class MameInputMappingSubsystemTests
         // lacking it -- so without reading the half off the axis, a label written for one
         // direction could only ever land on the minority of cfgs that nudge.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_DIAL" mappings="P1_DIAL.dec P1_DIAL.inc" />
                 <Mapping name="P1_DIAL.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_DIAL.inc" input="AxisLeftStickRight" />
@@ -300,8 +300,8 @@ public class MameInputMappingSubsystemTests
         // Without it the port would reach the axis the cfg gave it AND the one Controllers.xml
         // guessed, lighting all four directions.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_DIAL" mappings="P1_DIAL.dec P1_DIAL.inc" />
                 <Mapping name="P1_DIAL.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_DIAL.inc" input="AxisLeftStickRight" />
@@ -352,8 +352,8 @@ public class MameInputMappingSubsystemTests
         // this cfg. P1_AD_STICK_X/Z stay distinct from P2_AD_STICK_Z, so recognizing the borrowed
         // slot doesn't collide with or overwrite either genuine P1 lever.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="P1_AD_STICK_X" input="AxisLeftStickLeft" />
                 <Mapping name="P1_AD_STICK_Z" input="AxisRightStickUp" />
               </Controller>

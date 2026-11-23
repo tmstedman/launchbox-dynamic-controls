@@ -121,7 +121,7 @@ the buttons it is made of. The control then reaches whatever those buttons reach
 
 ```xml
 <!-- Defaults\Platforms\Nintendo 64\Controllers.xml -->
-<Controller name="Pad" default="true">
+<Controller name="Pad">
     <Control name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
     <Mapping name="C-Up"    input="AxisRightStickUp" />
     <Mapping name="C-Down"  input="AxisRightStickDown" />
@@ -162,8 +162,8 @@ root-level `inheritFrom`:
 
 ```xml
 <!-- Defaults\Controllers\Nintendo Entertainment System.xml  (root platform, full definition) -->
-<Controllers>
-    <Controller name="Pad" analogToDigital="left" default="true">
+<Controllers default="Pad">
+    <Controller name="Pad" analogToDigital="left">
         <Mapping name="B" input="ButtonA" />
         <Mapping name="A" input="ButtonB" />
         <!-- … -->
@@ -187,6 +187,11 @@ elements alongside the root `inheritFrom`; a controller whose `name` matches a r
 it, and a new name is appended. Root-level inheritance is transitive and controller-level
 `inheritFrom` resolves across the file boundary, so a platform can add a `6-Button` that inherits a
 `3-Button` defined in the root.
+
+The variant used when nothing selects one is named on the root, `<Controllers default="6-Button">`,
+rather than marked on a controller, so replacing a controller never moves it. A file's own `default`
+wins over the one in the platform it inherits from; a name that matches no controller is logged and
+passed over, and with none at all the first controller in the file is used.
 
 
 ### 2. Add platform button images

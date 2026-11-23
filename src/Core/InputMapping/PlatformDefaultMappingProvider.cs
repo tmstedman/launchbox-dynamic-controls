@@ -4,7 +4,7 @@ namespace DynamicControls.InputMapping;
 
 /// <summary>
 /// Lowest-priority input mapping provider: returns the platform's default controller (the one
-/// flagged <c>default="true"</c>, or the first declared if none is flagged) from Controllers.xml,
+/// the root names with <c>default="..."</c>, or the first declared if none) from Controllers.xml,
 /// nothing remapped. Registered last so it only contributes when no higher-priority provider
 /// applies. Returns null when the platform has no Controllers.xml or it declares no controllers —
 /// the chain then falls back to an empty mapping.

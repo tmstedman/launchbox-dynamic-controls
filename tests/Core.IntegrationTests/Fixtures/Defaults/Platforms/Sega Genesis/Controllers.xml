@@ -1,4 +1,4 @@
-<Controllers>
+<Controllers default="6-Button">
 
     <Controller name="3-Button" analogToDigital="left">
         <Mapping name="A" input="ButtonX" />
@@ -12,7 +12,7 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="6-Button" inheritFrom="3-Button" default="true">
+    <Controller name="6-Button" inheritFrom="3-Button">
         <Mapping name="X" input="ButtonLeftShoulder" />
         <Mapping name="Y" input="ButtonY" />
         <Mapping name="Z" input="ButtonRightShoulder" />

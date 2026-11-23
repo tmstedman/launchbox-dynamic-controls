@@ -1,5 +1,5 @@
-<Controllers>
-    <Controller name="Cabinet" default="true">
+<Controllers default="Cabinet">
+    <Controller name="Cabinet">
         <Mapping name="BUTTON1" input="ButtonA" />
         <Mapping name="BUTTON2" input="ButtonB" />
         <Mapping name="BUTTON3" input="ButtonX" />

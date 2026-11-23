@@ -52,6 +52,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         List<ParsedController> parsed = raw.Controllers;
         string path = ControllersPath(platform);
         result.Games.AddRange(raw.Games);
+        string? defaultName = ChooseDefault(raw, path);
 
         // Pass 2: build the final ControllerConfig list. For each controller, walk its inheritFrom
         // chain to the root and prepend every ancestor's own mappings in order (root ancestor first,
@@ -65,7 +66,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             var controller = new ControllerConfig
             {
                 Name = pc.Name,
-                IsDefault = pc.IsDefault,
+                IsDefault = pc.Name == defaultName,
                 AnalogToDigital = a2d,
             };
             controller.Mappings.AddRange(inheritedMappings);
@@ -80,6 +81,27 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     }
 
     /// <summary>
+    /// Picks the platform default from the root <c>default</c> attributes, nearest first: the
+    /// user's file, the shipped one, then the platform a root inheritFrom names, worked out the same
+    /// way. A name that matches no controller is logged and passed over, so a typo costs nothing but
+    /// the line it is on. Null when none names a controller, leaving
+    /// <see cref="PlatformControllersConfig.Resolve"/> to take the first.
+    /// </summary>
+    private string? ChooseDefault(ParsedPlatform raw, string path)
+    {
+        foreach ((string name, string from) in raw.Defaults)
+        {
+            if (raw.Controllers.Any(c => c.Name == name))
+            {
+                _logger.Debug($"Controllers {path}: default '{name}' (from {from})");
+                return name;
+            }
+            _logger.Error($"Controllers file {from}: default='{name}' names no controller; ignoring it");
+        }
+        return null;
+    }
+
+    /// <summary>
     /// Reads a platform's Controllers files into a raw <see cref="ParsedController"/> list: the
     /// <c>User\</c> file's controllers laid over the <c>Defaults\</c> file's by name (see
     /// <see cref="MergeControllers"/>), so a user's file holds only what it changes. Then resolves a
@@ -89,8 +111,9 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// inheritFrom another) with cycles detected via <paramref name="visited"/> and a missing base
     /// logged; either case falls back to this platform's own controllers. The games are this
     /// platform's own, the user's laid over the shipped ones (see <see cref="MergeGames"/>): a
-    /// game's ID and ROM name belong to its platform, so a base file's are not brought in. Returns
-    /// null when neither layer has a file.
+    /// game's ID and ROM name belong to its platform, so a base file's are not brought in. The root
+    /// <c>default</c>s are collected nearest first — user, shipped, then the base's — for
+    /// <see cref="ChooseDefault"/>. Returns null when neither layer has a file.
     /// </summary>
     private ParsedPlatform? LoadControllersRaw(string platform, HashSet<string> visited)
     {
@@ -103,28 +126,31 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         ParsedFile? shipped = defaultsExists ? ParseFile(_lfs.Defaults.OpenRead(relative), Path.Combine("Defaults", relative)) : null;
         ParsedFile? user = userExists ? ParseFile(_lfs.User.OpenRead(relative), Path.Combine("User", relative)) : null;
 
-        List<ParsedController> own = MergeControllers(shipped?.Controllers ?? [], user?.Controllers ?? [], user?.Path ?? relative);
+        List<ParsedController> own = MergeControllers(shipped?.Controllers ?? [], user?.Controllers ?? []);
         List<GameMappingConfig> games = MergeGames(shipped?.Games ?? [], user?.Games ?? []);
+        List<(string Name, string From)> defaults = [.. new[] { user, shipped }
+            .Where(f => f?.Default != null)
+            .Select(f => (f!.Default!, f.Path))];
         string? baseName = user?.InheritFrom ?? shipped?.InheritFrom;
-        if (string.IsNullOrEmpty(baseName)) return new ParsedPlatform(own, games);
+        if (string.IsNullOrEmpty(baseName)) return new ParsedPlatform(own, games, defaults);
 
         if (!visited.Add(baseName))
         {
             _logger.Error($"Controllers file {relative}: root inheritFrom chain forms a cycle at '{baseName}'; stopping resolution");
-            return new ParsedPlatform(own, games);
+            return new ParsedPlatform(own, games, defaults);
         }
         ParsedPlatform? basePlatform = LoadControllersRaw(baseName, visited);
         if (basePlatform == null)
         {
             _logger.Error($"Controllers file {relative}: inheritFrom='{baseName}' names '{ControllersPath(baseName)}', found in neither User\\Platforms nor Defaults\\Platforms; using own controllers only");
-            return new ParsedPlatform(own, games);
+            return new ParsedPlatform(own, games, defaults);
         }
 
-        return new ParsedPlatform(MergeControllers(basePlatform.Controllers, own, relative), games);
+        return new ParsedPlatform(MergeControllers(basePlatform.Controllers, own), games, [.. defaults, .. basePlatform.Defaults]);
     }
 
     /// <summary>One layer's Controllers file as written: its controllers, its games and its root
-    /// inheritFrom.</summary>
+    /// inheritFrom and default.</summary>
     private ParsedFile ParseFile(Stream openedStream, string path)
     {
         using Stream stream = openedStream;
@@ -150,12 +176,11 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             }
         }
 
-        var defaults = controllers.Where(c => c.IsDefault).Select(c => c.Name).ToList();
-        if (defaults.Count > 1)
-            _logger.Error($"Controllers file {path}: multiple controllers marked default ({string.Join(", ", defaults)}); one will be picked arbitrarily by document order");
-
         string? inheritFrom = root.Attributes["inheritFrom"]?.Value;
-        return new ParsedFile(path, controllers, games, string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom);
+        string? defaultName = root.Attributes["default"]?.Value;
+        return new ParsedFile(path, controllers, games,
+            string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom,
+            string.IsNullOrEmpty(defaultName) ? null : defaultName);
     }
 
     /// <summary>
@@ -265,26 +290,12 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// <summary>
     /// Overlays <paramref name="own"/> controllers onto <paramref name="baseList"/>: a controller
     /// whose name matches a base entry replaces it in place; a new name is appended after the base
-    /// entries. Base document order is preserved for the shared controllers. If <paramref name="own"/>
-    /// declares its own default, it overrides the base's default (even for an appended, newly-named
-    /// controller) — otherwise <see cref="PlatformControllersConfig.Resolve"/> would always pick the
-    /// base's default first, since appended entries land after it regardless of intent.
+    /// entries. Base document order is preserved for the shared controllers. Which one is the
+    /// default is the root's to say, not a controller's, so replacing one never moves it.
     /// </summary>
-    private List<ParsedController> MergeControllers(List<ParsedController> baseList, List<ParsedController> own, string path)
+    private static List<ParsedController> MergeControllers(List<ParsedController> baseList, List<ParsedController> own)
     {
         var merged = new List<ParsedController>(baseList);
-
-        if (own.Any(c => c.IsDefault))
-        {
-            var demoted = merged.Where(c => c.IsDefault).Select(c => c.Name).ToList();
-            if (demoted.Count > 0)
-            {
-                string newDefault = own.First(c => c.IsDefault).Name;
-                _logger.Debug($"Controllers file {path}: '{newDefault}' overrides '{string.Join(", ", demoted)}' as the platform default");
-            }
-            for (int i = 0; i < merged.Count; i++)
-                if (merged[i].IsDefault) merged[i] = merged[i] with { IsDefault = false };
-        }
 
         foreach (ParsedController pc in own)
         {
@@ -352,10 +363,8 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             return null;
         }
 
-        bool isDefault = false;
-        string? defaultAttr = node.Attributes["default"]?.Value;
-        if (defaultAttr != null && bool.TryParse(defaultAttr, out bool parsed))
-            isDefault = parsed;
+        if (node.Attributes["default"] != null)
+            _logger.Error($"Ignoring default= on <Controller name=\"{name}\"> in {path}: the default is named on the root, <Controllers default=\"{name}\">");
 
         bool statesA2d = TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
 
@@ -387,7 +396,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             }
         }
 
-        return new ParsedController(name, isDefault, statesA2d, a2d, inheritFrom, ownMappings, ownUnmaps, ownControls);
+        return new ParsedController(name, statesA2d, a2d, inheritFrom, ownMappings, ownUnmaps, ownControls);
     }
 
     /// <summary>
@@ -416,15 +425,16 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         return new ControlEntry { Name = name, Mappings = [.. members] };
     }
 
-    private sealed record ParsedFile(string Path, List<ParsedController> Controllers, List<GameMappingConfig> Games, string? InheritFrom);
+    private sealed record ParsedFile(string Path, List<ParsedController> Controllers, List<GameMappingConfig> Games, string? InheritFrom, string? Default);
 
-    private sealed record ParsedPlatform(List<ParsedController> Controllers, List<GameMappingConfig> Games);
+    /// <param name="Defaults">Every root <c>default</c> in reach, nearest first, with the file
+    /// stating it.</param>
+    private sealed record ParsedPlatform(List<ParsedController> Controllers, List<GameMappingConfig> Games, List<(string Name, string From)> Defaults);
 
     /// <param name="StatesAnalogToDigital">The controller sets analogToDigital itself, <c>none</c>
     /// included, rather than inheriting its base's.</param>
     private sealed record ParsedController(
         string Name,
-        bool IsDefault,
         bool StatesAnalogToDigital,
         AnalogToDigitalMode? AnalogToDigital,
         string? InheritFrom,

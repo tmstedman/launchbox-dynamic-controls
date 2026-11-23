@@ -1,4 +1,4 @@
-<Controllers>
+<Controllers default="Pad">
 
     <Controller name="Arcade Stick">
         <Mapping name="A" input="ButtonA" />
@@ -15,7 +15,7 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="Pad" inheritFrom="Arcade Stick" default="true">
+    <Controller name="Pad" inheritFrom="Arcade Stick">
         <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
         <Mapping name="L-Down" input="AxisLeftStickDown" />

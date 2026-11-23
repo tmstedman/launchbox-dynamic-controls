@@ -1,5 +1,5 @@
-<Controllers>
-    <Controller name="Pad" default="true">
+<Controllers default="Pad">
+    <Controller name="Pad">
         <Mapping name="A" input="ButtonA" />
         <Mapping name="B" input="ButtonB" />
         <Mapping name="X" input="ButtonX" />

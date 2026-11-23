@@ -96,7 +96,7 @@ A platform's file holds several controllers and every game's remap of them, so r
 
 - A user `<Controller>` whose `name` matches a shipped one replaces it in place; a new name is added after the shipped ones.
 - A user `<Game>` replaces every shipped one it shares a `launchBoxId` or a `romName` with; an unmatched one is added. Matching on either key, rather than looking the keys up separately as `Labels.xml` does, is what lets a user entry giving only `romName` replace a shipped one that also has an ID.
-- A user controller marked `default="true"` takes the default from the shipped one.
+- The root `default` is the user file's when it states one, otherwise the shipped file's. It names a controller rather than being marked on one, so a user copy of the default controller stays the default. A name that matches no controller is logged and the next one down applies.
 - The root `inheritFrom` is the user file's when it states one, otherwise the shipped file's, so a user file for a platform that points at its family's root keeps that pointer without restating it. The platform it points at is itself loaded merged, so a user change to the root platform reaches every platform inheriting from it.
 - A root `inheritFrom` brings in the base platform's controllers but not its games: a game's ID and ROM name belong to its own platform.
 
