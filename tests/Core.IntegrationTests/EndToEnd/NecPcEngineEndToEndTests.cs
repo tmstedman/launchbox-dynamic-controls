@@ -6,9 +6,9 @@ namespace DynamicControls.Core.IntegrationTests.EndToEnd;
 /// <summary>
 /// Full-pipeline test exercising transitive <c>inheritFrom</c>: NEC PC Engine's Controllers.xml
 /// declares a three-level chain — 2-Button (base) → 3-Button (adds III) → 6-Button (adds IV/V/VI).
-/// A per-game XML selects 6-Button, so a correct resolution must accumulate every ancestor's
-/// mappings. The labels then land on the generic input each platform button drives, and the slot
-/// each label reaches is the discriminator:
+/// The game's Controllers.xml entry selects 6-Button, so a correct resolution must accumulate
+/// every ancestor's mappings. The labels then land on the generic input each platform button
+/// drives, and the slot each label reaches is the discriminator:
 /// <list type="bullet">
 ///   <item>I → ButtonB, II → ButtonA — inherited from the <b>grandparent</b> (2-Button)</item>
 ///   <item>III → ButtonX — inherited from the <b>parent</b> (3-Button)</item>
