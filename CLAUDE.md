@@ -66,8 +66,9 @@ All projects target `net6.0` with `LangVersion=12.0` (set in `Directory.Build.pr
 - `ILogger` — debug-only file logger; silenced in tests via `NullLogger` (in `Core.IntegrationTests/Subsystem/SubsystemFakes.cs`)
 - `IDelay` — abstracts `Thread.Sleep`; implemented by `SystemDelay` (excluded from coverage). Exists so a bounded retry (e.g. `MameCfgLoader` waiting out a MAME cfg write) can be tested without actually sleeping
 - `LayeredFileSystem` — wraps `IFileSystem` with two-tier path resolution (a real class, not an interface — the `IFileSystem` it wraps is the test seam). `Resolve(params segments)` returns `User\{segments}` if that file exists, else `Defaults\{segments}`, else null; loaders call it without knowing which layer wins, then read the result back through `FileExists`/`OpenRead` (rooted at the plugin root). `Defaults` / `User` expose each tier as a `RootedFileSystem` for the loaders that must check a specific layer (`InputLabelsLoader` merges both; `StaticImageResolver` reads `User` only). Components that take plain paths (logger, templates, RetroArch cfg from the emulator dir) get the raw `IFileSystem` injected instead. `Templates/`, `Logs/`, and the RetroArch emulator tree live at root and bypass layering.
-  - Every loader resolves files this way, so a `User\` file *wholesale shadows* its `Defaults\` counterpart — **except `GlobalConfig.xml` and `Platforms\{Platform}\Labels.xml`**, which are merged. `ConfigLoader` merges the config field-by-field: it deserialises `Defaults\GlobalConfig.xml` as the base, then overwrites only the fields whose elements are *present* in `User\GlobalConfig.xml` (detected via an `XmlDocument` pass over the child element names). This stops a user file that sets one field from silently forcing every omitted bool back to `false`.
+  - Every loader resolves files this way, so a `User\` file *wholesale shadows* its `Defaults\` counterpart — **except `GlobalConfig.xml`, `Platforms\{Platform}\Labels.xml` and `Platforms\{Platform}\Controllers.xml`**, which are merged. `ConfigLoader` merges the config field-by-field: it deserialises `Defaults\GlobalConfig.xml` as the base, then overwrites only the fields whose elements are *present* in `User\GlobalConfig.xml` (detected via an `XmlDocument` pass over the child element names). This stops a user file that sets one field from silently forcing every omitted bool back to `false`.
   - `InputLabelsLoader` merges the labels file *entry-by-entry*: it reads the `Defaults\` and `User\` copies separately (via `lfs.Defaults` / `lfs.User`, not `Resolve`) and lays the user's `<Game>` entries over the shipped ones (matched by `launchBoxId`, then `romName`), and returns the two `<Defaults>` blocks as separate layers, User first, for `InputLabelsService` to merge — whether two entries name the same buttons depends on the mapping (a MAME port answers to two names), which the loader doesn't have. One file now holds every game on a platform, so shadowing would make labelling one game drop the rest.
+  - `InputMappingLoader` merges `Controllers.xml` *controller-by-controller* the same way: it reads both copies, lays the user's `<Controller>`s over the shipped ones by `name` (replace in place, append new, a user `default` demoting the shipped one), and takes the root `inheritFrom` from the user file only when it states one. The base platform a root `inheritFrom` names is loaded merged too, so a user change to a family's root reaches its descendants.
 - `[ExcludeFromCodeCoverage]` — applied to infrastructure shims, factory classes, and pure DTOs
 
 ## Test patterns
@@ -116,7 +117,8 @@ Fixtures/
     Emulators/MAME/JoycodeMapping.xml        — JOYCODE → generic-input lookup
   User/
     (mirrors Defaults/ structure; files here shadow the Defaults counterpart —
-     except Platforms/{Platform}/Labels.xml, which is merged entry-by-entry)
+     except Platforms/{Platform}/Labels.xml and Controllers.xml, which are
+     merged entry-by-entry)
   controls.xml                            — BYOAC MAME controls database (plugin root, unlayered)
   Emulators/
     mame/mame.exe + cfg/{rom}.cfg

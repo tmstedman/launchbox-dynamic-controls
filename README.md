@@ -40,10 +40,11 @@ All data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two laye
 
 **Editing `Defaults\` is encouraged, with one proviso: contribute the change back.** If a button is mapped to the wrong slot, a platform is missing, or a game has no labels, fix it in `Defaults\` - the file you test is then byte-identical to the file you submit. Then [open a pull request](#contributing) with it. Once merged it ships in the next release, so the update that would have overwritten your edit now *delivers* it - to you and to everyone else - and you stop having to maintain it. An edit that only ever lives on your machine is one you lose on the next update. (If you do test from `User\`, delete that copy once your fix ships - otherwise it keeps shadowing the shipped file and later corrections never reach you.)
 
-**Keep changes that are specific to your own setup in `User\`** - your emulator's button assignments, a personal label preference, a per-game remap nobody else wants. Place a copy of the shipped file at the same relative path under `User\` and it takes precedence automatically, permanently. Neither layer is quicker to work in - the only question is whether the change would help anyone but you. Two files are merged rather than replaced, because each one holds many independent settings:
+**Keep changes that are specific to your own setup in `User\`** - your emulator's button assignments, a personal label preference, a per-game remap nobody else wants. Place a copy of the shipped file at the same relative path under `User\` and it takes precedence automatically, permanently. Neither layer is quicker to work in - the only question is whether the change would help anyone but you. Three files are merged rather than replaced, because each one holds many independent settings:
 
 - **`GlobalConfig.xml`** - rather than copying the whole file, include only the settings you want to change; the rest keep their defaults.
 - **`Platforms\{Platform}\Labels.xml`** - your entries are merged over the shipped ones game by game, so labelling one game doesn't cost you the shipped labels for every other game on that platform.
+- **`Platforms\{Platform}\Controllers.xml`** - your controllers are merged over the shipped ones by name, so redefining one controller keeps the platform's others.
 
 ### `GlobalConfig.xml`
 
@@ -93,7 +94,7 @@ A control that works as a unit — a stick, a D-pad, a C-button cluster — also
 
 `C-Any` reaches whatever those four reach, so a label written against it describes the cluster as a whole — "Camera" on the C-buttons rather than four copies of it. It is resolved *after* your emulator's own configuration is read, which is what keeps that label correct when the emulator has moved the individual directions somewhere else.
 
-The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the relevant `Platforms\{Platform}\Controllers.xml` to `User\Platforms\{Platform}\` and edit it to match your configuration.
+The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the controller you use from the relevant `Platforms\{Platform}\Controllers.xml` into `User\Platforms\{Platform}\Controllers.xml` and edit it to match your configuration. A controller you don't copy keeps its shipped definition.
 
 ### Game-specific overrides
 

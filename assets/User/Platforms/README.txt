@@ -14,18 +14,25 @@ Example layout:
   User/Platforms/Sega Genesis/Labels.xml
   User/Platforms/Sega Genesis/ControllerOverrides/Aladdin (USA).xml
 
-To override a shipped file, copy it from the matching
-Defaults/Platforms/{Platform}/ path here and edit your copy. Controllers.xml
-and ControllerOverrides/{Game}.xml are shadowed wholesale — a User copy
-replaces the Defaults file entirely. Labels.xml is merged entry-by-entry
-instead (see below), because it holds many independent settings.
+ControllerOverrides/{Game}.xml is shadowed wholesale: copy it from the
+matching Defaults/Platforms/{Platform}/ path here and edit your copy, and it
+replaces the Defaults file entirely. Controllers.xml and Labels.xml are merged
+entry by entry instead (see below), because each holds many independent
+settings: write only the entries you want to change.
 
 Controllers.xml
 ----------------
 When to use: if your emulator's default button assignments for a platform
-differ from the shipped mapping, copy the platform's
-Defaults/Platforms/{Platform}/Controllers.xml here and edit the <Mapping>
-entries to match your emulator's configuration.
+differ from the shipped mapping, copy the controller you use from the
+platform's Defaults/Platforms/{Platform}/Controllers.xml into a
+Controllers.xml here and edit the <Mapping> entries to match your emulator's
+configuration.
+
+Your file is merged over the shipped one: a <Controller> here replaces the
+shipped one with the same name, a new name adds a controller, and the shipped
+controllers you leave out are kept. A controller marked default="true" here
+becomes the platform's default. The shipped file's inheritFrom on the root
+<Controllers> element still applies unless yours states one.
 
   <Controllers>
 

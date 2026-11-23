@@ -290,7 +290,7 @@ Plugin data is split into two trees under the root: `Defaults/` (shipped, replac
 
 `Templates/`, `Logs/`, and the RetroArch emulator config tree live at the root and bypass layering — templates ship fixed, logs are output, and RetroArch's own configs are read from the emulator install, not the plugin data folder.
 
-Most files shadow wholesale. `GlobalConfig.xml` and `Platforms/{platform}/Labels.xml` merge instead, and a couple of loaders address one layer directly rather than taking the usual resolution. Which files merge, at what granularity, and what a release zip may write are specified in [config-layering.md](config-layering.md).
+Most files shadow wholesale. `GlobalConfig.xml`, `Platforms/{platform}/Labels.xml` and `Platforms/{platform}/Controllers.xml` merge instead, and a couple of loaders address one layer directly rather than taking the usual resolution. Which files merge, at what granularity, and what a release zip may write are specified in [config-layering.md](config-layering.md).
 
 ## Extension points
 

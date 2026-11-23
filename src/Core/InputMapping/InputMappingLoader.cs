@@ -25,8 +25,9 @@ public interface IInputMappingLoader
     /// on) with cycles detected and broken. The root <c>&lt;Controllers&gt;</c> element may also
     /// carry <c>inheritFrom="OtherFile"</c> to pull in a shared base file's controllers and merge
     /// this file's own on top (override by name, append new) — letting platforms that share a
-    /// layout reduce to a one-line pointer. Returns null when no controllers file exists for the
-    /// given platform.
+    /// layout reduce to a one-line pointer. A <c>User\</c> file is merged over the shipped one the
+    /// same way, controller by controller, rather than replacing it. Returns null when no
+    /// controllers file exists for the given platform in either layer.
     /// </summary>
     PlatformControllersConfig? LoadPlatformMapping(string platform);
 }
@@ -48,16 +49,6 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         _logger.Debug($"Game input mapping path: {gamePath}");
 
         return gamePath != null ? ParseGameMapping(gamePath) : null;
-    }
-
-    /// <inheritdoc />
-    public PlatformControllersConfig? LoadPlatformMapping(string platform)
-    {
-        string safePlatform = platform.SafeFileName();
-        string? platformPath = _lfs.Resolve("Platforms", safePlatform, "Controllers.xml");
-        _logger.Debug($"Controllers path: {platformPath}");
-
-        return platformPath != null ? ParsePlatformMapping(platformPath) : null;
     }
 
     private InputMappingConfig ParseGameMapping(string path)
@@ -95,16 +86,20 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         return result;
     }
 
-    private PlatformControllersConfig ParsePlatformMapping(string path)
+    /// <inheritdoc />
+    public PlatformControllersConfig? LoadPlatformMapping(string platform)
     {
         var result = new PlatformControllersConfig();
 
-        // Pass 1: read this file's raw <Controller> list, resolving any root-level file
-        // inheritFrom first — a `<Controllers inheritFrom="_Base">` file pulls in the base file's
-        // controllers and merges its own on top (override by name, append new names). This lets
-        // many platforms that share a controller layout reduce to a one-line pointer at a shared
-        // base file. No controller-level inheritance is resolved yet.
-        List<ParsedController> parsed = LoadControllersRaw(path, new HashSet<string>(StringComparer.OrdinalIgnoreCase));
+        // Pass 1: read this platform's raw <Controller> list — the user's file laid over the
+        // shipped one — resolving any root-level file inheritFrom first: a
+        // `<Controllers inheritFrom="_Base">` file pulls in the base file's controllers and merges
+        // its own on top (override by name, append new names). This lets many platforms that share
+        // a controller layout reduce to a one-line pointer at a shared base file. No
+        // controller-level inheritance is resolved yet.
+        List<ParsedController>? parsed = LoadControllersRaw(platform, new HashSet<string>(StringComparer.OrdinalIgnoreCase) { platform });
+        if (parsed == null) return null;
+        string path = ControllersPath(platform);
 
         // Pass 2: build the final ControllerConfig list. For each controller, walk its inheritFrom
         // chain to the root and prepend every ancestor's own mappings in order (root ancestor first,
@@ -134,50 +129,72 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     }
 
     /// <summary>
-    /// Reads a Controllers file into a raw <see cref="ParsedController"/> list, resolving a
-    /// root-level <c>&lt;Controllers inheritFrom="OtherFile"&gt;</c> reference by loading that file
-    /// first and merging this file's own controllers on top. Root-level inheritance is transitive
-    /// (a base may itself inheritFrom another) with cycles detected via <paramref name="visited"/>
-    /// and a missing base logged; either case falls back to this file's own controllers.
+    /// Reads a platform's Controllers files into a raw <see cref="ParsedController"/> list: the
+    /// <c>User\</c> file's controllers laid over the <c>Defaults\</c> file's by name (see
+    /// <see cref="MergeControllers"/>), so a user's file holds only what it changes. Then resolves a
+    /// root-level <c>&lt;Controllers inheritFrom="OtherFile"&gt;</c> reference — the user's when its
+    /// file states one, else the shipped one — by loading that platform the same way and merging
+    /// this one's controllers on top. Root-level inheritance is transitive (a base may itself
+    /// inheritFrom another) with cycles detected via <paramref name="visited"/> and a missing base
+    /// logged; either case falls back to this platform's own controllers. Returns null when neither
+    /// layer has a file.
     /// </summary>
-    private List<ParsedController> LoadControllersRaw(string path, HashSet<string> visited)
+    private List<ParsedController>? LoadControllersRaw(string platform, HashSet<string> visited)
     {
-        using Stream stream = _lfs.OpenRead(path);
+        string relative = ControllersPath(platform);
+        bool defaultsExists = _lfs.Defaults.FileExists(relative);
+        bool userExists = _lfs.User.FileExists(relative);
+        _logger.Debug($"Controllers '{relative}' — defaults: {(defaultsExists ? "found" : "missing")}, user: {(userExists ? "found" : "missing")}");
+        if (!defaultsExists && !userExists) return null;
+
+        ParsedFile? shipped = defaultsExists ? ParseFile(_lfs.Defaults.OpenRead(relative), Path.Combine("Defaults", relative)) : null;
+        ParsedFile? user = userExists ? ParseFile(_lfs.User.OpenRead(relative), Path.Combine("User", relative)) : null;
+
+        List<ParsedController> own = MergeControllers(shipped?.Controllers ?? [], user?.Controllers ?? [], user?.Path ?? relative);
+        string? baseName = user?.InheritFrom ?? shipped?.InheritFrom;
+        if (string.IsNullOrEmpty(baseName)) return own;
+
+        if (!visited.Add(baseName))
+        {
+            _logger.Error($"Controllers file {relative}: root inheritFrom chain forms a cycle at '{baseName}'; stopping resolution");
+            return own;
+        }
+        List<ParsedController>? baseControllers = LoadControllersRaw(baseName, visited);
+        if (baseControllers == null)
+        {
+            _logger.Error($"Controllers file {relative}: inheritFrom='{baseName}' names '{ControllersPath(baseName)}', found in neither User\\Platforms nor Defaults\\Platforms; using own controllers only");
+            return own;
+        }
+
+        return MergeControllers(baseControllers, own, relative);
+    }
+
+    /// <summary>One layer's Controllers file as written: its controllers and its root inheritFrom.</summary>
+    private ParsedFile ParseFile(Stream openedStream, string path)
+    {
+        using Stream stream = openedStream;
         var doc = new XmlDocument();
         doc.Load(stream);
         XmlElement root = doc.DocumentElement!;
 
-        var own = new List<ParsedController>();
+        var controllers = new List<ParsedController>();
         foreach (XmlElement node in root.ChildNodes.OfType<XmlElement>())
         {
             if (node.Name != "Controller") continue;
             ParsedController? pc = ParseControllerRaw(node, path);
-            if (pc != null) own.Add(pc);
+            if (pc != null) controllers.Add(pc);
         }
 
-        var ownDefaults = own.Where(c => c.IsDefault).Select(c => c.Name).ToList();
-        if (ownDefaults.Count > 1)
-            _logger.Error($"Controllers file {path}: multiple controllers marked default ({string.Join(", ", ownDefaults)}); one will be picked arbitrarily by document order");
+        var defaults = controllers.Where(c => c.IsDefault).Select(c => c.Name).ToList();
+        if (defaults.Count > 1)
+            _logger.Error($"Controllers file {path}: multiple controllers marked default ({string.Join(", ", defaults)}); one will be picked arbitrarily by document order");
 
-        string? baseName = root.Attributes["inheritFrom"]?.Value;
-        if (string.IsNullOrEmpty(baseName)) return own;
-
-        string safeBaseName = baseName.SafeFileName();
-        string? basePath = _lfs.Resolve("Platforms", safeBaseName, "Controllers.xml");
-        if (basePath == null)
-        {
-            _logger.Error($"Controllers file {path}: inheritFrom='{baseName}' names 'Platforms\\{safeBaseName}\\Controllers.xml', found in neither User\\Platforms nor Defaults\\Platforms; using own controllers only");
-            return own;
-        }
-        if (!visited.Add(baseName))
-        {
-            _logger.Error($"Controllers file {path}: root inheritFrom chain forms a cycle at '{baseName}'; stopping resolution");
-            return own;
-        }
-
-        List<ParsedController> baseControllers = LoadControllersRaw(basePath, visited);
-        return MergeControllers(baseControllers, own, path);
+        string? inheritFrom = root.Attributes["inheritFrom"]?.Value;
+        return new ParsedFile(path, controllers, string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom);
     }
+
+    private static string ControllersPath(string platform) =>
+        Path.Combine("Platforms", platform.SafeFileName(), "Controllers.xml");
 
     /// <summary>
     /// Overlays <paramref name="own"/> controllers onto <paramref name="baseList"/>: a controller
@@ -333,6 +350,8 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
 
         return new ControlEntry { Name = name, Mappings = [.. members] };
     }
+
+    private sealed record ParsedFile(string Path, List<ParsedController> Controllers, string? InheritFrom);
 
     private sealed record ParsedController(
         string Name,

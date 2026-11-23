@@ -31,9 +31,10 @@ Dynamic Controls\
 
 `LayeredFileSystem.Resolve(...segments)` performs it, and returns a root-relative path that the caller reads back through `FileExists`/`OpenRead`. Loaders call it without knowing which layer won.
 
-Two loaders need a specific layer instead and address it directly through `LayeredFileSystem.Defaults` / `.User`:
+Three loaders need a specific layer instead and address it directly through `LayeredFileSystem.Defaults` / `.User`:
 
 - `InputLabelsLoader` reads both and merges them (see [Labels](#platformsplatformlabelsxml--entry-level-merge)).
+- `InputMappingLoader` reads both copies of `Controllers.xml` and merges them (see [Controllers](#platformsplatformcontrollersxml--entry-level-merge)).
 - `StaticImageResolver` reads `User\` only, because `Static\` has no shipped counterpart.
 
 ## What isn't layered
@@ -52,15 +53,15 @@ Two loaders need a specific layer instead and address it directly through `Layer
 |---|---|---|---|
 | `GlobalConfig.xml` | yes | **Merged** | per setting |
 | `Platforms\{Platform}\Labels.xml` | yes | **Merged** | per entry — per game, and per default button |
-| `Platforms\{Platform}\Controllers.xml` | yes | **Replaced** | whole file, per platform |
+| `Platforms\{Platform}\Controllers.xml` | yes | **Merged** | per controller |
 | `Platforms\{Platform}\ControllerOverrides\{Rom}.xml` | yes | **Replaced** | whole file, per game |
 | `Emulators\**` | yes | **Replaced** | whole file |
 | `Templates\` | no | not layered | — |
 | `Static\` | user-only | not layered | per image |
 
-**Two files merge; everything else is replaced wholesale.**
+**Three files merge; everything else is replaced wholesale.**
 
-A file is replaced when it describes exactly one thing — one platform's controllers, one game's mapping — because replacing it is precisely the customization the user meant, and it needs no cross-file merge logic. A file is merged when it holds many independent settings, because replacing it would discard far more than the user intended to change.
+A file is replaced when it describes exactly one thing — one game's mapping, one emulator core's controller ids — because replacing it is precisely the customization the user meant, and it needs no cross-file merge logic. A file is merged when it holds many independent settings, because replacing it would discard far more than the user intended to change.
 
 ## `GlobalConfig.xml` — field-level merge
 
@@ -88,6 +89,18 @@ One file holds every game on a platform, so replacing it wholesale would mean th
 **The merge is per entry, not per label.** A user `<Game>` entry replaces the shipped entry for that game outright rather than combining button-by-button — so "show *these* labels for this game" stays expressible, instead of leaving the user unable to remove a shipped label.
 
 **A game with control sets is replaced whole as well.** A user entry's `<ControlSet>`s and its own `<Input>`s are the whole entry, so a set the shipped entry has and the user's leaves out is gone, and an empty user entry clears the game's labels. Correcting one context means copying the entry; in exchange, removing a set needs no syntax of its own.
+
+## `Platforms\{Platform}\Controllers.xml` — entry-level merge
+
+**Read both copies and overlay the user's controllers onto the shipped ones by name.**
+
+A platform's file holds several controllers, so replacing it wholesale would mean that changing one controller discards the others, and that a user's file has to restate every controller just to stay complete.
+
+- A user `<Controller>` whose `name` matches a shipped one replaces it in place; a new name is added after the shipped ones.
+- A user controller marked `default="true"` takes the default from the shipped one.
+- The root `inheritFrom` is the user file's when it states one, otherwise the shipped file's, so a user file for a platform that points at its family's root keeps that pointer without restating it. The platform it points at is itself loaded merged, so a user change to the root platform reaches every platform inheriting from it.
+
+**The merge is per controller, not per button.** A user controller replaces the shipped one outright, the same rule as a `<Game>` in `Labels.xml`, so what a controller's buttons do is stated in one place. To change one button and keep the rest, give the user controller another name and `inheritFrom` the shipped one.
 
 ## What ships in a release zip
 
