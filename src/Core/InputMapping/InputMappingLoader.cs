@@ -203,13 +203,15 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// entry it shares an ID or a ROM name with, taking the first one's place, and is appended when
     /// it shares neither. Whole entries rather than keys, so a user entry naming a game by its ROM
     /// alone still replaces a shipped one that also has an ID — which an ID lookup would otherwise
-    /// find first.
+    /// find first. Each user entry is marked <see cref="GameMappingConfig.FromUser"/>, for the
+    /// shipped entries the merge can't see are the same game: those sharing no key with it.
     /// </summary>
     private static List<GameMappingConfig> MergeGames(List<GameMappingConfig> shipped, List<GameMappingConfig> user)
     {
         var merged = new List<GameMappingConfig>(shipped);
         foreach (GameMappingConfig game in user)
         {
+            game.FromUser = true;
             int at = merged.FindIndex(g => SameGame(g, game));
             if (at < 0)
             {

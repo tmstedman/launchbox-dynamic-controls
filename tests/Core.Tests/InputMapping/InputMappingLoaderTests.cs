@@ -298,6 +298,30 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_UserGame_IsFoundBeforeAShippedOneKeyedDifferently()
+    {
+        // given a shipped entry keyed by the game's ID alone, and a User entry by its ROM name alone,
+        // which share no key for the merge to replace one with the other
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game launchBoxId='42' inheritFrom='Shipped' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Game romName='OutRun' inheritFrom='Mine' />
+            </Controllers>
+            """);
+
+        // when the game is looked up by both
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's entry wins, though the shipped one matches by the key tried first
+        platform.FindGame(Game(romName: "OutRun", launchBoxId: 42))!.InheritFrom.ShouldBe("Mine");
+        platform.FindGame(Game(romName: "Other", launchBoxId: 42))!.InheritFrom.ShouldBe("Shipped");
+    }
+
+    [Fact]
     public void LoadPlatformMapping_RootInheritFrom_DoesNotBringInTheBaseFilesGames()
     {
         // given a base platform with a game entry, and a platform pointing at it

@@ -207,7 +207,8 @@ controller variant and your emulator is not RetroArch or MAME.
 Finding the game: an entry is matched by launchBoxId first (the LaunchBox
 Games Database ID), then by romName — LaunchBox's ROM name, compared ignoring
 case but otherwise exactly, so each region's dump needs its own entry. Either
-attribute alone is enough. A clone doesn't use its parent's entry (unlike its
+attribute alone is enough, and your entries are searched before the shipped
+ones. A clone doesn't use its parent's entry (unlike its
 labels), so a clone's own RetroArch or MAME configuration is still read when
 only its parent has one; give the clone an entry of its own to override it
 too. The clone does inherit its parent's labels, so a label for a button only
