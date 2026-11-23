@@ -94,6 +94,8 @@ A control that works as a unit — a stick, a D-pad, a C-button cluster — also
 
 `C-Any` reaches whatever those four reach, so a label written against it describes the cluster as a whole — "Camera" on the C-buttons rather than four copies of it. It is resolved *after* your emulator's own configuration is read, which is what keeps that label correct when the emulator has moved the individual directions somewhere else.
 
+A platform with more than one controller variant lists each as its own `<Controller name="…">`, and names the one used when nothing selects another on the root element: `<Controllers default="6-Button">`. A name that matches no controller is logged and ignored; with no `default` at all, the first controller in the file is used.
+
 The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the controller you use from the relevant `Platforms\{Platform}\Controllers.xml` into `User\Platforms\{Platform}\Controllers.xml` and edit it to match your configuration. A controller you don't copy keeps its shipped definition.
 
 ### Game-specific overrides

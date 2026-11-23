@@ -58,8 +58,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameXmlPresent_WinsOverMiddleAndPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -82,8 +82,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameXmlMissing_MiddleProviderPresent_WinsOverPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -99,8 +99,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameXmlMissing_MiddleProviderDeclines_FallsThroughToPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -119,8 +119,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameMapping_ReplacesBaselineEntriesByName_PreservesUnrelatedNames()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
                 <Mapping name="B" input="ButtonB" />
                 <Mapping name="Start" input="ButtonStart" />
@@ -148,8 +148,8 @@ public class InputMappingSubsystemTests
         // <Unmap name="A" /> in the game entry removes A from the baseline mapping entirely —
         // parity with RetroArch's -1 sentinel. Other Names survive.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
                 <Mapping name="B" input="ButtonB" />
                 <Mapping name="Start" input="ButtonStart" />
@@ -181,8 +181,8 @@ public class InputMappingSubsystemTests
         // and the resolver's AnalogToDigitalMirror appends AxisLeftStickUp to the same
         // platform button that drives ButtonDpadUp.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true" analogToDigital="left">
+            <Controllers default="Pad">
+              <Controller name="Pad" analogToDigital="left">
                 <Mapping name="Up" input="ButtonDpadUp" />
               </Controller>
             </Controllers>
@@ -206,8 +206,8 @@ public class InputMappingSubsystemTests
         // value of it. Were it left at the controller's (none), the stick directions the file's
         // mirror reaches would have no natural button and read as moved there by a remap.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="Up" input="ButtonDpadUp" />
               </Controller>
             </Controllers>
@@ -233,8 +233,8 @@ public class InputMappingSubsystemTests
         // 6-Button uses inheritFrom="Pad" so it prepends Pad's A mapping, then adds X.
         // The per-game override replaces A; X survives from the inherited baseline.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
               <Controller name="6-Button" inheritFrom="Pad">
@@ -266,8 +266,8 @@ public class InputMappingSubsystemTests
         // (parent), IV from 6-Button's own. This is the discriminator against one-level inheritance,
         // where the grandparent (2-Button) entries would be missing.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="2-Button" default="true">
+            <Controllers default="2-Button">
+              <Controller name="2-Button">
                 <Mapping name="I" input="ButtonB" />
                 <Mapping name="II" input="ButtonA" />
               </Controller>
@@ -301,8 +301,8 @@ public class InputMappingSubsystemTests
         // inheritFrom AND controller-level transitive inheritFrom (which crosses the file boundary)
         // through the real loader, accumulating every ancestor's mappings.
         _dc.WritePlatform("_NEC Pad", """
-            <Controllers>
-              <Controller name="2-Button" default="true">
+            <Controllers default="2-Button">
+              <Controller name="2-Button">
                 <Mapping name="I" input="ButtonB" />
                 <Mapping name="II" input="ButtonA" />
               </Controller>
@@ -338,15 +338,15 @@ public class InputMappingSubsystemTests
         // controller explicitly, so PlatformDefaultMappingProvider falls back to whichever controller
         // resolves as the platform default — this must be the platform file's own, not the base's.
         _dc.WritePlatform("_SharedBase", """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
             """);
         _dc.WritePlatform(Platform, """
-            <Controllers inheritFrom="_SharedBase">
-              <Controller name="CD-Pad" default="true">
+            <Controllers default="CD-Pad" inheritFrom="_SharedBase">
+              <Controller name="CD-Pad">
                 <Mapping name="A" input="ButtonB" />
               </Controller>
             </Controllers>
@@ -362,8 +362,8 @@ public class InputMappingSubsystemTests
     public void Load_PerGameSelectsUnknownController_FallsBackToPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -389,8 +389,8 @@ public class InputMappingSubsystemTests
         // one. Without that, a game naming a controller that does not exist would get the default
         // variant's buttons and no controls at all.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down" />
                 <Mapping name="Dpad-Up" input="ButtonDpadUp" />
                 <Mapping name="Dpad-Down" input="ButtonDpadDown" />
@@ -414,8 +414,8 @@ public class InputMappingSubsystemTests
         // pair and adds a control of its own over two face buttons, one of which it moves. Each
         // control is read last, against wherever the entry left its members.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left" />
                 <Mapping name="Dpad-Up" input="ButtonDpadUp" />
                 <Mapping name="Dpad-Down" input="ButtonDpadDown" />
@@ -450,8 +450,8 @@ public class InputMappingSubsystemTests
         // VisibilityEvaluator detect that ButtonA's natural physical button is still present in
         // the mapping (via Naturals) after its action has been remapped away.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -472,8 +472,8 @@ public class InputMappingSubsystemTests
     public void Load_ProviderDeclines_NothingRemapped_NaturalsEqualActive()
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -487,8 +487,8 @@ public class InputMappingSubsystemTests
     }
 
     private const string MirroredPad = """
-        <Controllers>
-          <Controller name="Pad" default="true" analogToDigital="left">
+        <Controllers default="Pad">
+          <Controller name="Pad" analogToDigital="left">
             <Mapping name="B" input="ButtonA" />
             <Mapping name="Dpad-Up" input="ButtonDpadUp" />
           </Controller>
@@ -549,8 +549,8 @@ public class InputMappingSubsystemTests
         //   (3) The provider behind the XML is never consulted: the XML supplies the whole
         //       mapping, so the swap that provider would have made on Y never lands
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
               <Controller name="6-Button" analogToDigital="right">
@@ -604,8 +604,8 @@ public class InputMappingSubsystemTests
         // port — so without the derivation it stays on ButtonDpad and a label written against it
         // reaches only half the controls the player is using.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="BUTTON1" input="ButtonA" />
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
@@ -656,8 +656,8 @@ public class InputMappingSubsystemTests
         // Only UP reaches the stick. Pushing the stick up moves the player, but the stick as a
         // whole does not, so the whole-joystick binding stays on the Dpad alone.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -698,8 +698,8 @@ public class InputMappingSubsystemTests
         // nothing in either saying so — and an author who does want the whole somewhere else can
         // now say it outright, by declaring the control differently.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -738,8 +738,8 @@ public class InputMappingSubsystemTests
         // stick that gained a binding in the forward map but not the reverse would render dim
         // and fall back to a generic image while being fully playable.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -781,8 +781,8 @@ public class InputMappingSubsystemTests
         // binding is appended, so the button genuinely mapped to the stick keeps it — a name
         // that means "the left stick" outranks one that merely turned out to reach it.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -827,8 +827,8 @@ public class InputMappingSubsystemTests
         // the pairing is discovered from the mapping rather than parsed out of the name, so the
         // derivation has to work here identically.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true" analogToDigital="left">
+            <Controllers default="Pad">
+              <Controller name="Pad" analogToDigital="left">
                 <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left Dpad-Right" />
                 <Mapping name="Dpad-Up" input="ButtonDpadUp" />
                 <Mapping name="Dpad-Down" input="ButtonDpadDown" />
@@ -873,8 +873,8 @@ public class InputMappingSubsystemTests
         // controller's own layout. Now the snapshot is the controller as Controllers.xml declares
         // it whichever file moved the button, and InputImageResolver compares against that.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -902,8 +902,8 @@ public class InputMappingSubsystemTests
         // the whole mapping: the emulator's remap does not stack on it. (Stacking would double-
         // count a swap that both describe.) The provider behind it is never even consulted.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="BUTTON1" input="ButtonA" />
                 <Mapping name="BUTTON2" input="ButtonB" />
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
@@ -960,8 +960,8 @@ public class InputMappingSubsystemTests
         // mapping describes the player's setup, which MAME and RetroArch keep per rom: were the
         // parent's file inherited, it would switch the clone's own configuration off.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="BUTTON1" input="ButtonA" />
                 <Mapping name="BUTTON2" input="ButtonB" />
               </Controller>
@@ -996,8 +996,8 @@ public class InputMappingSubsystemTests
         // The player sees "Move" printed on a D-pad that does nothing, beside a correctly
         // labelled stick. A stranded label is worse than a missing one: it actively misdirects.
         _dc.WritePlatform("Arcade", """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="JOYSTICK" mappings="JOYSTICK_UP JOYSTICK_DOWN JOYSTICK_LEFT JOYSTICK_RIGHT" />
                 <Mapping name="JOYSTICK_UP" input="ButtonDpadUp" />
                 <Mapping name="JOYSTICK_DOWN" input="ButtonDpadDown" />
@@ -1036,15 +1036,15 @@ public class InputMappingSubsystemTests
     {
         // Defaults file has Pad with A→ButtonA; User file redefines Pad with A→ButtonB.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
             """);
         _dc.WriteUserPlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonB" />
               </Controller>
             </Controllers>
@@ -1061,8 +1061,8 @@ public class InputMappingSubsystemTests
     {
         // Defaults file has the default Pad; User file only adds a controller of its own.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>
@@ -1087,8 +1087,8 @@ public class InputMappingSubsystemTests
     {
         // Defaults game entry has A→ButtonA; User game entry remaps A→ButtonB.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Pad" default="true">
+            <Controllers default="Pad">
+              <Controller name="Pad">
                 <Mapping name="A" input="ButtonA" />
               </Controller>
             </Controllers>

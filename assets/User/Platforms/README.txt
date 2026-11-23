@@ -27,21 +27,21 @@ configuration.
 
 Your file is merged over the shipped one: a <Controller> here replaces the
 shipped one with the same name, a new name adds a controller, and the shipped
-controllers you leave out are kept. A controller marked default="true" here
-becomes the platform's default. The shipped file's inheritFrom on the root
-<Controllers> element still applies unless yours states one.
+controllers you leave out are kept. The default and inheritFrom attributes on
+the root <Controllers> element are the shipped file's unless yours states
+them, so copying the default controller here keeps it the default.
 
-  <Controllers>
+  <Controllers default="3-Button">
 
       <!-- A <Controller> defines a named variant (e.g. a 3-button vs 6-button
-           pad). The variant with default="true" is used unless a game's input
-           mapping selects a different one.
+           pad). The variant the root names default is used unless a game's
+           input mapping selects a different one.
            analogToDigital="left" mirrors Dpad direction buttons onto the left
            stick's directions so both work for directional labels. A button
            declared with <Control> reaches those directions, so the whole stick
            follows from them. -->
 
-      <Controller name="3-Button" analogToDigital="left" default="true">
+      <Controller name="3-Button" analogToDigital="left">
           <Mapping name="A" input="ButtonX" />
           <Mapping name="B" input="ButtonA" />
           <Mapping name="C" input="ButtonB" />
@@ -65,7 +65,7 @@ A control that works as a unit — a stick, a D-pad, a C-button cluster — gets
 <Control> naming the buttons it is made of. The control reaches whatever those
 buttons reach, so a label written against it describes the whole control:
 
-  <Controller name="Pad" default="true">
+  <Controller name="Pad">
 
       <Control name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
       <Mapping name="C-Up"    input="AxisRightStickUp" />
@@ -89,7 +89,7 @@ are inherited by inheritFrom alongside mappings, overridden by name.
 
 Every mapping a variant uses must be reachable from that variant — either
 listed inside it or inherited via inheritFrom. There is no file-wide baseline:
-<Mapping> elements placed directly under <Controllers> are ignored.
+<Mapping> elements placed directly under <Controllers> are logged and skipped.
 
 Sharing one file across platforms: when several platforms in a hardware
 family use the same controller, put the full definition in the family's root
@@ -108,8 +108,9 @@ Attributes:
   Mapping/@name     Platform button name (matches element names in Labels.xml).
   Mapping/@input    Generic input name (ButtonA, ButtonX, AxisLeftStick, …).
   Controller/@name  Variant name — referenced by a <Game>'s inheritFrom.
-  Controller/@default="true"  Marks the variant used when no game-specific
-                    selection is made.
+  Controllers/@default  Name of the variant used when no game-specific
+                    selection is made. A name that matches no variant is
+                    logged and ignored; with none, the first variant is used.
   Controller/@inheritFrom     Name of another <Controller> whose mappings are
                     prepended before this variant's own.
   Control/@name       Platform button name being declared — usable in Labels.xml

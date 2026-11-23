@@ -1,4 +1,4 @@
-<Controllers>
+<Controllers default="DualShock">
 
     <Controller name="Standard">
         <Mapping name="Cross" input="ButtonA" />
@@ -18,7 +18,7 @@
         <Mapping name="Dpad-Right" input="ButtonDpadRight" />
     </Controller>
 
-    <Controller name="DualShock" inheritFrom="Standard" default="true">
+    <Controller name="DualShock" inheritFrom="Standard">
         <Control name="L-Any" mappings="L-Up L-Down L-Left L-Right" />
         <Mapping name="L-Up" input="AxisLeftStickUp" />
         <Mapping name="L-Down" input="AxisLeftStickDown" />

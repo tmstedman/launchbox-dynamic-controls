@@ -50,8 +50,8 @@ public class MameLabelsSubsystemTests
     {
         // Baseline: AD_STICK_X/Y default to the LEFT stick, same as production Controllers.xml.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="P1_AD_STICK_X" input="AxisRightStickLeft" />
                 <Mapping name="P1_AD_STICK_X" input="AxisRightStickRight" />
                 <Mapping name="P1_AD_STICK_Y" input="AxisRightStickUp" />
@@ -106,8 +106,8 @@ public class MameLabelsSubsystemTests
         // escounts' shape, with three of its four OTHER ports: one tag, told apart only by mask. The
         // last keeps the bare name, and the earlier two are labelled under their qualified names
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true" />
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet" />
             </Controllers>
             """);
         _dc.WriteMameMapping("""
@@ -150,8 +150,8 @@ public class MameLabelsSubsystemTests
         // the earlier port's nudges move with it to its qualified name; the later port states
         // none, and the bare nudge names must still not fall back to Controllers.xml's guess
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="P1_AD_STICK_X.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_AD_STICK_X.inc" input="AxisLeftStickRight" />
               </Controller>
@@ -196,8 +196,8 @@ public class MameLabelsSubsystemTests
         // escounts written by tag and mask throughout, the last OTHER port and the single P1_BUTTON1
         // included: each finds its port whatever button name it ended up under
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true" />
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet" />
             </Controllers>
             """);
         _dc.WriteMameMapping("""
@@ -240,8 +240,8 @@ public class MameLabelsSubsystemTests
         // escounts' Y: its Pass button and its first OTHER port are both bound there. The OTHER
         // port, now kept under its qualified name, carries no label, so it is no contender
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true" />
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet" />
             </Controllers>
             """);
         _dc.WriteMameMapping("""
@@ -284,8 +284,8 @@ public class MameLabelsSubsystemTests
         // button carries one label, so unioning them made the port say one word about three
         // controls.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_AD_STICK_Z" mappings="P1_AD_STICK_Z.dec P1_AD_STICK_Z.inc" />
                 <Mapping name="P1_AD_STICK_Z.dec" input="AxisRightStickUp" />
                 <Mapping name="P1_AD_STICK_Z.inc" input="AxisRightStickDown" />
@@ -341,8 +341,8 @@ public class MameLabelsSubsystemTests
         // otherwise splitting the sequences would have cost a label on every game that never
         // wanted the halves separated.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_DIAL" mappings="P1_DIAL.dec P1_DIAL.inc" />
                 <Mapping name="P1_DIAL.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_DIAL.inc" input="AxisLeftStickRight" />
@@ -396,8 +396,8 @@ public class MameLabelsSubsystemTests
         // cfg and the label got corrected to TRACKBALL_X/Y. This is the regression guard for the
         // corrected data: labelling the real port tracks a remap correctly.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Mapping name="P1_TRACKBALL_X" input="AxisLeftStickLeft" />
                 <Mapping name="P1_TRACKBALL_Y" input="AxisLeftStickUp" />
               </Controller>
@@ -444,8 +444,8 @@ public class MameLabelsSubsystemTests
     private void WriteRotary(string labels)
     {
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="Cabinet" default="true">
+            <Controllers default="Cabinet">
+              <Controller name="Cabinet">
                 <Control name="P1_POSITIONAL" mappings="P1_POSITIONAL.dec P1_POSITIONAL.inc" />
                 <Mapping name="P1_POSITIONAL.dec" input="AxisLeftStickLeft" />
                 <Mapping name="P1_POSITIONAL.inc" input="AxisLeftStickRight" />

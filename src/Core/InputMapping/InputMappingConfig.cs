@@ -65,7 +65,7 @@ public record InputMappingConfig
 /// entry replace it, new Names are appended. Inheritance is transitive — the named base may
 /// itself inheritFrom another controller — with cycles detected and broken. Games either select
 /// one controller explicitly via their entry's <c>inheritFrom</c> or fall back to whichever
-/// controller is marked default (or, if none is marked, the first one in document order).
+/// controller the root names default (or, if none, the first one in document order).
 /// </summary>
 public record PlatformControllersConfig
 {
@@ -148,10 +148,10 @@ public record ControllerConfig
     /// <summary>Unique name of the controller within the platform (e.g. "Pad", "Zapper").</summary>
     public string Name { get; set; } = null!;
 
-    /// <summary>True when this controller is marked as the platform default via
-    /// `default="true"`. Games whose entry names no controller inherit from the first
-    /// controller with this flag set; if none has it, the first controller in document order
-    /// is the implicit default.</summary>
+    /// <summary>True when this controller is the platform default the root names,
+    /// <c>&lt;Controllers default="..."&gt;</c>. Games whose entry names no controller inherit from
+    /// it; if none is flagged, the first controller in document order is the implicit
+    /// default.</summary>
     public bool IsDefault { get; set; }
 
     /// <summary>`analogToDigital` as resolved along inheritFrom: the nearest controller's that

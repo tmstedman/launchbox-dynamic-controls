@@ -170,8 +170,8 @@ public class RetroArchSubsystemTests
     /// <summary>The Nintendo 64 pad as Controllers.xml declares it: its C buttons on the right
     /// stick, and C-Any, the cluster, standing for all four.</summary>
     private const string N64ControllersXml = """
-        <Controllers>
-          <Controller name="Pad" default="true">
+        <Controllers default="Pad">
+          <Controller name="Pad">
             <Mapping name="B" input="ButtonA" />
             <Mapping name="A" input="ButtonB" />
             <Control name="C-Any" mappings="C-Up C-Down C-Left C-Right" />
@@ -518,8 +518,8 @@ public class RetroArchSubsystemTests
         // The service reads Controllers.xml itself rather than being handed one, so the same
         // controller the other tests pass in has to exist on the staged filesystem here.
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="6-Button" default="true" analogToDigital="left">
+            <Controllers default="6-Button">
+              <Controller name="6-Button" analogToDigital="left">
                 <Mapping name="X" input="ButtonLeftShoulder" />
                 <Mapping name="Y" input="ButtonY" />
                 <Mapping name="Z" input="ButtonRightShoulder" />
@@ -559,8 +559,8 @@ public class RetroArchSubsystemTests
         StageCoreXml(("6-Button", "513"), ("3-Button", "257"));
         StageGameCfg(SelectDevice("257"));
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="6-Button" default="true" analogToDigital="left">
+            <Controllers default="6-Button">
+              <Controller name="6-Button" analogToDigital="left">
                 <Mapping name="X" input="ButtonLeftShoulder" />
                 <Mapping name="Y" input="ButtonY" />
                 <Mapping name="Z" input="ButtonRightShoulder" />
@@ -693,8 +693,8 @@ public class RetroArchSubsystemTests
         StageCoreInfo(coreDll: CoreDll, displayName: CoreDisplayName);
         StageGameRmp($"{RmpSwap("up", "5")}\n{RmpSwap("down", "4")}");
         _dc.WritePlatform(Platform, """
-            <Controllers>
-              <Controller name="3-Button" default="true" analogToDigital="left">
+            <Controllers default="3-Button">
+              <Controller name="3-Button" analogToDigital="left">
                 <Mapping name="B" input="ButtonA" />
                 <Mapping name="Dpad-Up" input="ButtonDpadUp" />
                 <Mapping name="Dpad-Down" input="ButtonDpadDown" />
