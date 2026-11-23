@@ -14,6 +14,7 @@ public class InputMappingLoaderTests
 {
     private const string RootDir = @"C:\plugin";
     private static readonly string DefaultsDir = Path.Combine(RootDir, "Defaults");
+    private static readonly string UserDir = Path.Combine(RootDir, "User");
 
     private readonly ILogger _logger = Substitute.For<ILogger>();
     private readonly IFileSystem _fs = TestFs.Create();
@@ -884,9 +885,168 @@ public class InputMappingLoaderTests
         // when the loader runs
         var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
 
-        // then resolution terminates and the cycle is reported; the merged set is finite
-        result.Controllers.Select(c => c.Name).ShouldBe(["Pad", "OtherPad"]);
+        // then resolution terminates and the cycle is reported at the file it started from; the
+        // merged set is finite, the base's controller first
+        result.Controllers.Select(c => c.Name).ShouldBe(["OtherPad", "Pad"]);
         _logger.Received().Error(Arg.Is<string>(s => s.Contains("cycle")));
+    }
+
+    // ---- LoadPlatformMapping: a User file merged over the shipped one ----
+
+    [Fact]
+    public void LoadPlatformMapping_UserFileOnly_IsLoaded()
+    {
+        // given a controllers file in the User layer and none shipped
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's controllers are the platform's
+        result.Controllers.Select(c => c.Name).ShouldBe(["Pad"]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserController_ReplacesTheShippedOneByName_AndKeepsTheRest()
+    {
+        // given a shipped file with two controllers, and a User file redefining one of them and
+        // adding a third
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button'>
+                <Mapping name='A' input='ButtonX' />
+              </Controller>
+              <Controller name='6-Button' default='true'>
+                <Mapping name='A' input='ButtonX' />
+                <Mapping name='X' input='ButtonLeftShoulder' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+              <Controller name='Mouse'>
+                <Mapping name='Left' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's 3-Button replaces the shipped one in place, the shipped 6-Button is kept
+        // and stays the default, and the new controller is appended
+        result.Controllers.Select(c => c.Name).ShouldBe(["3-Button", "6-Button", "Mouse"]);
+        result.Controllers[0].Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA")]);
+        result.Resolve(null)!.Name.ShouldBe("6-Button");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserDefault_DemotesTheShippedDefault()
+    {
+        // given a shipped default and a User file marking another controller default
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button' />
+              <Controller name='6-Button' default='true' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button' default='true' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's choice is the only default
+        result.Controllers.Select(c => (c.Name, c.IsDefault)).ShouldBe([("3-Button", true), ("6-Button", false)]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserFileStatingNoRootInheritFrom_KeepsTheShippedOne()
+    {
+        // given a shipped one-line pointer at a base platform, and a User file for the same
+        // platform that adds a controller without restating the pointer
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Famicom", "Controllers.xml"),
+            """<Controllers inheritFrom="Nintendo Entertainment System" />""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Nintendo Famicom", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Zapper'>
+                <Mapping name='Trigger' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Nintendo Famicom")!;
+
+        // then the base platform's controllers still arrive, with the user's added after them
+        result.Controllers.Select(c => c.Name).ShouldBe(["Pad", "Zapper"]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserFileStatingARootInheritFrom_ReplacesTheShippedOne()
+    {
+        // given a shipped pointer at one base, and a User file pointing at another
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"),
+            """<Controllers inheritFrom="_Shipped" />""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "_Shipped", "Controllers.xml"),
+            """<Controllers><Controller name='ShippedPad' /></Controllers>""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "_Mine", "Controllers.xml"),
+            """<Controllers><Controller name='MyPad' /></Controllers>""");
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"),
+            """<Controllers inheritFrom="_Mine" />""");
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's pointer is the one followed
+        result.Controllers.Select(c => c.Name).ShouldBe(["MyPad"]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_BasePlatformsUserFile_ReachesThePlatformsInheritingFromIt()
+    {
+        // given a shipped pointer from Famicom to NES, and a User NES file changing the pad
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Famicom", "Controllers.xml"),
+            """<Controllers inheritFrom="Nintendo Entertainment System" />""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Nintendo Entertainment System", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad' default='true'>
+                <Mapping name='A' input='ButtonB' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the Famicom is loaded
+        var result = _underTest.LoadPlatformMapping("Nintendo Famicom")!;
+
+        // then it inherits the NES pad as the user changed it
+        result.Controllers.Single().Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonB")]);
     }
 
     [Fact]

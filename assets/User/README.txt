@@ -6,7 +6,7 @@ for every file it reads; if a match exists here it wins, otherwise the Defaults/
 file is used.
 
 To override a shipped file, copy it from Defaults/ to the same relative path here
-and edit your copy. Two exceptions are merged rather than replaced, because each
+and edit your copy. Three exceptions are merged rather than replaced, because each
 holds many independent settings:
 
   GlobalConfig.xml                Merged field by field — include only the
@@ -15,6 +15,10 @@ holds many independent settings:
                                   are laid over the shipped ones, so labelling
                                   one game doesn't discard the shipped labels
                                   for every other game.
+  Platforms/{Platform}/Controllers.xml
+                                  Merged controller by controller — a
+                                  <Controller> here replaces the shipped one
+                                  of the same name, and the rest are kept.
 
 An update refreshes these README.txt files, so don't keep notes of your own in
 them. Nothing else under User/ is ever touched.

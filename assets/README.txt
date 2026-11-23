@@ -10,7 +10,9 @@ grouped by purpose:
   Logs/          Plugin diagnostic output.
 
 For each file the plugin reads, it checks User/ first. If a matching file exists
-there it wins; otherwise the shipped Defaults/ file is used.
+there it wins; otherwise the shipped Defaults/ file is used. GlobalConfig.xml and
+each platform's Labels.xml and Controllers.xml are the exceptions: your copy is
+merged over the shipped one instead (see User/README.txt).
 
 Defaults/  (shipped — replaced on every update)
 ----------------------------------------------------------
@@ -41,7 +43,7 @@ Place files here with the same relative path as their Defaults/ counterpart to
 shadow them. For example:
 
   GlobalConfig.xml                          Override global settings.
-  Platforms/{Platform}/Controllers.xml      Override a platform's controller definitions.
+  Platforms/{Platform}/Controllers.xml      Override or add a platform's controllers.
   Platforms/{Platform}/Labels.xml           Override or add game labels for a platform.
   Platforms/{Platform}/ControllerOverrides/{Game}.xml  Override a game's input mapping.
   controls.xml                              Override the MAME controls database.

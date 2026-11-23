@@ -1000,9 +1000,9 @@ public class InputMappingSubsystemTests
     // ---- user-layer override ----
 
     [Fact]
-    public void Load_UserControllerFilePresent_WinsOverDefaultsFile()
+    public void Load_UserControllerFilePresent_ReplacesTheShippedControllerItNames()
     {
-        // Defaults file has A→ButtonA; User file replaces the whole controller with A→ButtonB.
+        // Defaults file has Pad with A→ButtonA; User file redefines Pad with A→ButtonB.
         _dc.WritePlatform(Platform, """
             <Controllers>
               <Controller name="Pad" default="true">
@@ -1020,8 +1020,34 @@ public class InputMappingSubsystemTests
 
         ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
 
-        // The User file wins — ButtonB, not the Defaults ButtonA
+        // The User controller wins — ButtonB, not the Defaults ButtonA
         mapping.ButtonToInput["A"].ShouldBe(["ButtonB"]);
+    }
+
+    [Fact]
+    public void Load_UserControllerFileAddingAController_KeepsTheShippedDefault()
+    {
+        // Defaults file has the default Pad; User file only adds a controller of its own.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Mapping name="A" input="ButtonA" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteUserPlatform(Platform, """
+            <Controllers>
+              <Controller name="Mouse">
+                <Mapping name="Left" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        // The shipped default still answers; the user's file didn't replace the shipped one
+        mapping.ButtonToInput["A"].ShouldBe(["ButtonA"]);
+        mapping.ButtonToInput.ContainsKey("Left").ShouldBeFalse();
     }
 
     [Fact]
