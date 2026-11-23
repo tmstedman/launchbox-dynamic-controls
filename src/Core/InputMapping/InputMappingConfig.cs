@@ -48,6 +48,12 @@ public record InputMappingConfig
     /// presses from the stick itself, after remapping — and never read from a file.
     /// </summary>
     public List<MappingEntry>? DpadMirrorSource { get; set; }
+
+    /// <summary>
+    /// The controls to resolve last, when they aren't just the controller's own: a game entry's
+    /// laid over its controller's by name. Null means the controller's own.
+    /// </summary>
+    public List<ControlEntry>? Controls { get; set; }
 }
 
 /// <summary>
@@ -125,6 +131,9 @@ public record GameMappingConfig
 
     /// <summary>Buttons of the controller this game leaves unbound.</summary>
     public List<string> Unmaps { get; set; } = [];
+
+    /// <summary>Controls this game declares, laid over its controller's by name.</summary>
+    public List<ControlEntry> Controls { get; set; } = [];
 }
 
 /// <summary>

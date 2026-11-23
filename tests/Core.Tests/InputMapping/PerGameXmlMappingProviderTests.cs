@@ -399,6 +399,58 @@ public class PerGameXmlMappingProviderTests
         result.Natural.AnalogToDigital.ShouldBeNull();
     }
 
+    [Fact]
+    public void Load_EntryDeclaresControls_LaysThemOverTheControllersByName()
+    {
+        // given a controller with two controls, and an entry redefining one and adding another
+        var game = Game();
+        GameMappingConfig entry = GameEntry() with
+        {
+            Controls =
+            [
+                new ControlEntry { Name = "Dpad-Any", Mappings = ["Dpad-Up", "Dpad-Down"] },
+                new ControlEntry { Name = "Pedals", Mappings = ["A", "B"] },
+            ],
+        };
+        var platform = PlatformConfig(ControllerDef(name: "Pad", isDefault: true) with
+        {
+            Controls =
+            [
+                new ControlEntry { Name = "Dpad-Any", Mappings = ["Dpad-Up", "Dpad-Down", "Dpad-Left", "Dpad-Right"] },
+                new ControlEntry { Name = "C-Any", Mappings = ["C-Up", "C-Down"] },
+            ],
+        }).WithGames(entry);
+
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
+
+        // then the entry's Dpad-Any replaces the controller's in place, C-Any is kept, and the
+        // new control is added
+        result.ShouldNotBeNull();
+        result.Controls.ShouldNotBeNull();
+        result.Controls.Select(c => (c.Name, string.Join(" ", c.Mappings))).ShouldBe(
+        [
+            ("Dpad-Any", "Dpad-Up Dpad-Down"),
+            ("C-Any", "C-Up C-Down"),
+            ("Pedals", "A B"),
+        ]);
+    }
+
+    [Fact]
+    public void Load_EntryDeclaresNoControls_LeavesTheControllersToTheService()
+    {
+        // given an entry with no controls of its own
+        var game = Game();
+        var platform = PlatformConfig(ControllerDef(name: "Pad", isDefault: true)).WithGames(GameEntry());
+
+        // when the provider loads
+        var result = _underTest.Load(game, platform)?.Current;
+
+        // then it supplies none, so the selected controller's own are read
+        result.ShouldNotBeNull();
+        result.Controls.ShouldBeNull();
+    }
+
     // ---- natural vs current ----
 
     [Fact]

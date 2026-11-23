@@ -157,6 +157,22 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_GameControl_IsParsedAlongsideMappings()
+    {
+        // given an entry declaring a control of its own
+        var result = LoadGame("""
+            <Game romName='OutRun'>
+              <Control name='Pedals' mappings='A B' />
+              <Mapping name='A' input='ButtonX' />
+            </Game>
+            """)!;
+
+        // then the control is read as a controller's would be
+        result.Controls.Select(c => (c.Name, string.Join(" ", c.Mappings))).ShouldBe([("Pedals", "A B")]);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
     public void LoadPlatformMapping_GameUnrecognisedElement_SkippedWithError()
     {
         // given an entry with a typo'd element

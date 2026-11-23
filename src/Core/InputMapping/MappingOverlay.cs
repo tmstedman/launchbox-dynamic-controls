@@ -19,4 +19,20 @@ internal static class MappingOverlay
         result.AddRange(overlay);
         return result;
     }
+
+    /// <summary>
+    /// Controls overlay by their own name too, but a later declaration replaces an earlier one
+    /// outright rather than adding members to it, so what a name stands for is always stated in
+    /// one place.
+    /// </summary>
+    internal static List<ControlEntry> ApplyControls(List<ControlEntry> baseline, List<ControlEntry> overlay)
+    {
+        var result = new List<ControlEntry>(baseline);
+        foreach (ControlEntry control in overlay)
+        {
+            int at = result.FindIndex(c => string.Equals(c.Name, control.Name, StringComparison.Ordinal));
+            if (at >= 0) result[at] = control; else result.Add(control);
+        }
+        return result;
+    }
 }

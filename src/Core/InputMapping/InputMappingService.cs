@@ -59,14 +59,15 @@ public class InputMappingService(
         // A remap comes from an emulator's config (or a file standing in for one), which binds
         // individual directions and has no way to name a control as a unit. So a control — a
         // button that does name one — is read last, against wherever its members actually ended up.
-        return ResolveControls(mapping, platform, controller);
+        return ResolveControls(mapping, provided.Current.Controls, platform, controller);
     }
 
-    /// <summary>Applies the selected controller's own controls, if it declares any.</summary>
+    /// <summary>Applies the controls the provider supplied — a game entry's, laid over its
+    /// controller's — or else the selected controller's own, if it declares any.</summary>
     private ResolvedMapping ResolveControls(
-        ResolvedMapping mapping, PlatformControllersConfig? platform, string? controllerName)
+        ResolvedMapping mapping, List<ControlEntry>? provided, PlatformControllersConfig? platform, string? controllerName)
     {
-        ControllerConfig? controller = platform?.Resolve(controllerName);
-        return _controlResolver.Apply(mapping, controller?.Controls ?? []);
+        IReadOnlyList<ControlEntry> controls = provided ?? platform?.Resolve(controllerName)?.Controls ?? [];
+        return _controlResolver.Apply(mapping, controls);
     }
 }

@@ -407,6 +407,38 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
     }
 
+    [Fact]
+    public void Load_GameEntryDeclaresAControl_ItReachesWhatItsMembersReachAfterTheRemap()
+    {
+        // The controller says Dpad-Any is three directions; the game redefines it as the vertical
+        // pair and adds a control of its own over two face buttons, one of which it moves. Each
+        // control is read last, against wherever the entry left its members.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad" default="true">
+                <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down Dpad-Left" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+                <Mapping name="Dpad-Left" input="ButtonDpadLeft" />
+                <Mapping name="A" input="ButtonA" />
+                <Mapping name="B" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <Game>
+              <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down" />
+              <Control name="Pedals" mappings="A B" />
+              <Mapping name="A" input="ButtonX" />
+            </Game>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput["Dpad-Any"].ShouldBe(["ButtonDpadUp", "ButtonDpadDown"]);
+        mapping.ButtonToInput["Pedals"].ShouldBe(["ButtonX", "ButtonB"]);
+    }
+
     // ---- a provider's remap + natural-map splicing ----
 
     [Fact]
