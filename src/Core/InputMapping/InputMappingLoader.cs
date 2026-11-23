@@ -165,7 +165,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             switch (node.Name)
             {
                 case "Controller":
-                    if (ParseControllerRaw(node, path) is ParsedController pc) controllers.Add(pc);
+                    if (ParseControllerRaw(node, path) is ParsedController pc) AddController(controllers, pc, path);
                     break;
                 case "Game":
                     if (ParseGame(node, path) is GameMappingConfig game) AddGame(games, game, path);
@@ -181,6 +181,21 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         return new ParsedFile(path, controllers, games,
             string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom,
             string.IsNullOrEmpty(defaultName) ? null : defaultName);
+    }
+
+    /// <summary>
+    /// Adds <paramref name="controller"/> to one file's controllers unless an earlier one has its
+    /// name: which of the two applied would come down to document order, so the first is kept and
+    /// the second logged, as a game stated twice is.
+    /// </summary>
+    private void AddController(List<ParsedController> controllers, ParsedController controller, string path)
+    {
+        if (controllers.Any(c => c.Name == controller.Name))
+        {
+            _logger.Error($"Skipping the second <Controller name=\"{controller.Name}\"> in {path}: the name is already taken");
+            return;
+        }
+        controllers.Add(controller);
     }
 
     /// <summary>

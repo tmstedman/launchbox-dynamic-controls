@@ -1365,6 +1365,30 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_TwoControllersWithOneName_KeepsTheFirstAndLogs()
+    {
+        // given a file declaring the same controller twice
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='Pad'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+              <Controller name='Pad'>
+                <Mapping name='A' input='ButtonB' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis");
+
+        // then the platform still loads, from the first, and the second is reported
+        result.ShouldNotBeNull();
+        result.Controllers.Single().Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA")]);
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("second <Controller name=\"Pad\">")));
+    }
+
+    [Fact]
     public void LoadPlatformMapping_ControllerMissingName_SkippedWithError()
     {
         // given a Controllers.xml with one valid controller and one missing the name attribute
