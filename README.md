@@ -114,7 +114,7 @@ Some games remap buttons or use a different controller variant. The plugin resol
 </Controllers>
 ```
 
-An entry is found by `launchBoxId` first, then by `romName` (the ROM file name without its extension, ignoring case); either attribute alone is enough. It is written like a `<Controller>`, and your file is merged over the shipped one, so the entry is all it needs to hold.
+An entry is found by `launchBoxId` first, then by `romName` (the ROM file name without its extension, ignoring case); either attribute alone is enough, and yours are searched before any shipped one. It is written like a `<Controller>`, and your file is merged over the shipped one, so the entry is all it needs to hold.
 
 `<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place; a `<Control>` declares a button standing for several, as on a controller, replacing the controller's of the same name. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button. A button you remap is drawn like one an emulator has swapped: with the picture of the physical button the player presses.
 

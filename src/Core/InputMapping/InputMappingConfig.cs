@@ -91,14 +91,19 @@ public record PlatformControllersConfig
 
     /// <summary>
     /// Returns the entry for <paramref name="game"/>: the one with its LaunchBox ID, else the one
-    /// with its ROM name, compared ignoring case; null when neither matches. A ROM name is not
-    /// matched with its region and revision tags stripped, as a label is, and a clone is not
-    /// matched by its parent's: a mapping is one ROM's setup, as an emulator keeps it, so a remap
-    /// written for one dump shouldn't reach another.
+    /// with its ROM name, compared ignoring case; null when neither matches. The user's entries are
+    /// searched before the shipped ones, so one naming the game by either key wins even where a
+    /// shipped entry, sharing no key with it to be merged away, names the game by the other. A ROM
+    /// name is not matched with its region and revision tags stripped, as a label is, and a clone
+    /// is not matched by its parent's: a mapping is one ROM's setup, as an emulator keeps it, so a
+    /// remap written for one dump shouldn't reach another.
     /// </summary>
     public GameMappingConfig? FindGame(GameInfo game) =>
-        (game.LaunchBoxId is int id ? Games.FirstOrDefault(g => g.LaunchBoxId == id) : null)
-        ?? Games.FirstOrDefault(g => string.Equals(g.RomName, game.RomName, StringComparison.OrdinalIgnoreCase));
+        FindGame(Games.Where(g => g.FromUser), game) ?? FindGame(Games.Where(g => !g.FromUser), game);
+
+    private static GameMappingConfig? FindGame(IEnumerable<GameMappingConfig> games, GameInfo game) =>
+        (game.LaunchBoxId is int id ? games.FirstOrDefault(g => g.LaunchBoxId == id) : null)
+        ?? games.FirstOrDefault(g => string.Equals(g.RomName, game.RomName, StringComparison.OrdinalIgnoreCase));
 }
 
 /// <summary>
@@ -134,6 +139,11 @@ public record GameMappingConfig
 
     /// <summary>Controls this game declares, laid over its controller's by name.</summary>
     public List<ControlEntry> Controls { get; set; } = [];
+
+    /// <summary>The entry comes from the User layer's file, so <see
+    /// cref="PlatformControllersConfig.FindGame"/> tries it before the shipped ones. Set by the
+    /// loader, never read from the file.</summary>
+    public bool FromUser { get; set; }
 }
 
 /// <summary>
