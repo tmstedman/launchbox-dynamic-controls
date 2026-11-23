@@ -439,6 +439,32 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["Pedals"].ShouldBe(["ButtonX", "ButtonB"]);
     }
 
+    [Fact]
+    public void Load_GameEntryUnmapsAControl_ItReachesNothing()
+    {
+        // A control is a platform button like any other, so a game leaving it unbound drops it
+        // while the buttons it stood for keep their own bindings.
+        _dc.WritePlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad">
+                <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <Game>
+              <Unmap name="Dpad-Any" />
+            </Game>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput.ContainsKey("Dpad-Any").ShouldBeFalse();
+        mapping.ButtonToInput["Dpad-Up"].ShouldBe(["ButtonDpadUp"]);
+    }
+
     // ---- a provider's remap + natural-map splicing ----
 
     [Fact]
