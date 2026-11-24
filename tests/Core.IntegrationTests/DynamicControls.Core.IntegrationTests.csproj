@@ -28,6 +28,7 @@
   <ItemGroup>
     <None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\assets\Defaults\Emulators\MAME\JoycodeMapping.xml" Link="Shipped\Defaults\Emulators\MAME\JoycodeMapping.xml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\assets\Defaults\Platforms\**\Controllers.xml" Link="Shipped\Defaults\Platforms\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\assets\Templates\Xbox Series X\Layout.xml" Link="Shipped\Templates\Xbox Series X\Layout.xml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
