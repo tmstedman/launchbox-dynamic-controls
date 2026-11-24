@@ -1337,6 +1337,33 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_UserFileWithAnEmptyRootInheritFrom_InheritsFromNothing()
+    {
+        // given a shipped pointer at a base platform, and a User file for the platform saying it
+        // inherits from nothing, with a controller of its own
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega CD", "Controllers.xml"),
+            """<Controllers inheritFrom="Sega Genesis" />""");
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers default='6-Button'>
+              <Controller name='6-Button' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega CD", "Controllers.xml"), """
+            <Controllers inheritFrom="">
+              <Controller name='Mouse' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega CD")!;
+
+        // then the base platform's controllers and default are gone, not brought back by the
+        // shipped pointer
+        result.Controllers.Select(c => c.Name).ShouldBe(["Mouse"]);
+        result.Resolve(null)!.Name.ShouldBe("Mouse");
+    }
+
+    [Fact]
     public void LoadPlatformMapping_BasePlatformsUserFile_ReachesThePlatformsInheritingFromIt()
     {
         // given a shipped pointer from Famicom to NES, and a User NES file changing the pad
