@@ -200,6 +200,28 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
+    public void Load_GameEntrySaysAnalogToDigitalNone_TheControllersMirrorIsOff()
+    {
+        // The controller mirrors the d-pad onto the left stick; a game whose stick does something
+        // else switches it off with analogToDigital="none", read through the real loader.
+        _dc.WritePlatform(Platform, """
+            <Controllers default="Pad">
+              <Controller name="Pad" analogToDigital="left">
+                <Mapping name="Up" input="ButtonDpadUp" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteGameMapping(Platform, "OutRun", """
+            <Game analogToDigital="none" />
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.AnalogToDigital.ShouldBeNull();
+        mapping.ButtonToInput["Up"].ShouldBe(["ButtonDpadUp"]);
+    }
+
+    [Fact]
     public void Load_PerGameSetsAnalogToDigitalItsControllerLacks_TheNaturalStateMirrorsToo()
     {
         // The mirror describes the hardware, not a remap, so the natural state takes the file's
@@ -333,7 +355,7 @@ public class InputMappingSubsystemTests
     public void Load_PlatformAddsNewDefaultControllerOverBaseFile_OverridesInheritedDefault()
     {
         // The platform's own Controllers file inherits a shared base whose "Pad" is the default,
-        // but also declares its own new controller also marked default (e.g. a CD add-on platform
+        // but also declares its own new controller and names it default (e.g. a CD add-on platform
         // introducing a controller the base platform never had). No per-game mapping selects a
         // controller explicitly, so PlatformDefaultMappingProvider falls back to whichever controller
         // resolves as the platform default — this must be the platform file's own, not the base's.

@@ -761,6 +761,59 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_InvalidAnalogToDigital_IsLoggedAndTheBasesApplies()
+    {
+        // given a base mirroring left and a descendant with a value the loader doesn't know
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button' analogToDigital='left' />
+              <Controller name='6-Button' inheritFrom='3-Button' analogToDigital='off' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the value is reported and counts as unstated, so the base's mirror is inherited;
+        // switching it off takes "none"
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("'off'") && s.Contains("'none'")));
+        result.Controllers[1].AnalogToDigital.ShouldBe(AnalogToDigitalMode.Left);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserCopyOfABaseController_ReachesTheShippedVariantsInheritingFromIt()
+    {
+        // given a shipped 6-Button inheriting a 3-Button that mirrors left, and a User 3-Button
+        // that moves A and states no mirror
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers default='6-Button'>
+              <Controller name='3-Button' analogToDigital='left'>
+                <Mapping name='A' input='ButtonX' />
+              </Controller>
+              <Controller name='6-Button' inheritFrom='3-Button'>
+                <Mapping name='X' input='ButtonLeftShoulder' />
+              </Controller>
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Controller name='3-Button'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the shipped 6-Button inherits the user's 3-Button whole, its mirror included: a
+        // controller is replaced before inheritance is resolved
+        ControllerConfig sixButton = result.Resolve("6-Button")!;
+        sixButton.Mappings.Select(m => (m.Name, m.Input)).ShouldBe([("A", "ButtonA"), ("X", "ButtonLeftShoulder")]);
+        sixButton.AnalogToDigital.ShouldBeNull();
+    }
+
+    [Fact]
     public void LoadPlatformMapping_InheritFrom_UnmapDropsABaseButton()
     {
         // given a base with A, B and C, and a descendant without B
@@ -935,10 +988,10 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
-    public void LoadPlatformMapping_RootInheritFrom_NewControllerMarkedDefault_OverridesBaseDefault()
+    public void LoadPlatformMapping_RootInheritFrom_PlatformsOwnDefault_OverridesBaseDefault()
     {
-        // given a base with a default "Pad", and a platform that adds a new, unrelated controller
-        // also marked default (e.g. a CD add-on introducing a controller the base platform lacks)
+        // given a base whose default is "Pad", and a platform that adds a new, unrelated controller
+        // and names it default (e.g. a CD add-on introducing a controller the base platform lacks)
         string platformPath = Path.Combine(DefaultsDir, "Platforms", "NEC PC Engine-CD", "Controllers.xml");
         string basePath = Path.Combine(DefaultsDir, "Platforms", "_SharedBase", "Controllers.xml");
         StubXml(basePath, """
@@ -959,7 +1012,7 @@ public class InputMappingLoaderTests
         // when the loader runs
         var result = _underTest.LoadPlatformMapping("NEC PC Engine-CD")!;
 
-        // then the new controller's default wins — Pad's is cleared, not left as a second default
+        // then the platform's own default wins, and Pad is no longer one
         result.Controllers.Select(c => (c.Name, c.IsDefault)).ShouldBe(
         [
             ("Pad", false),
@@ -1075,7 +1128,7 @@ public class InputMappingLoaderTests
         // when the loader runs
         var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
 
-        // then the base's default is untouched — the fix only intervenes when own declares a default
+        // then the base's default stands, since the platform names none of its own
         result.Resolve(null)!.Name.ShouldBe("Pad");
     }
 
