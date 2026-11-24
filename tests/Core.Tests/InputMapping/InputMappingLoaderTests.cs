@@ -69,6 +69,40 @@ public class InputMappingLoaderTests
         ]);
     }
 
+    [Fact]
+    public void LoadPlatformMapping_GameInheritFrom_IsTrimmed()
+    {
+        // given an entry naming its controller with stray spaces
+        var result = LoadGame("<Game romName='OutRun' inheritFrom=' Zapper '/>")!;
+
+        // then the controller is named without them
+        result.InheritFrom.ShouldBe("Zapper");
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_ControllerInheritFromAndRootDefault_AreTrimmed()
+    {
+        // given a default and an inheritFrom written with stray spaces
+        StubXml(Path.Combine(DefaultsDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers default=' 6-Button '>
+              <Controller name='3-Button'>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+              <Controller name='6-Button' inheritFrom=' 3-Button '>
+                <Mapping name='X' input='ButtonX' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then both name their controllers, and no error is logged
+        result.Resolve(null)!.Name.ShouldBe("6-Button");
+        result.Resolve("6-Button")!.Mappings.Select(m => m.Name).ShouldBe(["A", "X"]);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
     [Theory]
     [InlineData("left", AnalogToDigitalMode.Left)]
     [InlineData("right", AnalogToDigitalMode.Right)]

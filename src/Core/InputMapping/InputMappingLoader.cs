@@ -179,7 +179,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         // An empty inheritFrom still states something: that this file inherits from no platform,
         // which is how a user's file drops the shipped file's pointer. So only an absent one is null.
         string? inheritFrom = root.Attributes["inheritFrom"]?.Value.Trim();
-        string? defaultName = root.Attributes["default"]?.Value;
+        string? defaultName = root.Attributes["default"]?.Value.Trim();
         return new ParsedFile(path, controllers, games,
             inheritFrom,
             string.IsNullOrEmpty(defaultName) ? null : defaultName);
@@ -273,7 +273,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             return null;
         }
 
-        string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
+        string? inheritFrom = node.Attributes["inheritFrom"]?.Value.Trim();
         var game = new GameMappingConfig { LaunchBoxId = id, RomName = romName, InheritFrom = string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom };
         if (TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d))
         {
@@ -388,7 +388,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
 
         bool statesA2d = TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
 
-        string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
+        string? inheritFrom = node.Attributes["inheritFrom"]?.Value.Trim();
 
         var ownMappings = new List<MappingEntry>();
         var ownUnmaps = new List<string>();
