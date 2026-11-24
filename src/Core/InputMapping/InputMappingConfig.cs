@@ -93,10 +93,11 @@ public record PlatformControllersConfig
     /// Returns the entry for <paramref name="game"/>: the one with its LaunchBox ID, else the one
     /// with its ROM name, compared ignoring case; null when neither matches. The user's entries are
     /// searched before the shipped ones, so one naming the game by either key wins even where a
-    /// shipped entry, sharing no key with it to be merged away, names the game by the other. A ROM
+    /// shipped entry, sharing no key with it to be merged away, names the game by the other. An ID
+    /// covers every ROM LaunchBox files under it, which is what an entry giving one asks for. A ROM
     /// name is not matched with its region and revision tags stripped, as a label is, and a clone
-    /// is not matched by its parent's: a mapping is one ROM's setup, as an emulator keeps it, so a
-    /// remap written for one dump shouldn't reach another.
+    /// is not matched by its parent's: an entry naming a ROM is that ROM's setup, as an emulator
+    /// keeps it, so it shouldn't reach another dump.
     /// </summary>
     public GameMappingConfig? FindGame(GameInfo game) =>
         FindGame(Games.Where(g => g.FromUser), game) ?? FindGame(Games.Where(g => !g.FromUser), game);
