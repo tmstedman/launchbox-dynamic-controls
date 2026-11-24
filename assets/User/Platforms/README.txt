@@ -124,7 +124,8 @@ Attributes:
                     buttons onto the named stick's directions. Inherited from
                     the variant's inheritFrom chain when absent; "none"
                     switches an inherited mirror off.
-  Unmap/@name       Inherited platform button this variant doesn't have.
+  Unmap/@name       Inherited platform button or control this variant
+                    doesn't have.
   Controllers/@inheritFrom    Platform name of another platform folder whose
                     variants are pulled in and merged under this file's own.
 
@@ -274,4 +275,9 @@ Attributes:
                             when absent, "none" for no mirroring.
   Mapping/@name             Platform button name to override.
   Mapping/@input            Generic input to assign to that button.
-  Unmap/@name               Platform button name to remove from the mapping.
+  Unmap/@name               Platform button name to remove from the mapping,
+                            or a control to remove.
+  Control/@name             A control to declare for this game, replacing
+                            the variant's control of the same name.
+  Control/@mappings         Space-separated platform button names it stands
+                            for.

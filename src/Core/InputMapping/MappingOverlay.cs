@@ -29,9 +29,9 @@ internal static class MappingOverlay
     internal static List<ControlEntry> ApplyControls(
         List<ControlEntry> baseline,
         List<ControlEntry> overlay,
-        List<string>? removes = null)
+        List<string> removes)
     {
-        var removed = new HashSet<string>(removes ?? []);
+        var removed = new HashSet<string>(removes);
         var result = baseline.Where(c => !removed.Contains(c.Name)).ToList();
         foreach (ControlEntry control in overlay)
         {

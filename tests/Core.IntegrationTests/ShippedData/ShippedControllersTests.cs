@@ -41,6 +41,25 @@ public class ShippedControllersTests
         result.Controllers.Count(c => c.IsDefault).ShouldBe(1);
     }
 
+    /// <summary>
+    /// The controllers whose stick mirror now comes along their inheritFrom chain rather than from
+    /// an attribute of their own, and the one that switches an inherited mirror off. Editing a
+    /// base controller's analogToDigital moves every controller built on it; this says which.
+    /// </summary>
+    [Theory]
+    [InlineData("Sega Genesis", "6-Button", AnalogToDigitalMode.Left)]
+    [InlineData("NEC PC Engine", "3-Button", AnalogToDigitalMode.Left)]
+    [InlineData("NEC PC Engine", "6-Button", AnalogToDigitalMode.Left)]
+    [InlineData("Sega Saturn", "Control Pad", AnalogToDigitalMode.Left)]
+    [InlineData("Sega Saturn", "3D Control Pad", null)]
+    public void InheritingController_MirrorsTheStickItInherits(string platform, string controller, AnalogToDigitalMode? expected)
+    {
+        PlatformControllersConfig result =
+            new InputMappingLoader(new ErrorRecordingLogger(), new LayeredFileSystem(Root, new SystemFileSystem())).LoadPlatformMapping(platform)!;
+
+        result.Resolve(controller)!.AnalogToDigital.ShouldBe(expected);
+    }
+
     [Fact]
     public void NoShippedFile_HasAGameEntry()
     {

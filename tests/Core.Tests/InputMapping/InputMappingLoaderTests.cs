@@ -103,6 +103,69 @@ public class InputMappingLoaderTests
         _logger.DidNotReceive().Error(Arg.Any<string>());
     }
 
+    [Fact]
+    public void LoadPlatformMapping_ControllerEmptyInheritFrom_NamesNoController()
+    {
+        // given a controller with an empty inheritFrom
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Controller name='3-Button' inheritFrom=' '>
+                <Mapping name='A' input='ButtonA' />
+              </Controller>
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var result = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then it inherits nothing, as a game or a root with an empty inheritFrom does, rather than
+        // reporting a controller called ''
+        result.Resolve("3-Button")!.Mappings.Select(m => m.Name).ShouldBe(["A"]);
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_GameKeys_AreTrimmed()
+    {
+        // given an entry whose ID and ROM name carry stray spaces
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game launchBoxId=' 42 ' inheritFrom='ById' />
+              <Game romName=' OutRun ' inheritFrom='ByName' />
+            </Controllers>
+            """);
+
+        // when the game is looked up
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then each key finds it without them
+        platform.FindGame(Game(romName: "Other", launchBoxId: 42))!.InheritFrom.ShouldBe("ById");
+        platform.FindGame(Game(romName: "OutRun"))!.InheritFrom.ShouldBe("ByName");
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_GameEmptyLaunchBoxId_IsAbsent()
+    {
+        // given an entry with an empty launchBoxId beside its ROM name
+        var result = LoadGame("<Game launchBoxId='' romName='OutRun' />")!;
+
+        // then it is keyed by ROM name alone, with no complaint about a number
+        result.LaunchBoxId.ShouldBeNull();
+        _logger.DidNotReceive().Error(Arg.Any<string>());
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_GameLaunchBoxIdNotANumber_IgnoredWithError()
+    {
+        // given an entry whose launchBoxId isn't a number, beside a ROM name
+        var result = LoadGame("<Game launchBoxId='abc' romName='OutRun' />")!;
+
+        // then the entry is keyed by ROM name alone, and the bad ID is reported
+        result.LaunchBoxId.ShouldBeNull();
+        _logger.Received().Error(Arg.Is<string>(s => s.Contains("launchBoxId=\"abc\"") && s.Contains("not a number")));
+    }
+
     [Theory]
     [InlineData("left", AnalogToDigitalMode.Left)]
     [InlineData("right", AnalogToDigitalMode.Right)]
@@ -340,6 +403,32 @@ public class InputMappingLoaderTests
             ("Aladdin", "Shipped"),
             ("Sonic", "Mine"),
         ]);
+    }
+
+    [Fact]
+    public void LoadPlatformMapping_UserGame_ReplacesEveryShippedEntryItSharesAKeyWith()
+    {
+        // given two shipped entries, one keyed by the game's ID and one by its ROM name, and a User
+        // entry naming both keys
+        StubXml(GenesisControllers, """
+            <Controllers>
+              <Game launchBoxId='42' inheritFrom='ShippedById' />
+              <Game romName='Aladdin' inheritFrom='Shipped' />
+              <Game romName='OutRun' inheritFrom='ShippedByName' />
+            </Controllers>
+            """);
+        StubXml(Path.Combine(UserDir, "Platforms", "Sega Genesis", "Controllers.xml"), """
+            <Controllers>
+              <Game launchBoxId='42' romName='OutRun' inheritFrom='Mine' />
+            </Controllers>
+            """);
+
+        // when the loader runs
+        var platform = _underTest.LoadPlatformMapping("Sega Genesis")!;
+
+        // then the user's entry takes the first one's place and the second is gone, leaving one
+        // entry for the game
+        platform.Games.Select(g => g.InheritFrom).ShouldBe(["Mine", "Shipped"]);
     }
 
     [Fact]

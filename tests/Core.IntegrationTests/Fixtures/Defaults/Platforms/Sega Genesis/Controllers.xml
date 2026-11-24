@@ -33,4 +33,8 @@
 
     <Game romName="UserMappingTest" inheritFrom="3-Button" />
 
+    <Game launchBoxId="9001" inheritFrom="3-Button">
+        <Mapping name="A" input="ButtonRightShoulder" />
+    </Game>
+
 </Controllers>

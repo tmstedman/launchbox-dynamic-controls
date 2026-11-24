@@ -258,14 +258,14 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// </summary>
     private GameMappingConfig? ParseGame(XmlElement node, string path)
     {
-        string? idText = node.Attributes["launchBoxId"]?.Value;
+        string? idText = node.Attributes["launchBoxId"]?.Value.Trim();
         int? id = null;
-        if (idText != null)
+        if (!string.IsNullOrEmpty(idText))
         {
             if (int.TryParse(idText, out int parsed)) id = parsed;
             else _logger.Error($"Ignoring launchBoxId=\"{idText}\" on a <Game> in {path}: not a number");
         }
-        string? romName = node.Attributes["romName"]?.Value;
+        string? romName = node.Attributes["romName"]?.Value.Trim();
         if (string.IsNullOrEmpty(romName)) romName = null;
         if (id == null && romName == null)
         {
@@ -389,6 +389,7 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
         bool statesA2d = TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d);
 
         string? inheritFrom = node.Attributes["inheritFrom"]?.Value.Trim();
+        if (string.IsNullOrEmpty(inheritFrom)) inheritFrom = null;
 
         var ownMappings = new List<MappingEntry>();
         var ownUnmaps = new List<string>();

@@ -570,6 +570,31 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
+    /// A game entry keyed by LaunchBox ID alone reaches the game whatever its ROM file is called:
+    /// it selects 3-Button and moves A onto the right shoulder, which the platform default
+    /// (6-Button, Z there) would draw otherwise.
+    /// </summary>
+    [Fact]
+    public void SegaGenesis_GameEntryKeyedByLaunchBoxIdOnly_ReachesTheGameUnderAnyRomName()
+    {
+        var game = new GameInfo(
+            Platform: "Sega Genesis",
+            RomName: "IdOnlyTest",                     // named by no entry
+            CloneOf: null,
+            LaunchBoxId: 9001,
+            EmulatorPath: null,
+            RomDirectory: null,
+            RetroArchCore: null);
+
+        ControllerOverlayModel overlay = _service.Resolve(game);
+
+        // A, moved there by the entry, is drawn where 6-Button's Z would be
+        overlay.ShouldHaveImage("ButtonRightShoulder", @"Templates\Xbox Series X\Sega Genesis\A.png".AsFixturePath());
+        // and 3-Button has no Y, so the Y position has nothing of the Genesis pad's to draw
+        overlay.RenderedImages.ShouldNotContain(i => i.InputName == "ButtonY" && i.Source.Contains("Sega Genesis"));
+    }
+
+    /// <summary>
     /// A game entry swapping B with Dpad-Left draws the swap the way an emulator's would: the
     /// template's A position is pressed with Dpad-Left, which has no Genesis picture of its own, so
     /// it shows the left arrow rather than the A glyph. The same file's <c>&lt;Unmap name="C"/&gt;</c>
