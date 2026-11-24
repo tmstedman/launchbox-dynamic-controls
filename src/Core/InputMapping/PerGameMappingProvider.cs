@@ -26,7 +26,7 @@ namespace DynamicControls.InputMapping;
 /// a clone shares; a mapping describes the player's setup, which MAME and RetroArch keep per rom, so
 /// an entry written for the parent would otherwise switch off a configuration written for the clone.</para>
 /// </summary>
-public class PerGameXmlMappingProvider(ILogger logger) : IInputMappingProvider
+public class PerGameMappingProvider(ILogger logger) : IInputMappingProvider
 {
     private readonly ILogger _logger = logger;
 

@@ -500,7 +500,7 @@ public class SegaGenesisEndToEndTests
     }
 
     /// <summary>
-    /// Per-game XML that both selects a non-default controller (3-Button) and remaps
+    /// A game entry that both selects a non-default controller (3-Button) and remaps
     /// A → ButtonRightShoulder — verifies controller selection and a Remapped input compose:
     /// A drives ButtonRightShoulder while ButtonX, left without a mapping, renders Unmapped and dim.
     /// </summary>
@@ -576,7 +576,7 @@ public class SegaGenesisEndToEndTests
     /// leaves the B position with no button at all, so it draws its generic glyph, not C's picture.
     /// </summary>
     [Fact]
-    public void SegaGenesis_PerGameXmlSwapsAFaceButtonWithADirection_DrawsTheSwapAndLeavesTheUnmappedPositionGeneric()
+    public void SegaGenesis_GameEntrySwapsAFaceButtonWithADirection_DrawsTheSwapAndLeavesTheUnmappedPositionGeneric()
     {
         var game = new GameInfo(
             Platform: "Sega Genesis",
@@ -604,7 +604,7 @@ public class SegaGenesisEndToEndTests
     /// clone's own emulator configuration. So the clone reads the platform default, 6-Button.
     /// </summary>
     [Fact]
-    public void SegaGenesis_OutRunBeta_Clone_InheritsTheParentsLabelsButNotItsControllerOverride()
+    public void SegaGenesis_OutRunBeta_Clone_InheritsTheParentsLabelsButNotItsGameEntry()
     {
         var game = new GameInfo(
             Platform: "Sega Genesis",

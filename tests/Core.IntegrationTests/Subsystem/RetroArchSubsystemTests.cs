@@ -583,10 +583,10 @@ public class RetroArchSubsystemTests
         retroArchCore: CoreDll));
 
     [Fact]
-    public void Scenario_NoPerGameXml_TheCfgsControllerChoiceReachesTheMapping()
+    public void Scenario_NoGameEntry_TheCfgsControllerChoiceReachesTheMapping()
     {
-        // The control for the test below: with no override file the cfg's 3-Button choice is the
-        // controller, so a different answer there is the XML's doing and not a broken fixture.
+        // The control for the test below: with no game entry the cfg's 3-Button choice is the
+        // controller, so a different answer there is the entry's doing and not a broken fixture.
         StageGenesisGameOnThreeButtonPad();
 
         ResolvedMapping mapping = LoadGenesisGame();
@@ -596,7 +596,7 @@ public class RetroArchSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlNamingNoController_ShadowsTheCfgsControllerChoice()
+    public void Scenario_GameEntryNamingNoController_ShadowsTheCfgsControllerChoice()
     {
         // A game entry that names no controller is read against the platform default, never the
         // pad RetroArch selected: the entry's button names come from some controller's vocabulary,
@@ -619,7 +619,7 @@ public class RetroArchSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlPresent_TheRmpsSwapsNeverReachTheMapping()
+    public void Scenario_GameEntryPresent_TheRmpsSwapsNeverReachTheMapping()
     {
         // The other half of the XML standing in for RetroArch: its swaps are dropped along with
         // its controller choice, rather than stacked on the file's own remap. The rmp moves B

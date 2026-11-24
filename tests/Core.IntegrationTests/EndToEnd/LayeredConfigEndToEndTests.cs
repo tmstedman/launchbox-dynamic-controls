@@ -22,7 +22,7 @@ public class LayeredConfigEndToEndTests
     /// label drops.
     /// </summary>
     [Fact]
-    public void SegaGenesis_UserControllerOverrideFileWinsOverDefaults()
+    public void SegaGenesis_UserGameEntryWinsOverDefaults()
     {
         // given a game whose Defaults mapping selects 3-Button but User mapping selects 6-Button
         var game = new GameInfo(
