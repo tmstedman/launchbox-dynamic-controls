@@ -28,10 +28,10 @@ public class PerGameXmlMappingProviderTests
     }
 
     [Fact]
-    public void Load_NullRomName_ReturnsNull()
+    public void Load_NoPlatform_ReturnsNull()
     {
-        // given a game with no rom name
-        var game = Game(romName: null!);
+        // given no Controllers.xml for the platform, so no entries either
+        var game = Game();
 
         // when the provider loads
         var result = _underTest.Load(game, platform: null)?.Current;

@@ -173,6 +173,17 @@ public class InputMappingLoaderTests
     }
 
     [Fact]
+    public void LoadPlatformMapping_GameEmptyInheritFrom_NamesNoController()
+    {
+        // given an entry with an empty inheritFrom
+        var result = LoadGame("<Game romName='OutRun' inheritFrom='' />")!;
+
+        // then it names no controller, as one leaving the attribute out does, rather than one
+        // called ''
+        result.InheritFrom.ShouldBeNull();
+    }
+
+    [Fact]
     public void LoadPlatformMapping_GameUnrecognisedElement_SkippedWithError()
     {
         // given an entry with a typo'd element
