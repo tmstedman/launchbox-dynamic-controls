@@ -509,7 +509,7 @@ public class MameInputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_PerGameXmlPresent_ReplacesTheCfgsBindingsAndPortNames()
+    public void Load_GameEntryPresent_ReplacesTheCfgsBindingsAndPortNames()
     {
         // A game entry stands in for the cfg rather than layering on it, so nothing the cfg says
         // reaches the mapping: not its swap of BUTTON3, not the BUTTON5 it adds, and not the

@@ -6,19 +6,19 @@ using static DynamicControls.InputMapping.AnalogToDigitalMode;
 namespace DynamicControls.Core.Tests.InputMapping;
 
 /// <summary>
-/// Unit tests for <see cref="PerGameXmlMappingProvider"/>. Each test supplies the platform's
+/// Unit tests for <see cref="PerGameMappingProvider"/>. Each test supplies the platform's
 /// controllers and the game's <see cref="GameMappingConfig"/> entry directly — no XML, no
 /// filesystem. Covers the controller-resolution chain (named → unknown-falls-back → null →
 /// platform-default), the per-game-over-baseline merge by Name, and AnalogToDigital inheritance.
 /// </summary>
-public class PerGameXmlMappingProviderTests
+public class PerGameMappingProviderTests
 {
     private readonly ILogger _logger = Substitute.For<ILogger>();
-    private readonly PerGameXmlMappingProvider _underTest;
+    private readonly PerGameMappingProvider _underTest;
 
-    public PerGameXmlMappingProviderTests()
+    public PerGameMappingProviderTests()
     {
-        _underTest = new PerGameXmlMappingProvider(_logger);
+        _underTest = new PerGameMappingProvider(_logger);
     }
 
     [Fact]

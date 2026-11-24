@@ -7,7 +7,7 @@ namespace DynamicControls.Core.IntegrationTests.Subsystem;
 
 /// <summary>
 /// Verifies the input-mapping pipeline with its real internal wiring intact:
-/// <see cref="InputMappingLoader"/> (XML parsing) → <see cref="PerGameXmlMappingProvider"/> /
+/// <see cref="InputMappingLoader"/> (XML parsing) → <see cref="PerGameMappingProvider"/> /
 /// <see cref="PlatformDefaultMappingProvider"/> (provider chain) → <see cref="InputMappingProviders"/>
 /// (priority + filtering) → <see cref="InputMappingResolver"/> (forward/reverse build +
 /// <see cref="AnalogToDigitalMirror"/>) → <see cref="InputMappingService"/>
@@ -28,7 +28,7 @@ public class InputMappingSubsystemTests
     // ---- factory helpers ----
 
     /// <summary>Uses the production factory so loader/resolver/providers/service wiring under test
-    /// matches what the rest of the system uses. <see cref="PerGameXmlMappingProvider"/> and
+    /// matches what the rest of the system uses. <see cref="PerGameMappingProvider"/> and
     /// <see cref="PlatformDefaultMappingProvider"/> are framework-fixed — the factory always wires
     /// them — so the suite only controls the middle (where RetroArch and MAME live in
     /// production).</summary>
@@ -55,7 +55,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_PerGameXmlPresent_WinsOverMiddleAndPlatformDefault()
+    public void Load_GameEntryPresent_WinsOverMiddleAndPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
             <Controllers default="Pad">
@@ -79,7 +79,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_PerGameXmlMissing_MiddleProviderPresent_WinsOverPlatformDefault()
+    public void Load_GameEntryMissing_MiddleProviderPresent_WinsOverPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
             <Controllers default="Pad">
@@ -96,7 +96,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Load_PerGameXmlMissing_MiddleProviderDeclines_FallsThroughToPlatformDefault()
+    public void Load_GameEntryMissing_MiddleProviderDeclines_FallsThroughToPlatformDefault()
     {
         _dc.WritePlatform(Platform, """
             <Controllers default="Pad">
@@ -385,7 +385,7 @@ public class InputMappingSubsystemTests
     {
         // The mappings and the controls are reached by different routes — mappings come from the
         // baseline the provider already resolved, controls from a second lookup by name. They agree
-        // only because PerGameXmlMappingProvider overwrites the requested name with the resolved
+        // only because PerGameMappingProvider overwrites the requested name with the resolved
         // one. Without that, a game naming a controller that does not exist would get the default
         // variant's buttons and no controls at all.
         _dc.WritePlatform(Platform, """
@@ -708,7 +708,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlMovesJoystickDirections_TheControlFollowsThem()
+    public void Scenario_GameEntryMovesJoystickDirections_TheControlFollowsThem()
     {
         // A game entry moves every direction onto the stick and says nothing about JOYSTICK.
         // JOYSTICK follows them, exactly as it would follow an emulator cfg.
@@ -891,7 +891,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlRemapsAButton_ItIsVisibleAsARemapLikeAnEmulatorsSwap()
+    public void Scenario_GameEntryRemapsAButton_ItIsVisibleAsARemapLikeAnEmulatorsSwap()
     {
         // The same move drew differently depending on which file it came from: an emulator's swap
         // left the controller as declared in the natural snapshot, so the renderer could tell the
@@ -920,7 +920,7 @@ public class InputMappingSubsystemTests
     }
 
     [Fact]
-    public void Scenario_PerGameXmlPresent_ReplacesTheEmulatorsRemapAndSupplyOfTheMapping()
+    public void Scenario_GameEntryPresent_ReplacesTheEmulatorsRemapAndSupplyOfTheMapping()
     {
         // The 3on3dunk shape: an authored game entry rotates the face buttons, and the
         // emulator's cfg would also OR the joystick onto the axes. The file stands in for what an

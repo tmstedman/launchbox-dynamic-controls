@@ -16,7 +16,7 @@ namespace DynamicControls.Composition;
 internal static class InputMappingFactory
 {
     /// <summary>
-    /// Wires the input-mapping subsystem. <see cref="PerGameXmlMappingProvider"/> is always the
+    /// Wires the input-mapping subsystem. <see cref="PerGameMappingProvider"/> is always the
     /// highest-priority provider and <see cref="PlatformDefaultMappingProvider"/> is always the
     /// fallback — those positions encode architectural invariants, not configuration. The
     /// <paramref name="providers"/> parameter controls what sits between them (RetroArch and MAME
@@ -48,7 +48,7 @@ internal static class InputMappingFactory
 
         IInputMappingProvider[] assembled =
         [
-            new PerGameXmlMappingProvider(logger),
+            new PerGameMappingProvider(logger),
             .. providers,
             new PlatformDefaultMappingProvider(logger),
         ];
