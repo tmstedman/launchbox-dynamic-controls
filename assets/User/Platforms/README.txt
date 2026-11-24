@@ -29,7 +29,8 @@ Your file is merged over the shipped one: a <Controller> here replaces the
 shipped one with the same name, a new name adds a controller, and the shipped
 controllers you leave out are kept. The default and inheritFrom attributes on
 the root <Controllers> element are the shipped file's unless yours states
-them, so copying the default controller here keeps it the default.
+them, so copying the default controller here keeps it the default. To stop
+inheriting the platform the shipped file points at, write inheritFrom="".
 
   <Controllers default="3-Button">
 

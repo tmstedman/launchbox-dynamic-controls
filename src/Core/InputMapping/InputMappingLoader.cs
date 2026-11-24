@@ -106,10 +106,10 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
     /// <c>User\</c> file's controllers laid over the <c>Defaults\</c> file's by name (see
     /// <see cref="MergeControllers"/>), so a user's file holds only what it changes. Then resolves a
     /// root-level <c>&lt;Controllers inheritFrom="OtherFile"&gt;</c> reference — the user's when its
-    /// file states one, else the shipped one — by loading that platform the same way and merging
-    /// this one's controllers on top. Root-level inheritance is transitive (a base may itself
-    /// inheritFrom another) with cycles detected via <paramref name="visited"/> and a missing base
-    /// logged; either case falls back to this platform's own controllers. The games are this
+    /// file states one, an empty one included, else the shipped one — by loading that platform the
+    /// same way and merging this one's controllers on top. Root-level inheritance is transitive (a
+    /// base may itself inheritFrom another) with cycles detected via <paramref name="visited"/> and
+    /// a missing base logged; either case falls back to this platform's own controllers. The games are this
     /// platform's own, the user's laid over the shipped ones (see <see cref="MergeGames"/>): a
     /// game's ID and ROM name belong to its platform, so a base file's are not brought in. The root
     /// <c>default</c>s are collected nearest first — user, shipped, then the base's — for
@@ -176,10 +176,12 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             }
         }
 
-        string? inheritFrom = root.Attributes["inheritFrom"]?.Value;
+        // An empty inheritFrom still states something: that this file inherits from no platform,
+        // which is how a user's file drops the shipped file's pointer. So only an absent one is null.
+        string? inheritFrom = root.Attributes["inheritFrom"]?.Value.Trim();
         string? defaultName = root.Attributes["default"]?.Value;
         return new ParsedFile(path, controllers, games,
-            string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom,
+            inheritFrom,
             string.IsNullOrEmpty(defaultName) ? null : defaultName);
     }
 
