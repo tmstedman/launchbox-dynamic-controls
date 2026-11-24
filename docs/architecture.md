@@ -79,7 +79,7 @@ Namespace: `src/Core/Static/`. Entry point: `StaticImageResolver` — a `*Resolv
 
 The resolution chain, highest priority first. Each link is an `IInputMappingProvider`, and **the first to answer supplies the whole mapping** — the controller and any remap of it — so providers do not stack:
 
-1. **Per-game entry** — a `<Game launchBoxId= romName=>` in the platform's `Controllers.xml`, found by its LaunchBox ID, else its ROM name. The entry's `inheritFrom` picks the controller, or the platform default when it names none, and its `<Mapping>`/`<Unmap>` entries overlay that controller.
+1. **Per-game entry** — a `<Game launchBoxId= romName=>` in the platform's `Controllers.xml`, found by its LaunchBox ID, else its ROM name. The entry's `inheritFrom` picks the controller, or the platform default when it names none, and its `<Mapping>`/`<Unmap>`/`<Control>` entries overlay that controller. An entry with a `launchBoxId` covers every ROM LaunchBox files under that ID; one with only `romName` covers that ROM.
 2. **RetroArch** — the core config and per-content overrides pick the controller, and the game's cfg and remap file apply the player's button swaps to it.
 3. **MAME** — lays the JOYCODE assignments read from the emulator's `cfg/` files onto the platform's default controller.
 4. **Platform default** — the controller selected from `Platforms/{platform}/Controllers.xml`.
@@ -304,7 +304,7 @@ Add a folder under `src/Core/Plugins/{Emulator}/`. Implement `IInputLabelsLoader
 
 ### Add a new platform
 
-Place a `Defaults/Platforms/{platform}/Controllers.xml` with the controllers that exist for that platform. The one the root names, `<Controllers default="…">`, is used when nothing selects a variant (falling back to the first in document order if none is marked); users can override per-game with a `<Game>` entry in the same file. Game labels and the platform's inheritable defaults share one file, `Platforms/{platform}/Labels.xml`. A variant that extends another can `inheritFrom` it rather than restating its mappings, and a control that works as a unit (a stick, a D-pad, a C-cluster) gets an `<Control>` naming the buttons it is made of — see [templates.md](templates.md) for the full rules on both. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
+Place a `Defaults/Platforms/{platform}/Controllers.xml` with the controllers that exist for that platform. The one the root names, `<Controllers default="…">`, is used when nothing selects a variant (falling back to the first in document order if it names none); users can override per-game with a `<Game>` entry in the same file. Game labels and the platform's inheritable defaults share one file, `Platforms/{platform}/Labels.xml`. A variant that extends another can `inheritFrom` it rather than restating its mappings, and a control that works as a unit (a stick, a D-pad, a C-cluster) gets an `<Control>` naming the buttons it is made of — see [templates.md](templates.md) for the full rules on both. Shipped data goes under `Defaults/`; a user can shadow any of it from `User/` (see [Config layering](#config-layering)). No code changes are required — the resolution is platform-agnostic.
 
 ### Add a new template
 

@@ -86,7 +86,8 @@ config had moved the directions underneath it.
 A control never displaces a direct mapping: if some button drives an input
 outright, that button keeps the slot and decides which image is shown. An
 control whose buttons are all unmapped reaches nothing and is skipped. Controls
-are inherited by inheritFrom alongside mappings, overridden by name.
+are inherited by inheritFrom alongside mappings, overridden by name, and
+dropped by an <Unmap> naming them.
 
 Every mapping a variant uses must be reachable from that variant — either
 listed inside it or inherited via inheritFrom. There is no file-wide baseline:
@@ -110,8 +111,10 @@ Attributes:
   Mapping/@input    Generic input name (ButtonA, ButtonX, AxisLeftStick, …).
   Controller/@name  Variant name — referenced by a <Game>'s inheritFrom.
   Controllers/@default  Name of the variant used when no game-specific
-                    selection is made. A name that matches no variant is
-                    logged and ignored; with none, the first variant is used.
+                    selection is made. Yours wins over the shipped file's,
+                    which wins over the root inheritFrom platform's. A name
+                    that matches no variant is logged and the next one down
+                    applies; with none, the first variant is used.
   Controller/@inheritFrom     Name of another <Controller> whose mappings are
                     prepended before this variant's own.
   Control/@name       Platform button name being declared — usable in Labels.xml
@@ -209,7 +212,8 @@ Finding the game: an entry is matched by launchBoxId first (the LaunchBox
 Games Database ID), then by romName — LaunchBox's ROM name, compared ignoring
 case but otherwise exactly, so each region's dump needs its own entry. Either
 attribute alone is enough, and your entries are searched before the shipped
-ones. A clone doesn't use its parent's entry (unlike its
+ones. An entry with a launchBoxId applies to every ROM LaunchBox files under
+that ID, whatever its name; give only romName to limit it to one ROM. A clone doesn't use its parent's entry (unlike its
 labels), so a clone's own RetroArch or MAME configuration is still read when
 only its parent has one; give the clone an entry of its own to override it
 too. The clone does inherit its parent's labels, so a label for a button only

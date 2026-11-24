@@ -44,7 +44,7 @@ All data lives under `…\LaunchBox\Data\Dynamic Controls\`, split into two laye
 
 - **`GlobalConfig.xml`** - rather than copying the whole file, include only the settings you want to change; the rest keep their defaults.
 - **`Platforms\{Platform}\Labels.xml`** - your entries are merged over the shipped ones game by game, so labelling one game doesn't cost you the shipped labels for every other game on that platform.
-- **`Platforms\{Platform}\Controllers.xml`** - your controllers are merged over the shipped ones by name, so redefining one controller keeps the platform's others.
+- **`Platforms\{Platform}\Controllers.xml`** - your controllers are merged over the shipped ones by name, and your `<Game>` entries over the shipped ones by game, so redefining one controller keeps the platform's others. A controller you redefine is what the shipped variants inheriting from it inherit too.
 
 ### `GlobalConfig.xml`
 
@@ -96,7 +96,7 @@ A control that works as a unit — a stick, a D-pad, a C-button cluster — also
 
 A platform with more than one controller variant lists each as its own `<Controller name="…">`, and names the one used when nothing selects another on the root element: `<Controllers default="6-Button">`. A name that matches no controller is logged and ignored; with no `default` at all, the first controller in the file is used. A variant that extends another says `inheritFrom="3-Button"` and lists only what differs: its own `<Mapping>`s replace the inherited ones of the same name, and `<Unmap name="…"/>` drops an inherited button or `<Control>` it doesn't have. `analogToDigital="left"` (or `"right"`) on a controller makes the d-pad's directions drive that stick too; it is inherited along `inheritFrom`, and `analogToDigital="none"` switches an inherited one off, as Saturn's 3D Control Pad does for its own stick.
 
-The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the controller you use from the relevant `Platforms\{Platform}\Controllers.xml` into `User\Platforms\{Platform}\Controllers.xml` and edit it to match your configuration. A controller you don't copy keeps its shipped definition.
+The overlay can only be accurate if this mapping matches what your emulator is actually doing. The shipped files assume the emulator's default generic button assignments for each platform - if your emulator is configured differently, copy the controller you use from the relevant `Platforms\{Platform}\Controllers.xml` into `User\Platforms\{Platform}\Controllers.xml` and edit it to match your configuration. A controller you don't copy keeps its shipped definition. A variant that `inheritFrom`s another holds only what it adds, so copy the controllers it inherits from as well if those are what you need to change.
 
 ### Game-specific overrides
 
@@ -114,7 +114,7 @@ Some games remap buttons or use a different controller variant. The plugin resol
 </Controllers>
 ```
 
-An entry is found by `launchBoxId` first, then by `romName` (the ROM file name without its extension, ignoring case); either attribute alone is enough, and yours are searched before any shipped one. It is written like a `<Controller>`, and your file is merged over the shipped one, so the entry is all it needs to hold.
+An entry is found by `launchBoxId` first, then by `romName` (the ROM file name without its extension, ignoring case); either attribute alone is enough, and yours are searched before any shipped one. An entry with a `launchBoxId` applies to every ROM LaunchBox files under that ID, whatever its name; give only `romName` to limit it to one ROM. `analogToDigital` on a `<Game>` works as on a controller: absent takes the controller's, and `"none"` switches the mirror off for that game. It is written like a `<Controller>`, and your file is merged over the shipped one, so the entry is all it needs to hold.
 
 `<Mapping>` replaces whatever generic input that platform button had; `<Unmap>` removes a button the game doesn't use, putting nothing in its place; a `<Control>` declares a button standing for several, as on a controller, replacing the controller's of the same name. Buttons you don't mention keep their baseline assignment. Repeating `<Mapping>` with the same `name` and different `input` values drives several controller slots from one platform button. A button you remap is drawn like one an emulator has swapped: with the picture of the physical button the player presses.
 
