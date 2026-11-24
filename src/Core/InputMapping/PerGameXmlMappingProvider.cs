@@ -34,8 +34,6 @@ public class PerGameXmlMappingProvider(ILogger logger) : IInputMappingProvider
 
     public ProvidedMapping? Load(GameInfo game, PlatformControllersConfig? platform)
     {
-        if (game.RomName == null) return null;
-
         GameMappingConfig? entry = platform?.FindGame(game);
         if (entry == null) return null;
         var config = new InputMappingConfig

@@ -273,7 +273,8 @@ public class InputMappingLoader(ILogger logger, LayeredFileSystem lfs) : IInputM
             return null;
         }
 
-        var game = new GameMappingConfig { LaunchBoxId = id, RomName = romName, InheritFrom = node.Attributes["inheritFrom"]?.Value };
+        string? inheritFrom = node.Attributes["inheritFrom"]?.Value;
+        var game = new GameMappingConfig { LaunchBoxId = id, RomName = romName, InheritFrom = string.IsNullOrEmpty(inheritFrom) ? null : inheritFrom };
         if (TryParseAnalogToDigital(node, path, out AnalogToDigitalMode? a2d))
         {
             game.AnalogToDigital = a2d;
