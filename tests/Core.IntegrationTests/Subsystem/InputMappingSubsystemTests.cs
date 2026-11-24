@@ -487,6 +487,30 @@ public class InputMappingSubsystemTests
         mapping.ButtonToInput["Dpad-Up"].ShouldBe(["ButtonDpadUp"]);
     }
 
+    [Fact]
+    public void Load_ControllerUnmapsAnInheritedControl_ItReachesNothing()
+    {
+        // A controller can drop a control its base declares, as a game can — read here through the
+        // controller's own controls rather than a provider's, the route a game entry never takes.
+        _dc.WritePlatform(Platform, """
+            <Controllers default="6-Button">
+              <Controller name="3-Button">
+                <Control name="Dpad-Any" mappings="Dpad-Up Dpad-Down" />
+                <Mapping name="Dpad-Up" input="ButtonDpadUp" />
+                <Mapping name="Dpad-Down" input="ButtonDpadDown" />
+              </Controller>
+              <Controller name="6-Button" inheritFrom="3-Button">
+                <Unmap name="Dpad-Any" />
+              </Controller>
+            </Controllers>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        mapping.ButtonToInput.ContainsKey("Dpad-Any").ShouldBeFalse();
+        mapping.ButtonToInput["Dpad-Up"].ShouldBe(["ButtonDpadUp"]);
+    }
+
     // ---- a provider's remap + natural-map splicing ----
 
     [Fact]
@@ -1156,6 +1180,41 @@ public class InputMappingSubsystemTests
 
         // The User entry wins — ButtonB, not the Defaults entry's ButtonA
         mapping.ButtonToInput["A"].ShouldBe(["ButtonB"]);
+    }
+
+    [Fact]
+    public void Load_UserGameEntryOnAControllerTheUserRedefines_RemapsTheUsersController()
+    {
+        // Defaults Pad has A→ButtonA and B→ButtonB; the User file redefines Pad with A→ButtonX and
+        // adds a game on it that drops B. The game is read against the merged Pad, not the
+        // shipped one.
+        _dc.WritePlatform(Platform, """
+            <Controllers default="Pad">
+              <Controller name="Pad">
+                <Mapping name="A" input="ButtonA" />
+                <Mapping name="B" input="ButtonB" />
+              </Controller>
+            </Controllers>
+            """);
+        _dc.WriteUserPlatform(Platform, """
+            <Controllers>
+              <Controller name="Pad">
+                <Mapping name="A" input="ButtonX" />
+                <Mapping name="B" input="ButtonB" />
+              </Controller>
+              <Game romName="OutRun" inheritFrom="Pad">
+                <Unmap name="B" />
+              </Game>
+            </Controllers>
+            """);
+
+        ResolvedMapping mapping = Build().Load(Game(romName: "OutRun"));
+
+        // The user's Pad is the natural state and the game's unmap is laid over it
+        mapping.NaturalButtonToInput["A"].ShouldBe(["ButtonX"]);
+        mapping.ButtonToInput["A"].ShouldBe(["ButtonX"]);
+        mapping.NaturalButtonToInput["B"].ShouldBe(["ButtonB"]);
+        mapping.ButtonToInput.ContainsKey("B").ShouldBeFalse();
     }
 
     // ---- stubs and helpers ----
